@@ -12,7 +12,7 @@ export function OverviewTab({ patient: p }: { patient: Patient }) {
   const address = [p.house, p.society, p.area, p.city, p.pincode, p.state].filter(Boolean).join(', ');
 
   return (
-    <Row gutter={[24, 24]}>
+    <Row gutter={[12, 12]}>
       <Col xs={24} lg={12}>
         <Descriptions title={t('patients.sections.details')} column={1} size="small" bordered>
           <Descriptions.Item label={t('patients.fields.dob')}>

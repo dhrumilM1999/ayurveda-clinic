@@ -12,6 +12,7 @@ import QueueDisplayPage from './pages/appointments/QueueDisplayPage';
 import QueuePage from './pages/appointments/QueuePage';
 import AuditLogPage from './pages/AuditLogPage';
 import ConsultPage from './pages/consult/ConsultPage';
+import MedicinesPage from './pages/medicines/MedicinesPage';
 import BranchesPage from './pages/BranchesPage';
 import DashboardPage from './pages/DashboardPage';
 import LoginPage from './pages/LoginPage';
@@ -57,6 +58,7 @@ export default function App() {
               <Route path="appointments" element={<RequirePermission code="appointments.view"><AppointmentsPage /></RequirePermission>} />
               <Route path="consult" element={<RequirePermission code="emr.view"><ConsultPage /></RequirePermission>} />
               <Route path="consult/:visitId" element={<RequirePermission code="emr.view"><ConsultPage /></RequirePermission>} />
+              <Route path="medicines" element={<RequirePermission code="medicines.view"><MedicinesPage /></RequirePermission>} />
               <Route path="queue" element={<RequirePermission code="appointments.view"><QueuePage /></RequirePermission>} />
               <Route path="branches" element={<RequirePermission code="branches.view"><BranchesPage /></RequirePermission>} />
               <Route path="rooms" element={<RequirePermission code="rooms.view"><RoomsPage /></RequirePermission>} />

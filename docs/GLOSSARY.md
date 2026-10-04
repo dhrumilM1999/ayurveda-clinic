@@ -39,6 +39,12 @@
 | **Version** (template) | Each saved change of a template's questions gets a new number; old check-ups keep their version. |
 | **Symptom score** | 0 (no problem) to 10 (worst), given per complaint at each visit to see progress. |
 | **NAMASTE / ICD** | Official code lists for diagnoses (Ayush / WHO). Optional in this software. |
+| **Classical medicine** | A medicine with an official name in the Ayurvedic Formulary / Pharmacopoeia of India (AFI / API). |
+| **Patent & Proprietary** | A company's brand of Ayurvedic medicine. |
+| **Anupana** | What the medicine is taken with (warm water, milk, honey, ghee...). |
+| **Schedule E1** | Official list of poisonous ingredients; such medicines are given only on prescription. |
+| **HSN code** | Tax code of a product, printed on GST bills (medicines usually 3004). |
+| **M-N-N (1-0-1)** | How many doses in the Morning, at Noon and at Night. |
 | **Token** | The queue number (1, 2, 3...) a patient gets on arrival, per doctor per day. |
 | **Walk-in** | A patient who comes without an appointment; gets a token straight away. |
 | **Click-to-chat** | A WhatsApp link (`wa.me/...`) that opens WhatsApp with the message typed; staff press Send. Free. |

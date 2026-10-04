@@ -95,7 +95,7 @@ export function DocumentsTab({ patientId }: { patientId: string }) {
 
   return (
     <>
-      <div className="page-toolbar" style={{ marginBottom: 12 }}>
+      <div className="section-toolbar">
         <Typography.Text type="secondary">{t('documents.help')}</Typography.Text>
         {canUpload && (
           <Button type="primary" icon={<UploadOutlined />} onClick={() => { form.resetFields(); setFiles([]); setOpen(true); }}>
@@ -165,7 +165,7 @@ export function DocumentsTab({ patientId }: { patientId: string }) {
               const name = fileList[0]?.name;
               if (name && !form.getFieldValue('title')) form.setFieldValue('title', name.replace(/\.[^.]+$/, ''));
             }}
-            style={{ marginBottom: 16 }}
+            style={{ marginBottom: 12 }}
           >
             <p className="ant-upload-drag-icon"><UploadOutlined /></p>
             <p>{t('documents.dropHere')}</p>

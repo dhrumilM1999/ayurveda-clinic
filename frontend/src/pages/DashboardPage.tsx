@@ -60,7 +60,7 @@ export default function DashboardPage() {
         <LeafArt className="hero-leaf" />
       </div>
 
-      <Row gutter={[14, 14]}>
+      <Row gutter={[12, 12]}>
         {tiles.map((tile) => (
           <Col xs={24} sm={12} xl={6} key={tile.key}>
             <Card className="stat-card" hoverable={!!live[tile.key]}>

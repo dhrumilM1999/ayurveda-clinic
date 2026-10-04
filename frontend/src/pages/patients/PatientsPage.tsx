@@ -36,15 +36,14 @@ export default function PatientsPage() {
           <Typography.Text type="secondary">{t('patients.count', { n: total })}</Typography.Text>
         </div>
         {can('patients.create') && (
-          <Button type="primary" size="large" icon={<PlusOutlined />} onClick={() => navigate('/patients/new')}>
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/patients/new')}>
             {t('patients.register')}
           </Button>
         )}
       </div>
 
-      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
+      <div className="filter-bar">
         <Input.Search
-          size="large"
           allowClear
           prefix={<SearchOutlined style={{ opacity: 0.45 }} />}
           placeholder={t('patients.searchPlaceholder')}
@@ -53,7 +52,6 @@ export default function PatientsPage() {
           enterButton={t('common.search')}
         />
         <Segmented
-          size="large"
           value={gender}
           onChange={(v) => setGender(String(v))}
           options={[

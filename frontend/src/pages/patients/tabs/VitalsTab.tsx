@@ -81,7 +81,7 @@ export function VitalsTab({ patientId }: { patientId: string }) {
 
   return (
     <>
-      <div className="page-toolbar" style={{ marginBottom: 12 }}>
+      <div className="section-toolbar">
         <Typography.Text type="secondary">
           {latest ? t('vitals.latest', { date: dayjs(latest.recorded_at).format('DD-MM-YYYY HH:mm') }) : t('vitals.none')}
         </Typography.Text>

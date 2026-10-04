@@ -239,7 +239,7 @@ export default function PatientFormPage() {
         </Space>
         <Space>
           <Button onClick={() => { clearDraft(draftKey); navigate(isEdit ? `/patients/${id}` : '/patients'); }}>{t('common.cancel')}</Button>
-          <Button type="primary" size="large" loading={saving} onClick={save}>
+          <Button type="primary" loading={saving} onClick={save}>
             {isEdit ? t('common.save') : t('patients.registerButton')}
           </Button>
         </Space>
@@ -250,12 +250,12 @@ export default function PatientFormPage() {
           action={<Button size="small" onClick={discardDraft}>{t('patients.discardDraft')}</Button>} />
       )}
       <Form form={form} layout="vertical" scrollToFirstError onValuesChange={keepDraft}>
-        <Row gutter={[20, 20]}>
+        <Row gutter={[12, 12]}>
           <Col xs={24} xl={17}>
-            <Space direction="vertical" size={20} style={{ width: '100%' }}>
+            <Space direction="vertical" size={12} style={{ width: '100%' }}>
               {/* ---------- Patient details ---------- */}
               <Card title={sectionTitle(t('patients.sections.details'))}>
-                <Row gutter={16}>
+                <Row gutter={12}>
                   <Col xs={24} md={6}>
                     <Form.Item name="title" label={t('patients.fields.title')}><MasterSelect category="title" /></Form.Item>
                   </Col>
@@ -328,7 +328,7 @@ export default function PatientFormPage() {
 
               {/* ---------- Contact ---------- */}
               <Card title={sectionTitle(t('patients.sections.contact'))}>
-                <Row gutter={16}>
+                <Row gutter={12}>
                   <Col xs={24} md={8}>
                     <Form.Item
                       name="mobile"
@@ -374,7 +374,7 @@ export default function PatientFormPage() {
               </Card>
 
               {/* ---------- Referred by + emergency ---------- */}
-              <Row gutter={[20, 20]}>
+              <Row gutter={[12, 12]}>
                 <Col xs={24} lg={12}>
                   <Card title={sectionTitle(t('patients.sections.referral'))} style={{ height: '100%' }}>
                     <Form.Item name="referral_source" label={t('patients.fields.referral_source')}><MasterSelect category="referral_source" /></Form.Item>
@@ -412,7 +412,7 @@ export default function PatientFormPage() {
                 <Typography.Text strong>{t('patients.fields.allergies')}</Typography.Text>
                 <Form.List name="allergies">
                   {(fields, { add, remove }) => (
-                    <div style={{ marginTop: 8, marginBottom: 16 }}>
+                    <div style={{ marginTop: 8, marginBottom: 12 }}>
                       {fields.map((field) => (
                         <Row gutter={8} key={field.key} align="top">
                           <Form.Item name={[field.name, 'id']} hidden><Input /></Form.Item>
@@ -435,7 +435,7 @@ export default function PatientFormPage() {
                 <Typography.Text strong>{t('patients.fields.medications')}</Typography.Text>
                 <Form.List name="medications">
                   {(fields, { add, remove }) => (
-                    <div style={{ marginTop: 8, marginBottom: 16 }}>
+                    <div style={{ marginTop: 8, marginBottom: 12 }}>
                       {fields.map((field) => (
                         <Row gutter={8} key={field.key}>
                           <Form.Item name={[field.name, 'id']} hidden><Input /></Form.Item>
@@ -452,7 +452,7 @@ export default function PatientFormPage() {
                 </Form.List>
 
                 {showHistory && (
-                  <Row gutter={16}>
+                  <Row gutter={12}>
                     {HISTORY_FIELDS.map((f) => (
                       <Col xs={24} md={12} key={f}>
                         <Form.Item name={f} label={t(`patients.fields.${f}`)}>

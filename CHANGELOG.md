@@ -2,6 +2,31 @@
 
 What changed in each step, in plain words.
 
+## Step 5 - Medicines and prescriptions (2026-10-04)
+
+**Medicines screen** (pharmacist, admin; doctors can look)
+- Classical medicines (AFI / API name and reference) and Patent & Proprietary brands (manufacturer, link to the
+  classical equivalent), with Gujarati and Hindi names and synonyms. Search finds any name, synonym or ingredient.
+- Dosage form, composition, pack size, Ayush licence no., HSN, GST %, price, the usual dose (dose, unit,
+  M-N-N, when, anupana) and safety flags (Schedule E1, metals / bhasma, pregnancy, child).
+- **Version history**: every change is kept; old prescriptions keep exactly what was prescribed.
+- **Branch price** and **In use** switch per branch.
+- **Import from Excel or CSV** with a preview first (nothing saved until you confirm) and a template file.
+- 23 **SAMPLE** medicines (orange tag) - a pharmacist must verify them. The 3 brands are made up.
+
+**Prescription (Rx) on the check-up screen**
+- Search and add medicines; dose, M-N-N, when, anupana are filled from the medicine; add duration and instructions.
+- **Safety warnings** (fixed rules, not AI): Schedule E1, metals, long courses, pregnancy (red if the patient is
+  pregnant / breastfeeding, a reminder for women 15-49), children under 12, allergies, the same medicine twice.
+- **Disease-wise templates**: Save as template / Apply template (matching diagnosis first).
+- **Repeat** an earlier prescription from Previous check-ups. Free-text medicines are allowed.
+- Autosave, undo / redo work for the prescription too. Completing the visit makes it **final** for the pharmacy.
+
+**Design tidy-up**
+- One spacing scale everywhere (12 px between blocks, 8 px between buttons); no extra-large buttons on pages.
+
+**Tests:** 15 new tests (medicines, import, versions, prescriptions, safety rules, templates); all pass.
+
 ## Clean-up: one database, sample data (2026-10-04)
 
 - **All old test data was deleted** and replaced by clean **sample data**: clinic "Ayurveda Clinic", one

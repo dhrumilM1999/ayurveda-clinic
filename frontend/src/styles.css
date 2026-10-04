@@ -17,7 +17,17 @@ body {
   gap: 12px;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
+}
+
+/* Smaller toolbar inside a tab or card: help text left, buttons right */
+.section-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
 }
 
 .page-toolbar h3.ant-typography,
@@ -30,7 +40,8 @@ body {
   margin: 0;
 }
 
-.page-toolbar > :last-child {
+.page-toolbar > :last-child,
+.section-toolbar > :last-child {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -230,7 +241,9 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
+  height: 32px;
+  line-height: 1;
+  padding: 0 12px;
   border-radius: 8px;
   background: var(--clinic-primary-soft);
   color: var(--clinic-primary);
@@ -446,7 +459,7 @@ body {
   top: 72px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 .dup-item {
   display: block;
@@ -588,7 +601,7 @@ body {
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 .status-filter {
   margin-bottom: 12px;
@@ -892,7 +905,7 @@ body {
 .consult {
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr);
-  gap: 14px;
+  gap: 12px;
   align-items: start;
 }
 .consult-list {
@@ -969,14 +982,14 @@ body {
 .workspace {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 230px;
-  gap: 14px;
+  gap: 12px;
   align-items: start;
 }
 .workspace-main {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 .visit-head-row {
   display: flex;
@@ -1386,4 +1399,199 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+/* ---------- Shared small pieces ---------- */
+.tag-tight {
+  margin-inline-end: 0 !important;
+  margin-inline-start: 6px;
+  padding: 0 6px !important;
+  font-size: 11px !important;
+  line-height: 18px !important;
+}
+.flag-tags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.flag-tags .tag-tight {
+  margin-inline-start: 0;
+}
+.num {
+  font-variant-numeric: tabular-nums;
+}
+.price-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 4px;
+  vertical-align: middle;
+  border-radius: 50%;
+  background: var(--clinic-accent);
+}
+.form-help {
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: rgba(35, 48, 42, 0.6);
+}
+.check-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 12px;
+}
+.check-grid .ant-checkbox-wrapper {
+  align-items: flex-start;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--clinic-border);
+}
+.change-list {
+  margin: 4px 0 0;
+  padding-left: 16px;
+  font-size: 12px;
+}
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #faf8f3;
+  border: 1px solid var(--clinic-border);
+}
+.stat-row .ant-statistic-title {
+  font-size: 12px;
+  margin-bottom: 0;
+}
+.stat-row .ant-statistic-content {
+  font-size: 20px;
+  font-weight: 700;
+}
+.danger-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 5px;
+  vertical-align: middle;
+  border-radius: 50%;
+  background: #c2412d;
+}
+
+/* ---------- Prescription (Rx) ---------- */
+.rx-search {
+  width: 100%;
+  margin-bottom: 12px;
+}
+.rx-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.rx-option-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+.rx-warnings {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+.rx-warning {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 12.5px;
+}
+.rx-danger {
+  background: #fdecea;
+  color: #8f2a1b;
+  border: 1px solid #f3c2b9;
+}
+.rx-warning.rx-warning {
+  background: #fff7e6;
+  color: #7a4d0b;
+  border: 1px solid #f5d9a8;
+}
+.rx-warning.rx-danger {
+  background: #fdecea;
+  color: #8f2a1b;
+  border: 1px solid #f3c2b9;
+}
+.rx-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.rx-line {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--clinic-border);
+  background: #fff;
+}
+.rx-line-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.rx-num {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--clinic-primary-soft);
+  color: var(--clinic-primary);
+  font-size: 12px;
+  font-weight: 700;
+}
+.rx-med {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  flex: 1;
+  min-width: 0;
+}
+.rx-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px 12px;
+  padding-left: 30px;
+}
+.rx-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.rx-field > span:first-child {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(35, 48, 42, 0.55);
+}
+.rx-field-grow {
+  flex: 1 1 180px;
+  min-width: 160px;
+}
+@media (max-width: 700px) {
+  .rx-controls {
+    padding-left: 0;
+  }
+  .check-grid,
+  .stat-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Inside forms the field above already adds 14px, so section titles need only a little extra space */
+.ant-form .section-title {
+  margin-top: 4px;
 }

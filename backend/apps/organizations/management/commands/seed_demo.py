@@ -1,6 +1,7 @@
 """
 Creates SAMPLE data for practice: 1 clinic, 1 main branch, rooms, one user per role,
-a few sample patients and today's sample appointments. All names and numbers are made up.
+a few sample patients, today's sample appointments and ~20 SAMPLE medicines (pharmacist to verify).
+All names and numbers are made up.
 
     python manage.py seed_demo              # add the sample data
     python manage.py seed_demo --if-empty   # only if the database has no clinic yet (runs on every start)
@@ -129,6 +130,9 @@ class Command(BaseCommand):
 
         self._seed_patients(org, branch)
         self._seed_appointments(org)
+        from apps.medicines.services import add_sample_medicines
+
+        add_sample_medicines(org)
 
     def _seed_patients(self, org, branch):
         from datetime import date

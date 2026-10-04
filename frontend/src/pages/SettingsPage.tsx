@@ -59,7 +59,7 @@ export default function SettingsPage() {
   return (
     <>
       <Typography.Title level={3}>{t('settings.title')}</Typography.Title>
-      <Row gutter={[16, 16]}>
+      <Row gutter={[12, 12]}>
         <Col xs={24} lg={12}>
           <Card title={t('settings.clinic')}>
             <Form form={form} layout="vertical">

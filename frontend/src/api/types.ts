@@ -528,3 +528,113 @@ export interface VisitListItem {
   photo_count: number;
   follow_up_date: string | null;
 }
+
+// --- Medicines and prescriptions (Step 5) ---
+export type MedicineKind = 'classical' | 'proprietary';
+export type MedicineFlag = 'schedule_e1' | 'contains_metals' | 'pregnancy_caution' | 'child_caution';
+
+export interface Medicine {
+  id: string;
+  kind: MedicineKind;
+  name: string;
+  name_gu: string;
+  name_hi: string;
+  synonyms: string;
+  dosage_form: MasterRef | null;
+  composition: string;
+  reference: string;
+  manufacturer: string;
+  classical_equivalent: string | null;
+  classical_equivalent_name: string;
+  ayush_licence_no: string;
+  hsn_code: string;
+  gst_rate: string;
+  mrp: string | null;
+  pack_size: string;
+  default_dose: string;
+  dose_unit: MasterRef | null;
+  default_frequency: string;
+  default_timing: MasterRef | null;
+  default_anupana: MasterRef | null;
+  schedule_e1: boolean;
+  contains_metals: boolean;
+  pregnancy_caution: boolean;
+  child_caution: boolean;
+  safety_notes: string;
+  is_sample: boolean;
+  is_active: boolean;
+  version: number;
+  branch_price: string | null;
+  branch_active: boolean;
+  updated_at: string;
+}
+
+export interface MedicineVersion {
+  version: number;
+  data: Record<string, unknown>;
+  created_at: string;
+  created_by_name: string;
+}
+
+export interface ImportResult {
+  created: number;
+  updated: number;
+  unchanged: number;
+  errors: { row: number; message: string }[];
+  rows: { row: number; name: string; kind: MedicineKind; status: 'created' | 'updated' | 'unchanged' }[];
+  dry_run: boolean;
+}
+
+export interface RxLine {
+  id?: string;
+  medicine: string | null;
+  medicine_name: string;
+  medicine_kind?: string;
+  medicine_version?: number | null;
+  dosage_form?: string;
+  dose: string;
+  dose_unit: string;
+  frequency: string;
+  timing: string;
+  anupana: string;
+  duration: number | null;
+  duration_unit: 'days' | 'weeks' | 'months';
+  quantity: string;
+  instructions: string;
+  medicine_flags?: MedicineFlag[];
+}
+
+export interface RxWarning {
+  level: 'danger' | 'warning';
+  rule: string;
+  medicine: string;
+  message: string;
+}
+
+export interface Prescription {
+  id: string;
+  visit: string;
+  visit_date: string;
+  patient: string;
+  patient_detail: AppointmentPatient;
+  doctor: string;
+  doctor_name: string;
+  branch_name: string;
+  status: 'draft' | 'final';
+  notes: string;
+  finalized_at: string | null;
+  items: RxLine[];
+  warnings: RxWarning[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PrescriptionTemplate {
+  id: string;
+  name: string;
+  diagnosis: MasterRef | null;
+  items: RxLine[];
+  notes: string;
+  is_active: boolean;
+  updated_at: string;
+}

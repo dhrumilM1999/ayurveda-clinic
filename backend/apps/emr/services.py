@@ -268,4 +268,7 @@ def complete_visit(visit: Visit, user) -> Visit:
     appointment = visit.appointment
     if appointment and appointment.status in ("checked_in", "in_consultation"):
         change_status(appointment, "complete", user)
+    from apps.prescriptions.services import finalize_for_visit  # here, to avoid a circular import
+
+    finalize_for_visit(visit, user)
     return visit

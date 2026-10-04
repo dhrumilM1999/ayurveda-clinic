@@ -63,7 +63,7 @@ export default function PatientDetailPage() {
         {t('patients.backToList')}
       </Button>
 
-      <Card className="patient-header" style={{ marginBottom: 14 }}>
+      <Card className="patient-header" style={{ marginBottom: 12 }}>
         <div className="patient-header-row">
           <PatientPhoto patientId={patient.id} hasPhoto={patient.has_photo} name={patient.full_name} size={88} />
           <div style={{ flex: 1, minWidth: 0 }}>

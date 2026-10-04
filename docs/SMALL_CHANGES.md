@@ -143,6 +143,32 @@ in the search box and press Enter (that does not add it to the list).
 The starting templates for a *new* clinic are in `backend/apps/emr/templates_catalog.py`.
 The Prakriti questions are a SAMPLE - the doctor should review and replace them.
 
+## Add or change a medicine
+
+**Medicines** screen (pharmacist or admin): **Add medicine** or the pencil button. Classical medicines use the
+official name and AFI/API reference; Patent & Proprietary brands have a manufacturer and can be linked to their
+classical equivalent. Fill **Other names** (Sanskrit, English, Hindi, Gujarati) so searching works.
+Every save keeps a version; old prescriptions keep what was prescribed. Medicines are never deleted: switch
+**In use** off.
+
+## Import your whole medicine list from Excel
+
+**Medicines** -> **Import** -> **Download template**. Fill one row per medicine (type `classical` or
+`proprietary`; dosage form, unit, when and anupana as the short code or the English name, e.g. `churna`,
+`g`, `after_food`, `warm_water`; flags as `yes` / `no`). Drop the file: the preview shows new / changed rows and
+problems, nothing is saved until you click **Import**.
+
+## Safety warnings on prescriptions
+
+They are **fixed rules in code** (not AI), listed at the top of `backend/apps/prescriptions/safety.py`.
+They use the medicine's flags (Schedule E1, metals / bhasma, pregnancy, child) and the patient's age, allergies
+and medical history (*Pregnant* / *Breastfeeding*). The doctor always decides. To change a rule, ask Claude Code.
+
+## Prescription templates
+
+On the check-up -> **Rx** -> **Save as template**, choose the diagnosis. Next time, **Apply template**
+lists the matching ones first (★).
+
 ## Change the SMS / WhatsApp appointment messages
 
 Open `backend/apps/appointments/messages_catalog.py`. Each message has an English (`en`), Gujarati (`gu`)

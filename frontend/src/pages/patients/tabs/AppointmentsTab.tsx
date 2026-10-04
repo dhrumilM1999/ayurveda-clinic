@@ -21,7 +21,7 @@ export function AppointmentsTab({ patient }: { patient: Patient }) {
 
   return (
     <>
-      <div className="page-toolbar" style={{ marginBottom: 12 }}>
+      <div className="section-toolbar">
         <Typography.Text type="secondary">{t('appointments.patientTabHelp')}</Typography.Text>
         {can('appointments.manage') && (
           <Button type="primary" icon={<PlusOutlined />} onClick={() => setBooking(true)}>{t('appointments.book')}</Button>

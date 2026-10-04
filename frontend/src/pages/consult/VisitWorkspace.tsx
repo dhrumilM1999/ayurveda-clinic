@@ -13,7 +13,9 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { api, errorMessage } from '../../api/client';
 import { useMasterLabel } from '../../api/masters';
-import type { ExamField, ExamTemplate, Patient, Visit, VisitExam, VisitListItem } from '../../api/types';
+import type {
+  ExamField, ExamTemplate, Page, Patient, Prescription, RxLine, RxWarning, Visit, VisitExam, VisitListItem,
+} from '../../api/types';
 import { useAuth } from '../../auth/AuthContext';
 import { genderAge } from '../patients/PatientsPage';
 import { VitalsTab } from '../patients/tabs/VitalsTab';
@@ -22,6 +24,7 @@ import {
   TemplateSection, type VisitDraft,
 } from './sections';
 import { PhotosSection, ProgressSection } from './extraSections';
+import { RxSection, type RxDraft } from './RxSection';
 import { usePrakritiName, useTemplateName } from './shared';
 
 const AUTOSAVE_MS = 1500; // save this long after the last change
@@ -29,7 +32,13 @@ const RETRY_MS = 8000; // if saving failed, try again after this long
 const UNDO_STEPS = 100; // how many changes Undo remembers
 const GROUP_MS = 1000; // typing in one box within this time = one Undo step
 
-type Doc = { draft: VisitDraft; exams: Record<string, Record<string, unknown>> };
+type Doc = { draft: VisitDraft; exams: Record<string, Record<string, unknown>>; rx: RxDraft };
+const EMPTY_RX: RxDraft = { items: [], notes: '' };
+
+/** Lines as the API wants them (without screen-only fields). */
+function rxPayload(items: RxLine[]) {
+  return items.map(({ medicine_flags: _f, medicine_kind: _k, medicine_version: _v, ...line }) => line);
+}
 
 function toDraft(v: Visit): VisitDraft {
   return {
@@ -77,16 +86,22 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
   const [templates, setTemplates] = useState<ExamTemplate[]>([]);
   const [draft, setDraft] = useState<VisitDraft | null>(null);
   const [exams, setExams] = useState<Record<string, Record<string, unknown>>>({});
+  const [rx, setRx] = useState<RxDraft>(EMPTY_RX);
+  const [rxWarnings, setRxWarnings] = useState<RxWarning[]>([]);
   const [section, setSection] = useState('complaints');
   const [saveState, setSaveState] = useState<'saved' | 'dirty' | 'saving' | 'error'>('saved');
   const [error, setError] = useState<string | null>(null);
   const readOnly = !can('emr.edit');
+  const canSeeRx = can('prescriptions.view');
+  const rxReadOnly = !can('prescriptions.create');
 
   // What still needs saving (kept in refs so the timer always sees the latest values)
   const dirtyDraft = useRef(false);
   const dirtyExams = useRef(new Set<string>());
-  const latest = useRef<{ draft: VisitDraft | null; exams: Record<string, Record<string, unknown>> }>({ draft: null, exams: {} });
-  latest.current = { draft, exams };
+  const dirtyRx = useRef(false);
+  const latest = useRef<{ draft: VisitDraft | null; exams: Record<string, Record<string, unknown>>; rx: RxDraft }>(
+    { draft: null, exams: {}, rx: EMPTY_RX });
+  latest.current = { draft, exams, rx };
   const timer = useRef<number>();
   const inFlight = useRef<Promise<boolean> | null>(null);
 
@@ -103,6 +118,9 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
     setSection('complaints');
     dirtyDraft.current = false;
     dirtyExams.current.clear();
+    dirtyRx.current = false;
+    setRx(EMPTY_RX);
+    setRxWarnings([]);
     past.current = [];
     future.current = [];
     Promise.all([api.get<Visit>(`/visits/${visitId}/`), loadTemplates()])
@@ -113,26 +131,37 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
         setExams(toExams(data.exams));
         setTemplates(tpls);
         setSaveState('saved');
+        if (canSeeRx) {
+          api.get<Page<Prescription>>('/prescriptions/', { params: { visit: data.id } }).then(({ data: page }) => {
+            const found = page.results[0];
+            if (found) {
+              setRx({ id: found.id, items: found.items, notes: found.notes, status: found.status });
+              setRxWarnings(found.warnings);
+            }
+          }).catch(() => undefined);
+        }
         return api.get<Patient>(`/patients/${data.patient}/`).then((p) => setPatient(p.data));
       })
       .catch((err) => setError(errorMessage(err, t('common.loadFailed'))));
   // eslint-disable-next-line react-hooks/exhaustive-deps -- load once per visit
   }, [visitId, t]);
 
-  const hasUnsaved = () => dirtyDraft.current || dirtyExams.current.size > 0;
+  const hasUnsaved = () => dirtyDraft.current || dirtyExams.current.size > 0 || dirtyRx.current;
 
   const save = useCallback(async (): Promise<boolean> => {
     window.clearTimeout(timer.current);
     // Never run two saves at the same time: wait for the running one, then save what is left.
     if (inFlight.current) await inFlight.current;
-    if (!latest.current.draft || !(dirtyDraft.current || dirtyExams.current.size)) return true;
+    if (!latest.current.draft || !(dirtyDraft.current || dirtyExams.current.size || dirtyRx.current)) return true;
 
     const run = (async () => {
-      const { draft: d, exams: ex } = latest.current;
+      const { draft: d, exams: ex, rx: r } = latest.current;
       const sendDraft = dirtyDraft.current;
       const codes = [...dirtyExams.current];
+      const sendRx = dirtyRx.current;
       dirtyDraft.current = false;
       dirtyExams.current.clear();
+      dirtyRx.current = false;
       setSaveState('saving');
       try {
         if (sendDraft) await api.patch<Visit>(`/visits/${visitId}/`, d);
@@ -143,11 +172,28 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
             setVisit((v) => (v ? { ...v, prakriti: { ...data.result, visit_date: v.visit_date } as Visit['prakriti'] } : v));
           }
         }
-        setSaveState(dirtyDraft.current || dirtyExams.current.size ? 'dirty' : 'saved');
+        if (sendRx) {
+          const sent = r.items;
+          const body = { items: rxPayload(sent), notes: r.notes };
+          const { data } = r.id
+            ? await api.patch<Prescription>(`/prescriptions/${r.id}/`, body)
+            : await api.post<Prescription>('/prescriptions/', { ...body, visit: visitId });
+          // New lines get their id from the server (matched by the line objects that were sent)
+          setRx((cur) => ({
+            ...cur, id: data.id, status: data.status,
+            items: cur.items.map((line) => {
+              const index = sent.indexOf(line);
+              return index >= 0 && !line.id ? { ...line, id: data.items[index]?.id } : line;
+            }),
+          }));
+          setRxWarnings(data.warnings);
+        }
+        setSaveState(dirtyDraft.current || dirtyExams.current.size || dirtyRx.current ? 'dirty' : 'saved');
         return true;
       } catch (err) {
         // Keep the changes marked as unsaved and try again a little later
         if (sendDraft) dirtyDraft.current = true;
+        if (sendRx) dirtyRx.current = true;
         codes.forEach((c) => dirtyExams.current.add(c));
         setSaveState('error');
         message.error(errorMessage(err, t('common.saveFailed')));
@@ -184,7 +230,7 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
     const now = Date.now();
     // Typing in the same box without a pause counts as one change
     if (now - lastEdit.current.at > GROUP_MS || lastEdit.current.key !== key) {
-      past.current.push({ draft: current.draft, exams: current.exams });
+      past.current.push({ draft: current.draft, exams: current.exams, rx: current.rx });
       if (past.current.length > UNDO_STEPS) past.current.shift();
     }
     lastEdit.current = { at: now, key };
@@ -198,6 +244,12 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
     dirtyDraft.current = true;
     scheduleSave();
   };
+  const changeRx = (patch: Partial<RxDraft>) => {
+    remember(`rx:${Object.keys(patch).join(',')}`);
+    setRx((r) => ({ ...r, ...patch }));
+    dirtyRx.current = true;
+    scheduleSave();
+  };
   const changeExam = (code: string, values: Record<string, unknown>) => {
     remember(`exam:${code}`);
     setExams((e) => ({ ...e, [code]: values }));
@@ -209,12 +261,16 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
   const restore = (doc: Doc) => {
     const current = latest.current;
     if (doc.draft !== current.draft) dirtyDraft.current = true;
+    if (doc.rx !== current.rx) dirtyRx.current = true;
     for (const code of new Set([...Object.keys(doc.exams), ...Object.keys(current.exams)])) {
       if (doc.exams[code] !== current.exams[code]) dirtyExams.current.add(code);
     }
     setDraft(doc.draft);
     setExams(doc.exams);
-    latest.current = doc;
+    // Keep the prescription's server id even when going back to before it was first saved
+    const restoredRx = { ...doc.rx, id: doc.rx.id ?? current.rx.id };
+    setRx(restoredRx);
+    latest.current = { ...doc, rx: restoredRx };
     lastEdit.current = { at: 0, key: '' };
     setHistoryVersion((n) => n + 1);
     scheduleSave();
@@ -223,14 +279,14 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
     const previous = past.current.pop();
     const current = latest.current;
     if (!previous || !current.draft) return;
-    future.current.push({ draft: current.draft, exams: current.exams });
+    future.current.push({ draft: current.draft, exams: current.exams, rx: current.rx });
     restore(previous);
   };
   const redo = () => {
     const next = future.current.pop();
     const current = latest.current;
     if (!next || !current.draft) return;
-    past.current.push({ draft: current.draft, exams: current.exams });
+    past.current.push({ draft: current.draft, exams: current.exams, rx: current.rx });
     restore(next);
   };
 
@@ -275,6 +331,7 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
     followUp: !!draft.follow_up_date,
     progress: draft.complaints.some((c) => c.score !== null && c.score !== undefined),
     photos: visit.photos.length > 0,
+    rx: rx.items.length > 0,
     ...Object.fromEntries(templates.map((tpl) => [`tpl:${tpl.code}`, Object.keys(exams[tpl.code] ?? {}).length > 0])),
   };
   const sections = [
@@ -286,6 +343,7 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
     { key: 'progress', label: t('consult.sections.progress') },
     { key: 'photos', label: t('consult.sections.photos') },
     { key: 'diagnosis', label: t('consult.sections.diagnosis') },
+    ...(canSeeRx ? [{ key: 'rx', label: t('consult.sections.rx') }] : []),
     { key: 'advice', label: t('consult.sections.advice') },
     { key: 'followUp', label: t('consult.sections.followUp') },
   ];
@@ -351,13 +409,15 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
               onClick={() => setSection(s.key)}>
               {filled[s.key] && <span className="filled-dot" aria-label={t('consult.filled')} />}
               {s.label}
+              {s.key === 'rx' && rxWarnings.some((w) => w.level === 'danger') && <span className="danger-dot" aria-label={t('rx.hasDanger')} />}
             </button>
           ))}
         </div>
 
         <Card size="small" className="section-card">
           {section === 'summary' && (
-            <SummarySection draft={draft} templates={templates} exams={exams} examFields={toExamFields(visit.exams, templates)} />
+            <SummarySection draft={draft} templates={templates} exams={exams} examFields={toExamFields(visit.exams, templates)}
+              rxItems={rx.items} rxNotes={rx.notes} />
           )}
           {section === 'progress' && (
             <ProgressSection patientId={visit.patient} visitId={visit.id} visitDate={visit.visit_date} complaints={draft.complaints} />
@@ -371,21 +431,42 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
               onChange={(values) => changeExam(openTemplate.code, values)} />
           )}
           {section === 'diagnosis' && <DiagnosisSection {...props} />}
+          {section === 'rx' && (
+            <RxSection rx={rx} onChange={changeRx} warnings={rxWarnings} diagnoses={draft.diagnoses} readOnly={rxReadOnly} />
+          )}
           {section === 'advice' && <AdviceSection {...props} />}
           {section === 'followUp' && <FollowUpSection {...props} />}
         </Card>
       </div>
 
-      <PreviousVisits patientId={visit.patient} currentId={visit.id} templates={templates} />
+      <PreviousVisits patientId={visit.patient} currentId={visit.id} templates={templates}
+        onRepeat={!rxReadOnly ? (lines) => { changeRx({ items: [...rx.items, ...lines] }); setSection('rx'); } : undefined} />
     </div>
   );
 }
 
 /** Right panel: the patient's earlier check-ups (all branches). Click one to read it. */
-function PreviousVisits({ patientId, currentId, templates }: { patientId: string; currentId: string; templates: ExamTemplate[] }) {
+function PreviousVisits({ patientId, currentId, templates, onRepeat }: {
+  patientId: string;
+  currentId: string;
+  templates: ExamTemplate[];
+  onRepeat?: (lines: RxLine[]) => void;
+}) {
   const { t } = useTranslation();
+  const { can } = useAuth();
   const [rows, setRows] = useState<VisitListItem[]>([]);
   const [open, setOpen] = useState<Visit | null>(null);
+  const [openRx, setOpenRx] = useState<Prescription | null>(null);
+
+  const openVisit = async (id: string) => {
+    const { data } = await api.get<Visit>(`/visits/${id}/`);
+    setOpen(data);
+    setOpenRx(null);
+    if (can('prescriptions.view')) {
+      api.get<Page<Prescription>>('/prescriptions/', { params: { visit: id } })
+        .then(({ data: page }) => setOpenRx(page.results[0] ?? null)).catch(() => undefined);
+    }
+  };
 
   useEffect(() => {
     api.get<{ results: VisitListItem[] }>('/visits/', { params: { patient: patientId, page_size: 30 } })
@@ -399,7 +480,7 @@ function PreviousVisits({ patientId, currentId, templates }: { patientId: string
       {rows.length === 0 && <div className="cell-sub">{t('consult.firstVisit')}</div>}
       {rows.map((v) => (
         <button type="button" className="prev-visit" key={v.id}
-          onClick={() => api.get<Visit>(`/visits/${v.id}/`).then(({ data }) => setOpen(data))}>
+          onClick={() => openVisit(v.id)}>
           <div className="prev-visit-date">{dayjs(v.visit_date).format('DD-MM-YYYY')}</div>
           <div className="cell-sub">{v.doctor_name} · {v.branch_name}</div>
           {v.diagnoses.length > 0 && <div className="prev-visit-dx">{v.diagnoses.join(', ')}</div>}
@@ -407,12 +488,22 @@ function PreviousVisits({ patientId, currentId, templates }: { patientId: string
         </button>
       ))}
       <Modal open={!!open} width={760} title={open ? t('consult.visitOf', { date: dayjs(open.visit_date).format('DD-MM-YYYY') }) : ''}
-        onCancel={() => setOpen(null)} footer={<Button onClick={() => setOpen(null)}>{t('common.close')}</Button>}>
+        onCancel={() => setOpen(null)} footer={(
+          <Space>
+            {onRepeat && openRx && openRx.items.length > 0 && (
+              <Button onClick={() => {
+                onRepeat(openRx.items.map(({ id: _id, ...line }) => line));
+                setOpen(null);
+              }}>{t('rx.repeat', { n: openRx.items.length })}</Button>
+            )}
+            <Button type="primary" onClick={() => setOpen(null)}>{t('common.close')}</Button>
+          </Space>
+        )}>
         {open && (
           <>
             <div className="cell-sub" style={{ marginBottom: 8 }}>{open.doctor_name} · {open.branch_name}</div>
             <SummarySection draft={toDraft(open)} templates={templates} exams={toExams(open.exams)}
-              examFields={toExamFields(open.exams, templates)} />
+              examFields={toExamFields(open.exams, templates)} rxItems={openRx?.items} rxNotes={openRx?.notes} />
           </>
         )}
       </Modal>

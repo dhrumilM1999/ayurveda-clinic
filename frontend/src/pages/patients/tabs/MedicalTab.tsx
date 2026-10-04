@@ -11,7 +11,7 @@ export function MedicalTab({ patient: p }: { patient: Patient }) {
   const label = useMasterLabel();
 
   return (
-    <Row gutter={[24, 24]}>
+    <Row gutter={[12, 12]}>
       <Col span={24}>
         <Typography.Title level={5}>{t('patients.fields.conditions')}</Typography.Title>
         {p.medical_history_hidden ? (
@@ -58,7 +58,7 @@ export function MedicalTab({ patient: p }: { patient: Patient }) {
 
       {!p.medical_history_hidden && (
         <Col span={24}>
-          <Row gutter={[16, 16]}>
+          <Row gutter={[12, 12]}>
             {(['past_history', 'family_history', 'surgical_history', 'other_notes'] as const).map((f) => (
               <Col xs={24} md={12} key={f}>
                 <div className="history-box">

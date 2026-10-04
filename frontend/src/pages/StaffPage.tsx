@@ -162,7 +162,7 @@ export default function StaffPage() {
               </Form.Item>
             </Col>
           </Row>
-          <Space size="large" wrap>
+          <Space size={12} wrap>
             <Form.Item name="is_doctor" valuePropName="checked"><Checkbox>{t('staff.isDoctor')}</Checkbox></Form.Item>
             {isOrgAdmin && (
               <Form.Item name="is_org_admin" valuePropName="checked"><Checkbox>{t('staff.isOrgAdmin')}</Checkbox></Form.Item>

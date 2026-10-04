@@ -82,7 +82,7 @@ export default function QueuePage() {
         <Card><Empty description={t('queue.empty')}><Link to="/appointments">{t('queue.goToAppointments')}</Link></Empty></Card>
       )}
 
-      <Row gutter={[14, 14]}>
+      <Row gutter={[12, 12]}>
         {data?.doctors.map((group) => (
           <Col xs={24} lg={12} xxl={8} key={group.doctor}>
             <Card

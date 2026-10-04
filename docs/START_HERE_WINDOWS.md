@@ -111,6 +111,22 @@ No real SMS is sent yet. You can find the code in two places:
 14. **Patients -> Register patient**: type a name, then press F5 (reload). The form comes back ("Your unsaved form
     was restored"). It is kept only in that browser tab and is removed on logout.
 
+### Step 5 check (medicines and prescriptions)
+
+1. Log in as `pharmacist1` or `admin` -> **Medicines**: 23 SAMPLE medicines (orange "SAMPLE" tag = pharmacist must verify).
+   Search by any name, e.g. `Withania` finds Ashwagandha, `ત્રિફળા` finds Triphala.
+2. **Edit** a medicine, change the price, save; the **history** button shows version 1 -> 2.
+3. **In use** switch: off = hidden from prescriptions in this branch only.
+4. **Import** -> **Download template** -> fill it in Excel -> drop the file. You first see a **preview**
+   (nothing saved), then click **Import**.
+5. Log in as `doctor1` -> **Check-up** -> a patient -> **Rx (medicines)**: search a medicine; dose, times a day
+   (morning-noon-night, e.g. 1-0-1), when, anupana come from the medicine. Add the duration.
+6. Warnings appear automatically: e.g. *Arogyavardhini Vati* -> Schedule E1 and metals warnings;
+   a child or a pregnant patient gets a red warning; an allergy that matches the medicine gets a red warning.
+7. **Save as template** (e.g. for Amlapitta) and **Apply template** next time (★ = matches today's diagnosis).
+8. In **Previous check-ups** open an old visit -> **Repeat these medicines**.
+9. **Complete visit**: the prescription becomes *final* (ready for the pharmacy).
+
 ## 5. Other addresses
 
 | What | Address |

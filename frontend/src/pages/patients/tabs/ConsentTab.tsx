@@ -68,7 +68,7 @@ export function ConsentTab({ patient }: { patient: Patient }) {
   return (
     <>
       <Typography.Paragraph type="secondary">{t('consent.help')}</Typography.Paragraph>
-      <Row gutter={[16, 16]}>
+      <Row gutter={[12, 12]}>
         {status.map((row) => (
           <Col xs={24} md={12} key={row.purpose.code}>
             <Card size="small" className="consent-card">

@@ -4,7 +4,7 @@ import { Button, DatePicker, Descriptions, Empty, Input, InputNumber, Radio, Seg
 import dayjs from 'dayjs';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Complaint, Diagnosis, ExamField, ExamTemplate, Visit } from '../../api/types';
+import type { Complaint, Diagnosis, ExamField, ExamTemplate, RxLine, Visit } from '../../api/types';
 import { ChipPicker, PrakritiBars, scorePrakriti, useLang3, usePrakritiName, useTemplateName } from './shared';
 
 export type VisitDraft = Pick<Visit,
@@ -274,12 +274,14 @@ export function TemplateSection({ template, values, onChange, readOnly }: {
 }
 
 // --- Summary of everything filled in ---------------------------------------------------------
-export function SummarySection({ draft, templates, exams, examFields = {} }: {
+export function SummarySection({ draft, templates, exams, examFields = {}, rxItems = [], rxNotes = '' }: {
   draft: VisitDraft;
   templates: ExamTemplate[];
   exams: Record<string, Record<string, unknown>>;
   /** Questions of older template versions, for check-ups filled before a template changed */
   examFields?: Record<string, ExamField[]>;
+  rxItems?: RxLine[];
+  rxNotes?: string;
 }) {
   const { t } = useTranslation();
   const lang = useLang3();
@@ -290,7 +292,7 @@ export function SummarySection({ draft, templates, exams, examFields = {} }: {
     .filter((tpl) => Object.keys(exams[tpl.code] ?? {}).length > 0)
     .map((tpl) => (examFields[tpl.code] ? { ...tpl, fields: examFields[tpl.code]! } : tpl));
   const nothing = !draft.complaints.length && !draft.diagnoses.length && !draft.advice.length && !draft.history_notes
-    && !filledTemplates.length && !draft.follow_up_date;
+    && !filledTemplates.length && !draft.follow_up_date && !rxItems.length;
   if (nothing) return <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('consult.summaryEmpty')} />;
 
   const answerText = (tpl: ExamTemplate, field: ExamField) => {
@@ -361,6 +363,22 @@ export function SummarySection({ draft, templates, exams, examFields = {} }: {
               </li>
             ))}
           </ul>
+        </>
+      )}
+      {rxItems.length > 0 && (
+        <>
+          <SectionTitle>{t('consult.sections.rx')}</SectionTitle>
+          <ol className="summary-list">
+            {rxItems.map((l, i) => (
+              <li key={i}>
+                <b>{l.medicine_name}</b>
+                {' — '}{[`${l.dose} ${l.dose_unit}`.trim(), l.frequency, l.timing, l.anupana && `${t('rx.with')} ${l.anupana}`,
+                  l.duration ? `${l.duration} ${t(`consult.units.${l.duration_unit}`)}` : ''].filter(Boolean).join(' · ')}
+                {l.instructions ? ` · ${l.instructions}` : ''}
+              </li>
+            ))}
+          </ol>
+          {rxNotes && <Typography.Paragraph className="pre-line">{rxNotes}</Typography.Paragraph>}
         </>
       )}
       {(draft.advice.length > 0 || draft.advice_notes) && (

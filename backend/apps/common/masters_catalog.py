@@ -22,6 +22,11 @@ CATEGORIES = {
     "complaint": "Complaints / symptoms",
     "diagnosis": "Diagnosis (Ayurvedic name - English)",
     "advice": "Advice (diet and lifestyle)",
+    # Medicines and prescriptions (Step 5)
+    "dosage_form": "Dosage form (churna, vati...)",
+    "dose_unit": "Dose unit (tablet, g, ml...)",
+    "medicine_timing": "When to take (before / after food...)",
+    "anupana": "Anupana (taken with: water, milk, honey...)",
 }
 
 DEFAULT_VALUES = {
@@ -165,5 +170,53 @@ DEFAULT_VALUES = {
         ("walk", "Walk 30 minutes daily", "રોજ 30 મિનિટ ચાલવું", "रोज़ 30 मिनट टहलें"),
         ("yoga", "Yoga and pranayama 20-30 minutes", "યોગ અને પ્રાણાયામ 20-30 મિનિટ", "योग और प्राणायाम 20-30 मिनट"),
         ("abhyanga", "Oil massage (abhyanga) before bath", "સ્નાન પહેલાં તેલ માલિશ (અભ્યંગ)", "स्नान से पहले तेल मालिश (अभ्यंग)"),
+    ],
+
+    # --- Medicines and prescriptions (Step 5) ---
+    "dosage_form": [
+        ("churna", "Churna (powder)", "ચૂર્ણ", "चूर्ण"),
+        ("vati", "Vati / Gutika (tablet)", "વટી / ગુટિકા", "वटी / गुटिका"),
+        ("guggulu", "Guggulu", "ગુગ્ગુલુ", "गुग्गुलु"),
+        ("kashaya", "Kashaya / Kwatha (decoction)", "કષાય / ક્વાથ", "कषाय / क्वाथ"),
+        ("arishta", "Arishta", "અરિષ્ટ", "अरिष्ट"),
+        ("asava", "Asava", "આસવ", "आसव"),
+        ("taila", "Taila (oil)", "તેલ", "तैल"),
+        ("ghrita", "Ghrita (ghee)", "ઘૃત", "घृत"),
+        ("bhasma", "Bhasma", "ભસ્મ", "भस्म"),
+        ("rasa", "Rasa / Rasayana", "રસ / રસાયન", "रस / रसायन"),
+        ("lehya", "Lehya / Avaleha", "લેહ્ય / અવલેહ", "लेह्य / अवलेह"),
+        ("capsule", "Capsule", "કેપ્સ્યૂલ", "कैप्सूल"),
+        ("syrup", "Syrup", "સિરપ", "सिरप"),
+        ("ointment", "Ointment / cream", "મલમ", "मलहम"),
+        ("other", "Other", "અન્ય", "अन्य"),
+    ],
+    "dose_unit": [
+        ("tablet", "tablet", "ગોળી", "गोली"),
+        ("capsule", "capsule", "કેપ્સ્યૂલ", "कैप्सूल"),
+        ("g", "g", "ગ્રામ", "ग्राम"),
+        ("ml", "ml", "મિલી", "मिली"),
+        ("tsp", "teaspoon", "ચમચી", "चम्मच"),
+        ("tbsp", "tablespoon", "મોટી ચમચી", "बड़ा चम्मच"),
+        ("drops", "drops", "ટીપાં", "बूँदें"),
+        ("pinch", "pinch", "ચપટી", "चुटकी"),
+        ("apply", "apply locally", "લગાવવું", "लगाएँ"),
+    ],
+    "medicine_timing": [
+        ("after_food", "After food", "જમ્યા પછી", "भोजन के बाद"),
+        ("before_food", "Before food", "જમ્યા પહેલાં", "भोजन से पहले"),
+        ("empty_stomach", "Empty stomach (morning)", "ખાલી પેટે (સવારે)", "खाली पेट (सुबह)"),
+        ("with_food", "With food", "જમવા સાથે", "भोजन के साथ"),
+        ("between_meals", "Between meals", "બે ભોજન વચ્ચે", "दो भोजन के बीच"),
+        ("bedtime", "At bedtime", "સૂતી વખતે", "सोते समय"),
+    ],
+    "anupana": [
+        ("warm_water", "Warm water", "હૂંફાળું પાણી", "गुनगुना पानी"),
+        ("water", "Water", "પાણી", "पानी"),
+        ("milk", "Warm milk", "ગરમ દૂધ", "गर्म दूध"),
+        ("honey", "Honey", "મધ", "शहद"),
+        ("ghee", "Ghee", "ઘી", "घी"),
+        ("buttermilk", "Buttermilk", "છાશ", "छाछ"),
+        ("jaggery", "Jaggery", "ગોળ", "गुड़"),
+        ("coconut_water", "Coconut water", "નાળિયેર પાણી", "नारियल पानी"),
     ],
 }
