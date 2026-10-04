@@ -25,6 +25,7 @@ import RolesPage from './pages/RolesPage';
 import RoomsPage from './pages/RoomsPage';
 import SchedulesPage from './pages/SchedulesPage';
 import SettingsPage from './pages/SettingsPage';
+import AdditionalSettingsPage from './pages/AdditionalSettingsPage';
 import StaffPage from './pages/StaffPage';
 import TemplatesPage from './pages/TemplatesPage';
 import { antTheme, applyCssVariables } from './theme';
@@ -69,6 +70,7 @@ export default function App() {
               <Route path="schedules" element={<RequirePermission code="schedules.view"><SchedulesPage /></RequirePermission>} />
               <Route path="templates" element={<RequirePermission code="settings.manage"><TemplatesPage /></RequirePermission>} />
               <Route path="settings" element={<RequirePermission code="settings.manage"><SettingsPage /></RequirePermission>} />
+              <Route path="additional-settings" element={<RequirePermission code="settings.manage"><AdditionalSettingsPage /></RequirePermission>} />
               <Route path="audit-log" element={<RequirePermission code="audit.view"><AuditLogPage /></RequirePermission>} />
               <Route path="login" element={<Navigate to="/" replace />} />
               <Route path="*" element={<NotFoundPage />} />

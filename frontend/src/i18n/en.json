@@ -67,7 +67,8 @@
     "consult": "Check-up",
     "templates": "Check-up templates",
     "medicines": "Medicines",
-    "pharmacy": "Pharmacy"
+    "pharmacy": "Pharmacy",
+    "additional": "Additional settings"
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",
@@ -1174,5 +1175,71 @@
     "searchPlaceholder": "Bill no., patient name or ID",
     "takePayment": "Take payment",
     "taxable": "Taxable value"
+  },
+  "additional": {
+    "title": "Additional settings",
+    "subtitle": "Optional features for the whole clinic. Switch on only what you need.",
+    "keptNote": "Switching a feature off only hides it. Nothing already saved is deleted; switch it on again to see it.",
+    "onlyAdmin": "Only an organization admin can change these switches.",
+    "allOn": "Turn all on",
+    "allOff": "Turn all off",
+    "needs": "Needs: {{name}}",
+    "groups": {
+      "pharmacy": "Pharmacy and stock"
+    },
+    "features": {
+      "pharmacy_billing": {
+        "label": "Pharmacy bills, payments and printing",
+        "help": "Dispensing makes a GST bill; take cash / UPI / card payments, print bills, UPI QR code, Bills tab with day closing. Off: medicines are only given, no bill."
+      },
+      "pharmacy_discounts": {
+        "label": "Discounts on pharmacy bills",
+        "help": "Discount % per medicine or on the whole bill when dispensing."
+      },
+      "pharmacy_sales_returns": {
+        "label": "Sales returns",
+        "help": "Take back medicines a patient returns: sellable ones go back to stock. With bills on, a credit note and refund are made."
+      },
+      "pharmacy_loose_sale": {
+        "label": "Sell loose (part of a pack)",
+        "help": "Sell single tablets from a strip. Set 'Units per pack' and 'Sell loose' on the medicine."
+      },
+      "pharmacy_racks": {
+        "label": "Racks and shelf locations",
+        "help": "Make racks (A, B, C...) and record the rack, shelf and box of each medicine; shown while dispensing and counting."
+      },
+      "pharmacy_barcode": {
+        "label": "Barcodes and scanning",
+        "help": "Barcode on medicines and batches; scan to find stock, add purchase lines and pick the batch when dispensing."
+      },
+      "pharmacy_purchase_details": {
+        "label": "Detailed purchase entry",
+        "help": "Free quantity, discount, GST, manufacture month, selling price and freight on supplier invoices, with taxable value and GST totals."
+      },
+      "pharmacy_opening_stock": {
+        "label": "Opening stock entry",
+        "help": "Enter the stock you already have when you start, without a supplier invoice."
+      },
+      "pharmacy_supplier_returns": {
+        "label": "Returns to supplier",
+        "help": "Send damaged, expired or extra stock back to the supplier; stock goes down and it is recorded."
+      },
+      "pharmacy_stock_alerts": {
+        "label": "Stock alerts (low, out, expiry)",
+        "help": "Out-of-stock, low-stock, expiring-soon and expired counts on the Stock tab and the Dashboard, with quick filters."
+      },
+      "pharmacy_stock_ledger": {
+        "label": "Stock ledger screen",
+        "help": "One screen with every stock movement (in, out, returns, corrections) and opening / closing balance, filtered by medicine and dates."
+      },
+      "pharmacy_stock_check": {
+        "label": "Physical stock check",
+        "help": "Count what is really on the shelves (all or one rack); differences are corrected and recorded."
+      },
+      "medicine_extra_details": {
+        "label": "Extra product details",
+        "help": "Generic name, category, pack type and default selling price on the medicine form."
+      }
+    }
   }
 }
