@@ -4,9 +4,11 @@ import { Card, Col, Row } from 'antd';
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
-import type { QueueData } from '../api/types';
+import type { DaySummary, QueueData } from '../api/types';
+import { money } from './medicines/shared';
+import { AlertTiles } from './pharmacy/StockTab';
 import { useAuth } from '../auth/AuthContext';
 import { LeafArt } from '../components/LeafArt';
 import { clinicConfig } from '../config/clinic';
@@ -18,7 +20,19 @@ export default function DashboardPage() {
   const { t } = useTranslation();
   const { me, branch, can, features } = useAuth();
   const [queue, setQueue] = useState<QueueData | null>(null);
+  const [collection, setCollection] = useState<number | null>(null);
+  const navigate = useNavigate();
   const showAppointments = can('appointments.view') && features.appointments !== false;
+  const showPharmacy = can('pharmacy.view') && features.pharmacy !== false;
+
+  // Today's money received (cash + UPI + card, minus refunds)
+  useEffect(() => {
+    if (!can('billing.view')) return;
+    api.get<DaySummary>('/invoices/summary/').then(({ data }) => {
+      const sum = (r: Record<string, string>) => Object.values(r).reduce((a, v) => a + Number(v), 0);
+      setCollection(sum(data.received) - sum(data.refunds));
+    }).catch(() => setCollection(null));
+  }, [can]);
 
   useEffect(() => {
     if (!showAppointments) return;
@@ -33,10 +47,13 @@ export default function DashboardPage() {
     }),
     { appointments: 0, waiting: 0 },
   );
-  const live: Record<string, { value: number; link: string; note: string } | undefined> = totals ? {
-    appointments: { value: totals.appointments, link: '/appointments', note: t('dashboard.today') },
-    queue: { value: totals.waiting, link: '/queue', note: t('dashboard.waitingNow') },
-  } : {};
+  const live: Record<string, { value: number | string; link: string; note: string } | undefined> = {
+    ...(totals ? {
+      appointments: { value: totals.appointments, link: '/appointments', note: t('dashboard.today') },
+      queue: { value: totals.waiting, link: '/queue', note: t('dashboard.waitingNow') },
+    } : {}),
+    ...(collection !== null ? { collection: { value: money(collection), link: '/pharmacy?tab=bills', note: t('dashboard.collectionNote') } } : {}),
+  };
 
   const hour = new Date().getHours();
   const greetingKey = hour < 12 ? 'dashboard.goodMorning' : hour < 17 ? 'dashboard.goodAfternoon' : 'dashboard.goodEvening';
@@ -78,6 +95,12 @@ export default function DashboardPage() {
           </Col>
         ))}
       </Row>
+      {showPharmacy && (
+        <>
+          <div className="section-title" style={{ marginTop: 16 }}>{t('dashboard.stockAlerts')}</div>
+          <AlertTiles onPick={(show) => navigate(`/pharmacy?tab=stock&show=${show}`)} />
+        </>
+      )}
     </>
   );
 }

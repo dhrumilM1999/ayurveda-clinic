@@ -6,6 +6,7 @@ import { api, errorMessage } from '../api/client';
 import type { FeatureFlag } from '../api/types';
 import { useAuth } from '../auth/AuthContext';
 import { LANGUAGES } from '../i18n';
+import { BranchDetailsCard } from './BranchDetailsCard';
 
 export default function SettingsPage() {
   const { t } = useTranslation();
@@ -58,7 +59,7 @@ export default function SettingsPage() {
 
   return (
     <>
-      <Typography.Title level={3}>{t('settings.title')}</Typography.Title>
+      <div className="page-toolbar"><Typography.Title level={3} style={{ margin: 0 }}>{t('settings.title')}</Typography.Title></div>
       <Row gutter={[12, 12]}>
         <Col xs={24} lg={12}>
           <Card title={t('settings.clinic')}>
@@ -88,7 +89,8 @@ export default function SettingsPage() {
           </Card>
         </Col>
         <Col xs={24} lg={12}>
-          <Card title={t('settings.features', { branch: branch?.name })}>
+          <BranchDetailsCard />
+          <Card title={t('settings.features', { branch: branch?.name })} style={{ marginTop: 12 }}>
             <Typography.Paragraph type="secondary">{t('settings.featuresHelp')}</Typography.Paragraph>
             <List
               dataSource={flags}

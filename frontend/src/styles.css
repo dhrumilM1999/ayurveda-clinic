@@ -1628,37 +1628,146 @@ body {
 .right {
   text-align: right;
 }
-.purchase-lines {
+
+/* Dispense / sell footer: payment on the left, total and buttons on the right */
+.sell-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+}
+.sell-pay {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.upi-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #faf8f3;
+  border: 1px solid var(--clinic-border);
+}
+
+/* Daily closing tiles (Bills) */
+.summary-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.summary-tile {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid var(--clinic-border);
+}
+.summary-tile.strong {
+  border-color: var(--clinic-primary);
+  background: var(--clinic-primary-soft);
+}
+.summary-label {
+  font-size: 12px;
+  color: rgba(35, 48, 42, 0.6);
+}
+.summary-value {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.bill-totals {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 24px;
+  width: 300px;
+  margin: 12px 0 0 auto;
+}
+.bill-totals > :nth-child(even) {
+  text-align: right;
+}
+
+/* Stock alerts */
+.alert-tiles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.alert-tile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--clinic-border);
+  background: #fff;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+.alert-tile:hover,
+.alert-tile.active {
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+.alert-count {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+}
+.alert-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--clinic-text);
+}
+.tile-red { color: #c2412d; }
+.tile-orange { color: #c46a12; }
+.tile-gold { color: #a87a12; }
+.tile-magenta { color: #b0306e; }
+
+/* Stock ledger statement */
+.ledger-statement {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.ledger-statement > div {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  min-width: 110px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid var(--clinic-border);
 }
-.purchase-head,
-.purchase-line {
-  display: grid;
-  grid-template-columns: minmax(200px, 2.2fr) 110px 110px 80px 100px 100px 100px 32px;
-  gap: 8px;
-  align-items: center;
+.ledger-statement > div.strong {
+  border-color: var(--clinic-primary);
+  background: var(--clinic-primary-soft);
 }
-.purchase-head {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: rgba(35, 48, 42, 0.55);
+.ledger-statement b {
+  font-size: 16px;
 }
-.purchase-lines > .ant-btn-dashed {
-  align-self: flex-start;
-  margin-top: 4px;
+
+/* Purchase entry lines */
+.purchase-entry {
+  max-height: 52vh;
+  overflow-y: auto;
+  padding-right: 4px;
 }
-@media (max-width: 900px) {
-  .purchase-head {
-    display: none;
-  }
-  .purchase-line {
-    grid-template-columns: 1fr 1fr;
-    padding: 8px;
-    border-radius: 8px;
-    border: 1px solid var(--clinic-border);
+.line-amount {
+  display: inline-block;
+  min-width: 90px;
+  line-height: 24px;
+  font-weight: 700;
+}
+@media (max-width: 700px) {
+  .alert-tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

@@ -1,110 +1,179 @@
-// Stock of this branch: one row per medicine, batches inside, corrections, low-stock level, history.
-import { HistoryOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
-import { App, Button, Drawer, Form, Input, InputNumber, Modal, Segmented, Space, Spin, Table, Tag, Tooltip } from 'antd';
+// Stock of this branch: alerts, one row per medicine (location, available, near expiry, minimum level),
+// batches inside with corrections and returns to the supplier, barcode search, stock history.
+import { EditOutlined, EnvironmentOutlined, HistoryOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
+import { App, Button, Form, Input, InputNumber, Modal, Segmented, Select, Space, Spin, Table, Tag, Tooltip } from 'antd';
 import dayjs from 'dayjs';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import { api, errorMessage } from '../../api/client';
-import type { StockBatch, StockMovement, StockRow } from '../../api/types';
+import type { Rack, ScanResult, StockAlerts, StockBatch, StockRow, Supplier } from '../../api/types';
 import { useAuth } from '../../auth/AuthContext';
 import { money } from '../medicines/shared';
-import { expiryText } from './DispenseTab';
+import { LedgerDrawer } from './LedgerTab';
 import { PurchaseModal } from './PurchaseModal';
+import { ScanInput, expiryText, qty } from './common';
 
-type Show = 'all' | 'low' | 'expiring' | 'expired';
+type Show = 'all' | 'low' | 'out' | 'expiring' | 'expired';
+
+export function AlertTiles({ onPick, active }: { onPick?: (show: Show) => void; active?: Show }) {
+  const { t } = useTranslation();
+  const [alerts, setAlerts] = useState<StockAlerts | null>(null);
+  useEffect(() => { api.get<StockAlerts>('/stock/alerts/').then(({ data }) => setAlerts(data)).catch(() => setAlerts(null)); }, []);
+  if (!alerts) return null;
+  const tiles: { key: Show; color: string }[] = [
+    { key: 'out', color: 'red' }, { key: 'low', color: 'orange' }, { key: 'expiring', color: 'gold' }, { key: 'expired', color: 'magenta' },
+  ];
+  return (
+    <div className="alert-tiles">
+      {tiles.map(({ key, color }) => (
+        <button type="button" key={key} className={`alert-tile tile-${color}${active === key ? ' active' : ''}`}
+          onClick={() => onPick?.(active === key ? 'all' : key)}>
+          <span className="alert-count num">{alerts[key as keyof StockAlerts]}</span>
+          <span className="alert-label">{t(`pharmacy.alerts.${key}`)}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export function StockTab() {
   const { t } = useTranslation();
   const { message } = App.useApp();
   const { can } = useAuth();
   const canStock = can('pharmacy.stock');
-  const [show, setShow] = useState<Show>('all');
+  const [params] = useSearchParams();
+  const [show, setShow] = useState<Show>((params.get('show') as Show) || 'all');
+  const [rack, setRack] = useState<string>();
+  const [racks, setRacks] = useState<Rack[]>([]);
   const [search, setSearch] = useState('');
   const [query, setQuery] = useState('');
   const [rows, setRows] = useState<StockRow[]>([]);
   const [loading, setLoading] = useState(false);
-  const [purchaseOpen, setPurchaseOpen] = useState(false);
+  const [purchase, setPurchase] = useState<'purchase' | 'opening' | null>(null);
   const [history, setHistory] = useState<StockRow | null>(null);
-  const [version, setVersion] = useState(0); // reload open batch lists after a change
+  const [locating, setLocating] = useState<StockRow | null>(null);
+  const [expanded, setExpanded] = useState<string[]>([]);
+  const [version, setVersion] = useState(0);
+
+  useEffect(() => { api.get<Rack[]>('/racks/').then(({ data }) => setRacks(data.filter((r) => r.is_active))).catch(() => setRacks([])); }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await api.get<StockRow[]>('/stock/', { params: { show, q: query || undefined } });
+      const { data } = await api.get<StockRow[]>('/stock/', { params: { show, q: query || undefined, rack } });
       setRows(data);
     } catch (err) {
       message.error(errorMessage(err, t('common.loadFailed')));
     } finally {
       setLoading(false);
     }
-  }, [show, query, message, t]);
-  useEffect(() => { load(); }, [load]);
+  }, [show, query, rack, message, t]);
+  useEffect(() => { load(); }, [load, version]);
+
+  const changed = () => setVersion((v) => v + 1);
 
   const saveLevel = async (row: StockRow, level: number | null) => {
     if ((level ?? null) === (row.reorder_level === null ? null : Number(row.reorder_level))) return;
     try {
       await api.post('/stock/reorder-level/', { medicine: row.medicine, level });
-      load();
+      changed();
     } catch (err) {
       message.error(errorMessage(err, t('common.saveFailed')));
     }
   };
 
-  const changed = () => { load(); setVersion((v) => v + 1); };
+  const onScan = async (code: string) => {
+    try {
+      const { data } = await api.get<ScanResult>('/stock/scan/', { params: { code } });
+      setShow('all');
+      setRack(undefined);
+      setSearch(data.name);
+      setQuery(data.name);
+      setExpanded([data.medicine]);
+      if (data.location) message.info(t('pharmacy.foundAt', { name: data.name, location: data.location }));
+    } catch (err) {
+      message.error(errorMessage(err, t('common.loadFailed')));
+    }
+  };
 
   return (
     <>
+      <AlertTiles key={version} active={show} onPick={setShow} />
       <div className="filter-bar">
-        <Input.Search allowClear placeholder={t('medicines.searchPlaceholder')} value={search} style={{ width: 260 }}
+        <ScanInput onScan={onScan} />
+        <Input.Search allowClear placeholder={t('pharmacy.stockSearch')} value={search} style={{ width: 240 }}
           onChange={(e) => { setSearch(e.target.value); if (!e.target.value) setQuery(''); }} onSearch={(v) => setQuery(v.trim())} />
+        <Select allowClear placeholder={t('pharmacy.allRacks')} value={rack} onChange={setRack} style={{ width: 150 }}
+          options={racks.map((r) => ({ value: r.id, label: `${r.code}${r.name ? ` · ${r.name}` : ''}` }))} />
         <Segmented value={show} onChange={(v) => setShow(v as Show)}
-          options={(['all', 'low', 'expiring', 'expired'] as const).map((k) => ({ value: k, label: t(`pharmacy.show.${k}`) }))} />
-        <Button icon={<ReloadOutlined />} onClick={load} aria-label={t('appointments.refresh')} />
+          options={(['all', 'low', 'out', 'expiring', 'expired'] as const).map((k) => ({ value: k, label: t(`pharmacy.show.${k}`) }))} />
+        <Button icon={<ReloadOutlined />} onClick={changed} aria-label={t('appointments.refresh')} />
         <span style={{ flex: 1 }} />
-        {canStock && <Button type="primary" icon={<PlusOutlined />} onClick={() => setPurchaseOpen(true)}>{t('pharmacy.addPurchase')}</Button>}
+        {canStock && (
+          <Space>
+            <Button onClick={() => setPurchase('opening')}>{t('pharmacy.openingStock')}</Button>
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => setPurchase('purchase')}>{t('pharmacy.addPurchase')}</Button>
+          </Space>
+        )}
       </div>
       <Table<StockRow>
         rowKey="medicine"
         loading={loading}
         dataSource={rows}
         pagination={{ pageSize: 50, hideOnSinglePage: true }}
-        locale={{ emptyText: show === 'all' ? t('pharmacy.stockEmpty') : t('pharmacy.nothingHere') }}
-        expandable={{ expandedRowRender: (r) => <BatchList key={version} row={r} canStock={canStock} onChanged={changed} /> }}
+        scroll={{ x: 980 }}
+        locale={{ emptyText: show === 'all' && !query ? t('pharmacy.stockEmpty') : t('pharmacy.nothingHere') }}
+        expandable={{
+          expandedRowKeys: expanded,
+          onExpandedRowsChange: (keys) => setExpanded(keys as string[]),
+          expandedRowRender: (r) => <BatchList key={version} row={r} canStock={canStock} onChanged={changed} />,
+        }}
         columns={[
           {
             title: t('rx.medicine'), key: 'name',
             render: (_: unknown, r: StockRow) => (
               <div style={{ lineHeight: 1.35 }}>
-                <b>{r.name}</b>
-                <div className="cell-sub">{r.pack_size || '—'}</div>
+                <b>{r.name}</b> <span className="cell-sub">{r.pack_size}</span>
+                <div className="cell-sub">{[r.generic_name, r.category, r.manufacturer].filter(Boolean).join(' · ') || '—'}</div>
               </div>
             ),
           },
           {
-            title: t('pharmacy.available'), key: 'available', width: 150, align: 'right' as const,
+            title: t('pharmacy.location'), key: 'loc', width: 130,
             render: (_: unknown, r: StockRow) => (
-              <Space size={6}>
-                {r.low && <Tag color="red" className="tag-tight">{t('pharmacy.low')}</Tag>}
-                <b className="num">{Number(r.usable)}</b>
+              <Space size={2}>
+                {r.location ? <Tag icon={<EnvironmentOutlined />} color="geekblue" className="tag-tight" style={{ marginInlineStart: 0 }}>{r.location}</Tag> : <span className="cell-sub">—</span>}
+                {canStock && <Button size="small" type="text" icon={<EditOutlined />} onClick={() => setLocating(r)} aria-label={t('pharmacy.setLocation')} />}
               </Space>
             ),
           },
           {
-            title: t('pharmacy.nearestExpiry'), key: 'expiry', width: 170,
+            title: t('pharmacy.available'), key: 'available', width: 130, align: 'right' as const,
             render: (_: unknown, r: StockRow) => (
               <Space size={6}>
+                {r.out && <Tag color="red" className="tag-tight">{t('pharmacy.out')}</Tag>}
+                {r.low && <Tag color="orange" className="tag-tight">{t('pharmacy.low')}</Tag>}
+                <b className="num">{qty(r.usable)}</b>
+              </Space>
+            ),
+          },
+          {
+            title: t('pharmacy.nearestExpiry'), key: 'expiry', width: 190,
+            render: (_: unknown, r: StockRow) => (
+              <Space size={6} wrap>
                 <span className={r.expiring ? 'text-warn' : undefined}>{expiryText(r.nearest_expiry)}</span>
-                {r.expiring && <Tag color="orange" className="tag-tight">{t('pharmacy.soon')}</Tag>}
+                {r.expiring && <Tooltip title={t('pharmacy.nearExpiryQty', { n: qty(r.near_expiry_quantity) })}><Tag color="gold" className="tag-tight">{t('pharmacy.soon')}</Tag></Tooltip>}
                 {r.expired && (
-                  <Tooltip title={t('pharmacy.expiredHelp', { n: Number(r.available) - Number(r.usable) })}>
-                    <Tag color="red" className="tag-tight">{t('pharmacy.expired')}</Tag>
+                  <Tooltip title={t('pharmacy.expiredHelp', { n: qty(Number(r.available) - Number(r.usable)) })}>
+                    <Tag color="magenta" className="tag-tight">{t('pharmacy.expired')}</Tag>
                   </Tooltip>
                 )}
               </Space>
             ),
           },
           {
-            title: <Tooltip title={t('pharmacy.reorderHelp')}>{t('pharmacy.reorderLevel')}</Tooltip>, key: 'level', width: 160,
+            title: <Tooltip title={t('pharmacy.reorderHelp')}>{t('pharmacy.reorderLevel')}</Tooltip>, key: 'level', width: 140,
             render: (_: unknown, r: StockRow) => (
               <InputNumber size="small" min={0} style={{ width: 90 }} disabled={!canStock} placeholder="—"
                 defaultValue={r.reorder_level === null ? undefined : Number(r.reorder_level)}
@@ -121,8 +190,9 @@ export function StockTab() {
           },
         ]}
       />
-      {purchaseOpen && <PurchaseModal onClose={(saved) => { setPurchaseOpen(false); if (saved) changed(); }} />}
-      {history && <HistoryDrawer row={history} onClose={() => setHistory(null)} />}
+      {purchase && <PurchaseModal opening={purchase === 'opening'} onClose={(saved) => { setPurchase(null); if (saved) changed(); }} />}
+      {history && <LedgerDrawer medicine={history.medicine} name={history.name} onClose={() => setHistory(null)} />}
+      {locating && <LocationModal row={locating} racks={racks} onClose={(saved) => { setLocating(null); if (saved) changed(); }} />}
     </>
   );
 }
@@ -130,10 +200,12 @@ export function StockTab() {
 function BatchList({ row, canStock, onChanged }: { row: StockRow; canStock: boolean; onChanged: () => void }) {
   const { t } = useTranslation();
   const [batches, setBatches] = useState<StockBatch[] | null>(null);
-  const [adjusting, setAdjusting] = useState<StockBatch | null>(null);
+  const [correcting, setCorrecting] = useState<StockBatch | null>(null);
+  const [returning, setReturning] = useState<StockBatch | null>(null);
 
   useEffect(() => {
-    api.get<StockBatch[]>('/stock/batches/', { params: { medicine: row.medicine } }).then(({ data }) => setBatches(data)).catch(() => setBatches([]));
+    api.get<StockBatch[]>('/stock/batches/', { params: { medicine: row.medicine, in_stock: 1 } })
+      .then(({ data }) => setBatches(data)).catch(() => setBatches([]));
   }, [row.medicine]);
 
   if (!batches) return <Spin size="small" />;
@@ -146,40 +218,54 @@ function BatchList({ row, canStock, onChanged }: { row: StockRow; canStock: bool
         pagination={false}
         dataSource={batches}
         className="inner-table"
+        locale={{ emptyText: t('pharmacy.noBatches') }}
         columns={[
-          { title: t('pharmacy.batch'), dataIndex: 'batch_no', render: (b: string) => <span className="mono">{b}</span> },
+          { title: t('pharmacy.batch'), dataIndex: 'batch_no', render: (b: string, x: StockBatch) => <><span className="mono">{b}</span>{x.barcode && <div className="cell-sub mono">{x.barcode}</div>}</> },
+          { title: t('pharmacy.mfg'), dataIndex: 'mfg_date', render: expiryText },
           {
             title: t('pharmacy.expiry'), dataIndex: 'expiry_date',
-            render: (d: string | null) => (d && d < today ? <Tag color="red" className="tag-tight" style={{ marginInlineStart: 0 }}>{expiryText(d)}</Tag> : expiryText(d)),
+            render: (d: string | null) => (d && d < today ? <Tag color="magenta" className="tag-tight" style={{ marginInlineStart: 0 }}>{expiryText(d)}</Tag> : expiryText(d)),
           },
           { title: 'MRP', dataIndex: 'mrp', align: 'right' as const, render: (v: string) => <span className="num">{money(v)}</span> },
+          { title: t('pharmacy.sellingPrice'), dataIndex: 'sale_price', align: 'right' as const, render: (v: string) => <span className="num">{money(v)}</span> },
           { title: t('pharmacy.purchaseRate'), dataIndex: 'purchase_rate', align: 'right' as const, render: (v: string | null) => <span className="num">{money(v)}</span> },
-          { title: t('pharmacy.available'), dataIndex: 'quantity', align: 'right' as const, render: (v: string) => <b className="num">{Number(v)}</b> },
+          { title: 'GST', dataIndex: 'gst_rate', align: 'right' as const, render: (v: string) => `${qty(v)}%` },
+          { title: t('pharmacy.supplier'), dataIndex: 'supplier_name', render: (v: string) => v || '—' },
+          { title: t('pharmacy.available'), dataIndex: 'quantity', align: 'right' as const, render: (v: string) => <b className="num">{qty(v)}</b> },
           {
-            title: '', key: 'adjust', width: 110, align: 'right' as const,
-            render: (_: unknown, b: StockBatch) => canStock ? <Button size="small" onClick={() => setAdjusting(b)}>{t('pharmacy.correct')}</Button> : null,
+            title: '', key: 'actions', width: 190, align: 'right' as const,
+            render: (_: unknown, b: StockBatch) => canStock ? (
+              <Space size={4}>
+                <Button size="small" onClick={() => setCorrecting(b)}>{t('pharmacy.correct')}</Button>
+                <Button size="small" onClick={() => setReturning(b)}>{t('pharmacy.returnToSupplier')}</Button>
+              </Space>
+            ) : null,
           },
         ]}
       />
-      {adjusting && <AdjustModal batch={adjusting} onClose={(saved) => { setAdjusting(null); if (saved) onChanged(); }} />}
+      {correcting && <CorrectModal batch={correcting} onClose={(saved) => { setCorrecting(null); if (saved) onChanged(); }} />}
+      {returning && <SupplierReturnModal batch={returning} onClose={(saved) => { setReturning(null); if (saved) onChanged(); }} />}
     </>
   );
 }
 
-const REASONS = ['damaged', 'expiredRemoved', 'countCorrection', 'returned'] as const;
+const REASONS = ['damaged', 'expiredRemoved', 'countCorrection', 'foundExtra'] as const;
 
-function AdjustModal({ batch, onClose }: { batch: StockBatch; onClose: (saved: boolean) => void }) {
+function CorrectModal({ batch, onClose }: { batch: StockBatch; onClose: (saved: boolean) => void }) {
   const { t } = useTranslation();
   const { message } = App.useApp();
   const [form] = Form.useForm();
   const [saving, setSaving] = useState(false);
+  const kind: 'damaged' | 'expired' | 'adjust' = Form.useWatch('kind', form) ?? 'damaged';
   const change: number | undefined = Form.useWatch('change', form);
+  useEffect(() => { form.setFieldsValue({ kind: 'damaged' }); }, [form]);
+  const signed = change ? (kind === 'adjust' ? change : -Math.abs(change)) : 0;
 
   const save = async () => {
     const values = await form.validateFields();
     setSaving(true);
     try {
-      await api.post('/stock/adjust/', { batch: batch.id, change: values.change, reason: values.reason });
+      await api.post('/stock/adjust/', { batch: batch.id, kind: values.kind, change: signed, reason: values.reason });
       message.success(t('common.saved'));
       onClose(true);
     } catch (err) {
@@ -190,13 +276,17 @@ function AdjustModal({ batch, onClose }: { batch: StockBatch; onClose: (saved: b
   };
 
   return (
-    <Modal open width={460} title={t('pharmacy.correctTitle', { name: batch.medicine_name, batch: batch.batch_no })}
+    <Modal open width={480} title={t('pharmacy.correctTitle', { name: batch.medicine_name, batch: batch.batch_no })}
       onCancel={() => onClose(false)} onOk={save} okText={t('common.save')} cancelText={t('common.cancel')} confirmLoading={saving}>
-      <div className="form-help">{t('pharmacy.correctHelp', { n: Number(batch.quantity) })}</div>
+      <div className="form-help">{t('pharmacy.correctHelp', { n: qty(batch.quantity) })}</div>
       <Form form={form} layout="vertical" requiredMark={false}>
-        <Form.Item name="change" label={t('pharmacy.change')} rules={[{ required: true, message: t('common.required') }]}
-          extra={change ? t('pharmacy.afterChange', { n: Number(batch.quantity) + change }) : t('pharmacy.changeHelp')}>
-          <InputNumber min={-Number(batch.quantity)} style={{ width: 160 }} placeholder="-2 / +3" />
+        <Form.Item name="kind" label={t('pharmacy.correctionType')}>
+          <Segmented options={(['damaged', 'expired', 'adjust'] as const).map((k) => ({ value: k, label: t(`pharmacy.kinds.${k}`) }))} />
+        </Form.Item>
+        <Form.Item name="change" label={kind === 'adjust' ? t('pharmacy.change') : t('pharmacy.packsRemoved')}
+          rules={[{ required: true, message: t('common.required') }]}
+          extra={change ? t('pharmacy.afterChange', { n: qty(Number(batch.quantity) + signed) }) : kind === 'adjust' ? t('pharmacy.changeHelp') : undefined}>
+          <InputNumber min={kind === 'adjust' ? -Number(batch.quantity) : 0.001} max={kind === 'adjust' ? undefined : Number(batch.quantity)} style={{ width: 160 }} />
         </Form.Item>
         <Form.Item name="reason" label={t('pharmacy.reason')} rules={[{ required: true, message: t('common.required') }]}>
           <Input maxLength={200} />
@@ -213,42 +303,92 @@ function AdjustModal({ batch, onClose }: { batch: StockBatch; onClose: (saved: b
   );
 }
 
-function HistoryDrawer({ row, onClose }: { row: StockRow; onClose: () => void }) {
+function SupplierReturnModal({ batch, onClose }: { batch: StockBatch; onClose: (saved: boolean) => void }) {
   const { t } = useTranslation();
-  const [moves, setMoves] = useState<StockMovement[] | null>(null);
-  useEffect(() => {
-    api.get<StockMovement[]>('/stock/movements/', { params: { medicine: row.medicine } }).then(({ data }) => setMoves(data)).catch(() => setMoves([]));
-  }, [row.medicine]);
+  const { message } = App.useApp();
+  const [form] = Form.useForm();
+  const [saving, setSaving] = useState(false);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  useEffect(() => { api.get<Supplier[]>('/suppliers/').then(({ data }) => setSuppliers(data.filter((s) => s.is_active))).catch(() => undefined); }, []);
+
+  const save = async () => {
+    const values = await form.validateFields();
+    setSaving(true);
+    try {
+      await api.post('/purchase-returns/', {
+        supplier: values.supplier ?? null, reference: values.reference ?? '', reason: values.reason,
+        items: [{ batch: batch.id, quantity: values.quantity }],
+      });
+      message.success(t('pharmacy.supplierReturnDone'));
+      onClose(true);
+    } catch (err) {
+      message.error(errorMessage(err, t('common.saveFailed')));
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
-    <Drawer open width={560} title={t('pharmacy.historyTitle', { name: row.name })} onClose={onClose}>
-      {!moves ? <Spin /> : (
-        <Table<StockMovement>
-          rowKey="id"
-          size="small"
-          pagination={false}
-          dataSource={moves}
-          columns={[
-            { title: t('pharmacy.when'), dataIndex: 'created_at', render: (d: string) => dayjs(d).format('DD-MM-YY HH:mm') },
-            { title: t('pharmacy.batch'), dataIndex: 'batch_no', render: (b: string) => <span className="mono">{b}</span> },
-            {
-              title: t('pharmacy.change'), key: 'q', align: 'right' as const,
-              render: (_: unknown, m: StockMovement) => (
-                <b className={`num ${Number(m.quantity) < 0 ? 'text-out' : 'text-in'}`}>{Number(m.quantity) > 0 ? '+' : ''}{Number(m.quantity)}</b>
-              ),
-            },
-            { title: t('pharmacy.balance'), dataIndex: 'balance_after', align: 'right' as const, render: (v: string) => <span className="num">{Number(v)}</span> },
-            {
-              title: t('pharmacy.reason'), key: 'r',
-              render: (_: unknown, m: StockMovement) => (
-                <div style={{ lineHeight: 1.35 }}>
-                  {t(`pharmacy.kinds.${m.kind}`)}
-                  <div className="cell-sub">{[m.reason, m.by].filter(Boolean).join(' · ')}</div>
-                </div>
-              ),
-            },
-          ]}
-        />
-      )}
-    </Drawer>
+    <Modal open width={500} title={t('pharmacy.returnToSupplierTitle', { name: batch.medicine_name, batch: batch.batch_no })}
+      onCancel={() => onClose(false)} onOk={save} okText={t('common.save')} cancelText={t('common.cancel')} confirmLoading={saving}>
+      <Form form={form} layout="vertical" requiredMark={false}>
+        <Form.Item name="supplier" label={t('pharmacy.supplier')}>
+          <Select allowClear showSearch optionFilterProp="label" options={suppliers.map((s) => ({ value: s.id, label: s.name }))} />
+        </Form.Item>
+        <Space size={12} align="start">
+          <Form.Item name="quantity" label={t('pharmacy.qty')} rules={[{ required: true, message: t('common.required') }]}
+            extra={t('pharmacy.availableN', { n: qty(batch.quantity) })}>
+            <InputNumber min={0.001} max={Number(batch.quantity)} style={{ width: 120 }} />
+          </Form.Item>
+          <Form.Item name="reference" label={t('pharmacy.debitNoteNo')}><Input maxLength={60} style={{ width: 200 }} /></Form.Item>
+        </Space>
+        <Form.Item name="reason" label={t('pharmacy.reason')} rules={[{ required: true, message: t('common.required') }]}>
+          <Input maxLength={200} placeholder={t('pharmacy.supplierReturnPlaceholder')} />
+        </Form.Item>
+      </Form>
+    </Modal>
+  );
+}
+
+function LocationModal({ row, racks, onClose }: { row: StockRow; racks: Rack[]; onClose: (saved: boolean) => void }) {
+  const { t } = useTranslation();
+  const { message } = App.useApp();
+  const [form] = Form.useForm();
+  const [saving, setSaving] = useState(false);
+  const rackId: string | undefined = Form.useWatch('rack', form);
+  const rack = racks.find((r) => r.id === rackId);
+  useEffect(() => { form.setFieldsValue({ rack: row.rack ?? undefined, shelf: row.shelf || undefined, bin: row.bin }); }, [form, row]);
+
+  const save = async () => {
+    const values = await form.validateFields();
+    setSaving(true);
+    try {
+      await api.post('/stock/location/', { medicine: row.medicine, rack: values.rack ?? null, shelf: values.shelf ?? '', bin: values.bin ?? '' });
+      message.success(t('common.saved'));
+      onClose(true);
+    } catch (err) {
+      message.error(errorMessage(err, t('common.saveFailed')));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Modal open width={460} title={t('pharmacy.locationTitle', { name: row.name })} onCancel={() => onClose(false)} onOk={save}
+      okText={t('common.save')} cancelText={t('common.cancel')} confirmLoading={saving}>
+      {!racks.length && <div className="form-help">{t('pharmacy.noRacksYet')}</div>}
+      <Form form={form} layout="vertical" requiredMark={false}>
+        <Space size={12} align="start" wrap>
+          <Form.Item name="rack" label={t('pharmacy.rack')}>
+            <Select allowClear style={{ width: 160 }} options={racks.map((r) => ({ value: r.id, label: `${r.code}${r.name ? ` · ${r.name}` : ''}` }))} />
+          </Form.Item>
+          <Form.Item name="shelf" label={t('pharmacy.shelf')}>
+            <Select allowClear style={{ width: 100 }} disabled={!rack}
+              options={Array.from({ length: rack?.shelves ?? 0 }, (_, i) => ({ value: String(i + 1), label: String(i + 1) }))} />
+          </Form.Item>
+          <Form.Item name="bin" label={t('pharmacy.bin')}><Input maxLength={20} style={{ width: 120 }} placeholder="Box 12" /></Form.Item>
+        </Space>
+      </Form>
+    </Modal>
   );
 }

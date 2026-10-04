@@ -40,6 +40,8 @@ export interface Branch {
   phone: string;
   email: string;
   gstin: string;
+  drug_licence_no: string;
+  upi_vpa: string;
   is_active: boolean;
 }
 
@@ -540,8 +542,15 @@ export interface Medicine {
   name_gu: string;
   name_hi: string;
   synonyms: string;
+  generic_name: string;
+  category: MasterRef | null;
   dosage_form: MasterRef | null;
   composition: string;
+  pack_type: MasterRef | null;
+  units_per_pack: string | null;
+  allow_loose: boolean;
+  selling_price: string | null;
+  barcode: string;
   reference: string;
   manufacturer: string;
   classical_equivalent: string | null;
@@ -640,13 +649,27 @@ export interface PrescriptionTemplate {
 }
 
 // --- Pharmacy ---
+export interface Rack {
+  id: string;
+  code: string;
+  name: string;
+  shelves: number;
+  sort_order: number;
+  is_active: boolean;
+  product_count: number;
+}
+
 export interface Supplier {
   id: string;
   name: string;
   contact_person: string;
   phone: string;
+  email: string;
   gstin: string;
+  drug_licence_no: string;
   address: string;
+  state: string;
+  payment_terms_days: number | null;
   is_active: boolean;
 }
 
@@ -655,9 +678,15 @@ export interface StockBatch {
   medicine: string;
   medicine_name: string;
   batch_no: string;
+  mfg_date: string | null;
   expiry_date: string | null;
   mrp: string;
+  selling_price: string | null;
+  sale_price: string;
   purchase_rate: string | null;
+  gst_rate: string;
+  barcode: string;
+  supplier_name: string;
   quantity: string;
 }
 
@@ -665,26 +694,85 @@ export interface StockRow {
   medicine: string;
   name: string;
   kind: MedicineKind;
+  generic_name: string;
+  manufacturer: string;
+  category: string;
   pack_size: string;
+  barcode: string;
   available: string;
   usable: string;
+  near_expiry_quantity: string;
   nearest_expiry: string | null;
   reorder_level: string | null;
+  location: string;
+  rack: string | null;
+  shelf: string;
+  bin: string;
   low: boolean;
+  out: boolean;
   expiring: boolean;
   expired: boolean;
 }
 
+export type MovementKind = 'opening' | 'purchase' | 'free' | 'dispense' | 'sale_return' | 'purchase_return'
+  | 'damaged' | 'expired' | 'adjust' | 'verification';
+
 export interface StockMovement {
   id: string;
+  medicine: string;
+  medicine_name: string;
   batch_no: string;
-  kind: 'purchase' | 'dispense' | 'adjust';
+  kind: MovementKind;
   quantity: string;
   balance_after: string;
   reason: string;
   reference: string;
+  reference_label: string;
   by: string;
   created_at: string;
+}
+
+export interface Ledger {
+  opening: string;
+  closing: string;
+  by_kind: Partial<Record<MovementKind, string>>;
+  lines: StockMovement[];
+}
+
+export interface StockAlerts {
+  low: number;
+  out: number;
+  expiring: number;
+  expired: number;
+}
+
+export interface ScanResult {
+  medicine: string;
+  name: string;
+  pack_size: string;
+  location: string;
+  scanned_batch: string | null;
+  batches: StockBatch[];
+}
+
+export interface PurchaseItemRecord {
+  id: string;
+  medicine: string;
+  medicine_name: string;
+  batch: string;
+  batch_no: string;
+  mfg_date: string | null;
+  expiry_date: string | null;
+  quantity: string;
+  free_quantity: string;
+  purchase_rate: string | null;
+  discount_percent: string;
+  gst_rate: string;
+  mrp: string;
+  selling_price: string | null;
+  taxable_amount: string;
+  gst_amount: string;
+  amount: string;
 }
 
 export interface PurchaseRecord {
@@ -693,10 +781,28 @@ export interface PurchaseRecord {
   supplier_name: string;
   invoice_no: string;
   invoice_date: string;
+  is_opening: boolean;
+  taxable_amount: string;
+  discount_amount: string;
+  gst_amount: string;
+  other_charges: string;
+  round_off: string;
   total_amount: string;
   notes: string;
-  items: { id: string; medicine: string; medicine_name: string; batch_no: string; expiry_date: string | null;
-    quantity: string; purchase_rate: string | null; mrp: string; amount: string }[];
+  items: PurchaseItemRecord[];
+  created_by_name: string;
+  created_at: string;
+}
+
+export interface PurchaseReturnRecord {
+  id: string;
+  supplier: string | null;
+  supplier_name: string;
+  return_date: string;
+  reference: string;
+  reason: string;
+  total_amount: string;
+  items: { id: string; medicine_name: string; batch_no: string; quantity: string; rate: string; amount: string }[];
   created_by_name: string;
   created_at: string;
 }
@@ -719,6 +825,11 @@ export interface DispenseLine {
   medicine_name: string;
   dosage_form: string;
   pack_size: string;
+  pack_type: string;
+  allow_loose: boolean;
+  units_per_pack: string | null;
+  unit_label: string;
+  location: string;
   dose: string;
   dose_unit: string;
   frequency: string;
@@ -737,5 +848,148 @@ export interface DispenseDetail {
   doctor_name: string;
   notes: string;
   status: DispenseStatus;
+  allergies: string[];
+  sales: { id: string; invoice: string | null; number: string; total: string }[];
   lines: DispenseLine[];
+}
+
+export interface SaleItem {
+  id: string;
+  medicine_name: string;
+  batch_no: string;
+  quantity: string;
+  loose_units: string | null;
+  returned_quantity: string;
+  amount: string;
+}
+
+export interface SaleRow {
+  id: string;
+  patient_detail: AppointmentPatient;
+  created_at: string;
+  total_amount: string;
+  by: string;
+  invoice: string | null;
+  number: string;
+  invoice_status: InvoiceStatus | '';
+  items?: SaleItem[];
+}
+
+export interface StockCheckItem {
+  id: string;
+  batch: string;
+  medicine_name: string;
+  batch_no: string;
+  expiry_date: string | null;
+  system_quantity: string;
+  counted_quantity: string | null;
+  difference: string | null;
+  location: string;
+}
+
+export interface StockCheck {
+  id: string;
+  title: string;
+  rack: string | null;
+  rack_code: string;
+  status: 'open' | 'completed';
+  notes: string;
+  completed_at: string | null;
+  created_at: string;
+  created_by_name: string;
+  item_count: number;
+  counted_count: number;
+  mismatch_count: number;
+  items?: StockCheckItem[];
+}
+
+// --- Billing ---
+export type InvoiceStatus = 'unpaid' | 'partly_paid' | 'paid' | 'cancelled';
+export type PaymentMode = 'cash' | 'upi' | 'card';
+
+export interface InvoiceLine {
+  id: string;
+  kind: string;
+  description: string;
+  batch_no: string;
+  expiry_date: string | null;
+  hsn_code: string;
+  quantity: string;
+  unit_label: string;
+  unit_price: string;
+  discount_percent: string;
+  gst_rate: string;
+  taxable_amount: string;
+  cgst_amount: string;
+  sgst_amount: string;
+  total_amount: string;
+  credited_quantity: string;
+}
+
+export interface CreditNoteRecord {
+  id: string;
+  number: string;
+  note_date: string;
+  invoice: string;
+  invoice_number: string;
+  customer_name: string;
+  reason: string;
+  total_amount: string;
+  refund_mode: PaymentMode | 'none';
+  refund_amount: string;
+  created_at: string;
+}
+
+export interface InvoicePayment {
+  id: string;
+  mode: PaymentMode;
+  amount: string;
+  reference: string;
+  paid_at: string;
+  received_by: string;
+}
+
+export interface InvoiceRecord {
+  id: string;
+  number: string;
+  series: string;
+  invoice_date: string;
+  customer_name: string;
+  patient_detail: AppointmentPatient | null;
+  total_amount: string;
+  paid_amount: string;
+  credited_amount: string;
+  refunded_amount: string;
+  balance: string;
+  status: InvoiceStatus;
+  print_count: number;
+  created_at: string;
+  // Only in the detail view
+  gross_amount?: string;
+  discount_amount?: string;
+  taxable_amount?: string;
+  cgst_amount?: string;
+  sgst_amount?: string;
+  round_off?: string;
+  cancel_reason?: string;
+  lines?: InvoiceLine[];
+  payments?: InvoicePayment[];
+  credit_notes?: CreditNoteRecord[];
+  created_by_name?: string;
+}
+
+export interface DaySummary {
+  date: string;
+  invoice_count: number;
+  billed: string;
+  taxable: string;
+  cgst: string;
+  sgst: string;
+  discount: string;
+  received: Record<PaymentMode, string>;
+  refunds: Record<PaymentMode, string>;
+  credit_notes: number;
+  credited: string;
+  cash_in_hand: string;
+  still_due: string;
 }

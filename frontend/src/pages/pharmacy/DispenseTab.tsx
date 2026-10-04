@@ -1,26 +1,21 @@
-// Today's final prescriptions of this branch: give the medicines and reduce stock.
-import { LeftOutlined, ReloadOutlined, RightOutlined } from '@ant-design/icons';
-import { App, Button, Checkbox, DatePicker, InputNumber, Modal, Segmented, Select, Space, Spin, Table, Tag, Typography } from 'antd';
+// Today's final prescriptions of this branch -> give medicines, make the bill, take payment, print.
+import { CheckCircleFilled, EnvironmentOutlined, LeftOutlined, ReloadOutlined, RightOutlined } from '@ant-design/icons';
+import {
+  Alert, App, Button, Checkbox, DatePicker, Input, InputNumber, Modal, Result, Segmented, Select, Space, Spin, Table,
+  Tag, Typography,
+} from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from '../../api/client';
-import type { DispenseDetail, DispenseLine, DispenseQueueRow, DispenseStatus } from '../../api/types';
+import type { DispenseDetail, DispenseLine, DispenseQueueRow, DispenseStatus, PaymentMode, ScanResult } from '../../api/types';
 import { useAuth } from '../../auth/AuthContext';
 import { PatientCell } from '../appointments/shared';
 import { money } from '../medicines/shared';
+import { UpiPayment } from './BillsTab';
+import { DispenseStatusTag, PrintButton, ScanInput, expiryText, qty } from './common';
 
 const REFRESH_SECONDS = 30;
-const STATUS_COLORS: Record<DispenseStatus, string> = { pending: 'gold', partly: 'blue', done: 'green' };
-
-export function DispenseStatusTag({ status }: { status: DispenseStatus }) {
-  const { t } = useTranslation();
-  return <Tag color={STATUS_COLORS[status]} className="tag-tight">{t(`pharmacy.status.${status}`)}</Tag>;
-}
-
-export function expiryText(date: string | null) {
-  return date ? dayjs(date).format('MM-YYYY') : '—';
-}
 
 export function DispenseTab() {
   const { t } = useTranslation();
@@ -91,36 +86,44 @@ export function DispenseTab() {
           { title: t('common.status'), dataIndex: 'status', width: 130, render: (s: DispenseStatus) => <DispenseStatusTag status={s} /> },
           {
             title: '', key: 'action', width: 120, align: 'right' as const,
-            render: (_: unknown, r: DispenseQueueRow) => (
-              <Button size="small" type={r.status === 'done' || !can('pharmacy.dispense') ? 'default' : 'primary'} onClick={() => setOpen(r.id)}>
-                {r.status === 'done' || !can('pharmacy.dispense') ? t('common.view') : t('pharmacy.dispense')}
-              </Button>
-            ),
+            render: (_: unknown, r: DispenseQueueRow) => {
+              const giving = r.status !== 'done' && can('pharmacy.dispense');
+              return (
+                <Button size="small" type={giving ? 'primary' : 'default'} onClick={() => setOpen(r.id)}>
+                  {giving ? t('pharmacy.dispense') : t('common.view')}
+                </Button>
+              );
+            },
           },
         ]}
       />
-      {open && <DispenseModal prescriptionId={open} onClose={(done) => { setOpen(null); if (done) load(); }} />}
+      {open && <SellModal prescriptionId={open} onClose={(done) => { setOpen(null); if (done) load(); }} />}
     </>
   );
 }
 
-type Choice = { give: boolean; batch?: string; quantity: number };
+type Choice = { give: boolean; batch?: string; quantity: number; loose: boolean; units: number; discount: number };
+type Done = { invoice: string; number: string; total_amount: string; invoice_status: string };
 
-function DispenseModal({ prescriptionId, onClose }: { prescriptionId: string; onClose: (done: boolean) => void }) {
+function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClose: (done: boolean) => void }) {
   const { t } = useTranslation();
   const { message } = App.useApp();
   const { can } = useAuth();
   const [detail, setDetail] = useState<DispenseDetail | null>(null);
   const [choices, setChoices] = useState<Record<string, Choice>>({});
+  const [payMode, setPayMode] = useState<PaymentMode | 'later'>('cash');
+  const [payAmount, setPayAmount] = useState<number | null>(null);
+  const [payRef, setPayRef] = useState('');
   const [saving, setSaving] = useState(false);
-  const canDispense = can('pharmacy.dispense');
+  const [done, setDone] = useState<Done | null>(null);
+  const canSell = can('pharmacy.dispense');
 
   useEffect(() => {
     api.get<DispenseDetail>(`/dispensing/${prescriptionId}/`).then(({ data }) => {
       setDetail(data);
-      // Suggest: earliest-expiry batch, 1 pack, for lines not given yet
+      // Suggest: earliest-expiry batch (FEFO), 1 pack, for lines not given yet
       setChoices(Object.fromEntries(data.lines.map((l) => [l.id, {
-        give: !!l.batches.length && !l.given, batch: l.batches[0]?.id, quantity: 1,
+        give: !!l.batches.length && !l.given, batch: l.batches[0]?.id, quantity: 1, loose: false, units: 0, discount: 0,
       }])));
     }).catch((err) => { message.error(errorMessage(err, t('common.loadFailed'))); onClose(false); });
   // Load once per prescription (the list behind refreshes every 30 s; that must not reset the choices)
@@ -129,21 +132,58 @@ function DispenseModal({ prescriptionId, onClose }: { prescriptionId: string; on
 
   const set = (id: string, patch: Partial<Choice>) => setChoices((c) => ({ ...c, [id]: { ...c[id]!, ...patch } }));
   const batchOf = (l: DispenseLine) => l.batches.find((b) => b.id === choices[l.id]?.batch);
-  const total = detail?.lines.reduce((sum, l) => {
+  const lineAmount = (l: DispenseLine) => {
     const c = choices[l.id];
     const b = batchOf(l);
-    return c?.give && b ? sum + Number(b.mrp) * (c.quantity || 0) : sum;
-  }, 0) ?? 0;
+    if (!c?.give || !b) return 0;
+    const price = Number(b.sale_price);
+    const gross = c.loose && l.units_per_pack
+      ? (Math.round((price / Number(l.units_per_pack)) * 100) / 100) * (c.units || 0)
+      : price * (c.quantity || 0);
+    return Math.round(gross * (100 - (c.discount || 0))) / 100;
+  };
   const selected = detail?.lines.filter((l) => choices[l.id]?.give && choices[l.id]?.batch) ?? [];
+  const total = Math.round(selected.reduce((s, l) => s + lineAmount(l), 0));
+  const allDiscount = (value: number) =>
+    setChoices((c) => Object.fromEntries(Object.entries(c).map(([k, v]) => [k, { ...v, discount: value }])));
+
+  // Barcode: pick the matching line and batch, or add one more pack
+  const onScan = async (code: string) => {
+    if (!detail) return;
+    try {
+      const { data } = await api.get<ScanResult>('/stock/scan/', { params: { code } });
+      const line = detail.lines.find((l) => l.medicine === data.medicine);
+      if (!line) {
+        message.warning(t('pharmacy.scanNotInRx', { name: data.name }));
+        return;
+      }
+      const batch = data.scanned_batch && line.batches.some((b) => b.id === data.scanned_batch) ? data.scanned_batch : line.batches[0]?.id;
+      if (!batch) {
+        message.warning(t('pharmacy.outOfStock'));
+        return;
+      }
+      const c = choices[line.id]!;
+      set(line.id, { give: true, batch, quantity: c.give && c.batch === batch && !c.loose ? c.quantity + 1 : c.quantity || 1 });
+      message.success(t('pharmacy.scanned', { name: data.name }));
+    } catch (err) {
+      message.error(errorMessage(err, t('common.loadFailed')));
+    }
+  };
 
   const save = async () => {
     setSaving(true);
     try {
-      const { data } = await api.post<{ total_amount: string }>(`/dispensing/${prescriptionId}/dispense/`, {
-        items: selected.map((l) => ({ prescription_item: l.id, batch: choices[l.id]!.batch, quantity: choices[l.id]!.quantity })),
+      const { data } = await api.post<Done>(`/dispensing/${prescriptionId}/sell/`, {
+        items: selected.map((l) => {
+          const c = choices[l.id]!;
+          return {
+            prescription_item: l.id, batch: c.batch, discount_percent: c.discount || 0,
+            ...(c.loose ? { loose_units: c.units } : { quantity: c.quantity }),
+          };
+        }),
+        payment: payMode === 'later' ? null : { mode: payMode, amount: payAmount ?? total, reference: payRef },
       });
-      message.success(t('pharmacy.dispensedMsg', { amount: money(data.total_amount) }));
-      onClose(true);
+      setDone(data);
     } catch (err) {
       message.error(errorMessage(err, t('common.saveFailed')));
     } finally {
@@ -151,42 +191,83 @@ function DispenseModal({ prescriptionId, onClose }: { prescriptionId: string; on
     }
   };
 
+  if (done) {
+    return (
+      <Modal open width={520} title={t('pharmacy.dispense')} onCancel={() => onClose(true)}
+        footer={<Button type="primary" onClick={() => onClose(true)}>{t('common.close')}</Button>}>
+        <Result className="compact-result" icon={<CheckCircleFilled style={{ color: 'var(--clinic-primary)' }} />}
+          title={t('pharmacy.billMade', { number: done.number })}
+          subTitle={`${money(done.total_amount)} · ${t(`billing.status.${done.invoice_status}`)}`}
+          extra={<PrintButton id={done.invoice} size="middle" type="primary" />} />
+        {done.invoice_status !== 'paid' && <UpiPayment invoiceId={done.invoice} />}
+      </Modal>
+    );
+  }
+
   const rxText = (l: DispenseLine) => [
     `${l.dose} ${l.dose_unit}`.trim(), l.frequency, l.timing, l.anupana,
     l.duration ? `${l.duration} ${t(`consult.units.${l.duration_unit}`)}` : '',
   ].filter(Boolean).join(' · ');
 
   return (
-    <Modal open width={940} keyboard={false} maskClosable={false} onCancel={() => onClose(false)}
+    <Modal open width={1060} keyboard={false} maskClosable={false} onCancel={() => onClose(false)}
       title={detail ? t('pharmacy.dispenseTitle', { name: detail.patient_detail.full_name }) : t('pharmacy.dispense')}
-      footer={(
-        <div className="modal-footer-split">
-          <span className="total-text">{t('pharmacy.total')}: <b className="num">{money(total)}</b></span>
-          <Space>
-            <Button onClick={() => onClose(false)}>{t('common.close')}</Button>
-            {canDispense && (
-              <Button type="primary" loading={saving} disabled={!selected.length} onClick={save}>
-                {t('pharmacy.dispenseButton', { count: selected.length })}
-              </Button>
+      footer={canSell ? (
+        <div className="sell-footer">
+          <div className="sell-pay">
+            <Segmented size="small" value={payMode} onChange={(v) => setPayMode(v as typeof payMode)}
+              options={(['cash', 'upi', 'card', 'later'] as const).map((m) => ({ value: m, label: t(`billing.modes.${m}`) }))} />
+            {payMode !== 'later' && (
+              <>
+                <InputNumber size="small" min={0} max={total} prefix="₹" value={payAmount ?? total} style={{ width: 120 }}
+                  onChange={(v) => setPayAmount(v)} />
+                {payMode !== 'cash' && (
+                  <Input size="small" placeholder={t('billing.reference')} value={payRef} maxLength={100} style={{ width: 160 }}
+                    onChange={(e) => setPayRef(e.target.value)} />
+                )}
+              </>
             )}
+          </div>
+          <Space>
+            <span className="total-text">{t('pharmacy.total')}: <b className="num">{money(total)}</b></span>
+            <Button onClick={() => onClose(false)}>{t('common.cancel')}</Button>
+            <Button type="primary" loading={saving} disabled={!selected.length} onClick={save}>
+              {t('pharmacy.giveAndBill', { count: selected.length })}
+            </Button>
           </Space>
         </div>
-      )}>
+      ) : <Button onClick={() => onClose(false)}>{t('common.close')}</Button>}>
       {!detail ? <Spin /> : (
         <>
-          <div className="cell-sub" style={{ marginBottom: 12 }}>
-            {detail.patient_detail.uhid} · {t('pharmacy.byDoctor', { name: detail.doctor_name })}
+          <div className="section-toolbar">
+            <span className="cell-sub">{detail.patient_detail.uhid} · {t('pharmacy.byDoctor', { name: detail.doctor_name })}</span>
+            {canSell && (
+              <Space size={8}>
+                <span className="cell-sub">{t('pharmacy.discountAll')}</span>
+                <InputNumber size="small" min={0} max={100} suffix="%" style={{ width: 90 }} onChange={(v) => allDiscount(Number(v ?? 0))} />
+                <ScanInput onScan={onScan} autoFocus />
+              </Space>
+            )}
           </div>
+          {detail.allergies.length > 0 && (
+            <Alert type="error" showIcon style={{ marginBottom: 12 }} message={<><b>{t('patients.allergyAlert')}:</b> {detail.allergies.join(', ')}</>} />
+          )}
+          {detail.sales.length > 0 && (
+            <div className="cell-sub" style={{ marginBottom: 8 }}>
+              {t('pharmacy.earlierBills')}: {detail.sales.map((s) => s.number).filter(Boolean).join(', ')}
+            </div>
+          )}
           <Table<DispenseLine>
             rowKey="id"
             size="small"
             pagination={false}
             dataSource={detail.lines}
+            scroll={{ x: 980 }}
             columns={[
               {
                 title: '', key: 'give', width: 36,
                 render: (_: unknown, l: DispenseLine) => (
-                  <Checkbox checked={!!choices[l.id]?.give} disabled={!l.batches.length || !canDispense}
+                  <Checkbox checked={!!choices[l.id]?.give} disabled={!l.batches.length || !canSell}
                     onChange={(e) => set(l.id, { give: e.target.checked })} aria-label={t('pharmacy.give')} />
                 ),
               },
@@ -195,41 +276,65 @@ function DispenseModal({ prescriptionId, onClose }: { prescriptionId: string; on
                 render: (_: unknown, l: DispenseLine) => (
                   <div style={{ lineHeight: 1.35 }}>
                     <b>{l.medicine_name}</b> <span className="cell-sub">{l.pack_size}</span>
+                    {l.location && <Tag icon={<EnvironmentOutlined />} color="geekblue" className="tag-tight">{l.location}</Tag>}
                     <div className="cell-sub">{rxText(l)}</div>
                     {l.instructions && <div className="cell-sub">{l.instructions}</div>}
-                    {l.given && <Tag color="green" className="tag-tight" style={{ marginInlineStart: 0 }}>{t('pharmacy.alreadyGiven', { n: Number(l.given) })}</Tag>}
+                    {l.given && <Tag color="green" className="tag-tight" style={{ marginInlineStart: 0 }}>{t('pharmacy.alreadyGiven', { n: qty(l.given) })}</Tag>}
                   </div>
                 ),
               },
               {
-                title: t('pharmacy.batch'), key: 'batch', width: 230,
+                title: t('pharmacy.batch'), key: 'batch', width: 250,
                 render: (_: unknown, l: DispenseLine) => {
                   if (!l.medicine) return <Tag className="tag-tight" style={{ marginInlineStart: 0 }}>{t('pharmacy.notFromStock')}</Tag>;
                   if (!l.batches.length) return <Tag color="red" className="tag-tight" style={{ marginInlineStart: 0 }}>{t('pharmacy.outOfStock')}</Tag>;
                   return (
-                    <Select size="small" style={{ width: '100%' }} value={choices[l.id]?.batch} disabled={!canDispense}
-                      onChange={(v) => set(l.id, { batch: v })}
+                    <Select size="small" style={{ width: '100%' }} value={choices[l.id]?.batch} disabled={!canSell}
+                      onChange={(v) => set(l.id, { batch: v })} popupMatchSelectWidth={false}
                       options={l.batches.map((b) => ({
                         value: b.id,
-                        label: `${b.batch_no} · ${t('pharmacy.exp')} ${expiryText(b.expiry_date)} · ${Number(b.quantity)} ${t('pharmacy.left')}`,
+                        label: `${b.batch_no} · ${t('pharmacy.exp')} ${expiryText(b.expiry_date)} · ${qty(b.quantity)} ${t('pharmacy.left')} · ${money(b.sale_price)}`,
                       }))} />
                   );
                 },
               },
               {
-                title: t('pharmacy.qty'), key: 'qty', width: 90,
+                title: t('pharmacy.qty'), key: 'qty', width: 190,
+                render: (_: unknown, l: DispenseLine) => {
+                  const c = choices[l.id];
+                  if (!l.batches.length || !c) return null;
+                  const disabled = !canSell || !c.give;
+                  return (
+                    <Space size={4}>
+                      {l.allow_loose && (
+                        <Segmented size="small" value={c.loose ? 'loose' : 'pack'} disabled={disabled}
+                          onChange={(v) => set(l.id, { loose: v === 'loose' })}
+                          options={[{ value: 'pack', label: t('pharmacy.packs') }, { value: 'loose', label: l.unit_label || t('pharmacy.units') }]} />
+                      )}
+                      {c.loose ? (
+                        <InputNumber size="small" min={1} style={{ width: 70 }} value={c.units || undefined} disabled={disabled}
+                          onChange={(v) => set(l.id, { units: Number(v ?? 0) })} />
+                      ) : (
+                        <InputNumber size="small" min={0.5} step={1} max={Number(batchOf(l)?.quantity ?? 0) || undefined}
+                          style={{ width: 70 }} value={c.quantity} disabled={disabled}
+                          onChange={(v) => set(l.id, { quantity: Number(v ?? 0) })} />
+                      )}
+                    </Space>
+                  );
+                },
+              },
+              {
+                title: t('pharmacy.discount'), key: 'disc', width: 90,
                 render: (_: unknown, l: DispenseLine) => l.batches.length ? (
-                  <InputNumber size="small" min={0.01} max={Number(batchOf(l)?.quantity ?? 0) || undefined} style={{ width: 72 }}
-                    value={choices[l.id]?.quantity} disabled={!canDispense || !choices[l.id]?.give}
-                    onChange={(v) => set(l.id, { quantity: Number(v ?? 0) })} />
+                  <InputNumber size="small" min={0} max={100} suffix="%" style={{ width: 76 }} value={choices[l.id]?.discount}
+                    disabled={!canSell || !choices[l.id]?.give} onChange={(v) => set(l.id, { discount: Number(v ?? 0) })} />
                 ) : null,
               },
               {
                 title: t('pharmacy.amount'), key: 'amount', width: 100, align: 'right' as const,
                 render: (_: unknown, l: DispenseLine) => {
-                  const b = batchOf(l);
-                  const c = choices[l.id];
-                  return b && c?.give ? <span className="num">{money(Number(b.mrp) * (c.quantity || 0))}</span> : <span className="cell-sub">—</span>;
+                  const a = lineAmount(l);
+                  return a ? <span className="num">{money(a)}</span> : <span className="cell-sub">—</span>;
                 },
               },
             ]}

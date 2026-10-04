@@ -1,5 +1,5 @@
 // Add or edit a medicine. Every saved change gets a new version (see "History").
-import { App, Checkbox, Col, Form, Input, InputNumber, Modal, Row, Segmented, Select } from 'antd';
+import { App, Checkbox, Col, Form, Input, InputNumber, Modal, Row, Segmented, Select, Switch } from 'antd';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from '../../api/client';
@@ -7,7 +7,7 @@ import type { MasterRef, Medicine, MedicineKind, Page } from '../../api/types';
 import { MasterSelect } from '../../components/MasterSelect';
 import { FLAGS } from './shared';
 
-const MASTER_FIELDS = ['dosage_form', 'dose_unit', 'default_timing', 'default_anupana'] as const;
+const MASTER_FIELDS = ['dosage_form', 'dose_unit', 'default_timing', 'default_anupana', 'category', 'pack_type'] as const;
 
 export function MedicineFormModal({ medicine, onClose }: { medicine: Medicine | null; onClose: (saved: boolean) => void }) {
   const { t } = useTranslation();
@@ -22,6 +22,8 @@ export function MedicineFormModal({ medicine, onClose }: { medicine: Medicine | 
       const values: Record<string, unknown> = { ...medicine };
       MASTER_FIELDS.forEach((f) => (values[f] = (medicine[f] as MasterRef | null)?.id));
       values.mrp = medicine.mrp === null ? undefined : Number(medicine.mrp);
+      values.selling_price = medicine.selling_price === null ? undefined : Number(medicine.selling_price);
+      values.units_per_pack = medicine.units_per_pack === null ? undefined : Number(medicine.units_per_pack);
       values.gst_rate = Number(medicine.gst_rate);
       form.setFieldsValue(values);
     } else {
@@ -40,7 +42,10 @@ export function MedicineFormModal({ medicine, onClose }: { medicine: Medicine | 
     const values = await form.validateFields();
     setSaving(true);
     try {
-      const payload = { ...values, mrp: values.mrp ?? null, classical_equivalent: values.classical_equivalent ?? null };
+      const payload = {
+        ...values, mrp: values.mrp ?? null, selling_price: values.selling_price ?? null,
+        units_per_pack: values.units_per_pack ?? null, classical_equivalent: values.classical_equivalent ?? null,
+      };
       if (medicine) await api.patch(`/medicines/${medicine.id}/`, payload);
       else await api.post('/medicines/', payload);
       message.success(t('common.saved'));
@@ -77,6 +82,8 @@ export function MedicineFormModal({ medicine, onClose }: { medicine: Medicine | 
           <Col xs={24} md={12}>
             <Form.Item name="dosage_form" label={t('medicines.form')}><MasterSelect category="dosage_form" /></Form.Item>
           </Col>
+          <Col xs={24} md={12}><Form.Item name="generic_name" label={t('medicines.genericName')}><Input maxLength={200} /></Form.Item></Col>
+          <Col xs={24} md={12}><Form.Item name="category" label={t('medicines.category')}><MasterSelect category="product_category" /></Form.Item></Col>
           <Col xs={24} md={12}><Form.Item name="name_gu" label={t('medicines.nameGu')}><Input maxLength={200} /></Form.Item></Col>
           <Col xs={24} md={12}><Form.Item name="name_hi" label={t('medicines.nameHi')}><Input maxLength={200} /></Form.Item></Col>
           <Col span={24}>
@@ -103,8 +110,24 @@ export function MedicineFormModal({ medicine, onClose }: { medicine: Medicine | 
               </Col>
             </>
           )}
-          <Col xs={24} md={12}><Form.Item name="pack_size" label={t('medicines.packSize')}><Input placeholder="100 g, 60 tablets" maxLength={60} /></Form.Item></Col>
           <Col xs={24} md={12}><Form.Item name="ayush_licence_no" label={t('medicines.licence')}><Input maxLength={60} /></Form.Item></Col>
+          <Col xs={24} md={12}><Form.Item name="barcode" label={t('medicines.barcode')} extra={t('medicines.barcodeHelp')}><Input maxLength={64} /></Form.Item></Col>
+        </Row>
+
+        <div className="section-title">{t('medicines.sections.pack')}</div>
+        <Row gutter={12}>
+          <Col xs={12} md={6}><Form.Item name="pack_type" label={t('medicines.packType')}><MasterSelect category="pack_type" /></Form.Item></Col>
+          <Col xs={12} md={6}><Form.Item name="pack_size" label={t('medicines.packSize')}><Input placeholder="100 g, 60 tablets" maxLength={60} /></Form.Item></Col>
+          <Col xs={12} md={6}>
+            <Form.Item name="units_per_pack" label={t('medicines.unitsPerPack')} extra={t('medicines.unitsPerPackHelp')}>
+              <InputNumber min={1} style={{ width: '100%' }} placeholder="60" />
+            </Form.Item>
+          </Col>
+          <Col xs={12} md={6}>
+            <Form.Item name="allow_loose" label={t('medicines.allowLoose')} valuePropName="checked" extra={t('medicines.allowLooseHelp')}>
+              <Switch />
+            </Form.Item>
+          </Col>
         </Row>
 
         <div className="section-title">{t('medicines.sections.dose')}</div>
@@ -118,15 +141,20 @@ export function MedicineFormModal({ medicine, onClose }: { medicine: Medicine | 
 
         <div className="section-title">{t('medicines.sections.price')}</div>
         <Row gutter={12}>
-          <Col xs={12} md={8}>
+          <Col xs={12} md={6}>
             <Form.Item name="mrp" label={t('medicines.mrp')}><InputNumber min={0} precision={2} prefix="₹" style={{ width: '100%' }} /></Form.Item>
           </Col>
-          <Col xs={12} md={8}>
+          <Col xs={12} md={6}>
+            <Form.Item name="selling_price" label={t('medicines.sellingPrice')} extra={t('medicines.sellingPriceHelp')}>
+              <InputNumber min={0} precision={2} prefix="₹" style={{ width: '100%' }} />
+            </Form.Item>
+          </Col>
+          <Col xs={12} md={6}>
             <Form.Item name="gst_rate" label={t('medicines.gst')} extra={t('medicines.gstHelp')} rules={required}>
               <InputNumber min={0} max={40} precision={2} suffix="%" style={{ width: '100%' }} />
             </Form.Item>
           </Col>
-          <Col xs={12} md={8}><Form.Item name="hsn_code" label={t('medicines.hsn')}><Input maxLength={10} /></Form.Item></Col>
+          <Col xs={12} md={6}><Form.Item name="hsn_code" label={t('medicines.hsn')}><Input maxLength={10} /></Form.Item></Col>
         </Row>
 
         <div className="section-title">{t('medicines.sections.safety')}</div>
