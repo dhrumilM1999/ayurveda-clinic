@@ -223,12 +223,12 @@ def _unit_label(medicine, loose_units=None):
 
 
 @transaction.atomic
-def sell(prescription, branch, user, lines: list[dict], *, notes="", payment=None):
+def sell(prescription, branch, user, lines: list[dict], *, notes="", payment=None, make_bill=True):
     """
-    Give medicines for a final prescription and make the bill.
+    Give medicines for a final prescription and make the bill (make_bill=False: only give, no bill).
     lines: [{"prescription_item", "batch_id", "quantity" (packs) or "loose_units", "discount_percent"}]
     payment: {"mode": "cash"|"upi"|"card", "amount", "reference"} or None (pay later)
-    Returns (dispense, invoice).
+    Returns (dispense, invoice or None).
     """
     if prescription.branch_id != branch.id:
         raise ValidationError({"detail": "This prescription belongs to another branch."})
@@ -290,6 +290,8 @@ def sell(prescription, branch, user, lines: list[dict], *, notes="", payment=Non
         total += amount
     record.total_amount = total
     record.save(update_fields=["total_amount"])
+    if not make_bill:
+        return record, None
     invoice = create_invoice(branch, user, series="PH", lines=invoice_lines, patient=prescription.patient,
                              prescription=prescription, dispense=record, notes=notes)
     # Ledger lines show the bill number
