@@ -23,29 +23,22 @@ Double-click **`start.bat`** in the project folder.
 - It creates your settings file `.env` (a copy of `.env.example`).
 - When ready, it opens **http://localhost:5173** in your browser.
 
-### No Docker yet? Use `start-without-docker.bat`
+## 3. Log in (sample users, made-up data)
 
-This uses Python and Node, which are already on this PC, and a simple file database
-(`backend\local.sqlite3`) in place of PostgreSQL. It's fine for trying the app with demo data.
-- Double-click **`start-without-docker.bat`**. The first time, it downloads packages (a few minutes).
-- Two black windows open, "Clinic BACKEND" and "Clinic SCREENS". **Keep them open** while you work.
-- **To stop:** close those two windows.
-- To start over with fresh demo data: stop it, delete `backend\local.sqlite3`, and start again.
-- The Docker way (`start.bat`) remains the proper setup for later (real database, email inbox).
+The software starts with **sample data** for practice: clinic "Ayurveda Clinic", one "Main Branch",
+the staff below and 5 sample patients. All names and phone numbers are made up.
+Change the clinic name and address on the **Settings** screen.
 
-## 3. Log in (demo users, fake data)
+The password for every sample user is **`Ayur@2026`**
 
-The password for every demo user is **`Ayur@Demo2026`**
-
-| Username | Who | Branches | OTP needed? |
-|---|---|---|---|
-| `admin` | Owner / organization admin | All branches | Yes |
-| `doctor1` | Doctor | Ahmedabad + Vadodara | Yes |
-| `doctor2` | Doctor | Vadodara | Yes |
-| `branchadmin` | Branch admin | Vadodara | Yes |
-| `reception1` | Receptionist | Ahmedabad | No |
-| `therapist1` | Therapist | Ahmedabad | No |
-| `pharmacist1` | Pharmacist | Ahmedabad | No |
+| Username | Who | OTP needed? |
+|---|---|---|
+| `admin` | Clinic Owner (all access) | Yes |
+| `doctor1` | Dr. Asha Mehta (Mon-Sat 10-13, Mon-Fri 17-20) | Yes |
+| `doctor2` | Dr. Ravi Patel (Mon-Sat 10-14) | Yes |
+| `reception1` | Nita Shah, receptionist | No |
+| `therapist1` | Kiran Joshi, therapist | No |
+| `pharmacist1` | Meena Desai, pharmacist | No |
 
 **OTP (one-time password):** doctors and admins type a 6-digit code after the password.
 No real SMS is sent yet. You can find the code in two places:
@@ -55,16 +48,17 @@ No real SMS is sent yet. You can find the code in two places:
 ## 4. Things to try (Step 1 check)
 
 1. Log in as `admin` and enter the OTP.
-2. **Switch branch** using the drop-down at the top (Ahmedabad ↔ Vadodara).
+2. (Only if you switched on **Settings -> Use more than one branch** and added a branch:
+   switch branch using the drop-down at the top.)
 3. **Change language** to ગુજરાતી (top right). The screen text changes.
-4. Go to **Rooms** → **Add room** → save. Switch branch: that room is not shown in the other branch.
+4. Go to **Rooms** → **Add room** → save.
 5. Go to **Audit log**. Your login and the new room are listed there.
 6. Log out, then log in as `reception1`. The menu is smaller, because a receptionist has fewer permissions.
 7. Leave the screen untouched for 15 minutes. You are logged out automatically.
 
 ### Step 2 check (patients)
 
-1. Log in as `reception1` → **Patients**: 5 demo patients are listed (mobile numbers masked).
+1. Log in as `reception1` → **Patients**: 5 sample patients are listed (mobile numbers masked).
 2. **Register patient**: type mobile `9811000002`. "Existing patients" warns that this is Sunita Shah.
    Change the number, fill the name, age and gender, tick a condition, add an allergy, then **Register patient**.
 3. The new patient gets an ID like `AY26-000006`. A red allergy box shows at the top.
@@ -72,18 +66,14 @@ No real SMS is sent yet. You can find the code in two places:
 5. **Medical history** tab: the receptionist sees "Only doctors can see…". Log in as `doctor1` to see everything.
 6. Log in as `admin` → open the patient → **Activity** tab: every view and change is listed.
 
-> Already had the app running before Step 2? `start-without-docker.bat` updates the database
-> automatically. To also get the 5 demo patients, run in the VS Code terminal:
-> `backend\.venv\Scripts\python backend\manage.py seed_demo --add-demo-patients`
-
-> **One branch for now:** the software shows only the main branch (Ahmedabad demo). The Vadodara demo
-> branch is still there, hidden. To see it: `admin` -> Settings -> **Use more than one branch**.
+> **One branch for now:** the software works with the Main Branch only. When you open a second branch:
+> `admin` -> Settings -> **Use more than one branch**, then add it on the Branches screen.
 
 ### Step 3 check (appointments and queue)
 
-1. Log in as `reception1` -> **Appointments**. Today has 2 demo walk-ins (tokens #1 and #2).
+1. Log in as `reception1` -> **Appointments**. Today has 2 sample walk-ins (tokens #1 and #2).
 2. **Book appointment**: search `Aarav`, choose the doctor and a date when the doctor sits
-   (Dr. Asha: Monday-Friday 10:00-13:00 in Ahmedabad). Free times are buttons; booked times are crossed out.
+   (Dr. Asha: Monday-Saturday 10:00-13:00, Monday-Friday 17:00-20:00). Free times are buttons; booked times are crossed out.
    Click a time -> **Book**. The message to the patient is shown, with a green **Send on WhatsApp** button
    (it opens WhatsApp with the text ready; nothing is sent until you press Send there).
 3. Try to book the same time for another patient: it is refused (no double booking).
@@ -96,8 +86,8 @@ No real SMS is sent yet. You can find the code in two places:
 9. The SMS text is only "logged", not really sent: run `logs.bat` and look for `SMS (console`.
    Patients without SMS/WhatsApp consent (Consent tab) get no messages.
 
-> To add today's demo appointments again on an existing database, run in the VS Code terminal:
-> `docker compose exec backend python manage.py seed_demo --add-demo-appointments`
+> To add today's sample appointments again, run in the VS Code terminal:
+> `docker compose exec backend python manage.py seed_demo --add-sample-appointments`
 
 > **Where is my data?** In Docker's storage boxes (volumes), not in this folder.
 > See [HOW_IT_WORKS.md](HOW_IT_WORKS.md#where-is-my-data).
@@ -136,8 +126,8 @@ No real SMS is sent yet. You can find the code in two places:
 |---|---|
 | `stop.bat` | Stops the app. **Your data is kept.** |
 | `logs.bat` | Shows live messages and errors (and login OTPs). Press Ctrl+C to stop watching. |
-| `reset-demo-data.bat` | **Deletes all data** and creates fresh demo data. You must type `YES`. Works only while `DEMO_MODE=true` in `.env`. |
+| `reset-demo-data.bat` | **Deletes all data** and creates fresh sample data. You must type `YES`. Works only while `DEMO_MODE=true` in `.env`. |
 
-## 7. Use only fake data
+## 7. Use only made-up data for now
 
 Until the software is finished and secured (Step 11), **do not enter real patients**.

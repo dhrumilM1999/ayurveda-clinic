@@ -95,27 +95,18 @@ TEMPLATES = [
 ]
 
 # --- Database ----------------------------------------------------------------
-# In Docker we use PostgreSQL. If POSTGRES_HOST is not set (for example when running
-# the automated tests directly on Windows), a small local SQLite file is used instead.
-if env("POSTGRES_HOST"):
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": env("POSTGRES_DB", "ayurveda"),
-            "USER": env("POSTGRES_USER", "ayurveda"),
-            "PASSWORD": env("POSTGRES_PASSWORD", ""),
-            "HOST": env("POSTGRES_HOST"),
-            "PORT": env("POSTGRES_PORT", "5432"),
-            "CONN_MAX_AGE": 60,
-        }
+# One database only: PostgreSQL, running in Docker (see docker-compose.yml).
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": env("POSTGRES_DB", "ayurveda"),
+        "USER": env("POSTGRES_USER", "ayurveda"),
+        "PASSWORD": env("POSTGRES_PASSWORD", ""),
+        "HOST": env("POSTGRES_HOST", "db"),
+        "PORT": env("POSTGRES_PORT", "5432"),
+        "CONN_MAX_AGE": 60,
     }
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "local.sqlite3",
-        }
-    }
+}
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "accounts.User"

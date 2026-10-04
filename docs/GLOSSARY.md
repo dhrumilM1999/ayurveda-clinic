@@ -27,7 +27,7 @@
 | **Rate limit / throttle** | Slowing down too many attempts (e.g. password guessing). |
 | **React** | The JavaScript toolkit used to build the screens. |
 | **Role** | A named set of permissions, e.g. Doctor or Receptionist. |
-| **Seed / demo data** | Fake starting data for testing (`seed_demo`). |
+| **Sample data** | Made-up starting data for practice (`seed_demo`, `reset-demo-data.bat`). |
 | **Soft delete** | Marking a record as deleted instead of really removing it. |
 | **TypeScript** | JavaScript with checks that catch mistakes before the app runs. |
 | **UUID** | A long random ID like `3f2a…`, safe to use in web addresses. |

@@ -57,15 +57,15 @@ echo  ===================================================
 echo     READY!  Opening http://localhost:5173
 echo  ===================================================
 echo.
-echo   Demo logins (fake data). Password for all: Ayur@Demo2026
-echo     admin        - owner, all branches (needs OTP)
-echo     doctor1      - doctor, both branches (needs OTP)
-echo     reception1   - receptionist, Ahmedabad
-echo     therapist1   - therapist, Ahmedabad
-echo     pharmacist1  - pharmacist, Ahmedabad
-echo     branchadmin  - branch admin, Vadodara (needs OTP)
+echo   Sample logins (made-up data). Password for all: Ayur@2026
+echo     admin        - clinic owner, all access (needs OTP)
+echo     doctor1      - Dr. Asha Mehta (needs OTP)
+echo     doctor2      - Dr. Ravi Patel (needs OTP)
+echo     reception1   - receptionist
+echo     therapist1   - therapist
+echo     pharmacist1  - pharmacist
 echo.
-echo   The OTP is shown on the login screen (demo mode) and in logs.bat.
+echo   The OTP is shown on the login screen (practice mode) and in logs.bat.
 echo   Other addresses:  API  http://localhost:8000/api/v1/
 echo                     Admin http://localhost:8000/admin/
 echo                     Test email inbox http://localhost:8025

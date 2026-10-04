@@ -1,11 +1,11 @@
 @echo off
-REM Deletes ALL data and creates fresh demo data. Only works when DEMO_MODE=true in .env.
+REM Deletes ALL data and creates fresh sample data. Only works when DEMO_MODE=true in .env.
 REM NEVER use this once real patient data has been entered.
-title Ayurveda Clinic - Reset demo data
+title Ayurveda Clinic - Reset sample data
 cd /d "%~dp0"
 echo.
 echo  ==============================================================
-echo    WARNING: this DELETES ALL DATA and creates fresh demo data.
+echo    WARNING: this DELETES ALL DATA and creates fresh sample data.
 echo    Only for testing. Never use it with real patients.
 echo  ==============================================================
 echo.
@@ -21,6 +21,6 @@ if errorlevel 1 (
   echo  Reset failed. Is the app running - start.bat? Is DEMO_MODE=true in .env?
 ) else (
   echo.
-  echo  Done. Fresh demo data is ready. Log in again at http://localhost:5173
+  echo  Done. Fresh sample data is ready. Log in again at http://localhost:5173
 )
 pause

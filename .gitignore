@@ -6,7 +6,6 @@ __pycache__/
 *.pyc
 .venv/
 venv/
-backend/local.sqlite3
 backend/media/
 backend/private_media/
 backend/staticfiles/

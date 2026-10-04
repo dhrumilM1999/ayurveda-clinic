@@ -11,9 +11,8 @@
 | `README.md` | Short introduction | SAFE TO EDIT |
 | `CHANGELOG.md` | What changed in each step | SAFE TO EDIT |
 | `start.bat` / `stop.bat` / `logs.bat` / `reset-demo-data.bat` | Double-click helpers | SAFE TO EDIT (messages only) |
-| `start-without-docker.bat` | Starts the app without Docker (Python + Node, file database, demo only) | SAFE TO EDIT (messages only) |
 | `.env` | **Your settings and secrets** (created by start.bat). Never share it. | SAFE TO EDIT (carefully) |
-| `.env.example` | Template for `.env` with safe demo values | ASK FIRST |
+| `.env.example` | Template for `.env` with safe practice values | ASK FIRST |
 | `docker-compose.yml` | Describes the 4 containers | ASK FIRST |
 | `.gitattributes`, `.gitignore`, `.htaccess` | Technical housekeeping | ASK FIRST |
 | `docs/` | These guide files | SAFE TO EDIT |
@@ -28,7 +27,7 @@
 | `backend/apps/common/` | Shared building blocks (base model, soft delete, adapters) | ASK FIRST |
 | `backend/apps/organizations/` | Organization, branches, rooms, feature switches | ASK FIRST |
 | `backend/apps/organizations/features_catalog.py` | List of modules that can be switched on/off per branch | **SAFE TO EDIT** |
-| `backend/apps/organizations/management/commands/seed_demo.py` | Demo data (fake names, rooms, timings) | **SAFE TO EDIT** |
+| `backend/apps/organizations/management/commands/seed_demo.py` | Sample data (made-up names, rooms, timings) | **SAFE TO EDIT** |
 | `backend/apps/accounts/` | Staff users, roles, login, OTP, doctor schedules | ASK FIRST |
 | `backend/apps/accounts/permissions_catalog.py` | **All permissions** and the starting permissions of each role | **SAFE TO EDIT** |
 | `backend/apps/audit/` | Audit log | ASK FIRST |

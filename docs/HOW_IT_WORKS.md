@@ -25,8 +25,8 @@ Docker Desktop's own disk on your PC:
 - `stop.bat`, restarting the PC, or updating the code **keeps** the data.
 - Only `reset-demo-data.bat` (after typing `YES`) or deleting the volume in Docker Desktop removes it.
 - To look inside the database yourself, use the technical admin site: http://localhost:8000/admin/ (user `admin`).
-- The no-Docker version (`start-without-docker.bat`) uses a different, separate file: `backend/db.sqlite3`.
-- Proper daily backups come in a later step (Step 11). Until then the data is demo data only.
+- There is only **one** database (PostgreSQL in Docker). Nothing is stored in the project folder.
+- Proper daily backups come in a later step (Step 11). Until then use made-up sample data only.
 
 **To see the database tables yourself** (optional): install the free program **DBeaver**
 (https://dbeaver.io), choose *New connection -> PostgreSQL* and enter:

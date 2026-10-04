@@ -1,12 +1,14 @@
 """
-Creates FAKE demo data: 1 organization, 2 branches, rooms, and one user per role.
+Creates SAMPLE data for practice: 1 clinic, 1 main branch, rooms, one user per role,
+a few sample patients and today's sample appointments. All names and numbers are made up.
 
-    python manage.py seed_demo              # add demo data
-    python manage.py seed_demo --if-empty   # only if the database has no organization yet
+    python manage.py seed_demo              # add the sample data
+    python manage.py seed_demo --if-empty   # only if the database has no clinic yet (runs on every start)
     python manage.py seed_demo --reset      # wipe EVERYTHING and start again (DEMO_MODE only)
-    python manage.py seed_demo --add-demo-appointments   # add today's demo appointments
+    python manage.py seed_demo --add-sample-appointments   # add today's sample appointments again
 
-SAFE TO EDIT: the demo names, rooms and timings below (they are fake data).
+SAFE TO EDIT: the sample names, rooms and timings below (they are made up).
+Change the clinic name and address later on the Settings screen.
 """
 from datetime import time
 
@@ -20,84 +22,72 @@ from apps.accounts.services import create_default_roles
 from apps.organizations.management.commands.ensure_defaults import ensure_defaults_for
 from apps.organizations.models import Branch, Organization, Room, RoomType
 
-DEMO_PASSWORD = "Ayur@Demo2026"
+SAMPLE_PASSWORD = "Ayur@2026"
 
-BRANCHES = [
-    {"code": "AHD", "name": "Ahmedabad - Navrangpura (Demo)", "city": "Ahmedabad", "pincode": "380009"},
-    {"code": "VDR", "name": "Vadodara - Alkapuri (Demo)", "city": "Vadodara", "pincode": "390007"},
-]
+CLINIC = {
+    "name": "Ayurveda Clinic", "short_name": "Ayurveda", "phone": "9800000000",
+    "email": "clinic@example.com", "address": "Main Road, Ahmedabad", "default_language": "en",
+}
+
+BRANCH = {"code": "MAIN", "name": "Main Branch", "city": "Ahmedabad", "pincode": "380009",
+          "state": "Gujarat", "address": "Main Road, Ahmedabad", "phone": "9800000000"}
 
 ROOM_TYPES = ["Consultation", "Panchakarma / Therapy", "Pharmacy", "Waiting area"]
 
-ROOMS = {
-    "AHD": [("Consultation Room 1", "Consultation"), ("Consultation Room 2", "Consultation"),
-            ("Therapy Room A", "Panchakarma / Therapy"), ("Pharmacy Counter", "Pharmacy")],
-    "VDR": [("Consultation Room", "Consultation"), ("Therapy Room", "Panchakarma / Therapy")],
-}
+ROOMS = [("Consultation Room 1", "Consultation"), ("Consultation Room 2", "Consultation"),
+         ("Therapy Room", "Panchakarma / Therapy"), ("Pharmacy Counter", "Pharmacy")]
 
-# username, full name, phone, is_doctor, is_org_admin, {branch code: role code}
+# username, full name, phone, is_doctor, is_org_admin, role code in the main branch
 USERS = [
-    ("admin", "Demo Owner (Admin)", "9800000001", False, True, {}),
-    ("doctor1", "Dr. Asha Mehta (Demo)", "9800000002", True, False, {"AHD": "doctor", "VDR": "doctor"}),
-    ("doctor2", "Dr. Ravi Patel (Demo)", "9800000003", True, False, {"VDR": "doctor"}),
-    ("reception1", "Nita Shah (Demo Reception)", "9800000004", False, False, {"AHD": "receptionist"}),
-    ("therapist1", "Kiran Joshi (Demo Therapist)", "9800000005", False, False, {"AHD": "therapist"}),
-    ("pharmacist1", "Meena Desai (Demo Pharmacist)", "9800000006", False, False, {"AHD": "pharmacist"}),
-    ("branchadmin", "Vadodara Manager (Demo)", "9800000007", False, False, {"VDR": "admin"}),
+    ("admin", "Clinic Owner", "9800000001", False, True, None),
+    ("doctor1", "Dr. Asha Mehta", "9800000002", True, False, "doctor"),
+    ("doctor2", "Dr. Ravi Patel", "9800000003", True, False, "doctor"),
+    ("reception1", "Nita Shah", "9800000004", False, False, "receptionist"),
+    ("therapist1", "Kiran Joshi", "9800000005", False, False, "therapist"),
+    ("pharmacist1", "Meena Desai", "9800000006", False, False, "pharmacist"),
 ]
 
-# FAKE demo patients: first, father/husband, surname, gender, age, mobile, city, branch code,
-# conditions, allergy (or None)
-DEMO_PATIENTS = [
-    ("Ramesh", "Bhikhabhai", "Patel", "male", 54, "9811000001", "Ahmedabad", "AHD", ["diabetes", "hypertension"], ("drug", "Penicillin")),
-    ("Sunita", "Rajesh", "Shah", "female", 42, "9811000002", "Ahmedabad", "AHD", ["thyroid"], None),
-    ("Harsh", "Mahesh", "Desai", "male", 29, "9811000003", "Vadodara", "VDR", ["acidity"], ("food", "Peanuts")),
-    ("Kokila", "Jayantilal", "Mehta", "female", 67, "9811000004", "Vadodara", "VDR", ["arthritis", "hypertension"], None),
-    ("Aarav", "Nikhil", "Joshi", "male", 8, "9811000005", "Ahmedabad", "AHD", ["asthma"], ("environment", "Dust")),
+# Sample patients (made up): first, father/husband, surname, gender, age, mobile, city, conditions, allergy
+SAMPLE_PATIENTS = [
+    ("Ramesh", "Bhikhabhai", "Patel", "male", 54, "9811000001", "Ahmedabad", ["diabetes", "hypertension"], ("drug", "Penicillin")),
+    ("Sunita", "Rajesh", "Shah", "female", 42, "9811000002", "Ahmedabad", ["thyroid"], None),
+    ("Harsh", "Mahesh", "Desai", "male", 29, "9811000003", "Gandhinagar", ["acidity"], ("food", "Peanuts")),
+    ("Kokila", "Jayantilal", "Mehta", "female", 67, "9811000004", "Ahmedabad", ["arthritis", "hypertension"], None),
+    ("Aarav", "Nikhil", "Joshi", "male", 8, "9811000005", "Ahmedabad", ["asthma"], ("environment", "Dust")),
 ]
 
-# doctor username, branch code, weekdays, start, end
+# doctor username, weekdays (0 = Monday ... 5 = Saturday), start, end
 SCHEDULES = [
-    ("doctor1", "AHD", [0, 1, 2, 3, 4], time(10, 0), time(13, 0)),
-    ("doctor1", "VDR", [5], time(10, 0), time(14, 0)),
-    ("doctor2", "VDR", [0, 1, 2, 3, 4, 5], time(16, 0), time(20, 0)),
+    ("doctor1", [0, 1, 2, 3, 4, 5], time(10, 0), time(13, 0)),
+    ("doctor1", [0, 1, 2, 3, 4], time(17, 0), time(20, 0)),
+    ("doctor2", [0, 1, 2, 3, 4, 5], time(10, 0), time(14, 0)),
 ]
 
 
 class Command(BaseCommand):
-    help = "Create fake demo data (organization, branches, rooms, users for every role)."
+    help = "Create sample data (clinic, main branch, rooms, users for every role, sample patients)."
 
     def add_arguments(self, parser):
         parser.add_argument("--reset", action="store_true", help="Delete ALL data first (DEMO_MODE only).")
-        parser.add_argument("--if-empty", action="store_true", help="Do nothing if an organization exists.")
-        parser.add_argument("--add-demo-patients", action="store_true",
-                            help="Only add the demo patients to the existing demo organization.")
-        parser.add_argument("--add-demo-appointments", action="store_true",
-                            help="Add demo appointments and walk-ins for today (Ahmedabad branch).")
+        parser.add_argument("--if-empty", action="store_true", help="Do nothing if a clinic exists.")
+        parser.add_argument("--add-sample-appointments", action="store_true",
+                            help="Add today's sample appointments and walk-ins.")
 
     def handle(self, *args, **options):
         if options["reset"]:
             if not settings.DEMO_MODE:
                 raise CommandError("Refusing to reset: DEMO_MODE is not true in .env.")
-            self.stdout.write(self.style.WARNING("Wiping all data (demo reset)..."))
+            self.stdout.write(self.style.WARNING("Wiping all data..."))
             call_command("flush", interactive=False, verbosity=0)
-        elif options["add_demo_patients"]:
+        elif options["add_sample_appointments"]:
             org = Organization.objects.order_by("created_at").first()
             if org is None:
-                raise CommandError("No organization yet. Run seed_demo first.")
-            ensure_defaults_for(org)
-            self._seed_patients(org)
-            self.stdout.write(self.style.SUCCESS("Demo patients added."))
-            return
-        elif options["add_demo_appointments"]:
-            org = Organization.objects.order_by("created_at").first()
-            if org is None:
-                raise CommandError("No organization yet. Run seed_demo first.")
+                raise CommandError("No clinic yet. Run seed_demo first.")
             self._seed_appointments(org)
-            self.stdout.write(self.style.SUCCESS("Demo appointments added for today."))
+            self.stdout.write(self.style.SUCCESS("Sample appointments added for today."))
             return
         elif options["if_empty"] and Organization.objects.exists():
-            self.stdout.write("Demo data already present - skipping seed_demo.")
+            self.stdout.write("Data already present - skipping sample data.")
             return
 
         with transaction.atomic():
@@ -105,73 +95,55 @@ class Command(BaseCommand):
         self._print_logins()
 
     def _seed(self):
-        org = Organization.objects.create(
-            name="Demo Ayurveda Clinics", short_name="Demo Ayur",
-            phone="9800000000", email="demo-clinic@example.com",
-            address="DEMO ONLY - not a real clinic", default_language="en",
-        )
+        org = Organization.objects.create(**CLINIC)
         roles = create_default_roles(org)
         ensure_defaults_for(org)
-
-        branches = {}
-        for info in BRANCHES:
-            branches[info["code"]] = Branch.objects.create(
-                organization=org, state="Gujarat", address="Demo address", phone="9800000000", **info,
-            )
+        branch = Branch.objects.create(organization=org, **BRANCH)
 
         room_types = {
             name: RoomType.objects.create(organization=org, name=name, sort_order=i)
             for i, name in enumerate(ROOM_TYPES)
         }
-        for code, rooms in ROOMS.items():
-            for name, type_name in rooms:
-                Room.objects.create(
-                    organization=org, branch=branches[code], name=name, room_type=room_types[type_name],
-                )
+        for name, type_name in ROOMS:
+            Room.objects.create(organization=org, branch=branch, name=name, room_type=room_types[type_name])
 
         users = {}
-        for username, full_name, phone, is_doctor, is_org_admin, assignments in USERS:
+        for username, full_name, phone, is_doctor, is_org_admin, role_code in USERS:
             user = User.objects.create_user(
-                username=username, password=DEMO_PASSWORD, full_name=full_name, phone=phone,
+                username=username, password=SAMPLE_PASSWORD, full_name=full_name, phone=phone,
                 organization=org, is_doctor=is_doctor, is_org_admin=is_org_admin,
                 # The owner account may also open the Django admin site.
                 is_staff=is_org_admin, is_superuser=is_org_admin,
-                qualification="BAMS (demo)" if is_doctor else "",
+                qualification="BAMS" if is_doctor else "",
             )
             users[username] = user
-            for branch_code, role_code in assignments.items():
-                UserBranchRole.objects.create(
-                    organization=org, user=user, branch=branches[branch_code], role=roles[role_code],
-                )
+            if role_code:
+                UserBranchRole.objects.create(organization=org, user=user, branch=branch, role=roles[role_code])
 
-        for username, branch_code, weekdays, start, end in SCHEDULES:
+        for username, weekdays, start, end in SCHEDULES:
             for weekday in weekdays:
                 DoctorSchedule.objects.create(
-                    organization=org, branch=branches[branch_code], doctor=users[username],
+                    organization=org, branch=branch, doctor=users[username],
                     weekday=weekday, start_time=start, end_time=end, slot_minutes=15,
                 )
 
-        self._seed_patients(org)
+        self._seed_patients(org, branch)
         self._seed_appointments(org)
 
-    def _seed_patients(self, org):
+    def _seed_patients(self, org, branch):
         from datetime import date
 
         from apps.common.models import MasterValue
-        from apps.patients.models import Patient, PatientAllergy, PatientCondition, PatientConsent, ConsentPurpose
+        from apps.patients.models import ConsentPurpose, Patient, PatientAllergy, PatientCondition, PatientConsent
         from apps.patients.services import next_uhid
 
         def master(category, code):
             return MasterValue.objects.get(organization=org, category=category, code=code)
 
-        branches = {b.code: b for b in Branch.objects.filter(organization=org)}
         receptionist = User.objects.filter(organization=org, username="reception1").first()
         treatment = ConsentPurpose.objects.get(organization=org, code="treatment")
         communication = ConsentPurpose.objects.get(organization=org, code="communication")
-        for first, middle, last, gender, age, mobile, city, branch_code, conditions, allergy in DEMO_PATIENTS:
-            if Patient.objects.filter(organization=org, mobile=mobile).exists():
-                continue
-            branch = branches[branch_code]
+        for first, middle, last, gender, age, mobile, city, conditions, allergy in SAMPLE_PATIENTS:
             title = "master" if age < 12 else ("mr" if gender == "male" else "mrs")
             patient = Patient.objects.create(
                 organization=org, uhid=next_uhid(org), registered_branch=branch,
@@ -189,20 +161,16 @@ class Command(BaseCommand):
                 PatientAllergy.objects.create(organization=org, patient=patient,
                                               allergy_type=master("allergy_type", allergy[0]),
                                               allergen=allergy[1], severity="moderate")
-            PatientConsent.objects.create(
-                organization=org, patient=patient, branch=branch, purpose=treatment,
-                purpose_version=treatment.version, granted=True, method="signed_form",
-                language="gu", created_by=receptionist,
-            )
-            # Demo patients agree to SMS/WhatsApp messages (so appointment messages can be tried)
-            PatientConsent.objects.create(
-                organization=org, patient=patient, branch=branch, purpose=communication,
-                purpose_version=communication.version, granted=True, method="signed_form",
-                language="gu", created_by=receptionist,
-            )
+            # Sample patients agree to treatment and to SMS/WhatsApp messages
+            for purpose in (treatment, communication):
+                PatientConsent.objects.create(
+                    organization=org, patient=patient, branch=branch, purpose=purpose,
+                    purpose_version=purpose.version, granted=True, method="signed_form",
+                    language="gu", created_by=receptionist,
+                )
 
     def _seed_appointments(self, org):
-        """Today's demo appointments at the Ahmedabad branch: some booked, two walk-ins waiting."""
+        """Today: two walk-ins waiting. Next working day: two booked appointments."""
         from datetime import datetime, timedelta
 
         from django.utils import timezone
@@ -211,7 +179,7 @@ class Command(BaseCommand):
         from apps.appointments.services import change_status
         from apps.patients.models import Patient
 
-        branch = Branch.objects.filter(organization=org, code="AHD").first()
+        branch = org.main_branch()
         doctor = User.objects.filter(organization=org, username="doctor1").first()
         receptionist = User.objects.filter(organization=org, username="reception1").first()
         if not branch or not doctor:
@@ -222,29 +190,30 @@ class Command(BaseCommand):
         patients = list(Patient.objects.filter(organization=org).order_by("created_at"))
         if len(patients) < 4:
             return
-        tomorrow = today + timedelta(days=1)
+        next_day = today + timedelta(days=1)
+        if next_day.weekday() == 6:  # the clinic is closed on Sunday
+            next_day += timedelta(days=1)
         plan = [  # patient, day, time, reason, walk-in?
             (patients[0], today, None, "Follow-up: sugar control", True),
             (patients[1], today, None, "Thyroid review", True),
-            (patients[2], tomorrow, (11, 0), "Acidity, first visit", False),
-            (patients[3], tomorrow, (11, 30), "Knee pain follow-up", False),
+            (patients[2], next_day, (11, 0), "Acidity, first visit", False),
+            (patients[3], next_day, (11, 30), "Knee pain follow-up", False),
         ]
         for patient, day, start, reason, walk_in in plan:
             start_time = datetime.strptime(f"{start[0]}:{start[1]}", "%H:%M").time() if start else None
             end_time = (datetime.combine(day, start_time) + timedelta(minutes=15)).time() if start else None
-            appt = Appointment.objects.create(
+            appointment = Appointment.objects.create(
                 organization=org, branch=branch, patient=patient, doctor=doctor, date=day,
                 start_time=start_time, end_time=end_time, kind="walk_in" if walk_in else "booked",
                 reason=reason, created_by=receptionist, updated_by=receptionist,
             )
             if walk_in:
-                change_status(appt, "check_in", receptionist)
+                change_status(appointment, "check_in", receptionist)
 
     def _print_logins(self):
         line = "=" * 64
-        self.stdout.write(self.style.SUCCESS(f"\n{line}\n DEMO LOGINS (fake data)   password for all: {DEMO_PASSWORD}\n{line}"))
-        for username, full_name, _, _, is_org_admin, assignments in USERS:
-            where = "all branches" if is_org_admin else ", ".join(f"{r} @ {b}" for b, r in assignments.items())
-            self.stdout.write(f"  {username:<13} {full_name:<32} {where}")
-        self.stdout.write("  (admin, doctors and branch admins also need an OTP - see logs.bat)")
+        self.stdout.write(self.style.SUCCESS(f"\n{line}\n SAMPLE LOGINS   password for all: {SAMPLE_PASSWORD}\n{line}"))
+        for username, full_name, _, _, is_org_admin, role_code in USERS:
+            self.stdout.write(f"  {username:<13} {full_name:<20} {'owner (all access)' if is_org_admin else role_code}")
+        self.stdout.write("  (admin and doctors also need an OTP - shown on the login screen and in logs.bat)")
         self.stdout.write(self.style.SUCCESS(line))

@@ -39,12 +39,25 @@ def roles(org):
 
 @pytest.fixture(autouse=True)
 def _private_files(settings, tmp_path):
-    """Uploaded patient files go to a temporary folder during tests."""
-    settings.STORAGES = {
-        **settings.STORAGES,
-        "private": {"BACKEND": "django.core.files.storage.FileSystemStorage",
-                    "OPTIONS": {"location": str(tmp_path / "private")}},
-    }
+    """
+    Uploaded patient files go to a temporary folder during tests, never into the real storage.
+    (File fields keep the storage they got at start-up, so each one is pointed to the temp folder.)
+    """
+    from django.apps import apps
+    from django.core.files.storage import FileSystemStorage
+    from django.db import models
+
+    temp = FileSystemStorage(location=str(tmp_path / "private"))
+    real_location = str(settings.PRIVATE_MEDIA_ROOT)
+    swapped = []
+    for model in apps.get_models():
+        for field in model._meta.get_fields():
+            if isinstance(field, models.FileField) and str(getattr(field.storage, "location", "")) == real_location:
+                swapped.append((field, field.storage))
+                field.storage = temp
+    yield
+    for field, storage in swapped:
+        field.storage = storage
 
 
 @pytest.fixture

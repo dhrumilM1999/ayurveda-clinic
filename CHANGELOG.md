@@ -2,6 +2,17 @@
 
 What changed in each step, in plain words.
 
+## Clean-up: one database, sample data (2026-10-04)
+
+- **All old test data was deleted** and replaced by clean **sample data**: clinic "Ayurveda Clinic", one
+  "Main Branch", 6 staff (owner, 2 doctors, receptionist, therapist, pharmacist), 5 sample patients and
+  today's sample appointments. No more "(Demo)" labels. New password for all sample users: **`Ayur@2026`**.
+- Only **one database** now: PostgreSQL in Docker. Removed the no-Docker version (`start-without-docker.bat`,
+  the `backend/.venv` folder, 93 MB) and its separate file database, plus two empty folders.
+- Fixed: the automated tests had saved 16 test files into the real patient-file storage. They were removed,
+  and tests now always use a temporary folder.
+- Guides updated (logins, one branch, no-Docker sections removed).
+
 ## Step 4 completed - requirement check, autosave, undo/redo (2026-10-04)
 
 **Checked against docs/FEATURES.md and docs/BUILD_STEPS.md (Step 4).** These parts were missing and are now built:
