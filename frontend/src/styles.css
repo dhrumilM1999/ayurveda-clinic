@@ -40,8 +40,8 @@ body {
   margin: 0;
 }
 
-.page-toolbar > :last-child:not(:first-child),
-.section-toolbar > :last-child:not(:first-child) {
+.page-toolbar > :last-child:not(:first-child):not(.ant-input-affix-wrapper),
+.section-toolbar > :last-child:not(:first-child):not(.ant-input-affix-wrapper) {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;

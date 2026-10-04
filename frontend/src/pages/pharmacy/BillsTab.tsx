@@ -272,7 +272,7 @@ function PaymentModal({ invoice, onClose }: { invoice: InvoiceRecord; onClose: (
     }
   };
   return (
-    <Modal open width={440} title={t('billing.takePayment')} onCancel={() => onClose(false)} onOk={save}
+    <Modal open keyboard={false} maskClosable={false} width={440} title={t('billing.takePayment')} onCancel={() => onClose(false)} onOk={save}
       okText={t('common.save')} cancelText={t('common.cancel')} confirmLoading={saving}>
       <div className="form-help">{t('billing.dueNow', { amount: money(invoice.balance) })}</div>
       <Form form={form} layout="vertical" requiredMark={false}>
@@ -311,7 +311,7 @@ function CancelModal({ invoice, onClose }: { invoice: InvoiceRecord; onClose: (s
   };
   const paid = Number(invoice.paid_amount) - Number(invoice.refunded_amount);
   return (
-    <Modal open width={460} title={t('billing.cancelBill')} onCancel={() => onClose(false)} onOk={save}
+    <Modal open keyboard={false} maskClosable={false} width={460} title={t('billing.cancelBill')} onCancel={() => onClose(false)} onOk={save}
       okText={t('billing.cancelBill')} okButtonProps={{ danger: true }} cancelText={t('common.close')} confirmLoading={saving}>
       <div className="form-help">{t('billing.cancelConfirmHelp')}</div>
       <Form form={form} layout="vertical" requiredMark={false}>

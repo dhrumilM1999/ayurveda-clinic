@@ -90,7 +90,7 @@ function StartModal({ onClose }: { onClose: (id?: string) => void }) {
     }
   };
   return (
-    <Modal open width={460} title={t('pharmacy.startCheck')} onCancel={() => onClose()} onOk={save}
+    <Modal open keyboard={false} maskClosable={false} width={460} title={t('pharmacy.startCheck')} onCancel={() => onClose()} onOk={save}
       okText={t('pharmacy.startCheck')} cancelText={t('common.cancel')} confirmLoading={saving}>
       <div className="form-help">{t('pharmacy.startCheckHelp')}</div>
       <Form form={form} layout="vertical" requiredMark={false}>
@@ -141,7 +141,7 @@ function CountModal({ id, onClose }: { id: string; onClose: () => void }) {
       if (!(await saveCounts())) return;
       try {
         const { data } = await api.post<{ changed: number }>(`/stock-checks/${id}/complete/`);
-        message.success(t('pharmacy.checkCompleted', { n: data.changed }));
+        message.success(t('pharmacy.checkCompleted', { count: data.changed }));
         onClose();
       } catch (err) {
         message.error(errorMessage(err, t('common.saveFailed')));
@@ -166,7 +166,7 @@ function CountModal({ id, onClose }: { id: string; onClose: () => void }) {
             <span className="cell-sub">{editable ? t('pharmacy.countHelp') : t('pharmacy.checkDoneHelp', { date: dayjs(check.completed_at).format('DD-MM-YYYY HH:mm') })}</span>
             <Input allowClear placeholder={t('pharmacy.filterCheck')} value={filter} onChange={(e) => setFilter(e.target.value)} style={{ width: 220 }} />
           </div>
-          <Table<StockCheckItem> size="small" rowKey="id" pagination={false} dataSource={items} scroll={{ y: 420 }}
+          <Table<StockCheckItem> size="small" rowKey="id" pagination={false} dataSource={items} scroll={items.length > 8 ? { y: 420 } : undefined}
             columns={[
               { title: t('pharmacy.location'), dataIndex: 'location', width: 90, render: (v: string) => v || '—' },
               { title: t('rx.medicine'), dataIndex: 'medicine_name' },

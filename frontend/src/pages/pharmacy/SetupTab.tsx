@@ -90,7 +90,7 @@ function RackModal({ rack, onClose }: { rack: Rack | null; onClose: (saved: bool
     }
   };
   return (
-    <Modal open width={460} title={rack ? t('pharmacy.editRack') : t('pharmacy.addRack')} onCancel={() => onClose(false)} onOk={save}
+    <Modal open keyboard={false} maskClosable={false} width={460} title={rack ? t('pharmacy.editRack') : t('pharmacy.addRack')} onCancel={() => onClose(false)} onOk={save}
       okText={t('common.save')} cancelText={t('common.cancel')} confirmLoading={saving} destroyOnHidden>
       <Form form={form} layout="vertical" requiredMark={false}>
         <Row gutter={12}>
@@ -173,7 +173,7 @@ function SupplierModal({ supplier, onClose }: { supplier: Supplier | null; onClo
     }
   };
   return (
-    <Modal open width={640} title={supplier ? t('pharmacy.editSupplier') : t('pharmacy.addSupplier')} onCancel={() => onClose(false)}
+    <Modal open keyboard={false} maskClosable={false} width={640} title={supplier ? t('pharmacy.editSupplier') : t('pharmacy.addSupplier')} onCancel={() => onClose(false)}
       onOk={save} okText={t('common.save')} cancelText={t('common.cancel')} confirmLoading={saving} destroyOnHidden>
       <Form form={form} layout="vertical" requiredMark={false}>
         <Form.Item name="name" label={t('pharmacy.supplier')} rules={[{ required: true, message: t('common.required') }]}><Input maxLength={200} /></Form.Item>

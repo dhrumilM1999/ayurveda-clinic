@@ -276,7 +276,7 @@ function CorrectModal({ batch, onClose }: { batch: StockBatch; onClose: (saved: 
   };
 
   return (
-    <Modal open width={480} title={t('pharmacy.correctTitle', { name: batch.medicine_name, batch: batch.batch_no })}
+    <Modal open keyboard={false} maskClosable={false} width={480} title={t('pharmacy.correctTitle', { name: batch.medicine_name, batch: batch.batch_no })}
       onCancel={() => onClose(false)} onOk={save} okText={t('common.save')} cancelText={t('common.cancel')} confirmLoading={saving}>
       <div className="form-help">{t('pharmacy.correctHelp', { n: qty(batch.quantity) })}</div>
       <Form form={form} layout="vertical" requiredMark={false}>
@@ -329,7 +329,7 @@ function SupplierReturnModal({ batch, onClose }: { batch: StockBatch; onClose: (
   };
 
   return (
-    <Modal open width={500} title={t('pharmacy.returnToSupplierTitle', { name: batch.medicine_name, batch: batch.batch_no })}
+    <Modal open keyboard={false} maskClosable={false} width={500} title={t('pharmacy.returnToSupplierTitle', { name: batch.medicine_name, batch: batch.batch_no })}
       onCancel={() => onClose(false)} onOk={save} okText={t('common.save')} cancelText={t('common.cancel')} confirmLoading={saving}>
       <Form form={form} layout="vertical" requiredMark={false}>
         <Form.Item name="supplier" label={t('pharmacy.supplier')}>
@@ -374,7 +374,7 @@ function LocationModal({ row, racks, onClose }: { row: StockRow; racks: Rack[]; 
   };
 
   return (
-    <Modal open width={460} title={t('pharmacy.locationTitle', { name: row.name })} onCancel={() => onClose(false)} onOk={save}
+    <Modal open keyboard={false} maskClosable={false} width={460} title={t('pharmacy.locationTitle', { name: row.name })} onCancel={() => onClose(false)} onOk={save}
       okText={t('common.save')} cancelText={t('common.cancel')} confirmLoading={saving}>
       {!racks.length && <div className="form-help">{t('pharmacy.noRacksYet')}</div>}
       <Form form={form} layout="vertical" requiredMark={false}>

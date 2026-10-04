@@ -48,6 +48,16 @@
 | **Batch** | One lot of a medicine from the maker, with its own number and expiry date. |
 | **FEFO** | First Expiry, First Out: the batch that expires first is given first. |
 | **Dispense** | Give the prescribed medicines to the patient (stock goes down). |
+| **MRP** | Maximum Retail Price printed on the pack; the selling price can be lower, never higher. |
+| **Free quantity** | Extra packs the supplier gives free with a purchase; they add to stock at no cost. |
+| **Opening stock** | The stock you already have on the day you start using the software. |
+| **Stock ledger** | The list of every stock movement (+ and -) with the balance after each one. |
+| **Stock check** | Counting what is really on the shelves and correcting the software to match. |
+| **Credit note** | A document that cancels all or part of a bill (for a return or refund). The bill itself stays. |
+| **Financial year (FY)** | April to March. Bill numbers start again from 1 each April (e.g. 2026-27). |
+| **Taxable value** | The price without GST. GST is worked out on this amount. |
+| **CGST / SGST** | The two halves of GST inside one state (central and state). |
+| **Loose sale** | Selling part of a pack, such as 10 tablets from a strip of 60. |
 | **Token** | The queue number (1, 2, 3...) a patient gets on arrival, per doctor per day. |
 | **Walk-in** | A patient who comes without an appointment; gets a token straight away. |
 | **Click-to-chat** | A WhatsApp link (`wa.me/...`) that opens WhatsApp with the message typed; staff press Send. Free. |

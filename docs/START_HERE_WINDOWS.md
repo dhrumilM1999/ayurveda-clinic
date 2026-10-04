@@ -127,16 +127,22 @@ No real SMS is sent yet. You can find the code in two places:
 8. In **Previous check-ups** open an old visit -> **Repeat these medicines**.
 9. **Complete visit**: the prescription becomes *final* (ready for the pharmacy).
 
-### Pharmacy check (first version - tell us what to change)
+### Pharmacy and billing check
 
-1. Log in as `pharmacist1` -> **Pharmacy** -> **Stock** -> **Add purchase**: medicine, batch no., expiry (month-year),
-   quantity in packs, purchase rate; the MRP fills from the medicine list. **Save** -> stock goes up.
-2. Click **+** on a stock row to see its batches; **Correct** removes broken / expired packs (a reason is required).
-   Set a **Low-stock level**: when stock falls to it, the row shows **Low**.
-3. A doctor completes a check-up with an Rx -> **To dispense** shows it. **Dispense**: the batch with the earliest
-   expiry is chosen, expired batches are never offered, you cannot give more than is in stock.
-4. **Give** -> stock goes down; the status shows *Partly given* / *Given*. The clock button shows the stock history.
-5. **Suppliers** tab: add the companies you buy from.
+1. **Settings -> Branch details**: check the address, add a GSTIN, drug licence no. and a UPI ID (made-up for now).
+2. **Pharmacy -> Racks & suppliers**: **Add rack** (code `A`, 5 shelves). **Suppliers** -> add one.
+3. **Purchases -> Add purchase**: supplier, invoice no., then a line: medicine, batch, mfg and expiry month,
+   quantity, free quantity, rate without GST, MRP. The total with GST shows at the bottom. **Save**.
+   Already have stock? Use **Opening stock** instead.
+4. **Stock**: the medicine shows the new quantity (bought + free). Click the pencil under **Location** -> rack A,
+   shelf 3. Type a **Low-stock level**. Click **+** to see batches (Correct, Return to supplier) and the clock for
+   the history.
+5. A doctor completes a check-up with an Rx -> **To dispense** -> **Dispense**: tick medicines, change batch or
+   quantity, add a discount, choose Cash / UPI / Card / Pay later -> **Give & bill**. Print the bill.
+6. **Bills**: the day's totals; open a bill to take payment, print or show the UPI QR code.
+7. **Sales & returns -> Return**: tick the medicine, Sellable or Damaged -> a credit note is made.
+8. **Stock check -> Start stock check**: type what you count -> **Complete check**: differences are corrected.
+9. **Stock ledger**: pick a medicine to see every + and - with the balance. The **Dashboard** shows stock alerts.
 
 ## 5. Other addresses
 

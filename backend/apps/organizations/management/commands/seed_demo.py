@@ -27,11 +27,11 @@ SAMPLE_PASSWORD = "Ayur@2026"
 
 CLINIC = {
     "name": "Ayurveda Clinic", "short_name": "Ayurveda", "phone": "9800000000",
-    "email": "clinic@example.com", "address": "Main Road, Ahmedabad", "default_language": "en",
+    "email": "clinic@example.com", "address": "Main Road", "default_language": "en",
 }
 
 BRANCH = {"code": "MAIN", "name": "Main Branch", "city": "Ahmedabad", "pincode": "380009",
-          "state": "Gujarat", "address": "Main Road, Ahmedabad", "phone": "9800000000"}
+          "state": "Gujarat", "address": "Main Road", "phone": "9800000000"}
 
 ROOM_TYPES = ["Consultation", "Panchakarma / Therapy", "Pharmacy", "Waiting area"]
 

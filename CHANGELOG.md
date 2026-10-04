@@ -2,6 +2,43 @@
 
 What changed in each step, in plain words.
 
+## Pharmacy stock, inventory and billing (2026-10-05)
+
+**Products** (Medicines screen): generic name, category, pack type and size, units per pack, "sell loose"
+(e.g. single tablets), selling price, barcode.
+
+**Stock by batch**: every batch keeps its own batch no., manufacture and expiry month, purchase rate, MRP,
+selling price, GST and supplier. Medicines are given from the batch that expires first (FEFO).
+
+**Racks and shelves**: make racks (A, B, C...) in **Racks & suppliers**; give each medicine a rack, shelf and box
+on the **Stock** tab. The location is shown when dispensing, in stock checks and on the stock list.
+
+**Purchases**: supplier, supplier invoice no. and date, freight; per line: batch, barcode, mfg / expiry, quantity,
+**free quantity**, purchase rate (without GST), discount, GST, MRP, selling price. Scan a barcode to add a line.
+**Opening stock** for the stock you already have. **Return to supplier** from a batch.
+
+**Stock ledger**: every movement with the running balance - opening, purchase, free, sale, sale return,
+supplier return, damaged, expired, correction, stock check.
+
+**Alerts**: out of stock, low stock (your level per medicine), expiring within 90 days, expired - on the Stock
+tab and on the Dashboard.
+
+**Stock check** (physical verification): count a rack or everything; the differences are corrected and recorded.
+
+**Dispense and bill** in one step: choose batches (FEFO pre-selected), scan, loose units, discount per line or on
+all, take payment (cash / UPI / card / pay later). A **pharmacy bill** is made (number like
+`MAIN/PH/2026-27/00001`, a new series each April). **Bills** tab: day totals and cash in hand, take payment,
+cancel, print (A4, A5, 80 mm thermal; reprints say DUPLICATE COPY), UPI QR code.
+
+**Sales returns**: tick the medicines brought back (sellable ones go back to stock, damaged ones do not); a
+**credit note** is made and the refund recorded. Bills are never deleted.
+
+**Settings -> Branch details**: address, GSTIN, drug licence no. and UPI ID printed on bills.
+
+Decisions: loose sale = yes (units per pack); over-the-counter sale without prescription = skipped for now;
+pharmacy bills are a separate "PH" series, ready to be combined with the clinic bill in Step 6; purchase orders
+later. **GST rates and bill wording must be confirmed with your CA.**
+
 ## Pharmacy - first version (2026-10-04)
 
 Built from docs/FEATURES.md section G as a **first draft for the owner to correct**.

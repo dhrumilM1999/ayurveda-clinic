@@ -48,8 +48,14 @@ Check: in VS Code's terminal run `cd frontend` then `npm run check:i18n`. It tel
 
 ## Edit a print template
 
-Print templates come in **Step 7**. They will live in `backend/templates/documents/`.
-This section will then explain how to edit them.
+Print templates live in `backend/templates/documents/`. They are HTML files (like a web page).
+
+- **Pharmacy bill and credit note**: `invoice.html`. You can change the wording (for example the line
+  "Please check medicines...", "TAX INVOICE"), the colours in the `<style>` part, and the font sizes.
+- Keep everything inside `{{ ... }}` and `{% ... %}` as it is - those put in the real data.
+- The clinic name, address, GSTIN, drug licence and UPI ID come from **Settings -> Branch details**, not from the file.
+- Save the file, then print a bill again to see the change (no restart needed).
+- More templates (prescription, certificates...) come in Step 7.
 
 ## Add a role or change what a role can do
 
@@ -175,6 +181,14 @@ lists the matching ones first (★).
   `backend/apps/pharmacy/services.py`.
 - Low stock: **Pharmacy -> Stock** -> type a number in **Low-stock level** for each medicine (per branch).
 - Switch the whole pharmacy off for a branch: **Settings -> Modules -> Pharmacy and stock**.
+
+## Pharmacy: racks, opening stock, UPI ID
+
+- Racks / cupboards: **Pharmacy -> Racks & suppliers -> Add rack**. Then on **Stock**, click the pencil under
+  **Location** to say where each medicine is kept. A rack you no longer use can be switched off.
+- Stock you already have on the first day: **Pharmacy -> Purchases -> Opening stock** (no supplier needed).
+- The UPI ID for the QR code on bills: **Settings -> Branch details -> UPI ID for payments**.
+- Selling loose tablets: in **Medicines**, edit the medicine -> fill **Units per pack** and switch on **Sell loose**.
 
 ## Change the SMS / WhatsApp appointment messages
 

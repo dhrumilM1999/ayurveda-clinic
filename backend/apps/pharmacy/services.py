@@ -65,7 +65,12 @@ def receive_stock(branch, user, *, items, supplier=None, invoice_no="", invoice_
         invoice_date=invoice_date or today, is_opening=is_opening, notes=notes[:300], other_charges=other_charges,
         created_by=user, updated_by=user,
     )
-    label = "Opening stock" if is_opening else f"Invoice {invoice_no}".strip()
+    if is_opening:
+        label = "Opening stock"
+    elif invoice_no:
+        label = f"Invoice {invoice_no}"
+    else:
+        label = f"Purchase from {supplier.name}" if supplier else "Purchase (no invoice no.)"
     totals = {"taxable": ZERO, "discount": ZERO, "gst": ZERO}
     for item in items:
         medicine: Medicine = item["medicine"]
@@ -213,7 +218,8 @@ def _unit_label(medicine, loose_units=None):
     if loose_units:
         unit = medicine.dose_unit.label if medicine.dose_unit_id else "units"
         return f"{unit}"
-    return medicine.pack_type.label if medicine.pack_type_id else (medicine.pack_size or "pack")
+    # The pack size is already in the item name, so the quantity reads "1 bottle" or "1 pack"
+    return medicine.pack_type.label if medicine.pack_type_id else "pack"
 
 
 @transaction.atomic
