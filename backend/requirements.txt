@@ -1,0 +1,13 @@
+# Python packages for the backend. ASK FIRST before adding or upgrading packages.
+Django>=5.2,<5.3                      # the web framework
+djangorestframework>=3.15,<3.17       # builds the REST API
+djangorestframework-simplejwt>=5.3,<6 # JWT login tokens
+argon2-cffi>=23.1                     # strong password hashing (Argon2)
+psycopg[binary]>=3.2,<4               # talks to PostgreSQL
+django-filter>=24.2                   # list filters in the API
+Pillow>=10.4                          # images (clinic logo, patient photos)
+cryptography>=43                      # encrypts sensitive medical notes in the database
+
+# Testing
+pytest>=8.0
+pytest-django>=4.8

@@ -1,0 +1,501 @@
+/* SAFE TO EDIT: extra styles. Colours and fonts come from src/config/clinic.ts
+   and are used here as var(--clinic-...). */
+
+body {
+  margin: 0;
+  font-family: var(--clinic-font-body);
+  color: var(--clinic-text);
+  background: var(--clinic-bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ---------- Page titles and toolbars ---------- */
+.page-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.page-toolbar h3.ant-typography,
+.page-title {
+  font-family: var(--clinic-font-heading);
+  font-weight: 600;
+  font-size: 26px;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.page-toolbar > :last-child {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* White rounded panel around every table */
+.ant-table-wrapper {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid var(--clinic-border);
+  box-shadow: 0 1px 2px rgba(35, 48, 42, 0.04), 0 4px 16px rgba(35, 48, 42, 0.04);
+  overflow: hidden;
+}
+.ant-table-wrapper .ant-table-pagination {
+  padding: 0 16px;
+}
+.ant-table-thead > tr > th {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600 !important;
+}
+
+.ant-card {
+  border: 1px solid var(--clinic-border);
+  box-shadow: 0 1px 2px rgba(35, 48, 42, 0.04), 0 4px 16px rgba(35, 48, 42, 0.04);
+}
+
+.ant-modal-title {
+  font-family: var(--clinic-font-heading);
+  font-weight: 600 !important;
+}
+
+/* ---------- Left menu ---------- */
+.app-sider {
+  position: sticky !important;
+  top: 0;
+  height: 100vh;
+  overflow: auto;
+  background: linear-gradient(180deg, var(--clinic-sidebar) 0%, #0d2b20 100%) !important;
+}
+.app-sider .ant-layout-sider-children {
+  display: flex;
+  flex-direction: column;
+}
+.app-sider .ant-menu {
+  background: transparent !important;
+  border-inline-end: none !important;
+  flex: 1;
+}
+.app-sider .ant-menu-item-selected {
+  position: relative;
+  font-weight: 600;
+}
+.app-sider .ant-menu-item-selected::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--clinic-accent);
+}
+
+.app-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 22px 20px 18px;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.app-brand img {
+  width: 38px;
+  height: 38px;
+  flex: none;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25));
+}
+.app-brand-name {
+  font-family: var(--clinic-font-heading);
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.15;
+}
+.app-brand-sub {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+.app-sider-divider {
+  height: 1px;
+  margin: 0 20px 12px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0));
+}
+.app-sider-footer {
+  padding: 16px 20px 20px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.45);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- Top bar ---------- */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 24px !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--clinic-border);
+}
+.app-header-left,
+.app-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.branch-picker .ant-select-selector {
+  background: var(--clinic-primary-soft) !important;
+  border-color: transparent !important;
+  font-weight: 600;
+}
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 10px 4px 4px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.user-chip:hover {
+  background: var(--clinic-primary-soft);
+}
+.user-chip-name {
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1.2;
+}
+.user-chip-role {
+  font-size: 11px;
+  color: rgba(35, 48, 42, 0.55);
+  line-height: 1.2;
+}
+
+.app-content {
+  padding: 28px 32px 40px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* ---------- Dashboard ---------- */
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: 28px 32px;
+  margin-bottom: 24px;
+  border-radius: 18px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 85% 20%, rgba(201, 138, 43, 0.35), transparent 45%),
+    linear-gradient(120deg, var(--clinic-primary) 0%, var(--clinic-sidebar) 100%);
+  box-shadow: 0 10px 30px rgba(18, 56, 42, 0.18);
+}
+.hero-date {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+}
+.hero-title {
+  font-family: var(--clinic-font-heading);
+  font-size: 30px;
+  font-weight: 600;
+  margin: 6px 0 4px;
+}
+.hero-sub {
+  color: rgba(255, 255, 255, 0.8);
+}
+.hero-leaf {
+  position: absolute;
+  right: 24px;
+  bottom: -30px;
+  width: 180px;
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+.stat-card .ant-card-body {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.stat-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex: none;
+  border-radius: 12px;
+  font-size: 20px;
+}
+.stat-label {
+  font-size: 13px;
+  color: rgba(35, 48, 42, 0.6);
+}
+.stat-value {
+  font-family: var(--clinic-font-heading);
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.stat-note {
+  font-size: 12px;
+  color: rgba(35, 48, 42, 0.45);
+}
+
+/* ---------- Login ---------- */
+.login-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  background: var(--clinic-bg);
+}
+.login-art {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 48px 56px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 80% 15%, rgba(201, 138, 43, 0.35), transparent 40%),
+    radial-gradient(circle at 10% 90%, rgba(255, 255, 255, 0.08), transparent 45%),
+    linear-gradient(150deg, var(--clinic-primary) 0%, var(--clinic-sidebar) 70%);
+}
+.login-art-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--clinic-font-heading);
+  font-size: 22px;
+  font-weight: 600;
+}
+.login-art-brand img {
+  width: 44px;
+  height: 44px;
+}
+.login-art-quote {
+  position: relative;
+  z-index: 1;
+  max-width: 460px;
+  font-family: var(--clinic-font-heading);
+  font-size: 38px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+.login-art-foot {
+  position: relative;
+  z-index: 1;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+}
+.login-art-leaf {
+  position: absolute;
+  right: -80px;
+  bottom: -60px;
+  width: 460px;
+  opacity: 0.1;
+  pointer-events: none;
+}
+.login-form-side {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+}
+.login-form {
+  width: 100%;
+  max-width: 380px;
+}
+.login-title {
+  font-family: var(--clinic-font-heading);
+  font-size: 30px;
+  font-weight: 600;
+  margin: 0 0 6px;
+}
+.login-sub {
+  color: rgba(35, 48, 42, 0.6);
+  margin-bottom: 28px;
+}
+.otp-input input {
+  letter-spacing: 0.5em;
+  font-size: 20px;
+  font-weight: 600;
+  text-align: center;
+}
+.login-mobile-brand {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .login-page {
+    grid-template-columns: 1fr;
+  }
+  .login-art {
+    display: none;
+  }
+  .login-mobile-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 28px;
+    font-family: var(--clinic-font-heading);
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .app-content {
+    padding: 20px 16px 32px;
+  }
+}
+
+/* ---------- Patients ---------- */
+.side-sticky {
+  position: sticky;
+  top: 88px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.dup-item {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--clinic-border);
+  color: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+.dup-item:hover {
+  background: var(--clinic-primary-soft);
+  border-color: var(--clinic-primary);
+}
+.dup-meta {
+  font-size: 12px;
+  color: rgba(35, 48, 42, 0.6);
+}
+.consent-row {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: #faf8f3;
+  border: 1px solid var(--clinic-border);
+}
+.consent-text {
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(35, 48, 42, 0.75);
+  white-space: pre-line;
+}
+.consent-text-box {
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: #faf8f3;
+  border: 1px solid var(--clinic-border);
+  max-height: 220px;
+  overflow: auto;
+}
+.consent-card {
+  height: 100%;
+  box-shadow: none !important;
+}
+.patient-header-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.patient-name {
+  font-family: var(--clinic-font-heading);
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.patient-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin-top: 6px;
+  color: rgba(35, 48, 42, 0.7);
+}
+.uhid-chip {
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 6px;
+  background: var(--clinic-accent-soft);
+  color: #8a5a12 !important;
+}
+.history-box {
+  height: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: #faf8f3;
+  border: 1px solid var(--clinic-border);
+}
+.history-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(35, 48, 42, 0.55);
+  margin-bottom: 6px;
+}
+.history-text {
+  white-space: pre-line;
+}
+.vital-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.vital-tile {
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: #faf8f3;
+  border: 1px solid var(--clinic-border);
+}
+.vital-label {
+  font-size: 12px;
+  color: rgba(35, 48, 42, 0.6);
+}
+.vital-value {
+  font-family: var(--clinic-font-heading);
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.vital-unit {
+  font-size: 12px;
+  color: rgba(35, 48, 42, 0.5);
+}
+.bmi-live {
+  font-family: var(--clinic-font-heading);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 38px;
+}
+.bmi-live small {
+  font-family: var(--clinic-font-body);
+  font-size: 12px;
+  font-weight: 500;
+}

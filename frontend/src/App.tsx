@@ -1,0 +1,65 @@
+// The list of screens (routes). To add a screen: add a <Route> here and an item in config/menu.tsx.
+import { App as AntApp, ConfigProvider, Spin } from 'antd';
+import enUS from 'antd/locale/en_US';
+import hiIN from 'antd/locale/hi_IN';
+import { useTranslation } from 'react-i18next';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import { useAuth } from './auth/AuthContext';
+import { RequirePermission } from './components/RequirePermission';
+import MainLayout from './layout/MainLayout';
+import AuditLogPage from './pages/AuditLogPage';
+import BranchesPage from './pages/BranchesPage';
+import DashboardPage from './pages/DashboardPage';
+import LoginPage from './pages/LoginPage';
+import NotFoundPage from './pages/NotFoundPage';
+import PatientDetailPage from './pages/patients/PatientDetailPage';
+import PatientFormPage from './pages/patients/PatientFormPage';
+import PatientsPage from './pages/patients/PatientsPage';
+import RolesPage from './pages/RolesPage';
+import RoomsPage from './pages/RoomsPage';
+import SchedulesPage from './pages/SchedulesPage';
+import SettingsPage from './pages/SettingsPage';
+import StaffPage from './pages/StaffPage';
+import { antTheme, applyCssVariables } from './theme';
+
+applyCssVariables();
+
+export default function App() {
+  const { me, loading } = useAuth();
+  const { i18n } = useTranslation();
+
+  return (
+    <ConfigProvider theme={antTheme} locale={i18n.language === 'hi' ? hiIN : enUS}>
+      <AntApp>
+        {loading ? (
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '30vh' }}>
+            <Spin size="large" />
+          </div>
+        ) : !me ? (
+          <Routes>
+            <Route path="*" element={<LoginPage />} />
+          </Routes>
+        ) : (
+          <Routes>
+            <Route element={<MainLayout />}>
+              <Route index element={<DashboardPage />} />
+              <Route path="patients" element={<RequirePermission code="patients.view"><PatientsPage /></RequirePermission>} />
+              <Route path="patients/new" element={<RequirePermission code="patients.create"><PatientFormPage /></RequirePermission>} />
+              <Route path="patients/:id" element={<RequirePermission code="patients.view"><PatientDetailPage /></RequirePermission>} />
+              <Route path="patients/:id/edit" element={<RequirePermission code="patients.edit"><PatientFormPage key="edit" /></RequirePermission>} />
+              <Route path="branches" element={<RequirePermission code="branches.view"><BranchesPage /></RequirePermission>} />
+              <Route path="rooms" element={<RequirePermission code="rooms.view"><RoomsPage /></RequirePermission>} />
+              <Route path="staff" element={<RequirePermission code="staff.view"><StaffPage /></RequirePermission>} />
+              <Route path="roles" element={<RequirePermission code="roles.view"><RolesPage /></RequirePermission>} />
+              <Route path="schedules" element={<RequirePermission code="schedules.view"><SchedulesPage /></RequirePermission>} />
+              <Route path="settings" element={<RequirePermission code="settings.manage"><SettingsPage /></RequirePermission>} />
+              <Route path="audit-log" element={<RequirePermission code="audit.view"><AuditLogPage /></RequirePermission>} />
+              <Route path="login" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<NotFoundPage />} />
+            </Route>
+          </Routes>
+        )}
+      </AntApp>
+    </ConfigProvider>
+  );
+}

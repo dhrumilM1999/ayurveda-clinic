@@ -1,0 +1,28 @@
+# Secrets and local settings - never commit
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+backend/local.sqlite3
+backend/media/
+backend/private_media/
+backend/staticfiles/
+.pytest_cache/
+
+# Node / React
+node_modules/
+frontend/dist/
+
+# Editors and OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+Thumbs.db
+.DS_Store
+
+# Backups (later) may contain patient data
+backups/
+backend/.venv/

@@ -1,0 +1,81 @@
+# Starts the whole app with one command: docker compose up
+# ASK FIRST before editing this file.
+#
+#   db        - PostgreSQL database (with pgvector for AI search later)
+#   backend   - Django API            -> http://localhost:8000/api/v1/  and  /admin/
+#   frontend  - React screens (Vite)  -> http://localhost:5173
+#   mailpit   - test email inbox      -> http://localhost:8025
+
+name: ayurveda
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ayurveda}
+      POSTGRES_USER: ${POSTGRES_USER:-ayurveda}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ayurveda_dev_password}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ayurveda} -d ${POSTGRES_DB:-ayurveda}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      POSTGRES_HOST: db
+      MEDIA_ROOT: /app/media
+      PRIVATE_MEDIA_ROOT: /app/private_media
+    # On every start: update the database tables, add demo data if the database is empty,
+    # then run the development server (it reloads itself when Python files change).
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py ensure_defaults &&
+             python manage.py seed_demo --if-empty &&
+             python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./backend:/app
+      - media:/app/media
+      # Patient photos and documents (private: only served through the API)
+      - private_media:/app/private_media
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    image: node:22-alpine
+    restart: unless-stopped
+    working_dir: /app
+    environment:
+      VITE_PROXY_TARGET: http://backend:8000
+      CHOKIDAR_USEPOLLING: "true"
+    command: sh -c "npm install --no-audit --no-fund && npm run dev"
+    volumes:
+      - ./frontend:/app
+      # Keep node_modules inside Docker (not on the Windows disk) - faster and avoids errors.
+      - /app/node_modules
+    ports:
+      - "127.0.0.1:5173:5173"
+    depends_on:
+      - backend
+
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8025:8025"
+
+volumes:
+  pgdata:
+  media:
+  private_media:

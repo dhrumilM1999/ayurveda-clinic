@@ -1,0 +1,4 @@
+# This folder is inside XAMPP's htdocs. This file stops Apache (XAMPP) from
+# showing these files (including the secret .env) at http://localhost/ayurveda/.
+# The app itself runs in Docker at http://localhost:5173 - not through XAMPP.
+Require all denied
