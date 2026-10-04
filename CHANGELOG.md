@@ -2,6 +2,25 @@
 
 What changed in each step, in plain words.
 
+## Additional settings: optional extra features (2026-10-05)
+
+The pharmacy extras added today are now **optional**. A new menu item **Additional settings** (organization
+admin only) has one ON/OFF switch per extra, for the whole clinic group. All are **off** at the start, so a new
+clinic sees the simple pharmacy and turns on only what it needs.
+
+Always there (with the Pharmacy module on): To dispense, Stock by batch (with corrections and history),
+Purchases, Suppliers.
+
+Switches: Pharmacy bills / payments / printing - Discounts (needs bills) - Sales returns - Sell loose - Racks and
+shelf locations - Barcodes and scanning - Detailed purchase entry - Opening stock - Returns to supplier -
+Stock alerts - Stock ledger screen - Physical stock check - Extra product details.
+
+Switching off only **hides** a feature: nothing saved is deleted. Without bills, "Give" just gives the medicines
+and lowers the stock (as in the first version). The server also refuses a switched-off feature.
+
+This work was done on the Git branch `feature/optional-pharmacy-features` in small steps, each of which can be
+undone on its own.
+
 ## Pharmacy stock, inventory and billing (2026-10-05)
 
 **Products** (Medicines screen): generic name, category, pack type and size, units per pack, "sell loose"

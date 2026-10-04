@@ -115,6 +115,17 @@ Switching it off again hides the other branches; nothing is deleted. Only the ow
 **Settings** → "Modules in <branch>" → flip the switch.
 The list of switches is in `backend/apps/organizations/features_catalog.py`.
 
+## Switch an optional extra feature on or off (whole clinic)
+
+**Additional settings** (left menu, organization admin only) -> flip the switch. It works at once for every
+branch. Off only hides the feature; saved data stays and comes back when you switch it on again.
+A tag "Needs: ..." means the feature also needs another switch (e.g. Discounts needs Pharmacy bills).
+
+To add a new optional feature for a programmer: add one line to `ADDITIONAL_FEATURES` in
+`backend/apps/organizations/features_catalog.py`, its text in `frontend/src/i18n/*.json` under
+`additional.features`, then use `hasFeature('code')` in the screen and `need_feature` / `required_features`
+in the API. No database change is needed.
+
 ## Add a simple field (with migration)
 
 Example: add "Landmark" to branches.

@@ -26,7 +26,7 @@
 | `backend/requirements.txt` | List of Python packages | ASK FIRST |
 | `backend/apps/common/` | Shared building blocks (base model, soft delete, adapters) | ASK FIRST |
 | `backend/apps/organizations/` | Organization, branches, rooms, feature switches | ASK FIRST |
-| `backend/apps/organizations/features_catalog.py` | List of modules that can be switched on/off per branch | **SAFE TO EDIT** |
+| `backend/apps/organizations/features_catalog.py` | Modules switched on/off per branch, and the optional **additional features** per organization (`ADDITIONAL_FEATURES`) | **SAFE TO EDIT** |
 | `backend/apps/organizations/management/commands/seed_demo.py` | Sample data (made-up names, rooms, timings) | **SAFE TO EDIT** |
 | `backend/apps/accounts/` | Staff users, roles, login, OTP, doctor schedules | ASK FIRST |
 | `backend/apps/accounts/permissions_catalog.py` | **All permissions** and the starting permissions of each role | **SAFE TO EDIT** |
@@ -65,6 +65,7 @@
 | `frontend/src/pages/medicines/` | Medicines screen, import, version history | ASK FIRST |
 | `frontend/src/pages/pharmacy/` | Pharmacy screen: dispense, sales & returns, bills, stock, purchases, stock check, ledger, racks & suppliers | ASK FIRST |
 | `frontend/src/pages/consult/RxSection.tsx` | The prescription part of the check-up | ASK FIRST |
+| `frontend/src/pages/AdditionalSettingsPage.tsx` | The Additional settings screen (optional extra features) | ASK FIRST |
 | `frontend/src/pages/TemplatesPage.tsx` | The Check-up templates editing screen | ASK FIRST |
 | `frontend/src/utils/formDraft.ts` | Keeps unsaved forms in the browser tab (autosave of the patient form) | ASK FIRST |
 | `frontend/src/pages/appointments/QueueDisplayPage.tsx` | TV screen: `REFRESH_SECONDS`, `NEXT_COUNT` at the top | **SAFE TO EDIT** (those two lines) |
