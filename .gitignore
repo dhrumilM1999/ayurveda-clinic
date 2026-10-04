@@ -26,3 +26,7 @@ Thumbs.db
 # Backups (later) may contain patient data
 backups/
 backend/.venv/
+
+# Compiled TypeScript output (the app is built by Vite; never commit these)
+frontend/src/**/*.js
+*.tsbuildinfo
