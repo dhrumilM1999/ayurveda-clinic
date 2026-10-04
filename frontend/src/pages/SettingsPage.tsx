@@ -10,7 +10,7 @@ import { LANGUAGES } from '../i18n';
 export default function SettingsPage() {
   const { t } = useTranslation();
   const { message } = App.useApp();
-  const { branch } = useAuth();
+  const { branch, me } = useAuth();
   const [flags, setFlags] = useState<FeatureFlag[]>([]);
   const [saving, setSaving] = useState(false);
   const [form] = Form.useForm();
@@ -35,6 +35,10 @@ export default function SettingsPage() {
     try {
       await api.patch('/organization/', values);
       message.success(t('common.saved'));
+      // The branch switch changes the menu and top bar: reload the app to apply it.
+      if (me && values.multi_branch !== undefined && values.multi_branch !== me.organization?.multi_branch) {
+        window.location.reload();
+      }
     } catch (err) {
       message.error(errorMessage(err, t('common.saveFailed')));
     } finally {
@@ -70,6 +74,12 @@ export default function SettingsPage() {
                 rules={[{ required: true, message: t('common.required') }, { pattern: /^[A-Za-z0-9]{1,6}$/, message: t('settings.uhidPrefixInvalid') }]}>
                 <Input maxLength={6} style={{ textTransform: 'uppercase', width: 140 }} />
               </Form.Item>
+              {me?.user.is_org_admin && (
+                <Form.Item name="multi_branch" label={t('settings.multiBranch')} valuePropName="checked"
+                  extra={t('settings.multiBranchHelp')}>
+                  <Switch />
+                </Form.Item>
+              )}
               <Form.Item name="default_language" label={t('settings.defaultLanguage')}>
                 <Select options={LANGUAGES.map((l) => ({ value: l.code, label: l.label }))} />
               </Form.Item>

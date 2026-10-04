@@ -98,6 +98,12 @@ It is SAMPLE text: have a lawyer check it. Text already copied into the database
 admin site (http://localhost:8000/admin/ → Consent purposes). **Raise the version number** when you change
 the meaning, so the app asks existing patients again.
 
+## One branch or many branches
+
+The software starts in **one-branch mode**: no branch picker at the top and no **Branches** menu.
+When you open a second branch: log in as `admin` -> **Settings** -> switch on **Use more than one branch** -> **Save**.
+Switching it off again hides the other branches; nothing is deleted. Only the owner account (`admin`) sees this switch.
+
 ## Switch a module on or off for one branch
 
 **Settings** → "Modules in <branch>" → flip the switch.

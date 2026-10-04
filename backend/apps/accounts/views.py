@@ -120,9 +120,16 @@ class MeView(APIView):
 
     def get(self, request):
         user = request.user
+        org = user.organization
         branches = []
         roles = {a.branch_id: a.role for a in user.branch_roles.select_related("role")}
-        for branch in accessible_branches(user):
+        allowed = list(accessible_branches(user))
+        if org and not org.multi_branch:
+            # Single-branch mode: only the main branch (unless the user does not work there).
+            main = org.main_branch()
+            if main and any(b.id == main.id for b in allowed):
+                allowed = [main]
+        for branch in allowed:
             role = roles.get(branch.id)
             branches.append({
                 "id": str(branch.id),
@@ -131,7 +138,6 @@ class MeView(APIView):
                 "role": {"code": role.code, "name": role.name} if role else None,
                 "permissions": sorted(branch_permissions(user, branch)),
             })
-        org = user.organization
         return Response({
             "user": {
                 "id": str(user.id),
@@ -141,7 +147,7 @@ class MeView(APIView):
                 "is_doctor": user.is_doctor,
                 "preferred_language": user.preferred_language,
             },
-            "organization": {"id": str(org.id), "name": org.name} if org else None,
+            "organization": {"id": str(org.id), "name": org.name, "multi_branch": org.multi_branch} if org else None,
             "branches": branches,
             "idle_timeout_minutes": settings.IDLE_TIMEOUT_MINUTES,
         })

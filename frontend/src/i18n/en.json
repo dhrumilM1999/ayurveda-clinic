@@ -176,7 +176,9 @@
     "featuresHelp": "Switch modules on or off for this branch only. Useful to try a new feature in one branch first.",
     "uhidPrefix": "Patient ID prefix",
     "uhidPrefixHelp": "Letters at the start of every patient ID, e.g. AY → AY26-000001",
-    "uhidPrefixInvalid": "Use 1 to 6 letters or numbers"
+    "uhidPrefixInvalid": "Use 1 to 6 letters or numbers",
+    "multiBranch": "Use more than one branch",
+    "multiBranchHelp": "Off: the software works with your main branch only (no branch picker). Turn on when you open a second branch. No data is lost either way."
   },
   "audit": {
     "title": "Audit log",

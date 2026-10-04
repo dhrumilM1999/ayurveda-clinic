@@ -35,8 +35,10 @@ export default function MainLayout() {
   const onIdle = useCallback(() => logout('idle'), [logout]);
   useIdleLogout(me?.idle_timeout_minutes, onIdle);
 
+  const multiBranch = !!me?.organization?.multi_branch;
   const visibleItems = menuItems.filter(
-    (item) => (!item.permission || can(item.permission)) && (!item.feature || features[item.feature] !== false),
+    (item) => (!item.permission || can(item.permission)) && (!item.feature || features[item.feature] !== false)
+      && (!item.multiBranchOnly || multiBranch),
   );
   const selected = visibleItems.find((item) =>
     item.path === '/' ? location.pathname === '/' : location.pathname.startsWith(item.path),
@@ -93,7 +95,7 @@ export default function MainLayout() {
               onClick={() => setCollapsed(!collapsed)}
               aria-label={t('layout.toggleMenu')}
             />
-            <Select
+            {multiBranch ? <Select
               className="branch-picker"
               style={{ minWidth: 240, maxWidth: 340 }}
               value={branch?.id}
@@ -103,7 +105,10 @@ export default function MainLayout() {
               options={me?.branches.map((b) => ({ value: b.id, label: b.name }))}
               placeholder={t('layout.chooseBranch')}
               aria-label={t('layout.branch')}
-            />
+            /> : (
+              // Single-branch mode: just show the clinic / branch name
+              <span className="branch-name"><EnvironmentOutlined /> {branch?.name}</span>
+            )}
           </div>
           <div className="app-header-right">
             <Segmented

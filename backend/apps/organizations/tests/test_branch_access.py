@@ -107,3 +107,27 @@ def test_feature_flags_toggle(org_admin, receptionist, branch_a, branch_b):
     reception = client_for(receptionist, branch_a)
     assert reception.get("/api/v1/feature-flags/").status_code == 200
     assert reception.patch("/api/v1/feature-flags/panchakarma/", {"enabled": False}, format="json").status_code == 403
+
+
+# --- Single-branch mode ----------------------------------------------------------------
+@pytest.mark.django_db
+def test_single_branch_mode_shows_only_main_branch(org, org_admin, branch_a, branch_b):
+    from conftest import client_for
+
+    client = client_for(org_admin)
+    data = client.get("/api/v1/auth/me/").data
+    assert data["organization"]["multi_branch"] is False
+    assert [b["id"] for b in data["branches"]] == [str(branch_a.id)]
+    org.multi_branch = True
+    org.save()
+    assert len(client.get("/api/v1/auth/me/").data["branches"]) == 2
+
+
+@pytest.mark.django_db
+def test_only_owner_switches_multi_branch(org, org_admin, branch_admin, branch_a):
+    from conftest import client_for
+
+    res = client_for(branch_admin, branch_a).patch("/api/v1/organization/", {"multi_branch": True}, format="json")
+    assert res.status_code in (400, 403)
+    res = client_for(org_admin, branch_a).patch("/api/v1/organization/", {"multi_branch": True}, format="json")
+    assert res.status_code == 200 and res.data["multi_branch"] is True

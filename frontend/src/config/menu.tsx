@@ -3,6 +3,7 @@
 // - permission: the menu item only shows if the user has this permission in the current branch
 // - path: must match a route in src/App.tsx
 // - feature: the item hides when that module is switched off for the branch (Settings)
+// - multiBranchOnly: the item shows only when "Use more than one branch" is on (Settings)
 import {
   ApartmentOutlined, AuditOutlined, CalendarOutlined, DashboardOutlined, HomeOutlined,
   IdcardOutlined, OrderedListOutlined, SafetyCertificateOutlined, ScheduleOutlined, SettingOutlined, TeamOutlined,
@@ -16,6 +17,7 @@ export interface MenuItemConfig {
   icon: ReactNode;
   permission?: string;
   feature?: string;
+  multiBranchOnly?: boolean;
 }
 
 export const menuItems: MenuItemConfig[] = [
@@ -23,7 +25,7 @@ export const menuItems: MenuItemConfig[] = [
   { key: 'patients', path: '/patients', labelKey: 'menu.patients', icon: <IdcardOutlined />, permission: 'patients.view' },
   { key: 'appointments', path: '/appointments', labelKey: 'menu.appointments', icon: <ScheduleOutlined />, permission: 'appointments.view', feature: 'appointments' },
   { key: 'queue', path: '/queue', labelKey: 'menu.queue', icon: <OrderedListOutlined />, permission: 'appointments.view', feature: 'appointments' },
-  { key: 'branches', path: '/branches', labelKey: 'menu.branches', icon: <ApartmentOutlined />, permission: 'branches.view' },
+  { key: 'branches', path: '/branches', labelKey: 'menu.branches', icon: <ApartmentOutlined />, permission: 'branches.view', multiBranchOnly: true },
   { key: 'rooms', path: '/rooms', labelKey: 'menu.rooms', icon: <HomeOutlined />, permission: 'rooms.view' },
   { key: 'staff', path: '/staff', labelKey: 'menu.staff', icon: <TeamOutlined />, permission: 'staff.view' },
   { key: 'roles', path: '/roles', labelKey: 'menu.roles', icon: <SafetyCertificateOutlined />, permission: 'roles.view' },

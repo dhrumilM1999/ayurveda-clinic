@@ -28,6 +28,20 @@ Docker Desktop's own disk on your PC:
 - The no-Docker version (`start-without-docker.bat`) uses a different, separate file: `backend/db.sqlite3`.
 - Proper daily backups come in a later step (Step 11). Until then the data is demo data only.
 
+**To see the database tables yourself** (optional): install the free program **DBeaver**
+(https://dbeaver.io), choose *New connection -> PostgreSQL* and enter:
+
+| Field | Value |
+|---|---|
+| Host | `localhost` |
+| Port | `5432` |
+| Database | `ayurveda` (the `POSTGRES_DB` line in `.env`) |
+| Username | `ayurveda` (`POSTGRES_USER` in `.env`) |
+| Password | the `POSTGRES_PASSWORD` line in `.env` |
+
+The app must be running (`start.bat`). Only *look* there: changing data directly skips the safety
+checks and the audit log. Tables are named by module, e.g. `patients_patient`, `appointments_appointment`.
+
 ## What happens when you click "Save" on a room
 
 1. The **frontend** sends the data to `/api/v1/rooms/`, together with

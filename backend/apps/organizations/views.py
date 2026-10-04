@@ -29,7 +29,7 @@ class CurrentOrganizationView(APIView):
         if not user_has_perm(request.user, "settings.manage"):
             self.permission_denied(request)
         org = request.user.organization
-        serializer = OrganizationSerializer(org, data=request.data, partial=True)
+        serializer = OrganizationSerializer(org, data=request.data, partial=True, context={"request": request})
         serializer.is_valid(raise_exception=True)
         serializer.save(updated_by=request.user)
         log_action(request, "update", org, changes={"fields": sorted(serializer.validated_data)})

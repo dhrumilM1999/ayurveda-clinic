@@ -76,6 +76,9 @@ No real SMS is sent yet. You can find the code in two places:
 > automatically. To also get the 5 demo patients, run in the VS Code terminal:
 > `backend\.venv\Scripts\python backend\manage.py seed_demo --add-demo-patients`
 
+> **One branch for now:** the software shows only the main branch (Ahmedabad demo). The Vadodara demo
+> branch is still there, hidden. To see it: `admin` -> Settings -> **Use more than one branch**.
+
 ### Step 3 check (appointments and queue)
 
 1. Log in as `reception1` -> **Appointments**. Today has 2 demo walk-ins (tokens #1 and #2).

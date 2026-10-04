@@ -26,6 +26,16 @@ class Organization(BaseModel):
         "Patient ID prefix", max_length=6, default="AY",
         help_text="Start of every patient ID, e.g. AY -> AY26-000001",
     )
+    # Off = the app shows only the main (first) branch: no branch picker, no Branches menu.
+    # Data stays branch-wise, so switching it on later needs no data change.
+    multi_branch = models.BooleanField(
+        "Use more than one branch", default=False,
+        help_text="Off: the app works with the main branch only.",
+    )
+
+    def main_branch(self):
+        """The first branch created (used when multi_branch is off)."""
+        return self.branches.filter(is_active=True, is_deleted=False).order_by("created_at").first()
 
     class Meta:
         ordering = ["name"]

@@ -24,7 +24,7 @@ export interface Me {
     is_doctor: boolean;
     preferred_language: string;
   };
-  organization: { id: string; name: string } | null;
+  organization: { id: string; name: string; multi_branch: boolean } | null;
   branches: MyBranch[];
   idle_timeout_minutes: number;
 }

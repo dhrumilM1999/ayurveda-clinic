@@ -2,6 +2,13 @@
 
 What changed in each step, in plain words.
 
+## One-branch mode (2026-10-04)
+
+- New switch **Settings -> Use more than one branch** (owner only). It is **off** now: the app works with the
+  main branch only, without the branch picker or the Branches menu. Branch data is kept, so turning it on later
+  just shows everything again.
+- Guide: how to look at the database with the free DBeaver program (docs/HOW_IT_WORKS.md, "Where is my data?").
+
 ## Step 3 - Appointments and queue (2026-10-04)
 
 **What you can do now**

@@ -226,6 +226,17 @@ body {
   border-color: transparent !important;
   font-weight: 600;
 }
+.branch-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: var(--clinic-primary-soft);
+  color: var(--clinic-primary);
+  font-weight: 600;
+  white-space: nowrap;
+}
 .user-chip {
   display: flex;
   align-items: center;

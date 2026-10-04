@@ -8,9 +8,14 @@ class OrganizationSerializer(serializers.ModelSerializer):
         model = Organization
         fields = [
             "id", "name", "short_name", "legal_name", "gstin", "phone", "email",
-            "address", "logo", "default_language", "uhid_prefix", "updated_at",
+            "address", "logo", "default_language", "uhid_prefix", "multi_branch", "updated_at",
         ]
         read_only_fields = ["id", "logo", "updated_at"]
+
+    def validate_multi_branch(self, value):
+        if self.instance and value != self.instance.multi_branch and not self.context["request"].user.is_org_admin:
+            raise serializers.ValidationError("Only the organization admin (owner) can change this.")
+        return value
 
     def validate_uhid_prefix(self, value):
         value = value.strip().upper()
