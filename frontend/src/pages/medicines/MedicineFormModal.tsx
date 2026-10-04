@@ -1,9 +1,11 @@
 // Add or edit a medicine. Every saved change gets a new version (see "History").
+// Extra fields follow Additional settings: product details, barcode, loose sale.
 import { App, Checkbox, Col, Form, Input, InputNumber, Modal, Row, Segmented, Select, Switch } from 'antd';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from '../../api/client';
 import type { MasterRef, Medicine, MedicineKind, Page } from '../../api/types';
+import { useAuth } from '../../auth/AuthContext';
 import { MasterSelect } from '../../components/MasterSelect';
 import { FLAGS } from './shared';
 
@@ -13,6 +15,10 @@ export function MedicineFormModal({ medicine, onClose }: { medicine: Medicine | 
   const { t } = useTranslation();
   const { message } = App.useApp();
   const [form] = Form.useForm();
+  const { hasFeature } = useAuth();
+  const extra = hasFeature('medicine_extra_details');
+  const barcode = hasFeature('pharmacy_barcode');
+  const loose = hasFeature('pharmacy_loose_sale');
   const [saving, setSaving] = useState(false);
   const [classicals, setClassicals] = useState<{ value: string; label: string }[]>([]);
   const kind: MedicineKind = Form.useWatch('kind', form) ?? medicine?.kind ?? 'classical';
@@ -42,9 +48,11 @@ export function MedicineFormModal({ medicine, onClose }: { medicine: Medicine | 
     const values = await form.validateFields();
     setSaving(true);
     try {
+      // Hidden fields (switched off in Additional settings) are not sent, so their saved values stay
       const payload = {
-        ...values, mrp: values.mrp ?? null, selling_price: values.selling_price ?? null,
-        units_per_pack: values.units_per_pack ?? null, classical_equivalent: values.classical_equivalent ?? null,
+        ...values, mrp: values.mrp ?? null, classical_equivalent: values.classical_equivalent ?? null,
+        ...(extra ? { selling_price: values.selling_price ?? null } : {}),
+        ...(loose ? { units_per_pack: values.units_per_pack ?? null } : {}),
       };
       if (medicine) await api.patch(`/medicines/${medicine.id}/`, payload);
       else await api.post('/medicines/', payload);
@@ -82,8 +90,12 @@ export function MedicineFormModal({ medicine, onClose }: { medicine: Medicine | 
           <Col xs={24} md={12}>
             <Form.Item name="dosage_form" label={t('medicines.form')}><MasterSelect category="dosage_form" /></Form.Item>
           </Col>
-          <Col xs={24} md={12}><Form.Item name="generic_name" label={t('medicines.genericName')}><Input maxLength={200} /></Form.Item></Col>
-          <Col xs={24} md={12}><Form.Item name="category" label={t('medicines.category')}><MasterSelect category="product_category" /></Form.Item></Col>
+          {extra && (
+            <>
+              <Col xs={24} md={12}><Form.Item name="generic_name" label={t('medicines.genericName')}><Input maxLength={200} /></Form.Item></Col>
+              <Col xs={24} md={12}><Form.Item name="category" label={t('medicines.category')}><MasterSelect category="product_category" /></Form.Item></Col>
+            </>
+          )}
           <Col xs={24} md={12}><Form.Item name="name_gu" label={t('medicines.nameGu')}><Input maxLength={200} /></Form.Item></Col>
           <Col xs={24} md={12}><Form.Item name="name_hi" label={t('medicines.nameHi')}><Input maxLength={200} /></Form.Item></Col>
           <Col span={24}>
@@ -111,23 +123,27 @@ export function MedicineFormModal({ medicine, onClose }: { medicine: Medicine | 
             </>
           )}
           <Col xs={24} md={12}><Form.Item name="ayush_licence_no" label={t('medicines.licence')}><Input maxLength={60} /></Form.Item></Col>
-          <Col xs={24} md={12}><Form.Item name="barcode" label={t('medicines.barcode')} extra={t('medicines.barcodeHelp')}><Input maxLength={64} /></Form.Item></Col>
+          {barcode && <Col xs={24} md={12}><Form.Item name="barcode" label={t('medicines.barcode')} extra={t('medicines.barcodeHelp')}><Input maxLength={64} /></Form.Item></Col>}
         </Row>
 
         <div className="section-title">{t('medicines.sections.pack')}</div>
         <Row gutter={12}>
-          <Col xs={12} md={6}><Form.Item name="pack_type" label={t('medicines.packType')}><MasterSelect category="pack_type" /></Form.Item></Col>
+          {extra && <Col xs={12} md={6}><Form.Item name="pack_type" label={t('medicines.packType')}><MasterSelect category="pack_type" /></Form.Item></Col>}
           <Col xs={12} md={6}><Form.Item name="pack_size" label={t('medicines.packSize')}><Input placeholder="100 g, 60 tablets" maxLength={60} /></Form.Item></Col>
-          <Col xs={12} md={6}>
-            <Form.Item name="units_per_pack" label={t('medicines.unitsPerPack')} extra={t('medicines.unitsPerPackHelp')}>
-              <InputNumber min={1} style={{ width: '100%' }} placeholder="60" />
-            </Form.Item>
-          </Col>
-          <Col xs={12} md={6}>
-            <Form.Item name="allow_loose" label={t('medicines.allowLoose')} valuePropName="checked" extra={t('medicines.allowLooseHelp')}>
-              <Switch />
-            </Form.Item>
-          </Col>
+          {loose && (
+            <>
+              <Col xs={12} md={6}>
+                <Form.Item name="units_per_pack" label={t('medicines.unitsPerPack')} extra={t('medicines.unitsPerPackHelp')}>
+                  <InputNumber min={1} style={{ width: '100%' }} placeholder="60" />
+                </Form.Item>
+              </Col>
+              <Col xs={12} md={6}>
+                <Form.Item name="allow_loose" label={t('medicines.allowLoose')} valuePropName="checked" extra={t('medicines.allowLooseHelp')}>
+                  <Switch />
+                </Form.Item>
+              </Col>
+            </>
+          )}
         </Row>
 
         <div className="section-title">{t('medicines.sections.dose')}</div>
@@ -144,11 +160,13 @@ export function MedicineFormModal({ medicine, onClose }: { medicine: Medicine | 
           <Col xs={12} md={6}>
             <Form.Item name="mrp" label={t('medicines.mrp')}><InputNumber min={0} precision={2} prefix="₹" style={{ width: '100%' }} /></Form.Item>
           </Col>
-          <Col xs={12} md={6}>
-            <Form.Item name="selling_price" label={t('medicines.sellingPrice')} extra={t('medicines.sellingPriceHelp')}>
-              <InputNumber min={0} precision={2} prefix="₹" style={{ width: '100%' }} />
-            </Form.Item>
-          </Col>
+          {extra && (
+            <Col xs={12} md={6}>
+              <Form.Item name="selling_price" label={t('medicines.sellingPrice')} extra={t('medicines.sellingPriceHelp')}>
+                <InputNumber min={0} precision={2} prefix="₹" style={{ width: '100%' }} />
+              </Form.Item>
+            </Col>
+          )}
           <Col xs={12} md={6}>
             <Form.Item name="gst_rate" label={t('medicines.gst')} extra={t('medicines.gstHelp')} rules={required}>
               <InputNumber min={0} max={40} precision={2} suffix="%" style={{ width: '100%' }} />

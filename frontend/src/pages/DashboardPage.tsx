@@ -18,21 +18,26 @@ const c = clinicConfig.colors;
 
 export default function DashboardPage() {
   const { t } = useTranslation();
-  const { me, branch, can, features } = useAuth();
+  const { me, branch, can, features, hasFeature } = useAuth();
   const [queue, setQueue] = useState<QueueData | null>(null);
   const [collection, setCollection] = useState<number | null>(null);
   const navigate = useNavigate();
   const showAppointments = can('appointments.view') && features.appointments !== false;
-  const showPharmacy = can('pharmacy.view') && features.pharmacy !== false;
+  const showStockAlerts = can('pharmacy.view') && features.pharmacy !== false && hasFeature('pharmacy_stock_alerts');
+  // Bills are made only by the pharmacy for now (clinic bills come in Step 6)
+  const showCollection = can('billing.view') && features.pharmacy !== false && hasFeature('pharmacy_billing');
 
   // Today's money received (cash + UPI + card, minus refunds)
   useEffect(() => {
-    if (!can('billing.view')) return;
+    if (!showCollection) {
+      setCollection(null);
+      return;
+    }
     api.get<DaySummary>('/invoices/summary/').then(({ data }) => {
       const sum = (r: Record<string, string>) => Object.values(r).reduce((a, v) => a + Number(v), 0);
       setCollection(sum(data.received) - sum(data.refunds));
     }).catch(() => setCollection(null));
-  }, [can]);
+  }, [showCollection]);
 
   useEffect(() => {
     if (!showAppointments) return;
@@ -95,7 +100,7 @@ export default function DashboardPage() {
           </Col>
         ))}
       </Row>
-      {showPharmacy && (
+      {showStockAlerts && (
         <>
           <div className="section-title" style={{ marginTop: 16 }}>{t('dashboard.stockAlerts')}</div>
           <AlertTiles onPick={(show) => navigate(`/pharmacy?tab=stock&show=${show}`)} />
