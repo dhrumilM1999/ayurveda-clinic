@@ -2,6 +2,29 @@
 
 What changed in each step, in plain words.
 
+## Step 4 completed - requirement check, autosave, undo/redo (2026-10-04)
+
+**Checked against docs/FEATURES.md and docs/BUILD_STEPS.md (Step 4).** These parts were missing and are now built:
+- **Templates editable by the admin** (new **Check-up templates** screen): questions, answers, Gujarati/Hindi text,
+  Prakriti scoring (each answer counts for Vata, Pitta or Kapha), switch on/off, add new templates.
+  Every change makes a new **version**; old check-ups always show the questions they were filled with.
+- **Symptom scores** (0-10 per complaint) and a **Progress** table over the visits (better / worse / same).
+- **Before / after photos** in the check-up (private, audit-logged), with a side-by-side before/after view.
+
+**New**
+- **Undo / Redo** on the check-up (buttons, Ctrl+Z, Ctrl+Y; Ctrl+S saves at once).
+- **Stronger autosave**: if saving fails (e.g. network), the change stays marked "Not saved!" and is retried
+  automatically; two saves never run at the same time.
+- **Autosave of the patient registration / edit form**: a reload no longer loses the typing. The draft is kept only in
+  that browser tab and deleted on logout (privacy on shared computers).
+
+**OPD flow re-checked** (walk-in -> token -> check-up -> complete -> appointment done) and fixed:
+- A check-up can no longer be opened for an appointment on a later date.
+- The Prakriti badge in the header updates as soon as the questionnaire is saved.
+- On small screens the appointment buttons stay visible (pinned on the right).
+
+**Tests:** 5 more automated tests (95 in total), all pass.
+
 ## Step 4 - Check-up screen and Ayurveda templates (2026-10-04)
 
 **What you can do now** (layout based on the Healthray check-up screen)

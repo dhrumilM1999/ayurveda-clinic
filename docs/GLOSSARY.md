@@ -34,7 +34,10 @@
 | **Vite** | The tool that serves the React screens during development and reloads on changes. |
 | **EMR** | Electronic Medical Record: the doctor's notes of each check-up, stored safely in the software. |
 | **Template** (check-up) | A ready form such as Ashtavidha Pariksha; the doctor clicks answers instead of typing. |
-| **Autosave** | The check-up saves itself a moment after you stop typing; no Save click needed. |
+| **Autosave** | The check-up saves itself a moment after you stop typing; no Save click needed. If saving fails it tries again. |
+| **Undo / Redo** | Go one change back / forward again (Ctrl+Z / Ctrl+Y). |
+| **Version** (template) | Each saved change of a template's questions gets a new number; old check-ups keep their version. |
+| **Symptom score** | 0 (no problem) to 10 (worst), given per complaint at each visit to see progress. |
 | **NAMASTE / ICD** | Official code lists for diagnoses (Ayush / WHO). Optional in this software. |
 | **Token** | The queue number (1, 2, 3...) a patient gets on arrival, per doctor per day. |
 | **Walk-in** | A patient who comes without an appointment; gets a token straight away. |

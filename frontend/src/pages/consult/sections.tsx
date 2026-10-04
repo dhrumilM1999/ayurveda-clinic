@@ -53,6 +53,9 @@ export function ComplaintsSection({ draft, onChange, readOnly }: SectionProps) {
                 { value: '', label: '—' },
                 ...['mild', 'moderate', 'severe'].map((s) => ({ value: s, label: t(`consult.severity.${s}`) })),
               ]} />
+            <InputNumber size="small" min={0} max={10} precision={0} disabled={readOnly} style={{ width: 92 }}
+              placeholder="0-10" addonBefore={t('consult.score')} value={c.score ?? undefined}
+              title={t('consult.scoreHelp')} onChange={(v) => update(i, { score: v ?? null })} />
             <Input size="small" placeholder={t('consult.notes')} value={c.notes} disabled={readOnly} maxLength={500}
               onChange={(e) => update(i, { notes: e.target.value })} className="item-notes" />
             {!readOnly && (
@@ -271,17 +274,21 @@ export function TemplateSection({ template, values, onChange, readOnly }: {
 }
 
 // --- Summary of everything filled in ---------------------------------------------------------
-export function SummarySection({ draft, templates, exams }: {
+export function SummarySection({ draft, templates, exams, examFields = {} }: {
   draft: VisitDraft;
   templates: ExamTemplate[];
   exams: Record<string, Record<string, unknown>>;
+  /** Questions of older template versions, for check-ups filled before a template changed */
+  examFields?: Record<string, ExamField[]>;
 }) {
   const { t } = useTranslation();
   const lang = useLang3();
   const name = useTemplateName();
   const prakritiName = usePrakritiName();
 
-  const filledTemplates = templates.filter((tpl) => Object.keys(exams[tpl.code] ?? {}).length > 0);
+  const filledTemplates = templates
+    .filter((tpl) => Object.keys(exams[tpl.code] ?? {}).length > 0)
+    .map((tpl) => (examFields[tpl.code] ? { ...tpl, fields: examFields[tpl.code]! } : tpl));
   const nothing = !draft.complaints.length && !draft.diagnoses.length && !draft.advice.length && !draft.history_notes
     && !filledTemplates.length && !draft.follow_up_date;
   if (nothing) return <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('consult.summaryEmpty')} />;
@@ -306,6 +313,7 @@ export function SummarySection({ draft, templates, exams }: {
                 <b>{c.label}</b>
                 {c.duration ? ` — ${c.duration} ${t(`consult.units.${c.duration_unit ?? 'days'}`)}` : ''}
                 {c.severity ? ` · ${t(`consult.severity.${c.severity}`)}` : ''}
+                {c.score !== null && c.score !== undefined ? ` · ${t('consult.score')} ${c.score}/10` : ''}
                 {c.notes ? ` · ${c.notes}` : ''}
               </li>
             ))}

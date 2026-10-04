@@ -114,6 +114,12 @@ No real SMS is sent yet. You can find the code in two places:
 7. Everything saves by itself ("Saved" at the top). **Summary** shows the whole check-up. **Complete visit** finishes it.
 8. Open the same patient again later: **Previous check-ups** on the right. The patient file has a **Check-ups** tab.
 9. Log in as `reception1`: there is no Check-up menu (front desk cannot read medical notes).
+10. **Undo / Redo**: the arrow buttons at the top of the check-up, or Ctrl+Z / Ctrl+Y. Ctrl+S saves at once.
+11. **Score** (0-10) on each complaint -> **Progress** shows the scores over the visits (better / worse).
+12. **Photos**: add *Before* / *During* / *After* photos; once there is a before and a later photo, they show side by side.
+13. As `admin`: **Check-up templates** -> **Edit** a template, change a question, **Save** -> version 2.
+14. **Patients -> Register patient**: type a name, then press F5 (reload). The form comes back ("Your unsaved form
+    was restored"). It is kept only in that browser tab and is removed on logout.
 
 ## 5. Other addresses
 

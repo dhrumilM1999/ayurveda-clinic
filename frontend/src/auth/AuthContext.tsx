@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { api, setSessionExpiredHandler } from '../api/client';
 import type { FeatureFlag, Me, MyBranch } from '../api/types';
 import i18n, { setLanguage } from '../i18n';
+import { clearAllDrafts } from '../utils/formDraft';
 import { tokenStore } from './tokenStore';
 
 interface AuthValue {
@@ -80,6 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
     tokenStore.clear();
+    clearAllDrafts(); // unsaved forms must not stay behind for the next person
     // The next person starts on the dashboard, not on the last screen used.
     navigate('/', { replace: true });
     setMe(null);

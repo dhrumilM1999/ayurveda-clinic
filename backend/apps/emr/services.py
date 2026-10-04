@@ -2,13 +2,15 @@
 Check-up rules: starting templates, checking exam answers, Prakriti scoring, starting and finishing a visit.
 Other modules (prescriptions, billing...) should use these functions.
 """
+import re
+
 from django.db import transaction
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
 from apps.appointments.services import change_status
 
-from .models import ExamTemplate, Visit, VisitExam
+from .models import ExamTemplate, ExamTemplateVersion, Visit, VisitExam
 from .templates_catalog import TEMPLATES
 
 DOSHAS = ("vata", "pitta", "kapha")
@@ -22,13 +24,129 @@ def ensure_exam_templates(organization) -> int:
     for order, tpl in enumerate(TEMPLATES):
         if tpl["code"] in existing:
             continue
-        ExamTemplate.objects.create(
+        template = ExamTemplate.objects.create(
             organization=organization, code=tpl["code"], version=tpl["version"], kind=tpl["kind"],
             name=tpl["name"]["en"], name_gu=tpl["name"]["gu"], name_hi=tpl["name"]["hi"],
             description=tpl.get("description", {}), fields=tpl["fields"], sort_order=order,
         )
+        ExamTemplateVersion.objects.create(template=template, version=template.version, fields=template.fields)
         added += 1
     return added
+
+
+# --- Editing templates (admin screen) -------------------------------------------------
+FIELD_TYPES = {"choice", "multi", "number", "text"}
+KEY_RE = re.compile(r"^[a-z][a-z0-9_]{0,39}$")
+MAX_FIELDS = 60
+MAX_OPTIONS = 30
+
+
+def _label(raw, where) -> dict:
+    if not isinstance(raw, dict) or not str(raw.get("en", "")).strip():
+        raise ValidationError({"fields": f"{where}: the English text is missing."})
+    return {lang: str(raw.get(lang, "")).strip()[:200] for lang in ("en", "gu", "hi")}
+
+
+def validate_template_fields(kind: str, fields) -> list:
+    """Check the questions of a template made on the admin screen, and return a clean copy."""
+    if not isinstance(fields, list) or not fields:
+        raise ValidationError({"fields": "Add at least one question."})
+    if len(fields) > MAX_FIELDS:
+        raise ValidationError({"fields": f"At most {MAX_FIELDS} questions."})
+    cleaned, keys = [], set()
+    for number, field in enumerate(fields, start=1):
+        where = f"Question {number}"
+        if not isinstance(field, dict):
+            raise ValidationError({"fields": f"{where} is not valid."})
+        key = str(field.get("key", "")).strip()
+        if not KEY_RE.match(key) or key in keys:
+            raise ValidationError({"fields": f"{where}: short name must be unique, lowercase letters/numbers/_ ."})
+        keys.add(key)
+        ftype = field.get("type")
+        if kind == "questionnaire":
+            ftype = "choice"  # every Prakriti-type question has one answer that counts for a dosha
+        if ftype not in FIELD_TYPES:
+            raise ValidationError({"fields": f"{where}: unknown answer type."})
+        item = {"key": key, "type": ftype, "label": _label(field.get("label"), where)}
+        if ftype in ("choice", "multi"):
+            options = field.get("options") or []
+            if not isinstance(options, list) or not 1 <= len(options) <= MAX_OPTIONS:
+                raise ValidationError({"fields": f"{where}: add 1 to {MAX_OPTIONS} answers."})
+            values, clean_options = set(), []
+            for opt in options:
+                value = str((opt or {}).get("value", "")).strip()
+                if kind == "questionnaire":
+                    if value not in DOSHAS:
+                        raise ValidationError({"fields": f"{where}: each answer must count for Vata, Pitta or Kapha."})
+                elif not KEY_RE.match(value) or value in values:
+                    raise ValidationError({"fields": f"{where}: answer short names must be unique."})
+                values.add(value)
+                clean_options.append({"value": value, "label": _label(opt.get("label"), where)})
+            item["options"] = clean_options
+        if ftype == "number":
+            item["unit"] = str(field.get("unit") or "")[:20]
+            for limit in ("min", "max"):
+                if field.get(limit) not in (None, ""):
+                    try:
+                        item[limit] = float(field[limit])
+                    except (TypeError, ValueError):
+                        raise ValidationError({"fields": f"{where}: {limit} must be a number."})
+        cleaned.append(item)
+    return cleaned
+
+
+def save_template(template: ExamTemplate, data: dict, user) -> ExamTemplate:
+    """Update a template. If the questions change, the version goes up and the old questions are kept."""
+    for name in ("name", "name_gu", "name_hi"):
+        if name in data:
+            setattr(template, name, str(data[name] or "").strip()[:150])
+    if not template.name:
+        raise ValidationError({"name": "Please give the template a name."})
+    if "description" in data and isinstance(data["description"], dict):
+        template.description = {k: str(data["description"].get(k, ""))[:500] for k in ("en", "gu", "hi")}
+    for name in ("is_active", "sort_order"):
+        if name in data:
+            setattr(template, name, data[name])
+    with transaction.atomic():
+        if "fields" in data:
+            fields = validate_template_fields(template.kind, data["fields"])
+            if fields != template.fields:
+                template.version += 1
+                template.fields = fields
+                ExamTemplateVersion.objects.create(template=template, version=template.version, fields=fields,
+                                                   created_by=user)
+        template.updated_by = user
+        template.save()
+    return template
+
+
+def create_template(organization, data: dict, user) -> ExamTemplate:
+    kind = data.get("kind") if data.get("kind") in ("form", "questionnaire") else "form"
+    name = str(data.get("name") or "").strip()
+    if not name:
+        raise ValidationError({"name": "Please give the template a name."})
+    base = re.sub(r"[^a-z0-9]+", "_", name.lower()).strip("_")[:40] or "template"
+    code, n = base, 2
+    while ExamTemplate.all_objects.filter(organization=organization, code=code).exists():
+        code, n = f"{base}_{n}", n + 1
+    fields = validate_template_fields(kind, data.get("fields"))
+    with transaction.atomic():
+        template = ExamTemplate.objects.create(
+            organization=organization, code=code, kind=kind, version=1, name=name[:150],
+            name_gu=str(data.get("name_gu") or "")[:150], name_hi=str(data.get("name_hi") or "")[:150],
+            fields=fields, sort_order=ExamTemplate.objects.filter(organization=organization).count(),
+            created_by=user, updated_by=user,
+        )
+        ExamTemplateVersion.objects.create(template=template, version=1, fields=fields, created_by=user)
+    return template
+
+
+def fields_for_version(template: ExamTemplate, version: int) -> list:
+    """The questions as they were in that version (falls back to the current ones)."""
+    if version == template.version:
+        return template.fields
+    snapshot = ExamTemplateVersion.objects.filter(template=template, version=version).first()
+    return snapshot.fields if snapshot else template.fields
 
 
 def clean_exam_values(template: ExamTemplate, values) -> dict:
@@ -127,6 +245,8 @@ def start_visit(*, patient, doctor, branch, user, appointment=None) -> tuple[Vis
         existing = Visit.objects.filter(appointment=appointment).first()
         if existing:
             return existing, False
+        if appointment.date > timezone.localdate():
+            raise ValidationError({"detail": "This appointment is on a later date. The check-up opens on that day."})
         if appointment.date == timezone.localdate():
             if appointment.status == "booked":
                 change_status(appointment, "check_in", user)

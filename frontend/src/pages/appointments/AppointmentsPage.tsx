@@ -152,7 +152,8 @@ export default function AppointmentsPage() {
           },
           { title: t('common.status'), dataIndex: 'status', width: 120, render: (s: AppointmentStatus) => <StatusTag status={s} /> },
           {
-            title: '', key: 'actions', width: 150, align: 'right' as const,
+            // fixed: the buttons stay visible on small screens
+            title: '', key: 'actions', width: 150, align: 'right' as const, fixed: 'right' as const,
             render: (_: unknown, r: Appointment) => <AppointmentActions appointment={r} onChanged={reload} />,
           },
         ]}

@@ -56,6 +56,9 @@
 | `frontend/public/logo.svg` | The logo | **SAFE TO EDIT** (replace the file) |
 | `frontend/src/pages/` | One file per screen (`pages/patients/` = patient screens, `pages/appointments/` = appointments and queue) | ASK FIRST |
 | `frontend/src/pages/consult/` | The check-up screen | ASK FIRST |
+| `frontend/src/pages/consult/VisitWorkspace.tsx` | Check-up autosave and undo: `AUTOSAVE_MS`, `RETRY_MS`, `UNDO_STEPS` at the top | **SAFE TO EDIT** (those lines) |
+| `frontend/src/pages/TemplatesPage.tsx` | The Check-up templates editing screen | ASK FIRST |
+| `frontend/src/utils/formDraft.ts` | Keeps unsaved forms in the browser tab (autosave of the patient form) | ASK FIRST |
 | `frontend/src/pages/appointments/QueueDisplayPage.tsx` | TV screen: `REFRESH_SECONDS`, `NEXT_COUNT` at the top | **SAFE TO EDIT** (those two lines) |
 | `frontend/src/layout/` | The frame: menu, top bar | ASK FIRST |
 | `frontend/src/auth/` | Login, branch choice, auto-logout | ASK FIRST |

@@ -432,6 +432,7 @@ export interface ExamTemplate {
   description: Partial<Lang3>;
   fields: ExamField[];
   sort_order: number;
+  is_active?: boolean;
 }
 
 export interface PrakritiResult {
@@ -451,7 +452,20 @@ export interface VisitExam {
   template_version: number;
   values: Record<string, unknown>;
   result: PrakritiResult | Record<string, never>;
+  /** The questions as they were when this exam was filled in */
+  template_fields: ExamField[];
   updated_at: string;
+}
+
+export interface VisitPhoto {
+  id: string;
+  visit: string;
+  visit_date: string;
+  kind: 'before' | 'after' | 'progress';
+  caption: string;
+  content_type: string;
+  size_bytes: number;
+  created_at: string;
 }
 
 export interface Complaint {
@@ -460,6 +474,8 @@ export interface Complaint {
   duration?: number | null;
   duration_unit?: 'days' | 'weeks' | 'months' | 'years';
   severity?: '' | 'mild' | 'moderate' | 'severe';
+  /** Symptom score 0 (none) to 10 (worst), for progress tracking */
+  score?: number | null;
   notes?: string;
 }
 
@@ -493,6 +509,7 @@ export interface Visit {
   follow_up_date: string | null;
   follow_up_notes: string;
   exams: VisitExam[];
+  photos: VisitPhoto[];
   prakriti: PrakritiResult | null;
   created_at: string;
   updated_at: string;
@@ -507,5 +524,7 @@ export interface VisitListItem {
   branch_name: string;
   complaints: string[];
   diagnoses: string[];
+  scores: Record<string, number>;
+  photo_count: number;
   follow_up_date: string | null;
 }

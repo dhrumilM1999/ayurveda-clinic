@@ -95,3 +95,58 @@ class VisitExam(OrgScopedModel):
     def patient_id(self):
         # Lets the audit log link exam changes to the patient's Activity tab.
         return self.visit.patient_id
+
+
+class ExamTemplateVersion(models.Model):
+    """
+    A frozen copy of a template's questions, saved every time the template is changed.
+    Old check-ups are shown with the questions of the version they were filled with.
+    """
+
+    template = models.ForeignKey(ExamTemplate, on_delete=models.PROTECT, related_name="versions")
+    version = models.PositiveSmallIntegerField()
+    fields = models.JSONField(default=list)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
+                                   related_name="+")
+
+    class Meta:
+        ordering = ["template", "-version"]
+        constraints = [
+            models.UniqueConstraint(fields=["template", "version"], name="uniq_exam_template_version"),
+        ]
+
+
+def _private_storage():
+    from django.core.files.storage import storages
+
+    return storages["private"]
+
+
+def visit_photo_path(instance, filename):
+    """Saved under a random name, so the file name never shows patient details."""
+    import uuid
+
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else "jpg"
+    return f"patients/{instance.visit.patient_id}/visits/{uuid.uuid4().hex}.{ext}"
+
+
+PHOTO_KINDS = [("before", "Before treatment"), ("after", "After treatment"), ("progress", "During treatment")]
+
+
+class VisitPhoto(OrgScopedModel):
+    """A clinical photo taken at a check-up (e.g. skin before / after treatment). Private storage only."""
+
+    visit = models.ForeignKey(Visit, on_delete=models.PROTECT, related_name="photos")
+    kind = models.CharField(max_length=20, choices=PHOTO_KINDS, default="before")
+    caption = models.CharField(max_length=200, blank=True)  # e.g. "Left knee", "Back of hands"
+    file = models.FileField(storage=_private_storage, upload_to=visit_photo_path)
+    content_type = models.CharField(max_length=100)
+    size_bytes = models.PositiveIntegerField()
+
+    class Meta:
+        ordering = ["created_at"]
+
+    @property
+    def patient_id(self):
+        return self.visit.patient_id

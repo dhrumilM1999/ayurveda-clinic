@@ -2,8 +2,8 @@ from rest_framework import serializers
 
 from apps.appointments.serializers import patient_summary
 
-from .models import ExamTemplate, Visit, VisitExam
-from .services import latest_prakriti
+from .models import ExamTemplate, Visit, VisitExam, VisitPhoto
+from .services import fields_for_version, latest_prakriti
 
 DURATION_UNITS = ("days", "weeks", "months", "years")
 SEVERITIES = ("mild", "moderate", "severe")
@@ -22,16 +22,32 @@ def _text(item, key, limit, required=False):
 class ExamTemplateSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExamTemplate
-        fields = ["id", "code", "version", "kind", "name", "name_gu", "name_hi", "description", "fields", "sort_order"]
+        fields = ["id", "code", "version", "kind", "name", "name_gu", "name_hi", "description", "fields", "sort_order",
+                  "is_active", "updated_at"]
 
 
 class VisitExamSerializer(serializers.ModelSerializer):
     values = serializers.JSONField(read_only=True)
     result = serializers.JSONField(read_only=True)
+    # The questions as they were when this exam was filled in (templates can change later)
+    template_fields = serializers.SerializerMethodField()
 
     class Meta:
         model = VisitExam
-        fields = ["id", "template", "template_code", "template_version", "values", "result", "updated_at"]
+        fields = ["id", "template", "template_code", "template_version", "values", "result", "template_fields",
+                  "updated_at"]
+
+    def get_template_fields(self, obj):
+        return fields_for_version(obj.template, obj.template_version)
+
+
+class VisitPhotoSerializer(serializers.ModelSerializer):
+    visit_date = serializers.DateField(source="visit.visit_date", read_only=True)
+
+    class Meta:
+        model = VisitPhoto
+        fields = ["id", "visit", "visit_date", "kind", "caption", "content_type", "size_bytes", "created_at"]
+        read_only_fields = fields
 
 
 class VisitSerializer(serializers.ModelSerializer):
@@ -40,6 +56,7 @@ class VisitSerializer(serializers.ModelSerializer):
     branch_name = serializers.CharField(source="branch.name", read_only=True)
     token_number = serializers.IntegerField(source="appointment.token_number", read_only=True, default=None)
     exams = serializers.SerializerMethodField()
+    photos = serializers.SerializerMethodField()
     prakriti = serializers.SerializerMethodField()
     complaints = serializers.JSONField(required=False)
     diagnoses = serializers.JSONField(required=False)
@@ -51,7 +68,7 @@ class VisitSerializer(serializers.ModelSerializer):
             "id", "patient", "patient_detail", "doctor", "doctor_name", "branch", "branch_name",
             "appointment", "token_number", "visit_date", "status", "completed_at",
             "complaints", "history_notes", "examination_notes", "diagnoses", "advice", "advice_notes",
-            "follow_up_date", "follow_up_notes", "exams", "prakriti", "created_at", "updated_at",
+            "follow_up_date", "follow_up_notes", "exams", "photos", "prakriti", "created_at", "updated_at",
         ]
         read_only_fields = [
             "id", "patient", "doctor", "branch", "appointment", "visit_date", "status", "completed_at",
@@ -63,6 +80,9 @@ class VisitSerializer(serializers.ModelSerializer):
 
     def get_exams(self, obj):
         return VisitExamSerializer(obj.exams.all(), many=True).data
+
+    def get_photos(self, obj):
+        return VisitPhotoSerializer(obj.photos.all(), many=True).data
 
     def get_prakriti(self, obj):
         return latest_prakriti(obj.patient)
@@ -90,13 +110,23 @@ class VisitSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError("Duration must be between 0 and 999.")
             else:
                 duration = None
+            score = item.get("score")
+            if score not in (None, ""):
+                try:
+                    score = int(score)
+                except (TypeError, ValueError):
+                    raise serializers.ValidationError("Symptom score must be a number from 0 to 10.")
+                if not 0 <= score <= 10:
+                    raise serializers.ValidationError("Symptom score must be from 0 to 10.")
+            else:
+                score = None
             unit = item.get("duration_unit") or "days"
             severity = item.get("severity") or ""
             if unit not in DURATION_UNITS or (severity and severity not in SEVERITIES):
                 raise serializers.ValidationError("Unknown duration unit or severity.")
             cleaned.append({
                 "label": _text(item, "label", 200, required=True), "code": _text(item, "code", 60),
-                "duration": duration, "duration_unit": unit, "severity": severity,
+                "duration": duration, "duration_unit": unit, "severity": severity, "score": score,
                 "notes": _text(item, "notes", 500),
             })
         return cleaned
@@ -127,19 +157,28 @@ class VisitListSerializer(serializers.ModelSerializer):
     branch_name = serializers.CharField(source="branch.name", read_only=True)
     complaints = serializers.SerializerMethodField()
     diagnoses = serializers.SerializerMethodField()
+    scores = serializers.SerializerMethodField()
+    photo_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Visit
         fields = [
             "id", "patient", "visit_date", "status", "doctor_name", "branch_name",
-            "complaints", "diagnoses", "follow_up_date",
+            "complaints", "diagnoses", "scores", "photo_count", "follow_up_date",
         ]
 
     def get_complaints(self, obj):
         return [c.get("label") for c in obj.complaints]
 
+    def get_scores(self, obj):
+        """{complaint: score} for the progress table."""
+        return {c.get("label"): c.get("score") for c in obj.complaints if c.get("score") is not None}
+
     def get_diagnoses(self, obj):
         return [d.get("label") for d in obj.diagnoses]
+
+    def get_photo_count(self, obj):
+        return len(obj.photos.all())
 
 
 class StartVisitSerializer(serializers.Serializer):

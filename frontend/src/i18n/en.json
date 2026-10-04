@@ -64,7 +64,8 @@
     "patients": "Patients",
     "appointments": "Appointments",
     "queue": "Queue",
-    "consult": "Check-up"
+    "consult": "Check-up",
+    "templates": "Check-up templates"
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",
@@ -421,7 +422,10 @@
       "patients_patientvital": "Vitals",
       "patients_patientdocument": "Document",
       "patients_patientconsent": "Consent"
-    }
+    },
+    "draftRestored": "Your unsaved form was restored.",
+    "discardDraft": "Start empty",
+    "draftSaved": "Draft kept in this browser tab"
   },
   "vitals": {
     "record": "Record vitals",
@@ -631,7 +635,9 @@
       "vitals": "Vitals",
       "diagnosis": "Diagnosis",
       "advice": "Advice",
-      "followUp": "Follow-up"
+      "followUp": "Follow-up",
+      "progress": "Progress",
+      "photos": "Photos"
     },
     "units": {
       "days": "days",
@@ -659,6 +665,68 @@
     "status": {
       "draft": "In progress",
       "completed": "Completed"
+    },
+    "undo": "Undo",
+    "redo": "Redo",
+    "undoHelp": "Undo the last change (Ctrl+Z)",
+    "redoHelp": "Redo (Ctrl+Y)",
+    "score": "Score",
+    "scoreHelp": "How bad is it today? 0 = none, 10 = worst",
+    "today": "Today",
+    "trend": "Change",
+    "better": "better by {{n}}",
+    "worse": "worse by {{n}}",
+    "same": "same",
+    "progressHelp": "Symptom score per visit (0 = none, 10 = worst). Add scores in Complaints.",
+    "progressEmpty": "No scores yet. Give each complaint a score (0-10) in Complaints to track progress.",
+    "addPhoto": "Add photo",
+    "photoCaption": "Body part, e.g. left knee",
+    "photoHelp": "Photos are private: only staff who can see check-ups can open them. Take photos only with the patient's permission.",
+    "compare": "Before / after",
+    "thisVisitPhotos": "Photos of this check-up ({{n}})",
+    "earlierPhotos": "Earlier photos",
+    "noPhotos": "No photos yet.",
+    "removePhoto": "Remove this photo?",
+    "photoKind": {
+      "before": "Before",
+      "progress": "During",
+      "after": "After"
+    }
+  },
+  "templatesAdmin": {
+    "title": "Check-up templates",
+    "subtitle": "Questions the doctor clicks on the check-up screen. Changes create a new version; old check-ups keep their questions.",
+    "addForm": "Add template",
+    "addQuestionnaire": "Add Prakriti-type questionnaire",
+    "name": "Name",
+    "kind": "Type",
+    "kinds": {
+      "form": "Form",
+      "questionnaire": "Scored (Vata/Pitta/Kapha)"
+    },
+    "questions": "Questions",
+    "questionsTitle": "Questions ({{n}})",
+    "version": "Version",
+    "versionHelp": "Now version {{v}}. Saving changed questions makes a new version.",
+    "editTitle": "Edit: {{name}}",
+    "description": "Short description",
+    "descriptionPlaceholder": "e.g. Eight-fold examination",
+    "questionnaireHelp": "Each answer counts for Vata, Pitta or Kapha. The software adds them up into a percentage score.",
+    "questionPlaceholder": "Question in English",
+    "answerPlaceholder": "Answer in English",
+    "answer": "Answer",
+    "addAnswer": "Add answer",
+    "addQuestion": "Add question",
+    "unit": "Unit",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "savedVersion": "Saved (version {{v}})",
+    "closeConfirm": "Close without saving?",
+    "types": {
+      "choice": "One answer",
+      "multi": "Many answers",
+      "number": "Number",
+      "text": "Notes"
     }
   }
 }

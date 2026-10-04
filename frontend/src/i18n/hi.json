@@ -64,7 +64,8 @@
     "patients": "मरीज़",
     "appointments": "अपॉइंटमेंट",
     "queue": "कतार (क्यू)",
-    "consult": "जाँच (चेक-अप)"
+    "consult": "जाँच (चेक-अप)",
+    "templates": "जाँच टेम्पलेट"
   },
   "dashboard": {
     "welcome": "स्वागत है, {{name}}",
@@ -421,7 +422,10 @@
       "patients_patientvital": "वाइटल्स",
       "patients_patientdocument": "दस्तावेज़",
       "patients_patientconsent": "सहमति"
-    }
+    },
+    "draftRestored": "आपका बिना सहेजा फ़ॉर्म वापस लाया गया।",
+    "discardDraft": "खाली शुरू करें",
+    "draftSaved": "ड्राफ़्ट इस टैब में रखा"
   },
   "vitals": {
     "record": "वाइटल्स दर्ज करें",
@@ -631,7 +635,9 @@
       "vitals": "वाइटल्स",
       "diagnosis": "निदान",
       "advice": "सलाह",
-      "followUp": "फ़ॉलो-अप"
+      "followUp": "फ़ॉलो-अप",
+      "progress": "प्रगति",
+      "photos": "फ़ोटो"
     },
     "units": {
       "days": "दिन",
@@ -659,6 +665,68 @@
     "status": {
       "draft": "जारी",
       "completed": "पूर्ण"
+    },
+    "undo": "पूर्ववत करें",
+    "redo": "फिर से करें",
+    "undoHelp": "पिछला बदलाव वापस (Ctrl+Z)",
+    "redoHelp": "फिर से करें (Ctrl+Y)",
+    "score": "स्कोर",
+    "scoreHelp": "आज कितनी तकलीफ़? 0 = नहीं, 10 = सबसे ज़्यादा",
+    "today": "आज",
+    "trend": "बदलाव",
+    "better": "{{n}} बेहतर",
+    "worse": "{{n}} बढ़ा",
+    "same": "उतना ही",
+    "progressHelp": "हर मुलाक़ात का लक्षण स्कोर (0 = नहीं, 10 = सबसे ज़्यादा)। शिकायतों में स्कोर जोड़ें।",
+    "progressEmpty": "अभी स्कोर नहीं। प्रगति देखने के लिए शिकायतों में हर एक को 0-10 स्कोर दें।",
+    "addPhoto": "फ़ोटो जोड़ें",
+    "photoCaption": "शरीर का भाग, जैसे बायाँ घुटना",
+    "photoHelp": "फ़ोटो निजी हैं: केवल जाँच देख सकने वाला स्टाफ़ खोल सकता है। मरीज़ की अनुमति से ही फ़ोटो लें।",
+    "compare": "पहले / बाद",
+    "thisVisitPhotos": "इस जाँच की फ़ोटो ({{n}})",
+    "earlierPhotos": "पिछली फ़ोटो",
+    "noPhotos": "अभी कोई फ़ोटो नहीं।",
+    "removePhoto": "यह फ़ोटो हटाएँ?",
+    "photoKind": {
+      "before": "पहले",
+      "progress": "दौरान",
+      "after": "बाद"
+    }
+  },
+  "templatesAdmin": {
+    "title": "जाँच टेम्पलेट",
+    "subtitle": "जाँच स्क्रीन पर डॉक्टर जो प्रश्न क्लिक करते हैं। बदलाव से नया वर्ज़न बनता है; पुरानी जाँच में पुराने प्रश्न रहते हैं।",
+    "addForm": "टेम्पलेट जोड़ें",
+    "addQuestionnaire": "प्रकृति जैसी प्रश्नावली जोड़ें",
+    "name": "नाम",
+    "kind": "प्रकार",
+    "kinds": {
+      "form": "फ़ॉर्म",
+      "questionnaire": "स्कोर वाली (वात/पित्त/कफ)"
+    },
+    "questions": "प्रश्न",
+    "questionsTitle": "प्रश्न ({{n}})",
+    "version": "वर्ज़न",
+    "versionHelp": "अभी वर्ज़न {{v}}। प्रश्न बदलकर सहेजने से नया वर्ज़न बनेगा।",
+    "editTitle": "बदलें: {{name}}",
+    "description": "छोटा विवरण",
+    "descriptionPlaceholder": "जैसे आठ प्रकार की परीक्षा",
+    "questionnaireHelp": "हर उत्तर वात, पित्त या कफ में गिना जाता है। सॉफ़्टवेयर उसका प्रतिशत स्कोर बनाता है।",
+    "questionPlaceholder": "अंग्रेज़ी में प्रश्न",
+    "answerPlaceholder": "अंग्रेज़ी में उत्तर",
+    "answer": "उत्तर",
+    "addAnswer": "उत्तर जोड़ें",
+    "addQuestion": "प्रश्न जोड़ें",
+    "unit": "इकाई",
+    "moveUp": "ऊपर ले जाएँ",
+    "moveDown": "नीचे ले जाएँ",
+    "savedVersion": "सहेजा गया (वर्ज़न {{v}})",
+    "closeConfirm": "बिना सहेजे बंद करें?",
+    "types": {
+      "choice": "एक उत्तर",
+      "multi": "कई उत्तर",
+      "number": "संख्या",
+      "text": "नोट"
     }
   }
 }

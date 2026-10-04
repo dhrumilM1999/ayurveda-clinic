@@ -1,14 +1,19 @@
 // One patient's check-up: header, section buttons (Healthray style), the open section, previous visits.
-// Changes save by themselves a moment after typing stops (and on "Save").
-import { AlertOutlined, CheckCircleOutlined, CloudSyncOutlined, FileSearchOutlined, SaveOutlined } from '@ant-design/icons';
-import { Alert, App, Button, Card, Modal, Skeleton, Space, Tag } from 'antd';
+// - Autosave: changes save by themselves a moment after typing stops (and on "Save"). If saving fails
+//   (e.g. no network) it tries again, and nothing typed is lost.
+// - Undo / Redo: buttons at the top, or Ctrl+Z / Ctrl+Y (Ctrl+Shift+Z) while the check-up is open.
+// SAFE TO EDIT: AUTOSAVE_MS, RETRY_MS, UNDO_STEPS below.
+import {
+  AlertOutlined, CheckCircleOutlined, CloudSyncOutlined, FileSearchOutlined, RedoOutlined, SaveOutlined, UndoOutlined,
+} from '@ant-design/icons';
+import { Alert, App, Button, Card, Modal, Skeleton, Space, Tag, Tooltip } from 'antd';
 import dayjs from 'dayjs';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { api, errorMessage } from '../../api/client';
 import { useMasterLabel } from '../../api/masters';
-import type { ExamTemplate, Patient, Visit, VisitExam, VisitListItem } from '../../api/types';
+import type { ExamField, ExamTemplate, Patient, Visit, VisitExam, VisitListItem } from '../../api/types';
 import { useAuth } from '../../auth/AuthContext';
 import { genderAge } from '../patients/PatientsPage';
 import { VitalsTab } from '../patients/tabs/VitalsTab';
@@ -16,9 +21,15 @@ import {
   AdviceSection, ComplaintsSection, DiagnosisSection, FollowUpSection, NotesSection, SummarySection,
   TemplateSection, type VisitDraft,
 } from './sections';
+import { PhotosSection, ProgressSection } from './extraSections';
 import { usePrakritiName, useTemplateName } from './shared';
 
-const AUTOSAVE_MS = 1500;
+const AUTOSAVE_MS = 1500; // save this long after the last change
+const RETRY_MS = 8000; // if saving failed, try again after this long
+const UNDO_STEPS = 100; // how many changes Undo remembers
+const GROUP_MS = 1000; // typing in one box within this time = one Undo step
+
+type Doc = { draft: VisitDraft; exams: Record<string, Record<string, unknown>> };
 
 function toDraft(v: Visit): VisitDraft {
   return {
@@ -32,7 +43,18 @@ function toExams(exams: VisitExam[]) {
   return Object.fromEntries(exams.map((e) => [e.template_code, e.values]));
 }
 
+/** Questions of exams filled with an older template version (so old answers show correctly). */
+function toExamFields(exams: VisitExam[], templates: ExamTemplate[]): Record<string, ExamField[]> {
+  const current = Object.fromEntries(templates.map((tpl) => [tpl.code, tpl.version]));
+  return Object.fromEntries(exams.filter((e) => e.template_version !== current[e.template_code])
+    .map((e) => [e.template_code, e.template_fields]));
+}
+
 let templatesCache: Promise<ExamTemplate[]> | null = null;
+/** Call after templates were edited, so the next check-up loads the new questions. */
+export function clearTemplatesCache() {
+  templatesCache = null;
+}
 function loadTemplates() {
   templatesCache ??= api.get<ExamTemplate[]>('/exam-templates/').then((r) => r.data)
     .catch((e) => { templatesCache = null; throw e; });
@@ -66,6 +88,14 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
   const latest = useRef<{ draft: VisitDraft | null; exams: Record<string, Record<string, unknown>> }>({ draft: null, exams: {} });
   latest.current = { draft, exams };
   const timer = useRef<number>();
+  const inFlight = useRef<Promise<boolean> | null>(null);
+
+  // Undo / redo history
+  const past = useRef<Doc[]>([]);
+  const future = useRef<Doc[]>([]);
+  const lastEdit = useRef({ at: 0, key: '' });
+  const [, setHistoryVersion] = useState(0);
+  const workspaceRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setVisit(null);
@@ -73,6 +103,8 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
     setSection('complaints');
     dirtyDraft.current = false;
     dirtyExams.current.clear();
+    past.current = [];
+    future.current = [];
     Promise.all([api.get<Visit>(`/visits/${visitId}/`), loadTemplates()])
       .then(([{ data }, tpls]) => {
         setVisit(data);
@@ -87,27 +119,47 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
   // eslint-disable-next-line react-hooks/exhaustive-deps -- load once per visit
   }, [visitId, t]);
 
-  const save = useCallback(async () => {
+  const hasUnsaved = () => dirtyDraft.current || dirtyExams.current.size > 0;
+
+  const save = useCallback(async (): Promise<boolean> => {
     window.clearTimeout(timer.current);
-    const { draft: d, exams: ex } = latest.current;
-    if (!d || (!dirtyDraft.current && dirtyExams.current.size === 0)) return true;
-    setSaveState('saving');
-    try {
-      if (dirtyDraft.current) {
-        dirtyDraft.current = false;
-        await api.patch<Visit>(`/visits/${visitId}/`, d);
+    // Never run two saves at the same time: wait for the running one, then save what is left.
+    if (inFlight.current) await inFlight.current;
+    if (!latest.current.draft || !(dirtyDraft.current || dirtyExams.current.size)) return true;
+
+    const run = (async () => {
+      const { draft: d, exams: ex } = latest.current;
+      const sendDraft = dirtyDraft.current;
+      const codes = [...dirtyExams.current];
+      dirtyDraft.current = false;
+      dirtyExams.current.clear();
+      setSaveState('saving');
+      try {
+        if (sendDraft) await api.patch<Visit>(`/visits/${visitId}/`, d);
+        for (const code of codes) {
+          const { data } = await api.put<VisitExam>(`/visits/${visitId}/exams/${code}/`, { values: ex[code] ?? {} });
+          if (data.template_code === 'prakriti' && 'answered' in data.result && data.result.answered) {
+            // Show the new Prakriti in the header straight away
+            setVisit((v) => (v ? { ...v, prakriti: { ...data.result, visit_date: v.visit_date } as Visit['prakriti'] } : v));
+          }
+        }
+        setSaveState(dirtyDraft.current || dirtyExams.current.size ? 'dirty' : 'saved');
+        return true;
+      } catch (err) {
+        // Keep the changes marked as unsaved and try again a little later
+        if (sendDraft) dirtyDraft.current = true;
+        codes.forEach((c) => dirtyExams.current.add(c));
+        setSaveState('error');
+        message.error(errorMessage(err, t('common.saveFailed')));
+        window.clearTimeout(timer.current);
+        timer.current = window.setTimeout(() => { save(); }, RETRY_MS);
+        return false;
       }
-      for (const code of [...dirtyExams.current]) {
-        dirtyExams.current.delete(code);
-        await api.put(`/visits/${visitId}/exams/${code}/`, { values: ex[code] ?? {} });
-      }
-      setSaveState(dirtyDraft.current || dirtyExams.current.size ? 'dirty' : 'saved');
-      return true;
-    } catch (err) {
-      setSaveState('error');
-      message.error(errorMessage(err, t('common.saveFailed')));
-      return false;
-    }
+    })();
+    inFlight.current = run;
+    const ok = await run;
+    inFlight.current = null;
+    return ok;
   }, [visitId, message, t]);
 
   // Save a moment after the last change; also save when leaving this visit.
@@ -119,22 +171,86 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
   useEffect(() => () => { save(); }, [save]);
   useEffect(() => {
     const warn = (e: BeforeUnloadEvent) => {
-      if (dirtyDraft.current || dirtyExams.current.size) e.preventDefault();
+      if (hasUnsaved()) e.preventDefault();
     };
     window.addEventListener('beforeunload', warn);
     return () => window.removeEventListener('beforeunload', warn);
   }, []);
 
+  /** Remember the state before a change, so Undo can go back to it. */
+  const remember = (key: string) => {
+    const current = latest.current;
+    if (!current.draft) return;
+    const now = Date.now();
+    // Typing in the same box without a pause counts as one change
+    if (now - lastEdit.current.at > GROUP_MS || lastEdit.current.key !== key) {
+      past.current.push({ draft: current.draft, exams: current.exams });
+      if (past.current.length > UNDO_STEPS) past.current.shift();
+    }
+    lastEdit.current = { at: now, key };
+    future.current = [];
+    setHistoryVersion((n) => n + 1);
+  };
+
   const changeDraft = (patch: Partial<VisitDraft>) => {
+    remember(`draft:${Object.keys(patch).join(',')}`);
     setDraft((d) => (d ? { ...d, ...patch } : d));
     dirtyDraft.current = true;
     scheduleSave();
   };
   const changeExam = (code: string, values: Record<string, unknown>) => {
+    remember(`exam:${code}`);
     setExams((e) => ({ ...e, [code]: values }));
     dirtyExams.current.add(code);
     scheduleSave();
   };
+
+  /** Put back an earlier state and save it. */
+  const restore = (doc: Doc) => {
+    const current = latest.current;
+    if (doc.draft !== current.draft) dirtyDraft.current = true;
+    for (const code of new Set([...Object.keys(doc.exams), ...Object.keys(current.exams)])) {
+      if (doc.exams[code] !== current.exams[code]) dirtyExams.current.add(code);
+    }
+    setDraft(doc.draft);
+    setExams(doc.exams);
+    latest.current = doc;
+    lastEdit.current = { at: 0, key: '' };
+    setHistoryVersion((n) => n + 1);
+    scheduleSave();
+  };
+  const undo = () => {
+    const previous = past.current.pop();
+    const current = latest.current;
+    if (!previous || !current.draft) return;
+    future.current.push({ draft: current.draft, exams: current.exams });
+    restore(previous);
+  };
+  const redo = () => {
+    const next = future.current.pop();
+    const current = latest.current;
+    if (!next || !current.draft) return;
+    past.current.push({ draft: current.draft, exams: current.exams });
+    restore(next);
+  };
+
+  // Keyboard: Ctrl+Z = undo, Ctrl+Y or Ctrl+Shift+Z = redo (only while this check-up is in use)
+  const keys = useRef({ undo, redo });
+  keys.current = { undo, redo };
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.ctrlKey || e.metaKey) || readOnly) return;
+      const active = document.activeElement;
+      const inside = !active || active === document.body || workspaceRef.current?.contains(active);
+      if (!inside || document.querySelector('.ant-modal-wrap:not([style*="display: none"])')) return;
+      const key = e.key.toLowerCase();
+      if (key === 'z' && !e.shiftKey) { e.preventDefault(); keys.current.undo(); }
+      else if (key === 'y' || (key === 'z' && e.shiftKey)) { e.preventDefault(); keys.current.redo(); }
+      else if (key === 's') { e.preventDefault(); save(); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [readOnly, save]);
 
   const complete = async () => {
     if (!(await save())) return;
@@ -157,6 +273,8 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
     diagnosis: draft.diagnoses.length > 0,
     advice: draft.advice.length > 0 || !!draft.advice_notes,
     followUp: !!draft.follow_up_date,
+    progress: draft.complaints.some((c) => c.score !== null && c.score !== undefined),
+    photos: visit.photos.length > 0,
     ...Object.fromEntries(templates.map((tpl) => [`tpl:${tpl.code}`, Object.keys(exams[tpl.code] ?? {}).length > 0])),
   };
   const sections = [
@@ -165,6 +283,8 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
     { key: 'history', label: t('consult.sections.history') },
     ...(can('patients.vitals') || can('emr.view') ? [{ key: 'vitals', label: t('consult.sections.vitals') }] : []),
     ...templates.map((tpl) => ({ key: `tpl:${tpl.code}`, label: templateName(tpl) })),
+    { key: 'progress', label: t('consult.sections.progress') },
+    { key: 'photos', label: t('consult.sections.photos') },
     { key: 'diagnosis', label: t('consult.sections.diagnosis') },
     { key: 'advice', label: t('consult.sections.advice') },
     { key: 'followUp', label: t('consult.sections.followUp') },
@@ -174,7 +294,7 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
   const props = { draft, onChange: changeDraft, readOnly };
 
   return (
-    <div className="workspace">
+    <div className="workspace" ref={workspaceRef}>
       <div className="workspace-main">
         <Card className="visit-head" size="small">
           <div className="visit-head-row">
@@ -197,7 +317,17 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
               <span className={`save-state save-${saveState}`}>
                 <CloudSyncOutlined /> {t(`consult.save.${saveState}`)}
               </span>
-              {!readOnly && <Button size="small" icon={<SaveOutlined />} onClick={save}>{t('common.save')}</Button>}
+              {!readOnly && (
+                <>
+                  <Tooltip title={t('consult.undoHelp')}>
+                    <Button size="small" icon={<UndoOutlined />} disabled={!past.current.length} onClick={undo} aria-label={t('consult.undo')} />
+                  </Tooltip>
+                  <Tooltip title={t('consult.redoHelp')}>
+                    <Button size="small" icon={<RedoOutlined />} disabled={!future.current.length} onClick={redo} aria-label={t('consult.redo')} />
+                  </Tooltip>
+                  <Button size="small" icon={<SaveOutlined />} onClick={() => save()}>{t('common.save')}</Button>
+                </>
+              )}
               {!readOnly && visit.status !== 'completed' && (
                 <Button size="small" type="primary" icon={<CheckCircleOutlined />} onClick={complete}>{t('consult.complete')}</Button>
               )}
@@ -226,7 +356,13 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
         </div>
 
         <Card size="small" className="section-card">
-          {section === 'summary' && <SummarySection draft={draft} templates={templates} exams={exams} />}
+          {section === 'summary' && (
+            <SummarySection draft={draft} templates={templates} exams={exams} examFields={toExamFields(visit.exams, templates)} />
+          )}
+          {section === 'progress' && (
+            <ProgressSection patientId={visit.patient} visitId={visit.id} visitDate={visit.visit_date} complaints={draft.complaints} />
+          )}
+          {section === 'photos' && <PhotosSection visitId={visit.id} patientId={visit.patient} readOnly={readOnly} />}
           {section === 'complaints' && <ComplaintsSection {...props} />}
           {section === 'history' && <NotesSection {...props} />}
           {section === 'vitals' && <VitalsTab patientId={visit.patient} />}
@@ -275,7 +411,8 @@ function PreviousVisits({ patientId, currentId, templates }: { patientId: string
         {open && (
           <>
             <div className="cell-sub" style={{ marginBottom: 8 }}>{open.doctor_name} · {open.branch_name}</div>
-            <SummarySection draft={toDraft(open)} templates={templates} exams={toExams(open.exams)} />
+            <SummarySection draft={toDraft(open)} templates={templates} exams={toExams(open.exams)}
+              examFields={toExamFields(open.exams, templates)} />
           </>
         )}
       </Modal>

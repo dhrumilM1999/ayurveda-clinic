@@ -64,7 +64,8 @@
     "patients": "દર્દીઓ",
     "appointments": "એપોઇન્ટમેન્ટ",
     "queue": "કતાર (ક્યૂ)",
-    "consult": "તપાસ (ચેક-અપ)"
+    "consult": "તપાસ (ચેક-અપ)",
+    "templates": "તપાસ ટેમ્પ્લેટ"
   },
   "dashboard": {
     "welcome": "સ્વાગત છે, {{name}}",
@@ -421,7 +422,10 @@
       "patients_patientvital": "વાઇટલ્સ",
       "patients_patientdocument": "દસ્તાવેજ",
       "patients_patientconsent": "સંમતિ"
-    }
+    },
+    "draftRestored": "તમારું ન સચવાયેલું ફોર્મ પાછું લાવ્યું.",
+    "discardDraft": "ખાલી શરૂ કરો",
+    "draftSaved": "ડ્રાફ્ટ આ ટેબમાં રાખ્યો"
   },
   "vitals": {
     "record": "વાઇટલ્સ નોંધો",
@@ -631,7 +635,9 @@
       "vitals": "વાઇટલ્સ",
       "diagnosis": "નિદાન",
       "advice": "સલાહ",
-      "followUp": "ફોલો-અપ"
+      "followUp": "ફોલો-અપ",
+      "progress": "પ્રગતિ",
+      "photos": "ફોટા"
     },
     "units": {
       "days": "દિવસ",
@@ -659,6 +665,68 @@
     "status": {
       "draft": "ચાલુ",
       "completed": "પૂર્ણ"
+    },
+    "undo": "પાછું કરો",
+    "redo": "ફરી કરો",
+    "undoHelp": "છેલ્લો ફેરફાર પાછો (Ctrl+Z)",
+    "redoHelp": "ફરી કરો (Ctrl+Y)",
+    "score": "સ્કોર",
+    "scoreHelp": "આજે કેટલું તકલીફ? 0 = નહીં, 10 = સૌથી વધુ",
+    "today": "આજે",
+    "trend": "ફેરફાર",
+    "better": "{{n}} સારું",
+    "worse": "{{n}} વધ્યું",
+    "same": "એટલું જ",
+    "progressHelp": "દરેક મુલાકાતે લક્ષણ સ્કોર (0 = નહીં, 10 = સૌથી વધુ). ફરિયાદોમાં સ્કોર ઉમેરો.",
+    "progressEmpty": "હજી સ્કોર નથી. પ્રગતિ જોવા ફરિયાદોમાં દરેકને 0-10 સ્કોર આપો.",
+    "addPhoto": "ફોટો ઉમેરો",
+    "photoCaption": "શરીરનો ભાગ, દા.ત. ડાબો ઘૂંટણ",
+    "photoHelp": "ફોટા ખાનગી છે: ફક્ત તપાસ જોઈ શકતો સ્ટાફ ખોલી શકે. દર્દીની મંજૂરીથી જ ફોટો લો.",
+    "compare": "પહેલાં / પછી",
+    "thisVisitPhotos": "આ તપાસના ફોટા ({{n}})",
+    "earlierPhotos": "અગાઉના ફોટા",
+    "noPhotos": "હજી કોઈ ફોટો નથી.",
+    "removePhoto": "આ ફોટો દૂર કરવો?",
+    "photoKind": {
+      "before": "પહેલાં",
+      "progress": "દરમિયાન",
+      "after": "પછી"
+    }
+  },
+  "templatesAdmin": {
+    "title": "તપાસ ટેમ્પ્લેટ",
+    "subtitle": "તપાસ સ્ક્રીન પર ડૉક્ટર જે પ્રશ્નો ક્લિક કરે છે. ફેરફારથી નવું વર્ઝન બને છે; જૂની તપાસમાં જૂના પ્રશ્નો રહે છે.",
+    "addForm": "ટેમ્પ્લેટ ઉમેરો",
+    "addQuestionnaire": "પ્રકૃતિ જેવી પ્રશ્નાવલી ઉમેરો",
+    "name": "નામ",
+    "kind": "પ્રકાર",
+    "kinds": {
+      "form": "ફોર્મ",
+      "questionnaire": "સ્કોરવાળી (વાત/પિત્ત/કફ)"
+    },
+    "questions": "પ્રશ્નો",
+    "questionsTitle": "પ્રશ્નો ({{n}})",
+    "version": "વર્ઝન",
+    "versionHelp": "હાલ વર્ઝન {{v}}. પ્રશ્નો બદલીને સાચવવાથી નવું વર્ઝન બનશે.",
+    "editTitle": "ફેરફાર: {{name}}",
+    "description": "ટૂંકું વર્ણન",
+    "descriptionPlaceholder": "દા.ત. આઠ પ્રકારની પરીક્ષા",
+    "questionnaireHelp": "દરેક જવાબ વાત, પિત્ત કે કફમાં ગણાય છે. સોફ્ટવેર તેનો ટકાવારી સ્કોર બનાવે છે.",
+    "questionPlaceholder": "અંગ્રેજીમાં પ્રશ્ન",
+    "answerPlaceholder": "અંગ્રેજીમાં જવાબ",
+    "answer": "જવાબ",
+    "addAnswer": "જવાબ ઉમેરો",
+    "addQuestion": "પ્રશ્ન ઉમેરો",
+    "unit": "એકમ",
+    "moveUp": "ઉપર ખસેડો",
+    "moveDown": "નીચે ખસેડો",
+    "savedVersion": "સચવાયું (વર્ઝન {{v}})",
+    "closeConfirm": "સાચવ્યા વગર બંધ કરવું?",
+    "types": {
+      "choice": "એક જવાબ",
+      "multi": "ઘણા જવાબ",
+      "number": "સંખ્યા",
+      "text": "નોંધ"
     }
   }
 }

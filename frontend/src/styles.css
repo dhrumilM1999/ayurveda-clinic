@@ -1285,3 +1285,105 @@ body {
     max-height: none;
   }
 }
+
+/* Check-up photos */
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+.photo-compare {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  max-width: 640px;
+}
+.visit-photo {
+  margin: 0;
+  border-radius: 8px;
+  border: 1px solid var(--clinic-border);
+  overflow: hidden;
+  background: #fff;
+}
+.visit-photo-img,
+.visit-photo .ant-image,
+.visit-photo .ant-image-img {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: #f3efe6;
+}
+.visit-photo figcaption {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+}
+.visit-photo figcaption .cell-sub {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.photo-kind {
+  padding: 0 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+}
+.kind-before { background: #8a6d3b; }
+.kind-progress { background: #3d6fb6; }
+.kind-after { background: #2f8a57; }
+
+/* Symptom-score progress */
+.score-cell {
+  display: inline-block;
+  min-width: 26px;
+  padding: 0 4px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.score-0 { background: #e9f5ee; color: #1f6b42; }
+.score-1 { background: #f1f6e4; color: #4d6b1f; }
+.score-2 { background: #fdf1dc; color: #8a5a12; }
+.score-3 { background: #fbe4df; color: #a5321f; }
+.trend {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(35, 48, 42, 0.6);
+}
+.trend-better { color: #1f6b42; }
+.trend-worse { color: #a5321f; }
+
+/* Template editor */
+.tpl-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.tpl-question-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.tpl-options {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+  padding-left: 18px;
+}
+.tpl-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}

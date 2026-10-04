@@ -5,10 +5,11 @@ import {
   Segmented, Skeleton, Space, Switch, Typography,
 } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api, errorMessage } from '../../api/client';
+import { clearDraft, loadDraft, saveDraft } from '../../utils/formDraft';
 import { pickLang, useMasterLabel, useMasters } from '../../api/masters';
 import type { ConsentPurpose, DuplicatePatient, MasterRef, Patient } from '../../api/types';
 import { useAuth } from '../../auth/AuthContext';
@@ -48,6 +49,43 @@ export default function PatientFormPage() {
   const [consentMethod, setConsentMethod] = useState('signed_form');
   const [consentGivenBy, setConsentGivenBy] = useState('');
 
+  // Autosave: the unsaved form is kept in this browser tab (see utils/formDraft.ts)
+  type Draft = { values: Record<string, unknown>; ageMode: 'dob' | 'age'; consents: Record<string, ConsentChoice> };
+  const draftKey = isEdit ? `patient:${id}` : 'patient:new';
+  const [draftRestored, setDraftRestored] = useState(false);
+  const draftTimer = useRef<number>();
+  const draftReady = useRef(false); // don't save before the form is filled in
+
+  const restoreDraft = () => {
+    const draft = loadDraft<Draft>(draftKey);
+    if (draft) {
+      const values = { ...draft.values };
+      if (typeof values.date_of_birth === 'string') values.date_of_birth = dayjs(values.date_of_birth);
+      form.setFieldsValue(values);
+      setAgeMode(draft.ageMode);
+      if (draft.consents) setConsents((c) => ({ ...c, ...draft.consents }));
+      setDraftRestored(true);
+    }
+    draftReady.current = true;
+  };
+
+  const keepDraft = () => {
+    if (!draftReady.current) return;
+    window.clearTimeout(draftTimer.current);
+    draftTimer.current = window.setTimeout(() => {
+      const values = { ...form.getFieldsValue(true) } as Record<string, unknown>;
+      if (dayjs.isDayjs(values.date_of_birth)) values.date_of_birth = (values.date_of_birth as Dayjs).format('YYYY-MM-DD');
+      saveDraft(draftKey, { values, ageMode, consents });
+    }, 800);
+  };
+  useEffect(keepDraft, [ageMode, consents]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => window.clearTimeout(draftTimer.current), []);
+
+  const discardDraft = () => {
+    clearDraft(draftKey);
+    window.location.reload();
+  };
+
   // Medical history: anyone may enter it at registration; after that only doctors (emr.edit).
   const canEditHistory = !isEdit || can('emr.edit');
   const showHistory = !isEdit || (can('emr.view') && !patient?.medical_history_hidden);
@@ -67,6 +105,7 @@ export default function PatientFormPage() {
       api.get<ConsentPurpose[]>('/consent-purposes/').then(({ data }) => {
         setPurposes(data);
         setConsents(Object.fromEntries(data.map((p) => [p.code, { granted: p.is_required }])));
+        restoreDraft(); // after the consent defaults, so saved consent choices win
       });
       form.setFieldsValue({ gender: undefined, preferred_language: 'gu', country_code: '+91', state: 'Gujarat', country: 'India', allergies: [], medications: [] });
       return;
@@ -82,6 +121,7 @@ export default function PatientFormPage() {
       values.allergies = data.allergies.map((a) => ({ ...a, allergy_type: idOf(a.allergy_type) }));
       setAgeMode(data.dob_is_estimated ? 'age' : 'dob');
       form.setFieldsValue(values);
+      restoreDraft();
       if (data.has_photo) {
         api.get(`/patients/${id}/photo/`, { responseType: 'blob' }).then((r) => setExistingPhotoUrl(URL.createObjectURL(r.data)));
       }
@@ -170,6 +210,7 @@ export default function PatientFormPage() {
       } else {
         message.success(t('common.saved'));
       }
+      clearDraft(draftKey);
       navigate(`/patients/${data.id}`);
     } catch (err) {
       message.error(errorMessage(err, t('common.saveFailed')));
@@ -197,14 +238,18 @@ export default function PatientFormPage() {
           </div>
         </Space>
         <Space>
-          <Button onClick={() => navigate(isEdit ? `/patients/${id}` : '/patients')}>{t('common.cancel')}</Button>
+          <Button onClick={() => { clearDraft(draftKey); navigate(isEdit ? `/patients/${id}` : '/patients'); }}>{t('common.cancel')}</Button>
           <Button type="primary" size="large" loading={saving} onClick={save}>
             {isEdit ? t('common.save') : t('patients.registerButton')}
           </Button>
         </Space>
       </div>
 
-      <Form form={form} layout="vertical" scrollToFirstError>
+      {draftRestored && (
+        <Alert type="info" showIcon style={{ marginBottom: 12 }} message={t('patients.draftRestored')}
+          action={<Button size="small" onClick={discardDraft}>{t('patients.discardDraft')}</Button>} />
+      )}
+      <Form form={form} layout="vertical" scrollToFirstError onValuesChange={keepDraft}>
         <Row gutter={[20, 20]}>
           <Col xs={24} xl={17}>
             <Space direction="vertical" size={20} style={{ width: '100%' }}>

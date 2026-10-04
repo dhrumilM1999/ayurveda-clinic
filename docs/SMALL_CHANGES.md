@@ -132,14 +132,16 @@ in the search box and press Enter (that does not add it to the list).
 
 ## Change or add a check-up template (Ashtavidha, Prakriti...)
 
-The starting templates are in `backend/apps/emr/templates_catalog.py`. Each template has fields with
-English, Gujarati and Hindi text. **For a new clinic** the file is used as it is. For your existing clinic,
-templates are already copied into the database, so:
-- To switch a template off or rename it: http://localhost:8000/admin/ -> **Exam templates**.
-- To add a brand-new template or change the questions: ask Claude Code ("add a template for ...").
-  Old check-ups keep the version they were filled with.
+**No code needed:** log in as `admin` -> **Check-up templates**.
+- **Edit**: change question and answer text (English, Gujarati, Hindi), add or remove questions and answers,
+  move questions up/down. Answer types: one answer, many answers, number (with unit), notes.
+- **Add template**: a new form (e.g. "Nadi detail", "Skin examination").
+- **Add Prakriti-type questionnaire**: every answer counts for Vata, Pitta or Kapha; the score is calculated.
+- **Active** switch: hide a template from the check-up screen (it is never deleted).
+- Saving changed questions makes a **new version**. Old check-ups still show the questions they were filled with.
 
-The Prakriti questions are a SAMPLE. Please send your own questions and the doctor's scoring.
+The starting templates for a *new* clinic are in `backend/apps/emr/templates_catalog.py`.
+The Prakriti questions are a SAMPLE - the doctor should review and replace them.
 
 ## Change the SMS / WhatsApp appointment messages
 

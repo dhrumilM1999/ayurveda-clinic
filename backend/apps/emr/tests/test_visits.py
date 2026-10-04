@@ -156,3 +156,94 @@ def test_doctor_can_start_without_appointment(doctor, branch_a, patient, org_adm
     assert res.status_code == 201 and res.data["appointment"] is None
     res = client_for(org_admin, branch_a).post(URL, {"patient": str(patient.id)}, format="json")
     assert res.status_code == 400  # not a doctor
+
+
+# --- Step 4 additions: symptom scores, photos, editable templates -------------------------
+def png_file(name="photo.png"):
+    import io
+
+    from django.core.files.uploadedfile import SimpleUploadedFile
+    from PIL import Image
+
+    buffer = io.BytesIO()
+    Image.new("RGB", (8, 8), "red").save(buffer, format="PNG")
+    return SimpleUploadedFile(name, buffer.getvalue(), content_type="image/png")
+
+
+@pytest.mark.django_db
+def test_symptom_score_and_progress(doctor, branch_a, appointment, patient):
+    client = client_for(doctor, branch_a)
+    visit_id = start(client, appointment).data["id"]
+    res = client.patch(f"{URL}{visit_id}/", {"complaints": [{"label": "Knee pain", "score": 7}]}, format="json")
+    assert res.data["complaints"][0]["score"] == 7
+    assert client.patch(f"{URL}{visit_id}/", {"complaints": [{"label": "Knee pain", "score": 11}]},
+                        format="json").status_code == 400
+    timeline = client.get(URL, {"patient": patient.id}).data["results"]
+    assert timeline[0]["scores"] == {"Knee pain": 7}
+
+
+@pytest.mark.django_db
+def test_future_appointment_cannot_open_checkup(org, doctor, branch_a, patient):
+    from datetime import timedelta
+
+    later = Appointment.objects.create(organization=org, branch=branch_a, patient=patient, doctor=doctor,
+                                       date=timezone.localdate() + timedelta(days=2), start_time=time(11, 0))
+    res = start(client_for(doctor, branch_a), later)
+    assert res.status_code == 400 and "later date" in str(res.data)
+
+
+@pytest.mark.django_db
+def test_before_after_photos(doctor, branch_a, appointment, patient, receptionist):
+    client = client_for(doctor, branch_a)
+    visit_id = start(client, appointment).data["id"]
+    res = client.post(f"{URL}{visit_id}/photos/", {"file": png_file(), "kind": "before", "caption": "Left knee"},
+                      format="multipart")
+    assert res.status_code == 201, res.data
+    photo_id = res.data["id"]
+    file_res = client.get(f"{URL}{visit_id}/photos/{photo_id}/file/")
+    assert file_res.status_code == 200 and file_res["Content-Type"] == "image/png"
+    assert AuditLog.objects.filter(action="view", object_id=photo_id).exists()
+    assert len(client.get(URL + "patient-photos/", {"patient": patient.id}).data) == 1
+    fake = client.post(f"{URL}{visit_id}/photos/",
+                       {"file": png_file("x.png").__class__("x.png", b"not an image", content_type="image/png")},
+                       format="multipart")
+    assert fake.status_code == 400
+    assert client_for(receptionist, branch_a).get(f"{URL}{visit_id}/photos/{photo_id}/file/").status_code == 403
+    assert client.delete(f"{URL}{visit_id}/photos/{photo_id}/").status_code == 204
+    assert client.get(URL + "patient-photos/", {"patient": patient.id}).data == []
+
+
+@pytest.mark.django_db
+def test_admin_edits_template_and_old_visits_keep_old_questions(doctor, branch_admin, branch_a, appointment, templates):
+    tpl = templates["ashtavidha"]
+    visit_id = start(client_for(doctor, branch_a), appointment).data["id"]
+    client_for(doctor, branch_a).put(f"{URL}{visit_id}/exams/ashtavidha/", {"values": {"nadi": "vata"}}, format="json")
+
+    admin = client_for(branch_admin, branch_a)
+    fields = tpl.fields + [{"key": "agni_note", "type": "text", "label": {"en": "Agni note"}}]
+    res = admin.patch(f"/api/v1/exam-templates/{tpl.id}/", {"fields": fields}, format="json")
+    assert res.status_code == 200, res.data
+    assert res.data["version"] == 2 and res.data["fields"][-1]["key"] == "agni_note"
+
+    exam = client_for(doctor, branch_a).get(f"{URL}{visit_id}/").data["exams"][0]
+    assert exam["template_version"] == 1
+    assert [f["key"] for f in exam["template_fields"]] == [f["key"] for f in tpl.fields]  # old questions
+
+
+@pytest.mark.django_db
+def test_template_rules(doctor, branch_admin, branch_a, templates):
+    admin = client_for(branch_admin, branch_a)
+    url = "/api/v1/exam-templates/"
+    # A doctor cannot change templates
+    assert client_for(doctor, branch_a).post(url, {"name": "X", "fields": []}, format="json").status_code == 403
+    # Questionnaire answers must count for a dosha
+    bad = admin.post(url, {"name": "My Prakriti", "kind": "questionnaire", "fields": [
+        {"key": "q1", "label": {"en": "Q1"}, "options": [{"value": "fast", "label": {"en": "Fast"}}]}]}, format="json")
+    assert bad.status_code == 400
+    good = admin.post(url, {"name": "Nadi detail", "fields": [
+        {"key": "rate", "type": "number", "unit": "/min", "label": {"en": "Rate", "gu": "દર"}}]}, format="json")
+    assert good.status_code == 201 and good.data["code"] == "nadi_detail"
+    # Switched-off templates are hidden from the check-up screen
+    admin.patch(f"{url}{good.data['id']}/", {"is_active": False}, format="json")
+    codes = [t["code"] for t in client_for(doctor, branch_a).get(url).data]
+    assert "nadi_detail" not in codes
