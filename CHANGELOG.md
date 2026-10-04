@@ -2,6 +2,13 @@
 
 What changed in each step, in plain words.
 
+## Compact design (2026-10-04)
+
+- Smaller headings and text (13px), less empty space, shorter buttons and table rows, so more fits on one screen.
+- Popups now have a coloured title bar, a compact middle and a light footer with the buttons.
+- Card titles are small, with a gold bar on the left.
+- To adjust sizes later: `frontend/src/styles.css` (spacing, heading sizes) and `frontend/src/theme.ts` (`fontSize`, `controlHeight`).
+
 ## Docker set up (2026-10-03)
 
 - The app now runs in Docker with the real PostgreSQL database: double-click `start.bat`, stop with `stop.bat`.
