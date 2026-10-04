@@ -50,7 +50,7 @@ export function ImportModal({ onClose }: { onClose: (done: boolean) => void }) {
         <Space>
           <Button onClick={() => onClose(false)}>{t('common.cancel')}</Button>
           <Button type="primary" disabled={!preview || changes === 0} loading={busy} onClick={() => send(false)}>
-            {t('medicines.importButton', { n: changes })}
+            {t('medicines.importButton', { count: changes })}
           </Button>
         </Space>
       )}>

@@ -45,6 +45,9 @@
 | **Schedule E1** | Official list of poisonous ingredients; such medicines are given only on prescription. |
 | **HSN code** | Tax code of a product, printed on GST bills (medicines usually 3004). |
 | **M-N-N (1-0-1)** | How many doses in the Morning, at Noon and at Night. |
+| **Batch** | One lot of a medicine from the maker, with its own number and expiry date. |
+| **FEFO** | First Expiry, First Out: the batch that expires first is given first. |
+| **Dispense** | Give the prescribed medicines to the patient (stock goes down). |
 | **Token** | The queue number (1, 2, 3...) a patient gets on arrival, per doctor per day. |
 | **Walk-in** | A patient who comes without an appointment; gets a token straight away. |
 | **Click-to-chat** | A WhatsApp link (`wa.me/...`) that opens WhatsApp with the message typed; staff press Send. Free. |

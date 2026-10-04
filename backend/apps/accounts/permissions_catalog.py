@@ -42,6 +42,7 @@ PERMISSIONS = {
     "billing.refund": "Cancel bills and give refunds",
     "pharmacy.view": "See pharmacy stock",
     "pharmacy.dispense": "Dispense medicines",
+    "pharmacy.stock": "Add purchases and suppliers, correct stock",
     "therapy.view": "See therapy sessions",
     "therapy.manage": "Schedule and record therapy sessions",
     "reports.view": "See reports",
@@ -102,7 +103,7 @@ DEFAULT_ROLES = {
             "dashboard.view",
             "patients.view", "prescriptions.view",
             "medicines.view", "medicines.manage",
-            "pharmacy.view", "pharmacy.dispense",
+            "pharmacy.view", "pharmacy.dispense", "pharmacy.stock",
         ],
     },
 }

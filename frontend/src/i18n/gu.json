@@ -66,7 +66,8 @@
     "queue": "કતાર (ક્યૂ)",
     "consult": "તપાસ (ચેક-અપ)",
     "templates": "તપાસ ટેમ્પ્લેટ",
-    "medicines": "દવાઓ"
+    "medicines": "દવાઓ",
+    "pharmacy": "ફાર્મસી"
   },
   "dashboard": {
     "welcome": "સ્વાગત છે, {{name}}",
@@ -823,7 +824,6 @@
     "dropFile": "અહીં ક્લિક કરો અથવા ફાઇલ મૂકો",
     "dropHint": "હાલની દવાઓ (સમાન પ્રકાર અને નામ) અપડેટ થશે; નવી ઉમેરાશે.",
     "previewNote": "ફક્ત પૂર્વાવલોકન - હજી કંઈ સચવાયું નથી. યાદી ચકાસી Import ક્લિક કરો.",
-    "importButton": "{{n}} દવાઓ આયાત કરો",
     "importDone": "{{n}} દવાઓ સચવાઈ",
     "importErrors": "સમસ્યાઓ",
     "importStatus": {
@@ -832,7 +832,9 @@
       "unchanged": "ફેરફાર નહીં"
     },
     "row": "પંક્તિ",
-    "problem": "સમસ્યા"
+    "problem": "સમસ્યા",
+    "importButton_one": "{{count}} દવાઓ આયાત કરો",
+    "importButton_other": "{{count}} દવાઓ આયાત કરો"
   },
   "rx": {
     "title": "પ્રિસ્ક્રિપ્શન",
@@ -861,8 +863,103 @@
     "notes": "દર્દી માટે સૂચના",
     "notesPlaceholder": "દા.ત. હૂંફાળા પાણી સાથે લેવું. ઝાડા થાય તો બંધ કરવું.",
     "with": "સાથે",
-    "repeat": "આ {{n}} દવાઓ ફરી લખો",
     "hasDanger": "ગંભીર ચેતવણી છે",
-    "instructionsLabel": "સૂચના"
+    "instructionsLabel": "સૂચના",
+    "repeat_one": "આ {{count}} દવાઓ ફરી લખો",
+    "repeat_other": "આ {{count}} દવાઓ ફરી લખો"
+  },
+  "pharmacy": {
+    "title": "ફાર્મસી",
+    "subtitle": "પ્રિસ્ક્રિપ્શન પરથી દવા આપો, બેચ અને એક્સપાયરી મુજબ સ્ટોક, ખરીદી",
+    "tabs": {
+      "dispense": "આપવાની દવા",
+      "stock": "સ્ટોક",
+      "purchases": "ખરીદી",
+      "suppliers": "સપ્લાયર"
+    },
+    "status": {
+      "pending": "આપવાની બાકી",
+      "partly": "થોડી આપી",
+      "done": "આપી દીધી"
+    },
+    "queueEmpty": "આ દિવસે કોઈ પૂર્ણ પ્રિસ્ક્રિપ્શન નથી.",
+    "ready": "તૈયાર સમય",
+    "medicines": "દવાઓ",
+    "dispense": "દવા આપો",
+    "dispenseTitle": "દવા આપો: {{name}}",
+    "dispensedMsg": "આપી દીધી. રકમ {{amount}}",
+    "byDoctor": "{{name}} દ્વારા લખાયેલ",
+    "give": "આપો",
+    "alreadyGiven": "{{n}} આપી દીધી",
+    "batch": "બેચ",
+    "exp": "એક્સ.",
+    "left": "બાકી",
+    "qty": "જથ્થો",
+    "amount": "રકમ",
+    "total": "કુલ",
+    "notFromStock": "સ્ટોકમાંથી નહીં",
+    "outOfStock": "સ્ટોક નથી",
+    "show": {
+      "all": "બધી",
+      "low": "ઓછો સ્ટોક",
+      "expiring": "જલ્દી એક્સપાયર",
+      "expired": "એક્સપાયર્ડ"
+    },
+    "stockEmpty": "હજી સ્ટોક નથી. મળેલી દવા નોંધવા \"ખરીદી ઉમેરો\" ક્લિક કરો.",
+    "nothingHere": "અહીં કંઈ નથી.",
+    "available": "ઉપલબ્ધ",
+    "low": "ઓછો",
+    "nearestExpiry": "નજીકની એક્સપાયરી",
+    "soon": "જલ્દી",
+    "expired": "એક્સપાયર્ડ",
+    "expiredHelp": "{{n}} પેક એક્સપાયર થયા: સુધારો વડે દૂર કરો",
+    "reorderLevel": "ઓછા સ્ટોકની હદ",
+    "reorderHelp": "સ્ટોક આટલા પેક કે ઓછો થાય ત્યારે \"ઓછો\" બતાવે",
+    "history": "સ્ટોક ઇતિહાસ",
+    "historyTitle": "સ્ટોક ઇતિહાસ: {{name}}",
+    "expiry": "એક્સપાયરી",
+    "purchaseRate": "ખરીદ ભાવ",
+    "correct": "સુધારો",
+    "correctTitle": "સ્ટોક સુધારો: {{name}} / {{batch}}",
+    "correctHelp": "આ બેચમાં હાલ {{n}}. દૂર કરવા માઇનસ, ઉમેરવા પ્લસ સંખ્યા.",
+    "change": "ફેરફાર",
+    "changeHelp": "દા.ત. બે તૂટેલી બોટલ માટે -2",
+    "afterChange": "પછી: {{n}}",
+    "reason": "કારણ",
+    "reasons": {
+      "damaged": "તૂટેલી / ખરાબ",
+      "expiredRemoved": "એક્સપાયર્ડ - દૂર કરી",
+      "countCorrection": "ગણતરી સુધારો",
+      "returned": "સપ્લાયરને પરત"
+    },
+    "when": "ક્યારે",
+    "balance": "બાકી",
+    "kinds": {
+      "purchase": "મળી",
+      "dispense": "દર્દીને આપી",
+      "adjust": "સુધારો"
+    },
+    "addPurchase": "ખરીદી ઉમેરો",
+    "purchasesHelp": "સપ્લાયર પાસેથી મળેલી દવાઓ. ખરીદી સાચવવાથી સ્ટોક વધે છે.",
+    "noPurchases": "હજી કોઈ ખરીદી નથી.",
+    "supplier": "સપ્લાયર",
+    "noSuppliersYet": "સપ્લાયર ટેબમાં સપ્લાયર ઉમેરો (વૈકલ્પિક).",
+    "invoiceNo": "સપ્લાયર બિલ નં.",
+    "invoiceDate": "બિલ તારીખ",
+    "purchaseTotal": "ખરીદી કુલ",
+    "purchaseSaved": "ખરીદી સચવાઈ. સ્ટોક અપડેટ થયો.",
+    "addLine": "લાઇન ઉમેરો",
+    "addLineFirst": "ઓછામાં ઓછી એક લાઇનમાં દવા, બેચ, જથ્થો અને MRP ભરો.",
+    "enteredBy": "નોંધનાર",
+    "suppliersHelp": "જેની પાસેથી દવા ખરીદો છો. બધી શાખાઓ માટે.",
+    "addSupplier": "સપ્લાયર ઉમેરો",
+    "editSupplier": "સપ્લાયર ફેરફાર",
+    "noSuppliers": "હજી કોઈ સપ્લાયર નથી.",
+    "contact": "સંપર્ક",
+    "contactPerson": "સંપર્ક વ્યક્તિ",
+    "dispenseButton_one": "{{count}} દવા આપો",
+    "dispenseButton_other": "{{count}} દવા આપો",
+    "savePurchase_one": "સાચવો ({{count}} લાઇન)",
+    "savePurchase_other": "સાચવો ({{count}} લાઇન)"
   }
 }

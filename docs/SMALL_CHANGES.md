@@ -169,6 +169,13 @@ and medical history (*Pregnant* / *Breastfeeding*). The doctor always decides. T
 On the check-up -> **Rx** -> **Save as template**, choose the diagnosis. Next time, **Apply template**
 lists the matching ones first (★).
 
+## Pharmacy: "expiring soon" and low stock
+
+- "Expiring soon" = within 90 days. To change it, edit `EXPIRY_WARNING_DAYS` at the top of
+  `backend/apps/pharmacy/services.py`.
+- Low stock: **Pharmacy -> Stock** -> type a number in **Low-stock level** for each medicine (per branch).
+- Switch the whole pharmacy off for a branch: **Settings -> Modules -> Pharmacy and stock**.
+
 ## Change the SMS / WhatsApp appointment messages
 
 Open `backend/apps/appointments/messages_catalog.py`. Each message has an English (`en`), Gujarati (`gu`)

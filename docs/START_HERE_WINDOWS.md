@@ -127,6 +127,17 @@ No real SMS is sent yet. You can find the code in two places:
 8. In **Previous check-ups** open an old visit -> **Repeat these medicines**.
 9. **Complete visit**: the prescription becomes *final* (ready for the pharmacy).
 
+### Pharmacy check (first version - tell us what to change)
+
+1. Log in as `pharmacist1` -> **Pharmacy** -> **Stock** -> **Add purchase**: medicine, batch no., expiry (month-year),
+   quantity in packs, purchase rate; the MRP fills from the medicine list. **Save** -> stock goes up.
+2. Click **+** on a stock row to see its batches; **Correct** removes broken / expired packs (a reason is required).
+   Set a **Low-stock level**: when stock falls to it, the row shows **Low**.
+3. A doctor completes a check-up with an Rx -> **To dispense** shows it. **Dispense**: the batch with the earliest
+   expiry is chosen, expired batches are never offered, you cannot give more than is in stock.
+4. **Give** -> stock goes down; the status shows *Partly given* / *Given*. The clock button shows the stock history.
+5. **Suppliers** tab: add the companies you buy from.
+
 ## 5. Other addresses
 
 | What | Address |

@@ -66,7 +66,8 @@
     "queue": "कतार (क्यू)",
     "consult": "जाँच (चेक-अप)",
     "templates": "जाँच टेम्पलेट",
-    "medicines": "दवाइयाँ"
+    "medicines": "दवाइयाँ",
+    "pharmacy": "फ़ार्मेसी"
   },
   "dashboard": {
     "welcome": "स्वागत है, {{name}}",
@@ -823,7 +824,6 @@
     "dropFile": "यहाँ क्लिक करें या फ़ाइल छोड़ें",
     "dropHint": "मौजूदा दवाइयाँ (समान प्रकार और नाम) अपडेट होंगी; नई जुड़ेंगी।",
     "previewNote": "केवल पूर्वावलोकन - अभी कुछ सहेजा नहीं। सूची जाँचकर Import क्लिक करें।",
-    "importButton": "{{n}} दवाइयाँ आयात करें",
     "importDone": "{{n}} दवाइयाँ सहेजी गईं",
     "importErrors": "समस्याएँ",
     "importStatus": {
@@ -832,7 +832,9 @@
       "unchanged": "कोई बदलाव नहीं"
     },
     "row": "पंक्ति",
-    "problem": "समस्या"
+    "problem": "समस्या",
+    "importButton_one": "{{count}} दवाइयाँ आयात करें",
+    "importButton_other": "{{count}} दवाइयाँ आयात करें"
   },
   "rx": {
     "title": "पर्चा",
@@ -861,8 +863,103 @@
     "notes": "मरीज़ के लिए निर्देश",
     "notesPlaceholder": "जैसे गुनगुने पानी के साथ लें। दस्त हो तो बंद करें।",
     "with": "के साथ",
-    "repeat": "ये {{n}} दवाइयाँ दोहराएँ",
     "hasDanger": "गंभीर चेतावनी है",
-    "instructionsLabel": "निर्देश"
+    "instructionsLabel": "निर्देश",
+    "repeat_one": "ये {{count}} दवाइयाँ दोहराएँ",
+    "repeat_other": "ये {{count}} दवाइयाँ दोहराएँ"
+  },
+  "pharmacy": {
+    "title": "फ़ार्मेसी",
+    "subtitle": "पर्चे से दवा दें, बैच और एक्सपायरी अनुसार स्टॉक, खरीद",
+    "tabs": {
+      "dispense": "देने की दवा",
+      "stock": "स्टॉक",
+      "purchases": "खरीद",
+      "suppliers": "सप्लायर"
+    },
+    "status": {
+      "pending": "देना बाकी",
+      "partly": "कुछ दी",
+      "done": "दे दी"
+    },
+    "queueEmpty": "इस दिन कोई पूरा पर्चा नहीं।",
+    "ready": "तैयार समय",
+    "medicines": "दवाइयाँ",
+    "dispense": "दवा दें",
+    "dispenseTitle": "दवा दें: {{name}}",
+    "dispensedMsg": "दे दी। राशि {{amount}}",
+    "byDoctor": "{{name}} द्वारा लिखा",
+    "give": "दें",
+    "alreadyGiven": "{{n}} दे दी",
+    "batch": "बैच",
+    "exp": "एक्स.",
+    "left": "बाकी",
+    "qty": "मात्रा",
+    "amount": "राशि",
+    "total": "कुल",
+    "notFromStock": "स्टॉक से नहीं",
+    "outOfStock": "स्टॉक नहीं",
+    "show": {
+      "all": "सभी",
+      "low": "कम स्टॉक",
+      "expiring": "जल्द एक्सपायर",
+      "expired": "एक्सपायर्ड"
+    },
+    "stockEmpty": "अभी स्टॉक नहीं। मिली दवा दर्ज करने के लिए \"खरीद जोड़ें\" क्लिक करें।",
+    "nothingHere": "यहाँ कुछ नहीं।",
+    "available": "उपलब्ध",
+    "low": "कम",
+    "nearestExpiry": "निकटतम एक्सपायरी",
+    "soon": "जल्द",
+    "expired": "एक्सपायर्ड",
+    "expiredHelp": "{{n}} पैक एक्सपायर हुए: सुधारें से हटाएँ",
+    "reorderLevel": "कम स्टॉक सीमा",
+    "reorderHelp": "स्टॉक इतने पैक या कम होने पर \"कम\" दिखाता है",
+    "history": "स्टॉक इतिहास",
+    "historyTitle": "स्टॉक इतिहास: {{name}}",
+    "expiry": "एक्सपायरी",
+    "purchaseRate": "खरीद दर",
+    "correct": "सुधारें",
+    "correctTitle": "स्टॉक सुधारें: {{name}} / {{batch}}",
+    "correctHelp": "इस बैच में अभी {{n}}। हटाने के लिए माइनस, जोड़ने के लिए प्लस संख्या।",
+    "change": "बदलाव",
+    "changeHelp": "जैसे दो टूटी बोतल के लिए -2",
+    "afterChange": "बाद में: {{n}}",
+    "reason": "कारण",
+    "reasons": {
+      "damaged": "टूटी / खराब",
+      "expiredRemoved": "एक्सपायर्ड - हटाई",
+      "countCorrection": "गिनती सुधार",
+      "returned": "सप्लायर को वापस"
+    },
+    "when": "कब",
+    "balance": "शेष",
+    "kinds": {
+      "purchase": "मिली",
+      "dispense": "मरीज़ को दी",
+      "adjust": "सुधार"
+    },
+    "addPurchase": "खरीद जोड़ें",
+    "purchasesHelp": "सप्लायर से मिली दवाइयाँ। खरीद सहेजने से स्टॉक बढ़ता है।",
+    "noPurchases": "अभी कोई खरीद नहीं।",
+    "supplier": "सप्लायर",
+    "noSuppliersYet": "सप्लायर टैब में सप्लायर जोड़ें (वैकल्पिक)।",
+    "invoiceNo": "सप्लायर बिल नं.",
+    "invoiceDate": "बिल तारीख",
+    "purchaseTotal": "खरीद कुल",
+    "purchaseSaved": "खरीद सहेजी। स्टॉक अपडेट हुआ।",
+    "addLine": "पंक्ति जोड़ें",
+    "addLineFirst": "कम से कम एक पंक्ति में दवा, बैच, मात्रा और MRP भरें।",
+    "enteredBy": "दर्ज करने वाले",
+    "suppliersHelp": "जिनसे दवा खरीदते हैं। सभी शाखाओं के लिए।",
+    "addSupplier": "सप्लायर जोड़ें",
+    "editSupplier": "सप्लायर बदलें",
+    "noSuppliers": "अभी कोई सप्लायर नहीं।",
+    "contact": "संपर्क",
+    "contactPerson": "संपर्क व्यक्ति",
+    "dispenseButton_one": "{{count}} दवा दें",
+    "dispenseButton_other": "{{count}} दवा दें",
+    "savePurchase_one": "सहेजें ({{count}} पंक्तियाँ)",
+    "savePurchase_other": "सहेजें ({{count}} पंक्तियाँ)"
   }
 }

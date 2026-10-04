@@ -494,7 +494,7 @@ function PreviousVisits({ patientId, currentId, templates, onRepeat }: {
               <Button onClick={() => {
                 onRepeat(openRx.items.map(({ id: _id, ...line }) => line));
                 setOpen(null);
-              }}>{t('rx.repeat', { n: openRx.items.length })}</Button>
+              }}>{t('rx.repeat', { count: openRx.items.length })}</Button>
             )}
             <Button type="primary" onClick={() => setOpen(null)}>{t('common.close')}</Button>
           </Space>

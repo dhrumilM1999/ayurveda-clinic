@@ -9,7 +9,7 @@ To add a new switch, add one line here. No database change is needed.
 FEATURES = {
     "appointments": {"label": "Appointments and queue", "default": True},
     "panchakarma": {"label": "Panchakarma and therapy", "default": False},
-    "pharmacy": {"label": "Pharmacy and stock", "default": False},
+    "pharmacy": {"label": "Pharmacy and stock", "default": True},
     "diet": {"label": "Diet and lifestyle charts", "default": False},
     "whatsapp_share": {"label": "Share by WhatsApp", "default": True},
     "ai_scribe": {"label": "AI scribe (voice to case sheet)", "default": False},

@@ -40,8 +40,8 @@ body {
   margin: 0;
 }
 
-.page-toolbar > :last-child,
-.section-toolbar > :last-child {
+.page-toolbar > :last-child:not(:first-child),
+.section-toolbar > :last-child:not(:first-child) {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -1594,4 +1594,71 @@ body {
 /* Inside forms the field above already adds 14px, so section titles need only a little extra space */
 .ant-form .section-title {
   margin-top: 4px;
+}
+
+/* ---------- Pharmacy ---------- */
+.page-tabs > .ant-tabs-nav {
+  margin-bottom: 12px;
+}
+.modal-footer-split {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.total-text {
+  font-size: 14px;
+}
+.total-text b {
+  font-size: 16px;
+}
+.inner-table {
+  margin: 4px 0;
+}
+.text-warn {
+  color: #b7791f;
+  font-weight: 600;
+}
+.text-in {
+  color: #1f6b42;
+}
+.text-out {
+  color: #a5321f;
+}
+.right {
+  text-align: right;
+}
+.purchase-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.purchase-head,
+.purchase-line {
+  display: grid;
+  grid-template-columns: minmax(200px, 2.2fr) 110px 110px 80px 100px 100px 100px 32px;
+  gap: 8px;
+  align-items: center;
+}
+.purchase-head {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(35, 48, 42, 0.55);
+}
+.purchase-lines > .ant-btn-dashed {
+  align-self: flex-start;
+  margin-top: 4px;
+}
+@media (max-width: 900px) {
+  .purchase-head {
+    display: none;
+  }
+  .purchase-line {
+    grid-template-columns: 1fr 1fr;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid var(--clinic-border);
+  }
 }

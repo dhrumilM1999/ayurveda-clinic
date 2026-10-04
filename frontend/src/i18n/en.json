@@ -66,7 +66,8 @@
     "queue": "Queue",
     "consult": "Check-up",
     "templates": "Check-up templates",
-    "medicines": "Medicines"
+    "medicines": "Medicines",
+    "pharmacy": "Pharmacy"
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",
@@ -823,7 +824,6 @@
     "dropFile": "Click or drop the file here",
     "dropHint": "Existing medicines (same type and name) are updated; new ones are added.",
     "previewNote": "Preview only - nothing is saved yet. Check the list, then click Import.",
-    "importButton": "Import {{n}} medicines",
     "importDone": "{{n}} medicines saved",
     "importErrors": "Problems",
     "importStatus": {
@@ -832,7 +832,9 @@
       "unchanged": "No change"
     },
     "row": "Row",
-    "problem": "Problem"
+    "problem": "Problem",
+    "importButton_one": "Import {{count}} medicine",
+    "importButton_other": "Import {{count}} medicines"
   },
   "rx": {
     "title": "Prescription",
@@ -861,8 +863,103 @@
     "notes": "Instructions for the patient",
     "notesPlaceholder": "e.g. Take with warm water. Stop if loose motions.",
     "with": "with",
-    "repeat": "Repeat these {{n}} medicines",
     "hasDanger": "has serious warnings",
-    "instructionsLabel": "Instructions"
+    "instructionsLabel": "Instructions",
+    "repeat_one": "Repeat this medicine",
+    "repeat_other": "Repeat these {{count}} medicines"
+  },
+  "pharmacy": {
+    "title": "Pharmacy",
+    "subtitle": "Give medicines from prescriptions, stock by batch and expiry, purchases",
+    "tabs": {
+      "dispense": "To dispense",
+      "stock": "Stock",
+      "purchases": "Purchases",
+      "suppliers": "Suppliers"
+    },
+    "status": {
+      "pending": "To give",
+      "partly": "Partly given",
+      "done": "Given"
+    },
+    "queueEmpty": "No completed prescriptions on this day.",
+    "ready": "Ready at",
+    "medicines": "Medicines",
+    "dispense": "Dispense",
+    "dispenseTitle": "Dispense: {{name}}",
+    "dispensedMsg": "Given. Amount {{amount}}",
+    "byDoctor": "Prescribed by {{name}}",
+    "give": "Give",
+    "alreadyGiven": "{{n}} already given",
+    "batch": "Batch",
+    "exp": "exp",
+    "left": "left",
+    "qty": "Qty",
+    "amount": "Amount",
+    "total": "Total",
+    "notFromStock": "Not from stock",
+    "outOfStock": "Out of stock",
+    "show": {
+      "all": "All",
+      "low": "Low stock",
+      "expiring": "Expiring soon",
+      "expired": "Expired"
+    },
+    "stockEmpty": "No stock yet. Click \"Add purchase\" to enter medicines received.",
+    "nothingHere": "Nothing here.",
+    "available": "Available",
+    "low": "Low",
+    "nearestExpiry": "Nearest expiry",
+    "soon": "Soon",
+    "expired": "Expired",
+    "expiredHelp": "{{n}} packs have expired: remove them with Correct",
+    "reorderLevel": "Low-stock level",
+    "reorderHelp": "Shows \"Low\" when the stock is this many packs or fewer",
+    "history": "Stock history",
+    "historyTitle": "Stock history: {{name}}",
+    "expiry": "Expiry",
+    "purchaseRate": "Purchase rate",
+    "correct": "Correct",
+    "correctTitle": "Correct stock: {{name}} / {{batch}}",
+    "correctHelp": "Now {{n}} in this batch. Use a minus number to remove, plus to add.",
+    "change": "Change",
+    "changeHelp": "e.g. -2 for two broken bottles",
+    "afterChange": "After: {{n}}",
+    "reason": "Reason",
+    "reasons": {
+      "damaged": "Damaged / broken",
+      "expiredRemoved": "Expired - removed",
+      "countCorrection": "Counting correction",
+      "returned": "Returned to supplier"
+    },
+    "when": "When",
+    "balance": "Balance",
+    "kinds": {
+      "purchase": "Received",
+      "dispense": "Given to patient",
+      "adjust": "Correction"
+    },
+    "addPurchase": "Add purchase",
+    "purchasesHelp": "Medicines received from suppliers. Saving a purchase adds the stock.",
+    "noPurchases": "No purchases yet.",
+    "supplier": "Supplier",
+    "noSuppliersYet": "Add suppliers on the Suppliers tab (optional).",
+    "invoiceNo": "Supplier invoice no.",
+    "invoiceDate": "Invoice date",
+    "purchaseTotal": "Purchase total",
+    "purchaseSaved": "Purchase saved. Stock updated.",
+    "addLine": "Add line",
+    "addLineFirst": "Fill medicine, batch, quantity and MRP in at least one line.",
+    "enteredBy": "Entered by",
+    "suppliersHelp": "Who you buy medicines from. Shared by all branches.",
+    "addSupplier": "Add supplier",
+    "editSupplier": "Edit supplier",
+    "noSuppliers": "No suppliers yet.",
+    "contact": "Contact",
+    "contactPerson": "Contact person",
+    "dispenseButton_one": "Give {{count}} medicine",
+    "dispenseButton_other": "Give {{count}} medicines",
+    "savePurchase_one": "Save ({{count}} line)",
+    "savePurchase_other": "Save ({{count}} lines)"
   }
 }

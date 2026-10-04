@@ -83,11 +83,13 @@ class MedicineVersion(models.Model):
 
 
 class BranchMedicine(BranchScopedModel):
-    """A branch's own price, and whether the medicine is used in that branch."""
+    """A branch's own price, whether the medicine is used there, and its low-stock level."""
 
     medicine = models.ForeignKey(Medicine, on_delete=models.PROTECT, related_name="branch_settings")
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     is_active = models.BooleanField(default=True)
+    # Pharmacy: warn "low stock" when the branch has this many packs or fewer
+    reorder_level = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
     class Meta:
         constraints = [

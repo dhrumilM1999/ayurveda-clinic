@@ -41,6 +41,7 @@
 | `backend/apps/medicines/` | Medicine list, versions, branch price, Excel import | ASK FIRST |
 | `backend/apps/medicines/sample_catalog.py` | The 23 SAMPLE medicines for a new clinic (**pharmacist to verify**) | **SAFE TO EDIT** |
 | `backend/apps/prescriptions/` | Prescriptions and prescription templates | ASK FIRST |
+| `backend/apps/pharmacy/` | Stock by batch, purchases, suppliers, dispensing, stock history | ASK FIRST |
 | `backend/apps/prescriptions/safety.py` | **Prescription safety rules** (fixed rules, not AI) | ASK FIRST |
 | `backend/apps/emr/templates_catalog.py` | **Starting check-up templates**: Ashtavidha, Dashavidha, Agni & habits, Prakriti questions (EN/GU/HI) | **SAFE TO EDIT** |
 | `backend/apps/appointments/messages_catalog.py` | **SMS/WhatsApp text** for booking, change, cancel, token (EN/GU/HI) | **SAFE TO EDIT** |
@@ -61,6 +62,7 @@
 | `frontend/src/pages/consult/` | The check-up screen | ASK FIRST |
 | `frontend/src/pages/consult/VisitWorkspace.tsx` | Check-up autosave and undo: `AUTOSAVE_MS`, `RETRY_MS`, `UNDO_STEPS` at the top | **SAFE TO EDIT** (those lines) |
 | `frontend/src/pages/medicines/` | Medicines screen, import, version history | ASK FIRST |
+| `frontend/src/pages/pharmacy/` | Pharmacy screen (dispense, stock, purchases, suppliers) | ASK FIRST |
 | `frontend/src/pages/consult/RxSection.tsx` | The prescription part of the check-up | ASK FIRST |
 | `frontend/src/pages/TemplatesPage.tsx` | The Check-up templates editing screen | ASK FIRST |
 | `frontend/src/utils/formDraft.ts` | Keeps unsaved forms in the browser tab (autosave of the patient form) | ASK FIRST |

@@ -638,3 +638,104 @@ export interface PrescriptionTemplate {
   is_active: boolean;
   updated_at: string;
 }
+
+// --- Pharmacy ---
+export interface Supplier {
+  id: string;
+  name: string;
+  contact_person: string;
+  phone: string;
+  gstin: string;
+  address: string;
+  is_active: boolean;
+}
+
+export interface StockBatch {
+  id: string;
+  medicine: string;
+  medicine_name: string;
+  batch_no: string;
+  expiry_date: string | null;
+  mrp: string;
+  purchase_rate: string | null;
+  quantity: string;
+}
+
+export interface StockRow {
+  medicine: string;
+  name: string;
+  kind: MedicineKind;
+  pack_size: string;
+  available: string;
+  usable: string;
+  nearest_expiry: string | null;
+  reorder_level: string | null;
+  low: boolean;
+  expiring: boolean;
+  expired: boolean;
+}
+
+export interface StockMovement {
+  id: string;
+  batch_no: string;
+  kind: 'purchase' | 'dispense' | 'adjust';
+  quantity: string;
+  balance_after: string;
+  reason: string;
+  reference: string;
+  by: string;
+  created_at: string;
+}
+
+export interface PurchaseRecord {
+  id: string;
+  supplier: string | null;
+  supplier_name: string;
+  invoice_no: string;
+  invoice_date: string;
+  total_amount: string;
+  notes: string;
+  items: { id: string; medicine: string; medicine_name: string; batch_no: string; expiry_date: string | null;
+    quantity: string; purchase_rate: string | null; mrp: string; amount: string }[];
+  created_by_name: string;
+  created_at: string;
+}
+
+export type DispenseStatus = 'pending' | 'partly' | 'done';
+
+export interface DispenseQueueRow {
+  id: string;
+  patient_detail: AppointmentPatient;
+  doctor_name: string;
+  token_number: number | null;
+  finalized_at: string | null;
+  item_count: number;
+  status: DispenseStatus;
+}
+
+export interface DispenseLine {
+  id: string;
+  medicine: string | null;
+  medicine_name: string;
+  dosage_form: string;
+  pack_size: string;
+  dose: string;
+  dose_unit: string;
+  frequency: string;
+  timing: string;
+  anupana: string;
+  duration: number | null;
+  duration_unit: 'days' | 'weeks' | 'months';
+  instructions: string;
+  given: string | null;
+  batches: StockBatch[];
+}
+
+export interface DispenseDetail {
+  id: string;
+  patient_detail: AppointmentPatient;
+  doctor_name: string;
+  notes: string;
+  status: DispenseStatus;
+  lines: DispenseLine[];
+}

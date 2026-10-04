@@ -2,6 +2,21 @@
 
 What changed in each step, in plain words.
 
+## Pharmacy - first version (2026-10-04)
+
+Built from docs/FEATURES.md section G as a **first draft for the owner to correct**.
+- New **Pharmacy** menu (pharmacist, admin). The module is on by default (Settings -> Modules).
+- **To dispense**: the day's final prescriptions of this branch. Dispense gives the medicines from the batch with
+  the **earliest expiry** (FEFO); expired batches are never offered; you cannot give more than is in stock;
+  free-text medicines are shown but not taken from stock. Status: To give / Partly given / Given.
+- **Stock**: one row per medicine with available packs, nearest expiry, *Soon* / *Expired* / *Low* tags,
+  a per-branch **low-stock level**, the batches inside, **Correct** (with a required reason) and the full
+  **stock history** (every + and -).
+- **Purchases**: enter a supplier invoice (batch, expiry month, quantity, purchase rate, MRP); stock goes up.
+- **Suppliers** list. New permission "Add purchases and suppliers, correct stock" (pharmacist and admin).
+- Not yet: branch-to-branch transfer (waits for multi-branch), billing of dispensed medicines (Step 6).
+- 8 new automated tests.
+
 ## Step 5 - Medicines and prescriptions (2026-10-04)
 
 **Medicines screen** (pharmacist, admin; doctors can look)
