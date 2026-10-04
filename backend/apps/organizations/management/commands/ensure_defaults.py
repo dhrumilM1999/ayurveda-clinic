@@ -1,5 +1,6 @@
 """
-Adds missing starting data for every organization: dropdown values and consent purposes.
+Adds missing starting data for every organization: dropdown values, consent purposes and
+check-up templates.
 Safe to run any time (runs automatically on start). Never changes or removes existing values.
 
     python manage.py ensure_defaults
@@ -7,12 +8,16 @@ Safe to run any time (runs automatically on start). Never changes or removes exi
 from django.core.management.base import BaseCommand
 
 from apps.common.services import ensure_master_values
+from apps.emr.services import ensure_exam_templates
 from apps.organizations.models import Organization
 from apps.patients.services import ensure_consent_purposes
 
 
 def ensure_defaults_for(organization):
-    return ensure_master_values(organization), ensure_consent_purposes(organization)
+    masters = ensure_master_values(organization)
+    purposes = ensure_consent_purposes(organization)
+    ensure_exam_templates(organization)
+    return masters, purposes
 
 
 class Command(BaseCommand):

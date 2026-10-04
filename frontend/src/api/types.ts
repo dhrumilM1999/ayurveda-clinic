@@ -407,3 +407,105 @@ export interface QueueData {
   server_time: string;
   doctors: QueueGroup[];
 }
+
+// --- Check-up / EMR (Step 4) ---
+export type Lang3 = { en: string; gu: string; hi: string };
+
+export interface ExamField {
+  key: string;
+  type: 'choice' | 'multi' | 'number' | 'text';
+  label: Lang3;
+  unit?: string;
+  min?: number;
+  max?: number;
+  options?: { value: string; label: Lang3 }[];
+}
+
+export interface ExamTemplate {
+  id: string;
+  code: string;
+  version: number;
+  kind: 'form' | 'questionnaire';
+  name: string;
+  name_gu: string;
+  name_hi: string;
+  description: Partial<Lang3>;
+  fields: ExamField[];
+  sort_order: number;
+}
+
+export interface PrakritiResult {
+  vata?: number;
+  pitta?: number;
+  kapha?: number;
+  type?: string;
+  answered: number;
+  total: number;
+  visit_date?: string;
+}
+
+export interface VisitExam {
+  id: string;
+  template: string;
+  template_code: string;
+  template_version: number;
+  values: Record<string, unknown>;
+  result: PrakritiResult | Record<string, never>;
+  updated_at: string;
+}
+
+export interface Complaint {
+  label: string;
+  code?: string;
+  duration?: number | null;
+  duration_unit?: 'days' | 'weeks' | 'months' | 'years';
+  severity?: '' | 'mild' | 'moderate' | 'severe';
+  notes?: string;
+}
+
+export interface Diagnosis {
+  label: string;
+  code?: string;
+  system?: '' | 'icd10' | 'icd11' | 'namaste';
+  kind: 'provisional' | 'final';
+  master?: string;
+}
+
+export interface Visit {
+  id: string;
+  patient: string;
+  patient_detail: AppointmentPatient;
+  doctor: string;
+  doctor_name: string;
+  branch: string;
+  branch_name: string;
+  appointment: string | null;
+  token_number: number | null;
+  visit_date: string;
+  status: 'draft' | 'completed';
+  completed_at: string | null;
+  complaints: Complaint[];
+  history_notes: string;
+  examination_notes: string;
+  diagnoses: Diagnosis[];
+  advice: string[];
+  advice_notes: string;
+  follow_up_date: string | null;
+  follow_up_notes: string;
+  exams: VisitExam[];
+  prakriti: PrakritiResult | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface VisitListItem {
+  id: string;
+  patient: string;
+  visit_date: string;
+  status: 'draft' | 'completed';
+  doctor_name: string;
+  branch_name: string;
+  complaints: string[];
+  diagnoses: string[];
+  follow_up_date: string | null;
+}

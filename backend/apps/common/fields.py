@@ -8,6 +8,7 @@ Note: encrypted text cannot be searched.
 """
 import base64
 import hashlib
+import json
 from functools import lru_cache
 
 from cryptography.fernet import Fernet, InvalidToken
@@ -54,3 +55,36 @@ class EncryptedTextField(models.TextField):
         if not value:
             return value
         return value if value.startswith(PREFIX) else encrypt(value)
+
+
+class EncryptedJSONField(models.TextField):
+    """
+    A list or dictionary (e.g. the complaints of a visit) stored as encrypted JSON text.
+    Use it with default=list or default=dict.
+    """
+
+    def _load(self, value):
+        if value is None or isinstance(value, (list, dict)):
+            return value
+        if value == "":
+            return self.get_default()
+        try:
+            return json.loads(decrypt(value))
+        except (ValueError, TypeError):
+            return self.get_default()  # unreadable (e.g. key changed): show as empty
+
+    def from_db_value(self, value, expression, connection):
+        return self._load(value)
+
+    def to_python(self, value):
+        return self._load(value)
+
+    def get_prep_value(self, value):
+        if value is None:
+            return value
+        if isinstance(value, str):
+            return value if value.startswith(PREFIX) or value == "" else encrypt(value)
+        return encrypt(json.dumps(value, ensure_ascii=False))
+
+    def value_to_string(self, obj):
+        return json.dumps(self.value_from_object(obj), ensure_ascii=False)

@@ -63,7 +63,8 @@
     "audit": "Audit log",
     "patients": "Patients",
     "appointments": "Appointments",
-    "queue": "Queue"
+    "queue": "Queue",
+    "consult": "Check-up"
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",
@@ -351,7 +352,8 @@
       "documents": "Documents",
       "consent": "Consent",
       "activity": "Activity",
-      "appointments": "Appointments"
+      "appointments": "Appointments",
+      "visits": "Check-ups"
     },
     "fields": {
       "title": "Title",
@@ -576,5 +578,87 @@
     "nowCalling": "Now",
     "next": "Next",
     "more": "+ {{n}} more"
+  },
+  "consult": {
+    "todayPatients": "Today's patients ({{n}})",
+    "withoutAppointment": "Check-up without appointment",
+    "withoutAppointmentHelp": "Search the patient. The check-up is saved under your name in this branch.",
+    "startCheckup": "Start check-up",
+    "openCheckup": "Open check-up",
+    "noPatientsToday": "No patients today yet.",
+    "appointmentsOff": "Appointments are off. Use \"Check-up without appointment\".",
+    "choosePatient": "Choose a patient on the left to start the check-up.",
+    "complete": "Complete visit",
+    "completed": "Completed",
+    "completedMsg": "Check-up completed. The appointment is marked done.",
+    "prakritiTag": "Prakriti: {{type}}",
+    "knownConditions": "Known conditions",
+    "filled": "filled in",
+    "previousVisits": "Previous check-ups",
+    "firstVisit": "This is the first check-up.",
+    "visitOf": "Check-up of {{date}}",
+    "visitsTabHelp": "Check-ups from all branches. Click one to open it.",
+    "noVisits": "No check-ups yet.",
+    "addTyped": "Add",
+    "pressEnterToAdd": "Not in the list: press Enter to add your own words.",
+    "noneAdded": "Nothing added yet. Click a chip above or type and press Enter.",
+    "searchComplaints": "Search complaints / symptoms",
+    "searchDiagnosis": "Search diagnosis",
+    "searchAdvice": "Search advice",
+    "since": "Since",
+    "notes": "Notes",
+    "historyPlaceholder": "How it started, what makes it better or worse, earlier treatment...",
+    "examination": "Examination findings",
+    "examinationPlaceholder": "General and local examination",
+    "provisional": "Provisional",
+    "final": "Final",
+    "noCode": "No code",
+    "code": "Code",
+    "adviceNotes": "Other advice / diet notes",
+    "adviceNotesPlaceholder": "Anything else to tell the patient",
+    "afterDays": "After {{n}} days",
+    "followUpOn": "Next visit: {{date}}",
+    "followUpNotesPlaceholder": "e.g. Come fasting for sugar test",
+    "clearAll": "Clear answers",
+    "prakritiScore": "Prakriti score",
+    "answered": "{{n}} of {{total}} answered",
+    "answerToScore": "Answer the questions to see the score.",
+    "summaryEmpty": "Nothing filled in yet.",
+    "sections": {
+      "summary": "Summary",
+      "complaints": "Complaints",
+      "history": "History & notes",
+      "vitals": "Vitals",
+      "diagnosis": "Diagnosis",
+      "advice": "Advice",
+      "followUp": "Follow-up"
+    },
+    "units": {
+      "days": "days",
+      "weeks": "weeks",
+      "months": "months",
+      "years": "years"
+    },
+    "severity": {
+      "mild": "Mild",
+      "moderate": "Moderate",
+      "severe": "Severe"
+    },
+    "dosha": {
+      "vata": "Vata",
+      "pitta": "Pitta",
+      "kapha": "Kapha",
+      "sama": "Sama (balanced)"
+    },
+    "save": {
+      "saved": "Saved",
+      "dirty": "Unsaved changes",
+      "saving": "Saving...",
+      "error": "Not saved!"
+    },
+    "status": {
+      "draft": "In progress",
+      "completed": "Completed"
+    }
   }
 }

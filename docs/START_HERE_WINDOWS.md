@@ -102,6 +102,19 @@ No real SMS is sent yet. You can find the code in two places:
 > **Where is my data?** In Docker's storage boxes (volumes), not in this folder.
 > See [HOW_IT_WORKS.md](HOW_IT_WORKS.md#where-is-my-data).
 
+### Step 4 check (check-up screen)
+
+1. Log in as `doctor1` (needs the OTP) -> **Check-up**. Today's patients are on the left.
+   (Or as `reception1`: **Appointments** -> **Walk-in** first, so there is a patient waiting.)
+2. Click a patient. The appointment turns "With doctor". The top shows allergies and known conditions.
+3. **Complaints**: click chips (e.g. *Knee pain*) or type your own and press Enter. Add duration and severity.
+4. **Ashtavidha / Dashavidha / Agni & daily habits**: click the answers.
+5. **Prakriti questionnaire**: answer the questions; the Vata / Pitta / Kapha score fills in as you go.
+6. **Diagnosis** (Ayurvedic names, optional NAMASTE / ICD code), **Advice**, **Follow-up** (after 7 / 15 / 30 days).
+7. Everything saves by itself ("Saved" at the top). **Summary** shows the whole check-up. **Complete visit** finishes it.
+8. Open the same patient again later: **Previous check-ups** on the right. The patient file has a **Check-ups** tab.
+9. Log in as `reception1`: there is no Check-up menu (front desk cannot read medical notes).
+
 ## 5. Other addresses
 
 | What | Address |

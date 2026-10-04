@@ -13,6 +13,7 @@ import { PatientPhoto } from '../../components/PatientPhoto';
 import { genderAge } from './PatientsPage';
 import { ActivityTab } from './tabs/ActivityTab';
 import { AppointmentsTab } from './tabs/AppointmentsTab';
+import { VisitsTab } from './tabs/VisitsTab';
 import { ConsentTab } from './tabs/ConsentTab';
 import { DocumentsTab } from './tabs/DocumentsTab';
 import { MedicalTab } from './tabs/MedicalTab';
@@ -47,6 +48,7 @@ export default function PatientDetailPage() {
   const tabs = [
     { key: 'overview', label: t('patients.tabs.overview'), children: <OverviewTab patient={patient} /> },
     { key: 'medical', label: t('patients.tabs.medical'), children: <MedicalTab patient={patient} /> },
+    ...(can('emr.view') ? [{ key: 'visits', label: t('patients.tabs.visits'), children: <VisitsTab patientId={patient.id} /> }] : []),
     ...(canSeeVitals ? [{ key: 'vitals', label: t('patients.tabs.vitals'), children: <VitalsTab patientId={patient.id} /> }] : []),
     ...(canDocuments ? [{ key: 'documents', label: t('patients.tabs.documents'), children: <DocumentsTab patientId={patient.id} /> }] : []),
     ...(can('appointments.view') && features.appointments !== false

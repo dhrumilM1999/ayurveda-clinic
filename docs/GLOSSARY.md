@@ -32,6 +32,10 @@
 | **TypeScript** | JavaScript with checks that catch mistakes before the app runs. |
 | **UUID** | A long random ID like `3f2a…`, safe to use in web addresses. |
 | **Vite** | The tool that serves the React screens during development and reloads on changes. |
+| **EMR** | Electronic Medical Record: the doctor's notes of each check-up, stored safely in the software. |
+| **Template** (check-up) | A ready form such as Ashtavidha Pariksha; the doctor clicks answers instead of typing. |
+| **Autosave** | The check-up saves itself a moment after you stop typing; no Save click needed. |
+| **NAMASTE / ICD** | Official code lists for diagnoses (Ayush / WHO). Optional in this software. |
 | **Token** | The queue number (1, 2, 3...) a patient gets on arrival, per doctor per day. |
 | **Walk-in** | A patient who comes without an appointment; gets a token straight away. |
 | **Click-to-chat** | A WhatsApp link (`wa.me/...`) that opens WhatsApp with the message typed; staff press Send. Free. |

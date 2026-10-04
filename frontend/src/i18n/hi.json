@@ -63,7 +63,8 @@
     "audit": "ऑडिट लॉग",
     "patients": "मरीज़",
     "appointments": "अपॉइंटमेंट",
-    "queue": "कतार (क्यू)"
+    "queue": "कतार (क्यू)",
+    "consult": "जाँच (चेक-अप)"
   },
   "dashboard": {
     "welcome": "स्वागत है, {{name}}",
@@ -351,7 +352,8 @@
       "documents": "दस्तावेज़",
       "consent": "सहमति",
       "activity": "गतिविधि",
-      "appointments": "अपॉइंटमेंट"
+      "appointments": "अपॉइंटमेंट",
+      "visits": "जाँच"
     },
     "fields": {
       "title": "संबोधन",
@@ -576,5 +578,87 @@
     "nowCalling": "अब",
     "next": "अगले",
     "more": "+ {{n}} और"
+  },
+  "consult": {
+    "todayPatients": "आज के मरीज़ ({{n}})",
+    "withoutAppointment": "बिना अपॉइंटमेंट जाँच",
+    "withoutAppointmentHelp": "मरीज़ खोजें। जाँच इस शाखा में आपके नाम से सहेजी जाएगी।",
+    "startCheckup": "जाँच शुरू करें",
+    "openCheckup": "जाँच खोलें",
+    "noPatientsToday": "आज अभी कोई मरीज़ नहीं।",
+    "appointmentsOff": "अपॉइंटमेंट बंद हैं। \"बिना अपॉइंटमेंट जाँच\" इस्तेमाल करें।",
+    "choosePatient": "जाँच शुरू करने के लिए बाईं ओर से मरीज़ चुनें।",
+    "complete": "जाँच पूरी करें",
+    "completed": "पूर्ण",
+    "completedMsg": "जाँच पूरी। अपॉइंटमेंट पूरा दर्ज हुआ।",
+    "prakritiTag": "प्रकृति: {{type}}",
+    "knownConditions": "ज्ञात बीमारियाँ",
+    "filled": "भरा हुआ",
+    "previousVisits": "पिछली जाँच",
+    "firstVisit": "यह पहली जाँच है।",
+    "visitOf": "{{date}} की जाँच",
+    "visitsTabHelp": "सभी शाखाओं की जाँच। खोलने के लिए क्लिक करें।",
+    "noVisits": "अभी कोई जाँच नहीं।",
+    "addTyped": "जोड़ें",
+    "pressEnterToAdd": "सूची में नहीं: अपने शब्द जोड़ने के लिए Enter दबाएँ।",
+    "noneAdded": "अभी कुछ नहीं जोड़ा। ऊपर चिप पर क्लिक करें या लिखकर Enter दबाएँ।",
+    "searchComplaints": "शिकायत / लक्षण खोजें",
+    "searchDiagnosis": "निदान खोजें",
+    "searchAdvice": "सलाह खोजें",
+    "since": "कब से",
+    "notes": "नोट",
+    "historyPlaceholder": "कैसे शुरू हुआ, क्या बेहतर या बदतर करता है, पिछला इलाज...",
+    "examination": "जाँच के निष्कर्ष",
+    "examinationPlaceholder": "सामान्य और स्थानीय जाँच",
+    "provisional": "अस्थायी",
+    "final": "अंतिम",
+    "noCode": "कोड नहीं",
+    "code": "कोड",
+    "adviceNotes": "अन्य सलाह / आहार नोट",
+    "adviceNotesPlaceholder": "मरीज़ को बताने की और बात",
+    "afterDays": "{{n}} दिन बाद",
+    "followUpOn": "अगली मुलाक़ात: {{date}}",
+    "followUpNotesPlaceholder": "जैसे शुगर टेस्ट के लिए खाली पेट आएँ",
+    "clearAll": "उत्तर साफ़ करें",
+    "prakritiScore": "प्रकृति स्कोर",
+    "answered": "{{total}} में से {{n}} उत्तर",
+    "answerToScore": "स्कोर देखने के लिए प्रश्नों के उत्तर दें।",
+    "summaryEmpty": "अभी कुछ नहीं भरा।",
+    "sections": {
+      "summary": "सारांश",
+      "complaints": "शिकायतें",
+      "history": "इतिहास और नोट",
+      "vitals": "वाइटल्स",
+      "diagnosis": "निदान",
+      "advice": "सलाह",
+      "followUp": "फ़ॉलो-अप"
+    },
+    "units": {
+      "days": "दिन",
+      "weeks": "सप्ताह",
+      "months": "महीने",
+      "years": "वर्ष"
+    },
+    "severity": {
+      "mild": "हल्का",
+      "moderate": "मध्यम",
+      "severe": "गंभीर"
+    },
+    "dosha": {
+      "vata": "वात",
+      "pitta": "पित्त",
+      "kapha": "कफ",
+      "sama": "सम (संतुलित)"
+    },
+    "save": {
+      "saved": "सहेजा गया",
+      "dirty": "बिना सहेजे बदलाव",
+      "saving": "सहेज रहे हैं...",
+      "error": "सहेजा नहीं गया!"
+    },
+    "status": {
+      "draft": "जारी",
+      "completed": "पूर्ण"
+    }
   }
 }

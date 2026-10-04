@@ -63,7 +63,8 @@
     "audit": "ઓડિટ લોગ",
     "patients": "દર્દીઓ",
     "appointments": "એપોઇન્ટમેન્ટ",
-    "queue": "કતાર (ક્યૂ)"
+    "queue": "કતાર (ક્યૂ)",
+    "consult": "તપાસ (ચેક-અપ)"
   },
   "dashboard": {
     "welcome": "સ્વાગત છે, {{name}}",
@@ -351,7 +352,8 @@
       "documents": "દસ્તાવેજો",
       "consent": "સંમતિ",
       "activity": "પ્રવૃત્તિ",
-      "appointments": "એપોઇન્ટમેન્ટ"
+      "appointments": "એપોઇન્ટમેન્ટ",
+      "visits": "તપાસ"
     },
     "fields": {
       "title": "સંબોધન",
@@ -576,5 +578,87 @@
     "nowCalling": "હવે",
     "next": "પછી",
     "more": "+ {{n}} વધુ"
+  },
+  "consult": {
+    "todayPatients": "આજના દર્દી ({{n}})",
+    "withoutAppointment": "એપોઇન્ટમેન્ટ વગર તપાસ",
+    "withoutAppointmentHelp": "દર્દી શોધો. તપાસ આ શાખામાં તમારા નામે સચવાશે.",
+    "startCheckup": "તપાસ શરૂ કરો",
+    "openCheckup": "તપાસ ખોલો",
+    "noPatientsToday": "આજે હજી કોઈ દર્દી નથી.",
+    "appointmentsOff": "એપોઇન્ટમેન્ટ બંધ છે. \"એપોઇન્ટમેન્ટ વગર તપાસ\" વાપરો.",
+    "choosePatient": "તપાસ શરૂ કરવા ડાબી બાજુથી દર્દી પસંદ કરો.",
+    "complete": "તપાસ પૂર્ણ કરો",
+    "completed": "પૂર્ણ",
+    "completedMsg": "તપાસ પૂર્ણ. એપોઇન્ટમેન્ટ પૂર્ણ તરીકે નોંધાઈ.",
+    "prakritiTag": "પ્રકૃતિ: {{type}}",
+    "knownConditions": "જાણીતી બીમારીઓ",
+    "filled": "ભરેલું",
+    "previousVisits": "અગાઉની તપાસ",
+    "firstVisit": "આ પહેલી તપાસ છે.",
+    "visitOf": "{{date}} ની તપાસ",
+    "visitsTabHelp": "બધી શાખાઓની તપાસ. ખોલવા ક્લિક કરો.",
+    "noVisits": "હજી કોઈ તપાસ નથી.",
+    "addTyped": "ઉમેરો",
+    "pressEnterToAdd": "યાદીમાં નથી: તમારા શબ્દો ઉમેરવા Enter દબાવો.",
+    "noneAdded": "હજી કંઈ ઉમેર્યું નથી. ઉપરની ચિપ પર ક્લિક કરો અથવા લખીને Enter દબાવો.",
+    "searchComplaints": "ફરિયાદ / લક્ષણ શોધો",
+    "searchDiagnosis": "નિદાન શોધો",
+    "searchAdvice": "સલાહ શોધો",
+    "since": "ક્યારથી",
+    "notes": "નોંધ",
+    "historyPlaceholder": "કેવી રીતે શરૂ થયું, શું સારું કે ખરાબ કરે છે, અગાઉની સારવાર...",
+    "examination": "તપાસનાં તારણો",
+    "examinationPlaceholder": "સામાન્ય અને સ્થાનિક તપાસ",
+    "provisional": "કામચલાઉ",
+    "final": "અંતિમ",
+    "noCode": "કોડ નહીં",
+    "code": "કોડ",
+    "adviceNotes": "અન્ય સલાહ / આહાર નોંધ",
+    "adviceNotesPlaceholder": "દર્દીને કહેવાની બીજી વાત",
+    "afterDays": "{{n}} દિવસ પછી",
+    "followUpOn": "આગલી મુલાકાત: {{date}}",
+    "followUpNotesPlaceholder": "દા.ત. સુગર ટેસ્ટ માટે ભૂખ્યા પેટે આવવું",
+    "clearAll": "જવાબ સાફ કરો",
+    "prakritiScore": "પ્રકૃતિ સ્કોર",
+    "answered": "{{total}} માંથી {{n}} જવાબ",
+    "answerToScore": "સ્કોર જોવા પ્રશ્નોના જવાબ આપો.",
+    "summaryEmpty": "હજી કંઈ ભર્યું નથી.",
+    "sections": {
+      "summary": "સારાંશ",
+      "complaints": "ફરિયાદો",
+      "history": "ઇતિહાસ અને નોંધ",
+      "vitals": "વાઇટલ્સ",
+      "diagnosis": "નિદાન",
+      "advice": "સલાહ",
+      "followUp": "ફોલો-અપ"
+    },
+    "units": {
+      "days": "દિવસ",
+      "weeks": "અઠવાડિયા",
+      "months": "મહિના",
+      "years": "વર્ષ"
+    },
+    "severity": {
+      "mild": "હળવું",
+      "moderate": "મધ્યમ",
+      "severe": "ગંભીર"
+    },
+    "dosha": {
+      "vata": "વાત",
+      "pitta": "પિત્ત",
+      "kapha": "કફ",
+      "sama": "સમ (સંતુલિત)"
+    },
+    "save": {
+      "saved": "સચવાયું",
+      "dirty": "ન સચવાયેલા ફેરફાર",
+      "saving": "સાચવી રહ્યું છે...",
+      "error": "સચવાયું નથી!"
+    },
+    "status": {
+      "draft": "ચાલુ",
+      "completed": "પૂર્ણ"
+    }
   }
 }

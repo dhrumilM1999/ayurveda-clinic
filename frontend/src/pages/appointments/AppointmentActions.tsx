@@ -4,6 +4,7 @@ import { MoreOutlined } from '@ant-design/icons';
 import { App, Button, DatePicker, Dropdown, Form, Input, Modal, Space } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from '../../api/client';
 import type { Appointment, PatientNotification, Slot } from '../../api/types';
@@ -16,12 +17,13 @@ export function AppointmentActions({ appointment: a, onChanged }: { appointment:
   const { t } = useTranslation();
   const { message, modal } = App.useApp();
   const { can } = useAuth();
+  const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [notice, setNotice] = useState<{ title: string; notification?: PatientNotification } | null>(null);
 
-  if (!can('appointments.manage')) return null;
+  if (!can('appointments.manage') && !can('emr.edit')) return null;
   const isToday = a.date === dayjs().format('YYYY-MM-DD');
 
   const run = async (step: Step) => {
@@ -41,6 +43,18 @@ export function AppointmentActions({ appointment: a, onChanged }: { appointment:
     }
   };
 
+  // Doctors: open the check-up screen for this appointment (marks it "With doctor")
+  const openCheckup = async () => {
+    setBusy(true);
+    try {
+      const { data } = await api.post<{ id: string }>('/visits/', { appointment: a.id });
+      navigate(`/consult/${data.id}`);
+    } catch (err) {
+      message.error(errorMessage(err, t('common.loadFailed')));
+      setBusy(false);
+    }
+  };
+
   const whatsapp = async () => {
     try {
       const { data } = await api.post<PatientNotification>(`/appointments/${a.id}/whatsapp/`);
@@ -56,7 +70,14 @@ export function AppointmentActions({ appointment: a, onChanged }: { appointment:
   if (a.status === 'checked_in') main = { step: 'start', label: t('appointments.start') };
   if (a.status === 'in_consultation') main = { step: 'complete', label: t('appointments.complete') };
 
+  const canCheckup = can('emr.edit') && isToday && ['booked', 'checked_in', 'in_consultation', 'completed'].includes(a.status);
+  if (!can('appointments.manage')) {
+    // Doctor without front-desk rights: only the check-up button
+    return canCheckup ? <Button size="small" loading={busy} onClick={openCheckup}>{t('consult.openCheckup')}</Button> : null;
+  }
+
   const menu = [
+    ...(canCheckup ? [{ key: 'checkup', label: t('consult.openCheckup') }] : []),
     ...(a.status === 'booked' ? [{ key: 'reschedule', label: t('appointments.reschedule') }] : []),
     ...(a.status === 'checked_in' ? [{ key: 'complete', label: t('appointments.complete') }] : []),
     ...(a.status === 'booked' && !dayjs(a.date).isAfter(dayjs(), 'day') ? [{ key: 'no-show', label: t('appointments.markNoShow') }] : []),
@@ -65,7 +86,8 @@ export function AppointmentActions({ appointment: a, onChanged }: { appointment:
   ];
 
   const onMenu = ({ key }: { key: string }) => {
-    if (key === 'reschedule') setRescheduleOpen(true);
+    if (key === 'checkup') openCheckup();
+    else if (key === 'reschedule') setRescheduleOpen(true);
     else if (key === 'cancel') setCancelOpen(true);
     else if (key === 'whatsapp') whatsapp();
     else if (key === 'no-show') {

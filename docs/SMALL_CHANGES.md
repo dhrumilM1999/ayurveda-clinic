@@ -123,6 +123,24 @@ Example: add "Landmark" to branches.
 
 Changing the database is an **ASK FIRST** change. It's fine to try, but ask Claude Code to review it.
 
+## Add check-up chips (complaints, diagnoses, advice)
+
+The quick-pick chips on the check-up screen are dropdown lists. Add one in the technical admin site:
+http://localhost:8000/admin/ -> **Master values** -> **Add**. Category `complaint`, `diagnosis` or `advice`,
+a short code (e.g. `pandu`), the English, Gujarati and Hindi text. The doctor can also simply type new words
+in the search box and press Enter (that does not add it to the list).
+
+## Change or add a check-up template (Ashtavidha, Prakriti...)
+
+The starting templates are in `backend/apps/emr/templates_catalog.py`. Each template has fields with
+English, Gujarati and Hindi text. **For a new clinic** the file is used as it is. For your existing clinic,
+templates are already copied into the database, so:
+- To switch a template off or rename it: http://localhost:8000/admin/ -> **Exam templates**.
+- To add a brand-new template or change the questions: ask Claude Code ("add a template for ...").
+  Old check-ups keep the version they were filled with.
+
+The Prakriti questions are a SAMPLE. Please send your own questions and the doctor's scoring.
+
 ## Change the SMS / WhatsApp appointment messages
 
 Open `backend/apps/appointments/messages_catalog.py`. Each message has an English (`en`), Gujarati (`gu`)

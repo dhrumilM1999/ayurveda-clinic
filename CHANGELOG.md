@@ -2,6 +2,29 @@
 
 What changed in each step, in plain words.
 
+## Step 4 - Check-up screen and Ayurveda templates (2026-10-04)
+
+**What you can do now** (layout based on the Healthray check-up screen)
+- New **Check-up** menu for doctors: today's patients on the left; click one to open the check-up.
+  The appointment moves to "With doctor"; **Complete visit** marks it done.
+- Top: patient name, ID, age, token, **allergy alert**, known conditions and the patient's **Prakriti**.
+- Section buttons: Summary, Complaints, History & notes, Vitals, **Ashtavidha Pariksha**, **Dashavidha Pariksha**,
+  **Agni & daily habits**, **Prakriti questionnaire** (live Vata / Pitta / Kapha score), Diagnosis, Advice, Follow-up.
+  A gold dot shows which sections are filled in.
+- Complaints, diagnoses (Ayurvedic names; optional NAMASTE / ICD codes) and advice use **search + quick-pick chips**;
+  you can also type your own.
+- **Saves by itself** a moment after typing stops.
+- **Previous check-ups** (from all branches) on the right; the patient file has a new **Check-ups** tab.
+- Doctors can start a check-up without an appointment.
+
+**Safety**
+- All check-up notes are stored **encrypted**. Opening a check-up is written to the audit log
+  (but the medical text itself is never copied into the log).
+- Front desk, therapist and pharmacist cannot read check-ups.
+- Templates are data (editable), with versions, so old check-ups always show what was asked then.
+
+**Tests:** 11 new automated tests; all backend tests pass.
+
 ## One-branch mode (2026-10-04)
 
 - New switch **Settings -> Use more than one branch** (owner only). It is **off** now: the app works with the

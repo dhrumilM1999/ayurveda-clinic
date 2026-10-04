@@ -887,3 +887,401 @@ body {
   font-size: max(20px, 1.8vw);
   color: rgba(255, 255, 255, 0.6);
 }
+
+/* ---------- Check-up (consultation) screen ---------- */
+.consult {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+.consult-list {
+  position: sticky;
+  top: 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: calc(100vh - 92px);
+  padding: 10px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid var(--clinic-border);
+}
+.consult-list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.consult-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  min-height: 0;
+}
+.consult-item {
+  text-align: left;
+  padding: 7px 9px;
+  border-radius: 8px;
+  border: 1px solid var(--clinic-border);
+  background: #fff;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s;
+}
+.consult-item:hover {
+  border-color: var(--clinic-primary);
+}
+.consult-item.active {
+  border-color: var(--clinic-primary);
+  background: var(--clinic-primary-soft);
+  box-shadow: inset 3px 0 0 var(--clinic-primary);
+}
+.consult-item.status-completed {
+  opacity: 0.6;
+}
+.consult-item-top,
+.consult-item-sub {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.consult-item-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12.5px;
+}
+.consult-main {
+  min-width: 0;
+}
+.consult-empty {
+  display: grid;
+  place-items: center;
+  min-height: 320px;
+  border-radius: 10px;
+  border: 1px dashed var(--clinic-border);
+  background: #fff;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 230px;
+  gap: 14px;
+  align-items: start;
+}
+.workspace-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.visit-head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.visit-patient {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--clinic-text) !important;
+}
+.visit-allergy {
+  margin-top: 8px;
+  padding: 4px 10px !important;
+}
+.save-state {
+  font-size: 12px;
+  color: rgba(35, 48, 42, 0.5);
+}
+.save-dirty,
+.save-saving {
+  color: #b7791f;
+}
+.save-error {
+  color: #c2412d;
+  font-weight: 600;
+}
+
+/* Section buttons (like Healthray) */
+.section-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.section-btn {
+  position: relative;
+  padding: 4px 11px;
+  border-radius: 6px;
+  border: 1px solid var(--clinic-border);
+  background: #fff;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: rgba(35, 48, 42, 0.8);
+  cursor: pointer;
+}
+.section-btn:hover {
+  border-color: var(--clinic-primary);
+  color: var(--clinic-primary);
+}
+.section-btn.active {
+  border-color: var(--clinic-primary);
+  background: var(--clinic-primary);
+  color: #fff;
+}
+.filled-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 5px;
+  vertical-align: middle;
+  border-radius: 50%;
+  background: var(--clinic-accent);
+}
+.section-card .ant-card-body {
+  min-height: 300px;
+}
+.section-title {
+  position: relative;
+  margin: 14px 0 8px;
+  padding-left: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(35, 48, 42, 0.7);
+}
+.section-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 2px;
+  bottom: 2px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--clinic-accent);
+}
+.section-card .ant-card-body > .section-title:first-child,
+.template-head .section-title {
+  margin-top: 0;
+}
+
+/* Search + quick-pick chips */
+.chip-picker {
+  padding: 8px;
+  border-radius: 8px;
+  background: #faf8f3;
+  border: 1px solid var(--clinic-border);
+}
+.chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+.pick-chip {
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--clinic-border);
+  background: #fff;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.pick-chip:hover {
+  border-color: var(--clinic-primary);
+  background: var(--clinic-primary-soft);
+  color: var(--clinic-primary);
+}
+.check-chip {
+  border: 1px solid var(--clinic-border) !important;
+  font-size: 12px;
+}
+.chosen-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+.item-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+.item-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--clinic-border);
+  background: #fff;
+}
+.item-label {
+  min-width: 160px;
+  flex: 0 1 220px;
+}
+.item-notes {
+  flex: 1 1 160px;
+  min-width: 120px;
+}
+
+/* Templates (Ashtavidha, Prakriti...) */
+.template-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.template-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.template-field .ant-radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.template-field .ant-radio-button-wrapper {
+  border-radius: 6px !important;
+  border-inline-start-width: 1px !important;
+  font-size: 12px;
+}
+.template-field .ant-radio-button-wrapper::before {
+  display: none !important;
+}
+.template-label {
+  margin-bottom: 4px;
+  font-weight: 600;
+  font-size: 12.5px;
+}
+.q-num {
+  color: rgba(35, 48, 42, 0.45);
+}
+.questionnaire {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px;
+  gap: 16px;
+  align-items: start;
+}
+.score-card {
+  position: sticky;
+  top: 72px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #faf8f3;
+  border: 1px solid var(--clinic-border);
+}
+.score-type {
+  margin-bottom: 8px;
+  font-size: 16px;
+  font-weight: 700;
+}
+.dosha-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 6px 0;
+}
+.dosha-row {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 38px;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+.dosha-name {
+  font-weight: 600;
+}
+.dosha-track {
+  height: 10px;
+  border-radius: 4px;
+  background: rgba(35, 48, 42, 0.07);
+  overflow: hidden;
+}
+.dosha-fill {
+  display: block;
+  height: 100%;
+  border-radius: 0 4px 4px 0;
+  transition: width 0.25s;
+}
+.dosha-vata { background: #4f6bc4; }
+.dosha-pitta { background: #d0612c; }
+.dosha-kapha { background: #2f8f6b; }
+.dosha-pct {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Summary and previous visits */
+.summary-list {
+  margin: 0 0 4px;
+  padding-left: 18px;
+}
+.pre-line {
+  white-space: pre-line;
+}
+.workspace-side {
+  position: sticky;
+  top: 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: calc(100vh - 92px);
+  overflow-y: auto;
+  padding: 10px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid var(--clinic-border);
+}
+.prev-visit {
+  text-align: left;
+  padding: 7px 9px;
+  border-radius: 8px;
+  border: 1px solid var(--clinic-border);
+  background: #faf8f3;
+  font: inherit;
+  cursor: pointer;
+}
+.prev-visit:hover {
+  border-color: var(--clinic-primary);
+}
+.prev-visit-date {
+  font-weight: 700;
+  font-size: 12.5px;
+}
+.prev-visit-dx {
+  font-size: 12px;
+  color: var(--clinic-primary);
+  font-weight: 600;
+}
+
+@media (max-width: 1200px) {
+  .workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .workspace-side {
+    position: static;
+    max-height: none;
+  }
+}
+@media (max-width: 900px) {
+  .consult,
+  .questionnaire {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .consult-list,
+  .score-card {
+    position: static;
+    max-height: none;
+  }
+}

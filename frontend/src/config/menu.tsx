@@ -5,7 +5,7 @@
 // - feature: the item hides when that module is switched off for the branch (Settings)
 // - multiBranchOnly: the item shows only when "Use more than one branch" is on (Settings)
 import {
-  ApartmentOutlined, AuditOutlined, CalendarOutlined, DashboardOutlined, HomeOutlined,
+  ApartmentOutlined, AuditOutlined, MedicineBoxOutlined, CalendarOutlined, DashboardOutlined, HomeOutlined,
   IdcardOutlined, OrderedListOutlined, SafetyCertificateOutlined, ScheduleOutlined, SettingOutlined, TeamOutlined,
 } from '@ant-design/icons';
 import type { ReactNode } from 'react';
@@ -24,6 +24,7 @@ export const menuItems: MenuItemConfig[] = [
   { key: 'dashboard', path: '/', labelKey: 'menu.dashboard', icon: <DashboardOutlined />, permission: 'dashboard.view' },
   { key: 'patients', path: '/patients', labelKey: 'menu.patients', icon: <IdcardOutlined />, permission: 'patients.view' },
   { key: 'appointments', path: '/appointments', labelKey: 'menu.appointments', icon: <ScheduleOutlined />, permission: 'appointments.view', feature: 'appointments' },
+  { key: 'consult', path: '/consult', labelKey: 'menu.consult', icon: <MedicineBoxOutlined />, permission: 'emr.view' },
   { key: 'queue', path: '/queue', labelKey: 'menu.queue', icon: <OrderedListOutlined />, permission: 'appointments.view', feature: 'appointments' },
   { key: 'branches', path: '/branches', labelKey: 'menu.branches', icon: <ApartmentOutlined />, permission: 'branches.view', multiBranchOnly: true },
   { key: 'rooms', path: '/rooms', labelKey: 'menu.rooms', icon: <HomeOutlined />, permission: 'rooms.view' },
