@@ -9,12 +9,12 @@ from apps.accounts.services import accessible_branches, user_has_perm
 from apps.audit.services import log_action
 from apps.common.viewsets import AuditedModelViewSet
 
-from .features_catalog import FEATURES
-from .models import Branch, BranchFeatureFlag, Organization, Room, RoomType
+from .features_catalog import ADDITIONAL_FEATURES, FEATURES
+from .models import Branch, BranchFeatureFlag, Organization, OrganizationFeature, Room, RoomType
 from .serializers import (
     BranchSerializer, FeatureFlagSerializer, OrganizationSerializer, RoomSerializer, RoomTypeSerializer,
 )
-from .services import branch_features
+from .services import branch_features, organization_features
 
 
 class CurrentOrganizationView(APIView):
@@ -106,5 +106,47 @@ class FeatureFlagViewSet(viewsets.ViewSet):
             flag.save(update_fields=["enabled", "updated_by", "updated_at"])
         log_action(request, "update", flag, changes={"code": code, "enabled": enabled})
         return Response({"code": code, "label": FEATURES[code]["label"], "enabled": enabled})
+
+    update = partial_update
+
+
+class AdditionalFeatureViewSet(viewsets.ViewSet):
+    """
+    Optional extra features for the whole organization ("Additional settings").
+    Everyone logged in may read them (the screens use them); only organization admins may switch them.
+    """
+
+    permission_classes = [IsAuthenticated, BranchPermission]
+    lookup_field = "code"
+
+    def _rows(self, organization_id):
+        effective = organization_features(organization_id)
+        saved = dict(OrganizationFeature.objects.filter(organization_id=organization_id).values_list("code", "enabled"))
+        return [{
+            "code": code, "group": info["group"], "label": info["label"], "requires": info.get("requires", ""),
+            "switched_on": saved.get(code, info["default"]), "enabled": effective[code],
+        } for code, info in ADDITIONAL_FEATURES.items()]
+
+    def list(self, request):
+        return Response(self._rows(request.user.organization_id))
+
+    def partial_update(self, request, code=None):
+        if not (request.user.is_org_admin and user_has_perm(request.user, "settings.manage")):
+            self.permission_denied(request, message="Only an organization admin can change additional settings.")
+        if code not in ADDITIONAL_FEATURES:
+            raise NotFound("Unknown feature.")
+        serializer = FeatureFlagSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        enabled = serializer.validated_data["enabled"]
+        flag, created = OrganizationFeature.objects.get_or_create(
+            organization_id=request.user.organization_id, code=code,
+            defaults={"enabled": enabled, "created_by": request.user, "updated_by": request.user},
+        )
+        if not created:
+            flag.enabled = enabled
+            flag.updated_by = request.user
+            flag.save(update_fields=["enabled", "updated_by", "updated_at"])
+        log_action(request, "update", flag, changes={"code": code, "enabled": enabled})
+        return Response(self._rows(request.user.organization_id))
 
     update = partial_update

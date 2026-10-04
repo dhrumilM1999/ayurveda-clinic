@@ -117,3 +117,20 @@ class BranchFeatureFlag(BranchScopedModel):
 
     def __str__(self):
         return f"{self.branch} / {self.code} = {self.enabled}"
+
+
+class OrganizationFeature(OrgScopedModel):
+    """An optional extra feature switched on/off for the whole organization. Codes: ADDITIONAL_FEATURES."""
+
+    code = models.CharField(max_length=50)
+    enabled = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["organization", "code"], condition=Q(is_deleted=False), name="uniq_feature_per_org"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.organization} / {self.code} = {self.enabled}"
