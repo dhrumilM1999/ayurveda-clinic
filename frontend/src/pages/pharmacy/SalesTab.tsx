@@ -14,7 +14,9 @@ import { InvoiceStatusTag, PrintButton, qty } from './common';
 
 export function SalesTab() {
   const { t } = useTranslation();
-  const { can } = useAuth();
+  const { can, hasFeature } = useAuth();
+  const billing = hasFeature('pharmacy_billing');
+  const returns = hasFeature('pharmacy_sales_returns');
   const [day, setDay] = useState<Dayjs | null>(dayjs());
   const [search, setSearch] = useState('');
   const [query, setQuery] = useState('');
@@ -52,16 +54,16 @@ export function SalesTab() {
         locale={{ emptyText: t('pharmacy.noSales') }}
         columns={[
           { title: t('pharmacy.when'), dataIndex: 'created_at', width: 130, render: (d: string) => dayjs(d).format('DD-MM-YY h:mm A') },
-          { title: t('billing.billNo'), dataIndex: 'number', render: (v: string, r: SaleRow) => (r.invoice ? <a className="mono" onClick={() => setBill(r.invoice)}>{v}</a> : '—') },
+          ...(billing ? [{ title: t('billing.billNo'), dataIndex: 'number', render: (v: string, r: SaleRow) => (r.invoice ? <a className="mono" onClick={() => setBill(r.invoice)}>{v}</a> : '—') }] : []),
           { title: t('appointments.patient'), key: 'p', render: (_: unknown, r: SaleRow) => <PatientCell patient={r.patient_detail} /> },
-          { title: t('pharmacy.total'), dataIndex: 'total_amount', width: 120, align: 'right' as const, render: (v: string) => <b className="num">{money(v)}</b> },
-          { title: t('common.status'), dataIndex: 'invoice_status', width: 120, render: (s: InvoiceStatus | '') => (s ? <InvoiceStatusTag status={s} /> : '—') },
+          ...(billing ? [{ title: t('pharmacy.total'), dataIndex: 'total_amount', width: 120, align: 'right' as const, render: (v: string) => <b className="num">{money(v)}</b> },
+          { title: t('common.status'), dataIndex: 'invoice_status', width: 120, render: (s: InvoiceStatus | '') => (s ? <InvoiceStatusTag status={s} /> : '—') }] : []),
           {
             title: '', key: 'a', width: 200, align: 'right' as const,
             render: (_: unknown, r: SaleRow) => (
               <Space size={4}>
-                {r.invoice && <PrintButton id={r.invoice} />}
-                {can('pharmacy.dispense') && r.invoice_status !== 'cancelled' && (
+                {billing && r.invoice && <PrintButton id={r.invoice} />}
+                {returns && can('pharmacy.dispense') && r.invoice_status !== 'cancelled' && (
                   <Button size="small" icon={<RollbackOutlined />} onClick={() => setReturning(r.id)}>{t('pharmacy.return')}</Button>
                 )}
               </Space>
@@ -96,6 +98,8 @@ function ReturnModal({ saleId, onClose }: { saleId: string; onClose: (saved: boo
   const set = (id: string, patch: Partial<Pick>) => setPicks((p) => ({ ...p, [id]: { ...p[id]!, ...patch } }));
   const left = (i: SaleItem) => Number(i.quantity) - Number(i.returned_quantity);
   const chosen = (sale?.items ?? []).filter((i) => picks[i.id]?.take && picks[i.id]!.quantity > 0);
+  // A sale made without a bill (Pharmacy bills switched off) is only taken back into stock: no credit note
+  const billed = !!sale?.invoice;
   const value = chosen.reduce((s, i) => s + (Number(i.amount) * picks[i.id]!.quantity) / Number(i.quantity), 0);
 
   const save = async () => {
@@ -106,7 +110,9 @@ function ReturnModal({ saleId, onClose }: { saleId: string; onClose: (saved: boo
         ...values,
         items: chosen.map((i) => ({ dispense_item: i.id, quantity: picks[i.id]!.quantity, back_to_stock: picks[i.id]!.back })),
       });
-      message.success(t('pharmacy.returnDone', { number: data.credit_note_number, amount: money(data.refund_amount) }));
+      message.success(data.credit_note_number
+        ? t('pharmacy.returnDone', { number: data.credit_note_number, amount: money(data.refund_amount) })
+        : t('pharmacy.returnDoneNoBill'));
       onClose(true);
     } catch (err) {
       message.error(errorMessage(err, t('common.saveFailed')));
@@ -116,8 +122,9 @@ function ReturnModal({ saleId, onClose }: { saleId: string; onClose: (saved: boo
   };
 
   return (
-    <Modal open width={760} title={t('pharmacy.returnTitle', { number: sale?.number ?? '' })} onCancel={() => onClose(false)}
-      onOk={save} okText={t('pharmacy.returnButton', { amount: money(value) })} okButtonProps={{ disabled: !chosen.length }}
+    <Modal open width={760} onCancel={() => onClose(false)} onOk={save}
+      title={billed ? t('pharmacy.returnTitle', { number: sale?.number }) : t('pharmacy.returnTitleNoBill', { name: sale?.patient_detail.full_name ?? '' })}
+      okText={billed ? t('pharmacy.returnButton', { amount: money(value) }) : t('pharmacy.returnButtonNoBill')} okButtonProps={{ disabled: !chosen.length }}
       cancelText={t('common.cancel')} confirmLoading={saving} keyboard={false} maskClosable={false}>
       {!sale ? <Spin /> : (
         <>
@@ -157,9 +164,11 @@ function ReturnModal({ saleId, onClose }: { saleId: string; onClose: (saved: boo
               <Form.Item name="reason" label={t('pharmacy.reason')} rules={[{ required: true, message: t('common.required') }]} style={{ width: 360 }}>
                 <Input maxLength={200} placeholder={t('pharmacy.returnReasonPlaceholder')} />
               </Form.Item>
-              <Form.Item name="refund_mode" label={t('billing.refundMode')}>
-                <Segmented options={(['cash', 'upi', 'card'] as const).map((m) => ({ value: m, label: t(`billing.modes.${m}`) }))} />
-              </Form.Item>
+              {billed && (
+                <Form.Item name="refund_mode" label={t('billing.refundMode')}>
+                  <Segmented options={(['cash', 'upi', 'card'] as const).map((m) => ({ value: m, label: t(`billing.modes.${m}`) }))} />
+                </Form.Item>
+              )}
             </Space>
           </Form>
         </>

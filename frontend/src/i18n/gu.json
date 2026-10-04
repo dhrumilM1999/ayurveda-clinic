@@ -890,7 +890,7 @@
   },
   "pharmacy": {
     "title": "ફાર્મસી",
-    "subtitle": "દવા આપો અને બિલ, બેચ અને રેક મુજબ સ્ટોક, ખરીદી, પરત, સ્ટોક ચકાસણી, લેજર",
+    "subtitle": "દવા આપવી, બેચ પ્રમાણે સ્ટોક, ખરીદી અને સપ્લાયર",
     "tabs": {
       "dispense": "આપવાની દવા",
       "stock": "સ્ટોક",
@@ -1007,6 +1007,9 @@
     },
     "giveAndBill_one": "{{count}} દવા આપો અને બિલ",
     "giveAndBill_other": "{{count}} દવા આપો અને બિલ",
+    "giveOnly_one": "{{count}} દવા આપો",
+    "giveOnly_other": "{{count}} દવા આપો",
+    "givenDone": "દવા આપી દીધી. સ્ટોક અપડેટ થયો.",
     "addRack": "રેક ઉમેરો",
     "editRack": "રેક ફેરફાર",
     "allMedicines": "બધી દવાઓ",
@@ -1085,6 +1088,9 @@
     "returnHelp": "પરત આવેલી દવાઓ પસંદ કરો. વેચી શકાય તેવી સ્ટોકમાં જાય; ખરાબ નહીં.",
     "returnReasonPlaceholder": "દા.ત. ડૉક્ટરે દવા બદલી",
     "returnTitle": "વેચાણ પરત: બિલ {{number}}",
+    "returnTitleNoBill": "વેચાણ પરત: {{name}}",
+    "returnButtonNoBill": "પાછી લો",
+    "returnDoneNoBill": "પરત લીધી. સ્ટોક અપડેટ થયો.",
     "returnToSupplier": "સપ્લાયરને પરત",
     "returnToSupplierTitle": "સપ્લાયરને પરત: {{name}} / {{batch}}",
     "salesHelp": "પ્રિસ્ક્રિપ્શન પર આપેલી દવાઓ. દર્દી દવા પરત લાવે ત્યારે પરત વાપરો.",

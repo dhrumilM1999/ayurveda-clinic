@@ -890,7 +890,7 @@
   },
   "pharmacy": {
     "title": "फ़ार्मेसी",
-    "subtitle": "दवा दें और बिल, बैच और रैक अनुसार स्टॉक, खरीद, वापसी, स्टॉक जाँच, लेजर",
+    "subtitle": "दवा देना, बैच अनुसार स्टॉक, ख़रीद और सप्लायर",
     "tabs": {
       "dispense": "देने की दवा",
       "stock": "स्टॉक",
@@ -1007,6 +1007,9 @@
     },
     "giveAndBill_one": "{{count}} दवा दें और बिल",
     "giveAndBill_other": "{{count}} दवाएँ दें और बिल",
+    "giveOnly_one": "{{count}} दवा दें",
+    "giveOnly_other": "{{count}} दवाएँ दें",
+    "givenDone": "दवा दे दी। स्टॉक अपडेट हुआ।",
     "addRack": "रैक जोड़ें",
     "editRack": "रैक बदलें",
     "allMedicines": "सभी दवाएँ",
@@ -1085,6 +1088,9 @@
     "returnHelp": "वापस आई दवाएँ चुनें। बेचने योग्य स्टॉक में जाएँगी; खराब नहीं।",
     "returnReasonPlaceholder": "जैसे डॉक्टर ने दवा बदली",
     "returnTitle": "बिक्री वापसी: बिल {{number}}",
+    "returnTitleNoBill": "बिक्री वापसी: {{name}}",
+    "returnButtonNoBill": "वापस लें",
+    "returnDoneNoBill": "वापस ली। स्टॉक अपडेट हुआ।",
     "returnToSupplier": "सप्लायर को वापस",
     "returnToSupplierTitle": "सप्लायर को वापस: {{name}} / {{batch}}",
     "salesHelp": "पर्चे पर दी गई दवाएँ। मरीज़ दवा लौटाए तो वापसी इस्तेमाल करें।",

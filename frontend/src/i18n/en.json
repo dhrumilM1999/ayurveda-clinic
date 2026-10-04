@@ -890,7 +890,7 @@
   },
   "pharmacy": {
     "title": "Pharmacy",
-    "subtitle": "Dispense and bill, stock by batch and rack, purchases, returns, stock checks, ledger",
+    "subtitle": "Dispense medicines, stock by batch, purchases and suppliers",
     "tabs": {
       "dispense": "To dispense",
       "stock": "Stock",
@@ -1007,6 +1007,9 @@
     },
     "giveAndBill_one": "Give & bill {{count}} medicine",
     "giveAndBill_other": "Give & bill {{count}} medicines",
+    "giveOnly_one": "Give {{count}} medicine",
+    "giveOnly_other": "Give {{count}} medicines",
+    "givenDone": "Medicines given. Stock is updated.",
     "addRack": "Add rack",
     "editRack": "Edit rack",
     "allMedicines": "All medicines",
@@ -1085,6 +1088,9 @@
     "returnHelp": "Tick the medicines brought back. Sellable ones go back to stock; damaged ones do not.",
     "returnReasonPlaceholder": "e.g. Doctor changed the medicine",
     "returnTitle": "Sale return: bill {{number}}",
+    "returnTitleNoBill": "Sale return: {{name}}",
+    "returnButtonNoBill": "Take back",
+    "returnDoneNoBill": "Returned. Stock updated.",
     "returnToSupplier": "Return to supplier",
     "returnToSupplierTitle": "Return to supplier: {{name}} / {{batch}}",
     "salesHelp": "Medicines given against prescriptions. Use Return when a patient brings medicines back.",

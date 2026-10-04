@@ -9,7 +9,10 @@ import { useAuth } from '../../auth/AuthContext';
 
 export function SetupTab() {
   const { t } = useTranslation();
+  const { hasFeature } = useAuth();
   const [view, setView] = useState<'racks' | 'suppliers'>('racks');
+  // Racks are an extra (Additional settings); suppliers are always here
+  if (!hasFeature('pharmacy_racks')) return <Suppliers />;
   return (
     <>
       <div className="filter-bar">
