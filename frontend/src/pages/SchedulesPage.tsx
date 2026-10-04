@@ -137,7 +137,7 @@ export default function SchedulesPage() {
         confirmLoading={saving}
         okText={t('common.save')}
         cancelText={t('common.cancel')}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form form={form} layout="vertical">
           <Form.Item name="doctor" label={t('schedules.doctor')} rules={[{ required: true, message: t('common.required') }]}>

@@ -130,7 +130,7 @@ export default function StaffPage() {
         okText={t('common.save')}
         cancelText={t('common.cancel')}
         width={720}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form form={form} layout="vertical">
           <Row gutter={12}>
@@ -210,7 +210,7 @@ export default function StaffPage() {
         onOk={savePassword}
         okText={t('common.save')}
         cancelText={t('common.cancel')}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form form={passwordForm} layout="vertical">
           <Form.Item name="password" label={t('staff.newPassword')} extra={t('staff.passwordRules')}

@@ -117,6 +117,17 @@ Example: add "Landmark" to branches.
 
 Changing the database is an **ASK FIRST** change. It's fine to try, but ask Claude Code to review it.
 
+## Change the SMS / WhatsApp appointment messages
+
+Open `backend/apps/appointments/messages_catalog.py`. Each message has an English (`en`), Gujarati (`gu`)
+and Hindi (`hi`) text. Change the words, but keep `{name}`, `{doctor}`, `{date}`, `{time}`, `{token}`,
+`{clinic}` and `{phone}` exactly as they are. The patient's language (from registration) picks the text.
+
+## Change doctor timings or slot length
+
+**Doctor schedules** screen -> edit the doctor's day. "Slot length" (e.g. 15 minutes) decides the time buttons
+shown when booking. Already booked appointments are not moved.
+
 ## Change the auto-logout time or OTP settings
 
 Open `.env` and change `IDLE_TIMEOUT_MINUTES=15` (or `OTP_VALID_MINUTES`, …).

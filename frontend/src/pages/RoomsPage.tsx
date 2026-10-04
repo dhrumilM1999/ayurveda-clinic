@@ -125,7 +125,7 @@ export default function RoomsPage() {
         confirmLoading={saving}
         okText={t('common.save')}
         cancelText={t('common.cancel')}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form form={form} layout="vertical">
           <Form.Item name="name" label={t('rooms.name')} rules={[{ required: true, message: t('common.required') }]}>

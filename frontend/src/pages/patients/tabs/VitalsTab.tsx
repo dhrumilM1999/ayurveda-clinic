@@ -137,7 +137,7 @@ export function VitalsTab({ patientId }: { patientId: string }) {
       />
 
       <Modal open={open} title={t('vitals.record')} onCancel={() => setOpen(false)} onOk={save} confirmLoading={saving}
-        okText={t('common.save')} cancelText={t('common.cancel')} width={640} destroyOnClose>
+        okText={t('common.save')} cancelText={t('common.cancel')} width={640} destroyOnHidden>
         <Form form={form} layout="vertical">
           <Row gutter={12}>
             {num('bp_systolic', t('vitals.systolic'), 50, 260, 'mmHg')}

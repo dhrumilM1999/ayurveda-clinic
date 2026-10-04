@@ -2,6 +2,34 @@
 
 What changed in each step, in plain words.
 
+## Step 3 - Appointments and queue (2026-10-04)
+
+**What you can do now**
+- **Appointments** screen: one day at a time (arrows to move days), filter by doctor and status, search.
+- **Book appointment**: choose patient, doctor and date; free times come from the doctor's schedule.
+  Booked times are crossed out. **The same doctor can never be booked twice for the same time**
+  (checked on screen and locked in the database), even across branches.
+- **Walk-in**: the patient gets the next **token number** for that doctor straight away.
+- **Check in** (on the day) gives a token too. Then **Start** -> **Done**. Also **Reschedule**, **Cancel**
+  (with reason) and **Did not come**. Appointments are never deleted.
+- **Queue** screen: per doctor - who is with the doctor, who is waiting (in token order), **Call next**.
+  Updates itself every 15 seconds.
+- **TV screen** for the waiting room: big tokens and short names only ("Ramesh P.") for privacy.
+- Messages: on booking, change, cancel and check-in, an SMS is "sent" through the free console adapter
+  (shown in `logs.bat`), and a **Send on WhatsApp** button opens WhatsApp with the message ready (free click-to-chat).
+  Messages go **only to patients who gave SMS/WhatsApp consent**, in the patient's language.
+- The patient file has a new **Appointments** tab. The dashboard shows today's appointments and waiting count.
+- The Appointments module can be switched off per branch (Settings -> Modules); the menu then hides it.
+
+**Other fixes**
+- Booking/reschedule popups no longer close by pressing Esc or clicking outside (no lost typing).
+- Fixed: login stopped working after an update because the backend had stopped; a restart fixed it
+  (see TROUBLESHOOTING.md).
+- Removed 38 stray files that had been saved to git by mistake.
+- Guide: new "Where is my data?" section in docs/HOW_IT_WORKS.md.
+
+**Tests:** 22 new automated tests for appointments; all backend tests pass.
+
 ## Compact design (2026-10-04)
 
 - Smaller headings and text (13px), less empty space, shorter buttons and table rows, so more fits on one screen.

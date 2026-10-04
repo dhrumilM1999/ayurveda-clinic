@@ -315,3 +315,95 @@ export interface ConsentRecord {
   recorded_by_name: string;
   branch_name: string;
 }
+
+// --- Appointments (Step 3) ---
+export type AppointmentStatus = 'booked' | 'checked_in' | 'in_consultation' | 'completed' | 'cancelled' | 'no_show';
+
+export interface AppointmentPatient {
+  id: string;
+  uhid: string;
+  full_name: string;
+  first_name: string;
+  last_name: string;
+  gender: string;
+  age_years: number | null;
+  mobile_masked: string;
+  is_vip: boolean;
+}
+
+/** What happened with the SMS / WhatsApp message after booking, check-in, etc. */
+export interface PatientNotification {
+  consent: boolean;
+  sms_sent: boolean;
+  whatsapp_link: string;
+  message: string;
+}
+
+export interface Appointment {
+  id: string;
+  patient: string;
+  patient_detail: AppointmentPatient;
+  doctor: string;
+  doctor_name: string;
+  branch: string;
+  branch_name: string;
+  date: string;
+  start_time: string | null;
+  end_time: string | null;
+  kind: 'booked' | 'walk_in';
+  status: AppointmentStatus;
+  token_number: number | null;
+  reason: string;
+  notes: string;
+  checked_in_at: string | null;
+  consultation_started_at: string | null;
+  completed_at: string | null;
+  cancelled_at: string | null;
+  cancel_reason: string;
+  reschedule_count: number;
+  created_at: string;
+  notification?: PatientNotification;
+}
+
+export interface Slot {
+  start: string;
+  end: string;
+  status: 'free' | 'booked' | 'past';
+}
+
+export interface AppointmentDoctor {
+  id: string;
+  full_name: string;
+  sits: boolean;
+  timings: string[];
+  active_count: number;
+}
+
+export interface QueueItem {
+  id: string;
+  token_number: number | null;
+  status: AppointmentStatus;
+  kind: 'booked' | 'walk_in';
+  start_time: string | null;
+  checked_in_at: string | null;
+  consultation_started_at: string | null;
+  patient_detail: AppointmentPatient;
+  display_name: string;
+  reason: string;
+}
+
+export interface QueueGroup {
+  doctor: string;
+  doctor_name: string;
+  now: QueueItem[];
+  waiting: QueueItem[];
+  booked_count: number;
+  done_count: number;
+}
+
+export interface QueueData {
+  date: string;
+  branch_name: string;
+  server_time: string;
+  doctors: QueueGroup[];
+}

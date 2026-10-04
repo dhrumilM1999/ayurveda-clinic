@@ -7,6 +7,9 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from './auth/AuthContext';
 import { RequirePermission } from './components/RequirePermission';
 import MainLayout from './layout/MainLayout';
+import AppointmentsPage from './pages/appointments/AppointmentsPage';
+import QueueDisplayPage from './pages/appointments/QueueDisplayPage';
+import QueuePage from './pages/appointments/QueuePage';
 import AuditLogPage from './pages/AuditLogPage';
 import BranchesPage from './pages/BranchesPage';
 import DashboardPage from './pages/DashboardPage';
@@ -41,12 +44,16 @@ export default function App() {
           </Routes>
         ) : (
           <Routes>
+            {/* TV screen for the waiting room: full screen, without the menu */}
+            <Route path="queue/display" element={<RequirePermission code="appointments.view"><QueueDisplayPage /></RequirePermission>} />
             <Route element={<MainLayout />}>
               <Route index element={<DashboardPage />} />
               <Route path="patients" element={<RequirePermission code="patients.view"><PatientsPage /></RequirePermission>} />
               <Route path="patients/new" element={<RequirePermission code="patients.create"><PatientFormPage /></RequirePermission>} />
               <Route path="patients/:id" element={<RequirePermission code="patients.view"><PatientDetailPage /></RequirePermission>} />
               <Route path="patients/:id/edit" element={<RequirePermission code="patients.edit"><PatientFormPage key="edit" /></RequirePermission>} />
+              <Route path="appointments" element={<RequirePermission code="appointments.view"><AppointmentsPage /></RequirePermission>} />
+              <Route path="queue" element={<RequirePermission code="appointments.view"><QueuePage /></RequirePermission>} />
               <Route path="branches" element={<RequirePermission code="branches.view"><BranchesPage /></RequirePermission>} />
               <Route path="rooms" element={<RequirePermission code="rooms.view"><RoomsPage /></RequirePermission>} />
               <Route path="staff" element={<RequirePermission code="staff.view"><StaffPage /></RequirePermission>} />

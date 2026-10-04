@@ -20,6 +20,7 @@ api_v1 = [
     path("", include("apps.audit.urls")),
     path("", include("apps.common.urls")),
     path("", include("apps.patients.urls")),
+    path("", include("apps.appointments.urls")),
 ]
 
 urlpatterns = [

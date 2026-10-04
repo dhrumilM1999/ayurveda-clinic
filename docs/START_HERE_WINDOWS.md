@@ -76,6 +76,29 @@ No real SMS is sent yet. You can find the code in two places:
 > automatically. To also get the 5 demo patients, run in the VS Code terminal:
 > `backend\.venv\Scripts\python backend\manage.py seed_demo --add-demo-patients`
 
+### Step 3 check (appointments and queue)
+
+1. Log in as `reception1` -> **Appointments**. Today has 2 demo walk-ins (tokens #1 and #2).
+2. **Book appointment**: search `Aarav`, choose the doctor and a date when the doctor sits
+   (Dr. Asha: Monday-Friday 10:00-13:00 in Ahmedabad). Free times are buttons; booked times are crossed out.
+   Click a time -> **Book**. The message to the patient is shown, with a green **Send on WhatsApp** button
+   (it opens WhatsApp with the text ready; nothing is sent until you press Send there).
+3. Try to book the same time for another patient: it is refused (no double booking).
+4. Row menu **...** -> **Reschedule** (pick a new time) or **Cancel appointment**.
+5. **Walk-in**: pick a patient and doctor -> **Give token**. The patient gets the next token number.
+6. **Queue**: one card per doctor. **Call next** finishes the current patient and calls the next token.
+7. **TV screen** (on the Queue screen): full screen for the waiting room - press F11. It shows only the token
+   and a short name like "Ramesh P.". Move the mouse to the top to see **Exit TV screen**.
+8. Open a patient -> **Appointments** tab: their visits, with **Book appointment**.
+9. The SMS text is only "logged", not really sent: run `logs.bat` and look for `SMS (console`.
+   Patients without SMS/WhatsApp consent (Consent tab) get no messages.
+
+> To add today's demo appointments again on an existing database, run in the VS Code terminal:
+> `docker compose exec backend python manage.py seed_demo --add-demo-appointments`
+
+> **Where is my data?** In Docker's storage boxes (volumes), not in this folder.
+> See [HOW_IT_WORKS.md](HOW_IT_WORKS.md#where-is-my-data).
+
 ## 5. Other addresses
 
 | What | Address |

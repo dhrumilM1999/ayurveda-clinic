@@ -12,6 +12,7 @@ import { useAuth } from '../../auth/AuthContext';
 import { PatientPhoto } from '../../components/PatientPhoto';
 import { genderAge } from './PatientsPage';
 import { ActivityTab } from './tabs/ActivityTab';
+import { AppointmentsTab } from './tabs/AppointmentsTab';
 import { ConsentTab } from './tabs/ConsentTab';
 import { DocumentsTab } from './tabs/DocumentsTab';
 import { MedicalTab } from './tabs/MedicalTab';
@@ -22,7 +23,7 @@ export default function PatientDetailPage() {
   const { id } = useParams();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { can } = useAuth();
+  const { can, features } = useAuth();
   const masterLabel = useMasterLabel();
   const [patient, setPatient] = useState<Patient | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -48,6 +49,8 @@ export default function PatientDetailPage() {
     { key: 'medical', label: t('patients.tabs.medical'), children: <MedicalTab patient={patient} /> },
     ...(canSeeVitals ? [{ key: 'vitals', label: t('patients.tabs.vitals'), children: <VitalsTab patientId={patient.id} /> }] : []),
     ...(canDocuments ? [{ key: 'documents', label: t('patients.tabs.documents'), children: <DocumentsTab patientId={patient.id} /> }] : []),
+    ...(can('appointments.view') && features.appointments !== false
+      ? [{ key: 'appointments', label: t('patients.tabs.appointments'), children: <AppointmentsTab patient={patient} /> }] : []),
     { key: 'consent', label: t('patients.tabs.consent'), children: <ConsentTab patient={patient} /> },
     ...(can('audit.view') ? [{ key: 'activity', label: t('patients.tabs.activity'), children: <ActivityTab patientId={patient.id} /> }] : []),
   ];
@@ -58,7 +61,7 @@ export default function PatientDetailPage() {
         {t('patients.backToList')}
       </Button>
 
-      <Card className="patient-header" style={{ marginBottom: 20 }}>
+      <Card className="patient-header" style={{ marginBottom: 14 }}>
         <div className="patient-header-row">
           <PatientPhoto patientId={patient.id} hasPhoto={patient.has_photo} name={patient.full_name} size={88} />
           <div style={{ flex: 1, minWidth: 0 }}>

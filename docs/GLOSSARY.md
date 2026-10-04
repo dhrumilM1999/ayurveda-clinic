@@ -32,5 +32,8 @@
 | **TypeScript** | JavaScript with checks that catch mistakes before the app runs. |
 | **UUID** | A long random ID like `3f2a…`, safe to use in web addresses. |
 | **Vite** | The tool that serves the React screens during development and reloads on changes. |
+| **Token** | The queue number (1, 2, 3...) a patient gets on arrival, per doctor per day. |
+| **Walk-in** | A patient who comes without an appointment; gets a token straight away. |
+| **Click-to-chat** | A WhatsApp link (`wa.me/...`) that opens WhatsApp with the message typed; staff press Send. Free. |
 | **Volume** | A storage box Docker keeps on your PC so data survives restarts. |
 | **WSL 2** | The Windows feature that lets Docker run Linux programs. |

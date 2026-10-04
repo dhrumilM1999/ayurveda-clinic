@@ -27,7 +27,7 @@ function initials(name: string) {
 
 export default function MainLayout() {
   const { t, i18n } = useTranslation();
-  const { me, branch, can, switchBranch, logout } = useAuth();
+  const { me, branch, features, can, switchBranch, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -35,7 +35,9 @@ export default function MainLayout() {
   const onIdle = useCallback(() => logout('idle'), [logout]);
   useIdleLogout(me?.idle_timeout_minutes, onIdle);
 
-  const visibleItems = menuItems.filter((item) => !item.permission || can(item.permission));
+  const visibleItems = menuItems.filter(
+    (item) => (!item.permission || can(item.permission)) && (!item.feature || features[item.feature] !== false),
+  );
   const selected = visibleItems.find((item) =>
     item.path === '/' ? location.pathname === '/' : location.pathname.startsWith(item.path),
   );
@@ -56,7 +58,7 @@ export default function MainLayout() {
         trigger={null}
         breakpoint="lg"
         onBreakpoint={(broken) => setCollapsed(broken)}
-        width={248}
+        width={224}
         collapsedWidth={76}
       >
         <div className="app-brand">

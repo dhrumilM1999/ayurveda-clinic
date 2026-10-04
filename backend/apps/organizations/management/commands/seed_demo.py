@@ -4,6 +4,7 @@ Creates FAKE demo data: 1 organization, 2 branches, rooms, and one user per role
     python manage.py seed_demo              # add demo data
     python manage.py seed_demo --if-empty   # only if the database has no organization yet
     python manage.py seed_demo --reset      # wipe EVERYTHING and start again (DEMO_MODE only)
+    python manage.py seed_demo --add-demo-appointments   # add today's demo appointments
 
 SAFE TO EDIT: the demo names, rooms and timings below (they are fake data).
 """
@@ -71,6 +72,8 @@ class Command(BaseCommand):
         parser.add_argument("--if-empty", action="store_true", help="Do nothing if an organization exists.")
         parser.add_argument("--add-demo-patients", action="store_true",
                             help="Only add the demo patients to the existing demo organization.")
+        parser.add_argument("--add-demo-appointments", action="store_true",
+                            help="Add demo appointments and walk-ins for today (Ahmedabad branch).")
 
     def handle(self, *args, **options):
         if options["reset"]:
@@ -85,6 +88,13 @@ class Command(BaseCommand):
             ensure_defaults_for(org)
             self._seed_patients(org)
             self.stdout.write(self.style.SUCCESS("Demo patients added."))
+            return
+        elif options["add_demo_appointments"]:
+            org = Organization.objects.order_by("created_at").first()
+            if org is None:
+                raise CommandError("No organization yet. Run seed_demo first.")
+            self._seed_appointments(org)
+            self.stdout.write(self.style.SUCCESS("Demo appointments added for today."))
             return
         elif options["if_empty"] and Organization.objects.exists():
             self.stdout.write("Demo data already present - skipping seed_demo.")
@@ -142,6 +152,7 @@ class Command(BaseCommand):
                 )
 
         self._seed_patients(org)
+        self._seed_appointments(org)
 
     def _seed_patients(self, org):
         from datetime import date
@@ -156,6 +167,7 @@ class Command(BaseCommand):
         branches = {b.code: b for b in Branch.objects.filter(organization=org)}
         receptionist = User.objects.filter(organization=org, username="reception1").first()
         treatment = ConsentPurpose.objects.get(organization=org, code="treatment")
+        communication = ConsentPurpose.objects.get(organization=org, code="communication")
         for first, middle, last, gender, age, mobile, city, branch_code, conditions, allergy in DEMO_PATIENTS:
             if Patient.objects.filter(organization=org, mobile=mobile).exists():
                 continue
@@ -182,6 +194,51 @@ class Command(BaseCommand):
                 purpose_version=treatment.version, granted=True, method="signed_form",
                 language="gu", created_by=receptionist,
             )
+            # Demo patients agree to SMS/WhatsApp messages (so appointment messages can be tried)
+            PatientConsent.objects.create(
+                organization=org, patient=patient, branch=branch, purpose=communication,
+                purpose_version=communication.version, granted=True, method="signed_form",
+                language="gu", created_by=receptionist,
+            )
+
+    def _seed_appointments(self, org):
+        """Today's demo appointments at the Ahmedabad branch: some booked, two walk-ins waiting."""
+        from datetime import datetime, timedelta
+
+        from django.utils import timezone
+
+        from apps.appointments.models import Appointment
+        from apps.appointments.services import change_status
+        from apps.patients.models import Patient
+
+        branch = Branch.objects.filter(organization=org, code="AHD").first()
+        doctor = User.objects.filter(organization=org, username="doctor1").first()
+        receptionist = User.objects.filter(organization=org, username="reception1").first()
+        if not branch or not doctor:
+            return
+        today = timezone.localdate()
+        if Appointment.objects.filter(branch=branch, date=today).exists():
+            return
+        patients = list(Patient.objects.filter(organization=org).order_by("created_at"))
+        if len(patients) < 4:
+            return
+        tomorrow = today + timedelta(days=1)
+        plan = [  # patient, day, time, reason, walk-in?
+            (patients[0], today, None, "Follow-up: sugar control", True),
+            (patients[1], today, None, "Thyroid review", True),
+            (patients[2], tomorrow, (11, 0), "Acidity, first visit", False),
+            (patients[3], tomorrow, (11, 30), "Knee pain follow-up", False),
+        ]
+        for patient, day, start, reason, walk_in in plan:
+            start_time = datetime.strptime(f"{start[0]}:{start[1]}", "%H:%M").time() if start else None
+            end_time = (datetime.combine(day, start_time) + timedelta(minutes=15)).time() if start else None
+            appt = Appointment.objects.create(
+                organization=org, branch=branch, patient=patient, doctor=doctor, date=day,
+                start_time=start_time, end_time=end_time, kind="walk_in" if walk_in else "booked",
+                reason=reason, created_by=receptionist, updated_by=receptionist,
+            )
+            if walk_in:
+                change_status(appt, "check_in", receptionist)
 
     def _print_logins(self):
         line = "=" * 64

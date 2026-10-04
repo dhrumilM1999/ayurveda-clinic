@@ -5,13 +5,13 @@ import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from './client';
 import type { Page } from './types';
 
-export function useList<T>(url: string, params: Record<string, unknown> = {}) {
+export function useList<T>(url: string, params: Record<string, unknown> = {}, initialPageSize = 25) {
   const { message } = App.useApp();
   const { t } = useTranslation();
   const [rows, setRows] = useState<T[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
+  const [pageSize, setPageSize] = useState(initialPageSize);
   const [loading, setLoading] = useState(false);
   const paramsKey = JSON.stringify(params);
 

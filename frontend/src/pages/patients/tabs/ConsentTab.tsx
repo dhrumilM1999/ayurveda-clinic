@@ -135,7 +135,7 @@ export function ConsentTab({ patient }: { patient: Patient }) {
         okButtonProps={{ danger: dialog ? !dialog.granted : false }}
         cancelText={t('common.cancel')}
         width={620}
-        destroyOnClose
+        destroyOnHidden
       >
         {dialog && (
           <>

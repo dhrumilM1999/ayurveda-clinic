@@ -99,7 +99,7 @@ export function PhotoPicker({ value, onChange, existingUrl }: Props) {
         okText={t('patients.capture')}
         cancelText={t('common.cancel')}
         okButtonProps={{ disabled: !!cameraError }}
-        destroyOnClose
+        destroyOnHidden
       >
         {cameraError ? (
           <p>{cameraError}</p>

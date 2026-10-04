@@ -75,3 +75,16 @@ def create_default_roles(organization) -> dict[str, Role]:
         )
         roles[code] = role
     return roles
+
+
+def doctors_in_branch(branch):
+    """Active doctors who work in a branch (they have a role there, or are organization admins)."""
+    from django.db.models import Q
+
+    from .models import User
+
+    return (
+        User.objects.filter(organization_id=branch.organization_id, is_doctor=True, is_active=True)
+        .filter(Q(is_org_admin=True) | Q(branch_roles__branch=branch, branch_roles__is_deleted=False))
+        .distinct()
+    )

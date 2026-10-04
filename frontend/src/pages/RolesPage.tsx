@@ -127,7 +127,7 @@ export default function RolesPage() {
         okText={canManage ? t('common.save') : t('common.close')}
         cancelText={t('common.cancel')}
         width={860}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form form={form} layout="vertical" disabled={!canManage}>
           <Row gutter={12}>

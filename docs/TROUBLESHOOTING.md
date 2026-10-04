@@ -13,6 +13,9 @@
 | Login says **"Request was throttled"** | Too many tries. Wait 1 minute. |
 | **OTP not visible** | Look in the yellow box on the login screen, or run `logs.bat` and find `SMS (console`. The OTP is valid for 5 minutes. After 5 wrong tries, log in again to get a new one. |
 | Logged out suddenly | Auto-logout after 15 minutes without use (`IDLE_TIMEOUT_MINUTES` in `.env`), or the session ended after 12 hours. |
+| **Login suddenly fails** for everyone / screens show "Could not load data" | The backend stopped after a code change. Run `logs.bat`: if you see a red error (for example `ModuleNotFoundError`), run `stop.bat` then `start.bat`. If the error stays, paste it into Claude Code. |
+| Booking popup says **"The doctor does not sit on this day"** | That doctor has no timing on that weekday in this branch. Add it on **Doctor schedules**, or pick another date. |
+| **WhatsApp button** missing after booking | The patient has not given SMS/WhatsApp consent. Open the patient -> **Consent** tab. |
 | My code change doesn't show | Wait 5 seconds and press F5. If needed: `stop.bat` then `start.bat`. |
 | Changed `.env` but nothing happened | `.env` is only read at start: run `stop.bat` then `start.bat`. |
 | **"relation … does not exist"** / database errors after an update | A database update didn't run. Run `stop.bat` then `start.bat` (it runs `migrate` automatically). |

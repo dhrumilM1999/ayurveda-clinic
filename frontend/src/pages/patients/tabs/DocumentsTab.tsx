@@ -153,7 +153,7 @@ export function DocumentsTab({ patientId }: { patientId: string }) {
       )}
 
       <Modal open={open} title={t('documents.upload')} onCancel={() => setOpen(false)} onOk={save} confirmLoading={saving}
-        okText={t('documents.upload')} cancelText={t('common.cancel')} destroyOnClose>
+        okText={t('documents.upload')} cancelText={t('common.cancel')} destroyOnHidden>
         <Form form={form} layout="vertical">
           <Upload.Dragger
             fileList={files}

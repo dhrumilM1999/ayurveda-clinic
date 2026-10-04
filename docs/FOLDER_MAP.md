@@ -36,7 +36,9 @@
 | `backend/apps/patients/consent_catalog.py` | Starting consent wording (EN/GU/HI) — **sample, lawyer to check** | **SAFE TO EDIT** |
 | `backend/apps/common/masters_catalog.py` | Starting values of every dropdown list (title, blood group, conditions...) | **SAFE TO EDIT** |
 | `backend/apps/common/fields.py` | Encryption of medical notes | ASK FIRST |
-| `backend/apps/notifications/` | SMS adapter (WhatsApp/email later) | ASK FIRST |
+| `backend/apps/notifications/` | SMS and WhatsApp (click-to-chat) adapters | ASK FIRST |
+| `backend/apps/appointments/` | Appointments, walk-in tokens, queue | ASK FIRST |
+| `backend/apps/appointments/messages_catalog.py` | **SMS/WhatsApp text** for booking, change, cancel, token (EN/GU/HI) | **SAFE TO EDIT** |
 | `backend/apps/*/migrations/` | Database change history. **Never edit old files here.** | ASK FIRST |
 | `backend/apps/*/tests/`, `backend/conftest.py` | Automated tests | ASK FIRST |
 | `backend/templates/documents/` | Print/PDF templates (from Step 7) | **SAFE TO EDIT** |
@@ -50,7 +52,8 @@
 | `frontend/src/i18n/en.json`, `gu.json`, `hi.json` | **All screen text** in English, Gujarati and Hindi | **SAFE TO EDIT** |
 | `frontend/src/styles.css` | Small global styles | **SAFE TO EDIT** |
 | `frontend/public/logo.svg` | The logo | **SAFE TO EDIT** (replace the file) |
-| `frontend/src/pages/` | One file per screen (`pages/patients/` = patient screens) | ASK FIRST |
+| `frontend/src/pages/` | One file per screen (`pages/patients/` = patient screens, `pages/appointments/` = appointments and queue) | ASK FIRST |
+| `frontend/src/pages/appointments/QueueDisplayPage.tsx` | TV screen: `REFRESH_SECONDS`, `NEXT_COUNT` at the top | **SAFE TO EDIT** (those two lines) |
 | `frontend/src/layout/` | The frame: menu, top bar | ASK FIRST |
 | `frontend/src/auth/` | Login, branch choice, auto-logout | ASK FIRST |
 | `frontend/src/api/` | Talking to the backend | ASK FIRST |

@@ -6,6 +6,7 @@ from rest_framework.test import APIClient
 from apps.accounts.models import User, UserBranchRole
 from apps.accounts.services import create_default_roles
 from apps.notifications.sms import FakeSmsProvider
+from apps.notifications.whatsapp import FakeWhatsAppProvider
 from apps.organizations.models import Branch, Organization
 
 PASSWORD = "Test@Clinic2026"
@@ -14,8 +15,10 @@ PASSWORD = "Test@Clinic2026"
 @pytest.fixture(autouse=True)
 def _test_settings(settings):
     settings.SMS_PROVIDER = "fake"
+    settings.WHATSAPP_PROVIDER = "fake"
     settings.SHOW_DEV_OTP_ON_SCREEN = False
     FakeSmsProvider.outbox.clear()
+    FakeWhatsAppProvider.outbox.clear()
     cache.clear()  # resets login rate limits between tests
     yield
     cache.clear()

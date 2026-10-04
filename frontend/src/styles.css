@@ -563,3 +563,316 @@ body {
   font-size: 12px;
   font-weight: 500;
 }
+
+/* ---------- Appointments ---------- */
+.cell-sub {
+  font-size: 12px;
+  color: rgba(35, 48, 42, 0.55);
+}
+.mono {
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+}
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.status-filter {
+  margin-bottom: 12px;
+}
+.row-muted td {
+  opacity: 0.55;
+}
+.token-chip {
+  display: inline-block;
+  min-width: 30px;
+  padding: 0 6px;
+  border-radius: 6px;
+  background: var(--clinic-accent-soft);
+  color: #8a5a12;
+  font-weight: 700;
+  font-size: 12px;
+  text-align: center;
+}
+
+/* Time buttons in the booking popup */
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 6px;
+}
+.slot {
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid var(--clinic-border);
+  background: #fff;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--clinic-primary);
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+}
+.slot-free:hover {
+  border-color: var(--clinic-primary);
+  background: var(--clinic-primary-soft);
+}
+.slot-selected,
+.slot-selected:hover {
+  background: var(--clinic-primary);
+  border-color: var(--clinic-primary);
+  color: #fff;
+}
+.slot-booked {
+  background: #f3efe6;
+  color: rgba(35, 48, 42, 0.35);
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+.slot-past {
+  background: transparent;
+  color: rgba(35, 48, 42, 0.3);
+  border-style: dashed;
+  cursor: not-allowed;
+}
+
+/* Message preview + WhatsApp button */
+.notify-box {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #faf8f3;
+  border: 1px solid var(--clinic-border);
+}
+.notify-text {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: rgba(35, 48, 42, 0.8);
+}
+.whatsapp-btn {
+  background: #25d366 !important;
+  border-color: #25d366 !important;
+  color: #fff !important;
+}
+.whatsapp-btn:hover {
+  background: #1ebe5b !important;
+}
+.compact-result {
+  padding: 8px 0 12px !important;
+}
+.compact-result .ant-result-icon {
+  margin-bottom: 8px !important;
+}
+.compact-result .ant-result-icon > .anticon {
+  font-size: 44px !important;
+}
+.compact-result .ant-result-title {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+/* ---------- Queue (staff screen) ---------- */
+.queue-card .ant-card-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 230px;
+}
+.queue-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(35, 48, 42, 0.5);
+  margin-bottom: 6px;
+}
+.queue-now {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--clinic-primary-soft);
+}
+.queue-now-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.token-big {
+  display: grid;
+  place-items: center;
+  min-width: 46px;
+  height: 46px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: var(--clinic-primary);
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+}
+.queue-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.queue-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px dashed var(--clinic-border);
+}
+.queue-list li:last-child {
+  border-bottom: none;
+}
+.queue-name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  color: inherit;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.queue-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+/* ---------- Queue TV screen ---------- */
+.tv {
+  min-height: 100vh;
+  padding: 2.2vw 2.6vw;
+  box-sizing: border-box;
+  color: #fff;
+  background:
+    radial-gradient(circle at 90% 0%, rgba(201, 138, 43, 0.28), transparent 40%),
+    linear-gradient(160deg, var(--clinic-sidebar) 0%, #0b241b 100%);
+}
+.tv-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2vw;
+  margin-bottom: 2vw;
+}
+.tv-brand {
+  display: flex;
+  align-items: center;
+  gap: 1vw;
+}
+.tv-brand img {
+  width: 3.4vw;
+  min-width: 40px;
+}
+.tv-title {
+  font-family: var(--clinic-font-heading);
+  font-size: max(22px, 2.2vw);
+  font-weight: 600;
+}
+.tv-sub {
+  font-size: max(13px, 1.1vw);
+  color: rgba(255, 255, 255, 0.6);
+}
+.tv-clock {
+  text-align: right;
+  font-size: max(26px, 2.6vw);
+  font-weight: 700;
+  line-height: 1.1;
+}
+.tv-clock small {
+  font-size: 0.5em;
+}
+.tv-exit {
+  margin-left: auto;
+  padding: 6px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.tv-head:hover .tv-exit {
+  opacity: 1;
+}
+.tv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 1.6vw;
+}
+.tv-doctor {
+  padding: 1.6vw;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.tv-doctor h2 {
+  margin: 0 0 1vw;
+  font-size: max(20px, 1.7vw);
+  font-weight: 600;
+  color: #f6dcae;
+}
+.tv-label {
+  font-size: max(12px, 0.9vw);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 0.5vw;
+}
+.tv-now {
+  padding: 1.2vw;
+  margin-bottom: 1.4vw;
+  border-radius: 12px;
+  background: rgba(201, 138, 43, 0.18);
+  border: 1px solid rgba(201, 138, 43, 0.45);
+}
+.tv-now-row {
+  display: flex;
+  align-items: baseline;
+  gap: 1.2vw;
+}
+.tv-token {
+  font-size: max(54px, 5.6vw);
+  font-weight: 800;
+  line-height: 1;
+  color: #fff;
+}
+.tv-token-empty {
+  color: rgba(255, 255, 255, 0.3);
+}
+.tv-name {
+  font-size: max(22px, 2vw);
+  font-weight: 600;
+}
+.tv-next {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.tv-next li {
+  display: flex;
+  align-items: center;
+  gap: 1vw;
+  padding: 0.55vw 0;
+  font-size: max(18px, 1.5vw);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.tv-next-token {
+  min-width: 3.4vw;
+  font-weight: 800;
+  color: #f6dcae;
+}
+.tv-dim {
+  color: rgba(255, 255, 255, 0.45);
+}
+.tv-empty {
+  padding: 6vw 0;
+  text-align: center;
+  font-size: max(20px, 1.8vw);
+  color: rgba(255, 255, 255, 0.6);
+}

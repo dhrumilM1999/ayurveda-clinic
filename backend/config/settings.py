@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "apps.audit",
     "apps.notifications",
     "apps.patients",
+    "apps.appointments",
 ]
 
 MIDDLEWARE = [
@@ -219,6 +220,8 @@ FIELD_ENCRYPTION_KEY = env("FIELD_ENCRYPTION_KEY", "")
 
 # --- External service providers (see CLAUDE.md section 5) --------------------
 SMS_PROVIDER = env("SMS_PROVIDER", "console")
+# WhatsApp: "click_to_chat" builds a wa.me link that staff click to send (free).
+WHATSAPP_PROVIDER = env("WHATSAPP_PROVIDER", "click_to_chat")
 
 # --- Demo data ---------------------------------------------------------------
 # reset-demo-data.bat only works when DEMO_MODE is true. Never true with real patients.

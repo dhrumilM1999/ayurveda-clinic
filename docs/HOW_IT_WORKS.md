@@ -10,6 +10,24 @@ Think of the software as a **clinic building**:
 | **Docker** | A building contractor who sets up every room the same way on any PC | `docker-compose.yml` describes the 4 "rooms" (containers): db, backend, frontend, mailpit |
 | **API** | The window between reception and back office | Fixed addresses like `/api/v1/rooms/` that the frontend calls |
 
+## Where is my data?
+
+Your data is **not** in the project folder. Docker keeps it in "volumes" (storage boxes) inside
+Docker Desktop's own disk on your PC:
+
+| What | Docker volume name | Inside the container |
+|---|---|---|
+| The database (patients, appointments, staff, audit log...) | `ayurveda_pgdata` | `/var/lib/postgresql/data` |
+| Patient photos and documents (private, only through the app) | `ayurveda_private_media` | `/app/private_media` |
+| Other uploaded files (logos) | `ayurveda_media` | `/app/media` |
+
+- See them: open **Docker Desktop -> Volumes**.
+- `stop.bat`, restarting the PC, or updating the code **keeps** the data.
+- Only `reset-demo-data.bat` (after typing `YES`) or deleting the volume in Docker Desktop removes it.
+- To look inside the database yourself, use the technical admin site: http://localhost:8000/admin/ (user `admin`).
+- The no-Docker version (`start-without-docker.bat`) uses a different, separate file: `backend/db.sqlite3`.
+- Proper daily backups come in a later step (Step 11). Until then the data is demo data only.
+
 ## What happens when you click "Save" on a room
 
 1. The **frontend** sends the data to `/api/v1/rooms/`, together with

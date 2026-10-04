@@ -23,7 +23,7 @@ from .serializers import (
     ChangePasswordSerializer, DoctorScheduleSerializer, LoginSerializer, LogoutSerializer,
     MeUpdateSerializer, RoleSerializer, SetPasswordSerializer, StaffSerializer, VerifyOtpSerializer,
 )
-from .services import accessible_branches, branch_permissions, user_requires_2fa
+from .services import accessible_branches, branch_permissions, doctors_in_branch, user_requires_2fa
 from .throttles import LoginIPThrottle, LoginUserThrottle, OtpThrottle
 
 
@@ -249,9 +249,7 @@ class DoctorScheduleViewSet(AuditedModelViewSet):
     def doctors(self, request):
         """Doctors who work in the current branch (for dropdowns)."""
         doctors = (
-            User.objects.filter(organization_id=request.user.organization_id, is_doctor=True, is_active=True)
-            .filter(Q(is_org_admin=True) | Q(branch_roles__branch=request.branch, branch_roles__is_deleted=False))
-            .distinct()
+            doctors_in_branch(request.branch)
             .annotate(schedule_count=Count("schedules", filter=Q(schedules__branch=request.branch, schedules__is_deleted=False)))
         )
         return Response([
