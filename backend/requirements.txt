@@ -8,6 +8,8 @@ django-filter>=24.2                   # list filters in the API
 Pillow>=10.4                          # images (clinic logo, patient photos)
 cryptography>=43                      # encrypts sensitive medical notes in the database
 openpyxl>=3.1                         # reads Excel files (medicine list import)
+weasyprint>=62                        # makes PDF documents (bills) from HTML templates
+segno>=1.6                            # draws QR codes (UPI payment) on documents
 
 # Testing
 pytest>=8.0

@@ -10,6 +10,8 @@ class MedicineSerializer(serializers.ModelSerializer):
     dose_unit = MasterField("dose_unit")
     default_timing = MasterField("medicine_timing")
     default_anupana = MasterField("anupana")
+    category = MasterField("product_category")
+    pack_type = MasterField("pack_type")
     classical_equivalent_name = serializers.CharField(source="classical_equivalent.name", read_only=True, default="")
     # This branch's own settings (filled by the view)
     branch_price = serializers.SerializerMethodField()
@@ -18,7 +20,8 @@ class MedicineSerializer(serializers.ModelSerializer):
     class Meta:
         model = Medicine
         fields = [
-            "id", "kind", "name", "name_gu", "name_hi", "synonyms", "dosage_form", "composition", "reference",
+            "id", "kind", "name", "name_gu", "name_hi", "synonyms", "generic_name", "category", "dosage_form",
+            "composition", "reference", "pack_type", "units_per_pack", "allow_loose", "selling_price", "barcode",
             "manufacturer", "classical_equivalent", "classical_equivalent_name", "ayush_licence_no", "hsn_code",
             "gst_rate", "mrp", "pack_size", "default_dose", "dose_unit", "default_frequency", "default_timing",
             "default_anupana", "schedule_e1", "contains_metals", "pregnancy_caution", "child_caution",
@@ -50,6 +53,17 @@ class MedicineSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Choose a classical medicine.")
         return value
 
+    def validate_barcode(self, value):
+        value = (value or "").strip()
+        if value:
+            org_id = self.context["request"].user.organization_id
+            clash = Medicine.objects.filter(organization_id=org_id, barcode=value)
+            if self.instance:
+                clash = clash.exclude(pk=self.instance.pk)
+            if clash.exists():
+                raise serializers.ValidationError(f"This barcode is already used for {clash.first().name}.")
+        return value
+
     def validate_gst_rate(self, value):
         if not 0 <= value <= 40:
             raise serializers.ValidationError("GST must be between 0 and 40 %.")
@@ -59,6 +73,13 @@ class MedicineSerializer(serializers.ModelSerializer):
         kind = attrs.get("kind", getattr(self.instance, "kind", "classical"))
         if kind == "classical":
             attrs["classical_equivalent"] = None
+        mrp = attrs.get("mrp", getattr(self.instance, "mrp", None))
+        selling = attrs.get("selling_price", getattr(self.instance, "selling_price", None))
+        if mrp is not None and selling is not None and selling > mrp:
+            raise serializers.ValidationError({"selling_price": "Selling price cannot be more than MRP."})
+        if attrs.get("allow_loose", getattr(self.instance, "allow_loose", False)) and not attrs.get(
+                "units_per_pack", getattr(self.instance, "units_per_pack", None)):
+            raise serializers.ValidationError({"units_per_pack": "Enter how many units are in one pack (e.g. 60)."})
         name = attrs.get("name", getattr(self.instance, "name", ""))
         org_id = self.context["request"].user.organization_id
         clash = Medicine.objects.filter(organization_id=org_id, kind=kind, name__iexact=name)

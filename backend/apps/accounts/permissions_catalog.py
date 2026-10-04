@@ -103,7 +103,7 @@ DEFAULT_ROLES = {
             "dashboard.view",
             "patients.view", "prescriptions.view",
             "medicines.view", "medicines.manage",
-            "pharmacy.view", "pharmacy.dispense", "pharmacy.stock",
+            "pharmacy.view", "pharmacy.dispense", "pharmacy.stock", "billing.view", "billing.create",
         ],
     },
 }

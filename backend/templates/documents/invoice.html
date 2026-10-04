@@ -1,0 +1,175 @@
+{% comment %}
+SAFE TO EDIT: the printed bill / credit note (PDF). Change words, colours and the footer text here.
+Keep the {{ ... }} and {% ... %} parts. Sizes: A4, A5 and 80 mm thermal ("size" below).
+{% endcomment %}
+{% load humanize_money %}
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: {{ page_width }} {{ page_height }}; margin: {{ page_margin }}; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Noto Sans", "Noto Sans Gujarati", "Noto Sans Devanagari", sans-serif;
+    font-size: {% if size == "80mm" %}8.5pt{% elif size == "a5" %}8.5pt{% else %}9.5pt{% endif %};
+    color: #1d2a24; margin: 0;
+  }
+  .head { display: flex; justify-content: space-between; gap: 12px; border-bottom: 2px solid #1f5c45; padding-bottom: 6px; }
+  .org { font-size: 1.6em; font-weight: 700; color: #1f5c45; }
+  .muted { color: #5b6862; }
+  .small { font-size: 0.85em; }
+  .title { text-align: center; font-weight: 700; letter-spacing: 0.08em; margin: 6px 0; font-size: 1.1em; }
+  .meta { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+  table { width: 100%; border-collapse: collapse; }
+  th { background: #eef3ef; text-align: left; font-weight: 600; font-size: 0.85em; }
+  th, td { padding: 3px 4px; border-bottom: 1px solid #d9e1dc; vertical-align: top; }
+  .r { text-align: right; white-space: nowrap; }
+  .totals { width: 55%; margin-left: auto; margin-top: 6px; }
+  .totals td { border: none; padding: 1px 4px; }
+  .grand td { font-size: 1.15em; font-weight: 700; border-top: 1.5px solid #1d2a24; }
+  .words { margin-top: 4px; font-style: italic; }
+  .foot { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; margin-top: 10px; }
+  .qr { text-align: center; }
+  .qr img { width: 28mm; height: 28mm; }
+  .sign { text-align: right; }
+  .watermark {
+    position: fixed; top: 40%; left: 0; right: 0; text-align: center; transform: rotate(-24deg);
+    font-size: 40pt; font-weight: 800; color: rgba(194, 65, 45, 0.16); letter-spacing: 0.1em;
+  }
+  {% if size == "80mm" %}
+  .head { display: block; text-align: center; }
+  .meta { display: block; }
+  .totals { width: 100%; }
+  .foot { display: block; text-align: center; }
+  .sign { text-align: center; margin-top: 6px; }
+  .watermark { font-size: 20pt; }
+  {% endif %}
+</style>
+</head>
+<body>
+{% if duplicate %}<div class="watermark">DUPLICATE COPY</div>{% endif %}
+
+<div class="head">
+  <div>
+    <div class="org">{{ organization.name }}</div>
+    <div>{{ branch.name }}</div>
+    <div class="muted small">{{ branch.address }}{% if branch.city %}, {{ branch.city }}{% endif %} {{ branch.pincode }}</div>
+    <div class="muted small">{% if branch.phone %}Phone {{ branch.phone }}{% endif %}{% if branch.email %} · {{ branch.email }}{% endif %}</div>
+  </div>
+  <div class="small {% if size != '80mm' %}r{% endif %}">
+    {% if branch.gstin %}<div>GSTIN: <b>{{ branch.gstin }}</b></div>{% endif %}
+    {% if branch.drug_licence_no %}<div>Licence: {{ branch.drug_licence_no }}</div>{% endif %}
+    <div>State: {{ invoice.place_of_supply }}</div>
+  </div>
+</div>
+
+<div class="title">{% if credit_note %}CREDIT NOTE{% else %}TAX INVOICE{% endif %}</div>
+
+<div class="meta">
+  <div>
+    <div><b>{{ invoice.customer_name }}</b></div>
+    {% if patient %}<div class="muted small">Patient ID {{ patient.uhid }}{% if patient.mobile %} · {{ patient.mobile }}{% endif %}</div>{% endif %}
+    {% if doctor %}<div class="muted small">Prescribed by {{ doctor.full_name }}</div>{% endif %}
+  </div>
+  <div class="{% if size != '80mm' %}r{% endif %}">
+    {% if credit_note %}
+      <div>Credit note <b>{{ credit_note.number }}</b></div>
+      <div>Date {{ credit_note.note_date|date:"d-m-Y" }}</div>
+      <div class="muted small">Against bill {{ invoice.number }} of {{ invoice.invoice_date|date:"d-m-Y" }}</div>
+    {% else %}
+      <div>Bill no. <b>{{ invoice.number }}</b></div>
+      <div>Date {{ invoice.invoice_date|date:"d-m-Y" }}</div>
+    {% endif %}
+  </div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th><th>Item</th>
+      {% if size != "80mm" %}<th>Batch</th><th>Exp.</th><th>HSN</th>{% endif %}
+      <th class="r">Qty</th><th class="r">Rate</th>
+      {% if size != "80mm" %}<th class="r">Disc %</th><th class="r">GST %</th>{% endif %}
+      <th class="r">Amount</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% if credit_note %}
+    {% for cl in credit_lines %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ cl.invoice_line.description }}{% if size == "80mm" %}<div class="muted small">{{ cl.invoice_line.batch_no }}</div>{% endif %}</td>
+      {% if size != "80mm" %}<td>{{ cl.invoice_line.batch_no }}</td><td>{{ cl.invoice_line.expiry_date|date:"m-Y" }}</td><td>{{ cl.invoice_line.hsn_code }}</td>{% endif %}
+      <td class="r">{{ cl.quantity|qty }} {{ cl.invoice_line.unit_label }}</td>
+      <td class="r">{{ cl.invoice_line.unit_price|money }}</td>
+      {% if size != "80mm" %}<td class="r">{{ cl.invoice_line.discount_percent|qty }}</td><td class="r">{{ cl.invoice_line.gst_rate|qty }}</td>{% endif %}
+      <td class="r">{{ cl.total_amount|money }}</td>
+    </tr>
+    {% endfor %}
+  {% else %}
+    {% for line in lines %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ line.description }}{% if size == "80mm" and line.batch_no %}<div class="muted small">B: {{ line.batch_no }} · Exp {{ line.expiry_date|date:"m-Y" }}</div>{% endif %}</td>
+      {% if size != "80mm" %}<td>{{ line.batch_no }}</td><td>{{ line.expiry_date|date:"m-Y" }}</td><td>{{ line.hsn_code }}</td>{% endif %}
+      <td class="r">{{ line.quantity|qty }} {{ line.unit_label }}</td>
+      <td class="r">{{ line.unit_price|money }}</td>
+      {% if size != "80mm" %}<td class="r">{{ line.discount_percent|qty }}</td><td class="r">{{ line.gst_rate|qty }}</td>{% endif %}
+      <td class="r">{{ line.total_amount|money }}</td>
+    </tr>
+    {% endfor %}
+  {% endif %}
+  </tbody>
+</table>
+
+<table class="totals">
+  {% if credit_note %}
+    <tr><td>Taxable value</td><td class="r">{{ credit_note.taxable_amount|money }}</td></tr>
+    <tr><td>CGST</td><td class="r">{{ credit_note.cgst_amount|money }}</td></tr>
+    <tr><td>SGST</td><td class="r">{{ credit_note.sgst_amount|money }}</td></tr>
+    <tr class="grand"><td>Credit total</td><td class="r">₹ {{ credit_note.total_amount|money }}</td></tr>
+    {% if credit_note.refund_amount %}<tr><td>Refunded ({{ credit_note.get_refund_mode_display }})</td><td class="r">{{ credit_note.refund_amount|money }}</td></tr>{% endif %}
+  {% else %}
+    {% if invoice.discount_amount %}
+      <tr><td>Total before discount</td><td class="r">{{ invoice.gross_amount|money }}</td></tr>
+      <tr><td>Discount</td><td class="r">- {{ invoice.discount_amount|money }}</td></tr>
+    {% endif %}
+    <tr><td>Taxable value</td><td class="r">{{ invoice.taxable_amount|money }}</td></tr>
+    <tr><td>CGST</td><td class="r">{{ invoice.cgst_amount|money }}</td></tr>
+    <tr><td>SGST</td><td class="r">{{ invoice.sgst_amount|money }}</td></tr>
+    {% if invoice.round_off %}<tr><td>Round off</td><td class="r">{{ invoice.round_off|money }}</td></tr>{% endif %}
+    <tr class="grand"><td>Total</td><td class="r">₹ {{ invoice.total_amount|money }}</td></tr>
+    <tr><td>Paid</td><td class="r">{{ invoice.paid_amount|money }}</td></tr>
+    {% if invoice.credited_amount %}<tr><td>Returned / credited</td><td class="r">{{ invoice.credited_amount|money }}</td></tr>{% endif %}
+    {% if invoice.balance > 0 %}<tr><td><b>Balance due</b></td><td class="r"><b>{{ invoice.balance|money }}</b></td></tr>{% endif %}
+  {% endif %}
+</table>
+<div class="words">{{ amount_words }}</div>
+
+{% if size != "80mm" and gst_summary|length > 1 %}
+<table style="margin-top:6px; width:60%">
+  <thead><tr><th>GST %</th><th class="r">Taxable</th><th class="r">CGST</th><th class="r">SGST</th></tr></thead>
+  <tbody>
+  {% for g in gst_summary %}
+    <tr><td>{{ g.rate|qty }}</td><td class="r">{{ g.taxable|money }}</td><td class="r">{{ g.cgst|money }}</td><td class="r">{{ g.sgst|money }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+<div class="foot">
+  <div>
+    {% if upi_qr %}
+      <div class="qr"><img src="{{ upi_qr }}" alt=""><div class="small">Scan to pay ₹ {{ invoice.balance|money }} by UPI</div></div>
+    {% endif %}
+    <div class="muted small">Please check medicines, batch and expiry before leaving the counter.</div>
+  </div>
+  <div class="sign">
+    <div style="height: 10mm"></div>
+    <div class="small">For {{ organization.name }}</div>
+    <div class="muted small">Pharmacist / authorised signatory</div>
+  </div>
+</div>
+</body>
+</html>

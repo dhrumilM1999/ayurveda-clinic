@@ -23,6 +23,8 @@ class Medicine(OrgScopedModel):
     name_gu = models.CharField("Name (Gujarati)", max_length=200, blank=True)
     name_hi = models.CharField("Name (Hindi)", max_length=200, blank=True)
     synonyms = models.TextField(blank=True, help_text="Other names, comma separated (Sanskrit, English, Hindi, Gujarati)")
+    generic_name = models.CharField(max_length=200, blank=True, help_text="e.g. the classical name or main ingredient")
+    category = models.ForeignKey("common.MasterValue", null=True, blank=True, on_delete=models.PROTECT, related_name="+")
     dosage_form = models.ForeignKey("common.MasterValue", null=True, blank=True, on_delete=models.PROTECT, related_name="+")
     composition = models.TextField(blank=True)
     reference = models.CharField("Reference (AFI / API)", max_length=300, blank=True)
@@ -36,6 +38,13 @@ class Medicine(OrgScopedModel):
     gst_rate = models.DecimalField("GST %", max_digits=5, decimal_places=2, default=12)
     mrp = models.DecimalField("Price (MRP)", max_digits=10, decimal_places=2, null=True, blank=True)
     pack_size = models.CharField(max_length=60, blank=True)  # e.g. "100 g", "60 tablets", "450 ml"
+    pack_type = models.ForeignKey("common.MasterValue", null=True, blank=True, on_delete=models.PROTECT, related_name="+")
+    # Loose selling: stock is counted in packs; with allow_loose the pharmacy may give part of a pack
+    units_per_pack = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # e.g. 60 (tablets)
+    allow_loose = models.BooleanField("Can be sold loose", default=False)
+    selling_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True,
+                                        help_text="Usual selling price per pack (MRP is the maximum)")
+    barcode = models.CharField(max_length=64, blank=True, db_index=True)
 
     # What the prescription screen fills in by default
     default_dose = models.CharField(max_length=20, blank=True)  # e.g. "2", "3-5"
@@ -60,6 +69,8 @@ class Medicine(OrgScopedModel):
         constraints = [
             models.UniqueConstraint(fields=["organization", "kind", "name"], condition=Q(is_deleted=False),
                                     name="uniq_medicine_name_per_kind"),
+            models.UniqueConstraint(fields=["organization", "barcode"], condition=Q(is_deleted=False) & ~Q(barcode=""),
+                                    name="uniq_medicine_barcode"),
         ]
         indexes = [models.Index(fields=["organization", "is_active"])]
 

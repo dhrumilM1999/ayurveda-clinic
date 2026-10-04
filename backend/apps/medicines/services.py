@@ -16,15 +16,16 @@ from .models import BranchMedicine, Medicine, MedicineVersion
 
 # Fields copied into the version history (and offered in the import file)
 TEXT_FIELDS = [
-    "kind", "name", "name_gu", "name_hi", "synonyms", "composition", "reference", "manufacturer",
-    "ayush_licence_no", "hsn_code", "pack_size", "default_dose", "default_frequency", "safety_notes",
+    "kind", "name", "name_gu", "name_hi", "synonyms", "generic_name", "composition", "reference", "manufacturer",
+    "ayush_licence_no", "hsn_code", "pack_size", "default_dose", "default_frequency", "safety_notes", "barcode",
 ]
 MASTER_FIELDS = {  # field -> dropdown list
     "dosage_form": "dosage_form", "dose_unit": "dose_unit",
     "default_timing": "medicine_timing", "default_anupana": "anupana",
+    "category": "product_category", "pack_type": "pack_type",
 }
-FLAG_FIELDS = ["schedule_e1", "contains_metals", "pregnancy_caution", "child_caution"]
-NUMBER_FIELDS = ["gst_rate", "mrp"]
+FLAG_FIELDS = ["schedule_e1", "contains_metals", "pregnancy_caution", "child_caution", "allow_loose"]
+NUMBER_FIELDS = ["gst_rate", "mrp", "selling_price", "units_per_pack"]
 
 
 # --- Search ---------------------------------------------------------------------
@@ -35,6 +36,7 @@ def search_filter(text: str) -> Q:
         q &= (
             Q(name__icontains=word) | Q(name_gu__icontains=word) | Q(name_hi__icontains=word)
             | Q(synonyms__icontains=word) | Q(composition__icontains=word) | Q(manufacturer__icontains=word)
+            | Q(generic_name__icontains=word) | Q(barcode=word)
         )
     return q
 

@@ -27,6 +27,9 @@ CATEGORIES = {
     "dose_unit": "Dose unit (tablet, g, ml...)",
     "medicine_timing": "When to take (before / after food...)",
     "anupana": "Anupana (taken with: water, milk, honey...)",
+    # Pharmacy
+    "product_category": "Product category (pharmacy)",
+    "pack_type": "Pack type (bottle, box, strip...)",
 }
 
 DEFAULT_VALUES = {
@@ -218,5 +221,25 @@ DEFAULT_VALUES = {
         ("buttermilk", "Buttermilk", "છાશ", "छाछ"),
         ("jaggery", "Jaggery", "ગોળ", "गुड़"),
         ("coconut_water", "Coconut water", "નાળિયેર પાણી", "नारियल पानी"),
+    ],
+
+    # --- Pharmacy ---
+    "product_category": [
+        ("classical_medicine", "Classical medicine", "ક્લાસિકલ દવા", "क्लासिकल दवा"),
+        ("proprietary_medicine", "Proprietary medicine", "પ્રોપ્રાઇટરી દવા", "प्रोप्राइटरी दवा"),
+        ("oil", "Oil / external use", "તેલ / બાહ્ય ઉપયોગ", "तेल / बाहरी उपयोग"),
+        ("panchakarma", "Panchakarma material", "પંચકર્મ સામગ્રી", "पंचकर्म सामग्री"),
+        ("supplement", "Health supplement", "હેલ્થ સપ્લિમેન્ટ", "हेल्थ सप्लीमेंट"),
+        ("cosmetic", "Cosmetic / personal care", "કોસ્મેટિક / પર્સનલ કેર", "कॉस्मेटिक / पर्सनल केयर"),
+        ("other", "Other", "અન્ય", "अन्य"),
+    ],
+    "pack_type": [
+        ("bottle", "Bottle", "બોટલ", "बोतल"),
+        ("jar", "Jar", "બરણી", "जार"),
+        ("box", "Box", "બોક્સ", "बॉक्स"),
+        ("strip", "Strip", "સ્ટ્રીપ", "स्ट्रिप"),
+        ("packet", "Packet / pouch", "પેકેટ", "पैकेट"),
+        ("tube", "Tube", "ટ્યુબ", "ट्यूब"),
+        ("tin", "Tin / can", "ડબ્બો", "डिब्बा"),
     ],
 }

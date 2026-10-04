@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     "apps.medicines",
     "apps.prescriptions",
     "apps.pharmacy",
+    "apps.billing",
 ]
 
 MIDDLEWARE = [
@@ -217,6 +218,8 @@ FIELD_ENCRYPTION_KEY = env("FIELD_ENCRYPTION_KEY", "")
 SMS_PROVIDER = env("SMS_PROVIDER", "console")
 # WhatsApp: "click_to_chat" builds a wa.me link that staff click to send (free).
 WHATSAPP_PROVIDER = env("WHATSAPP_PROVIDER", "click_to_chat")
+# Payments: "static_upi" shows a UPI QR / link; staff mark the bill paid (free, no gateway).
+PAYMENT_PROVIDER = env("PAYMENT_PROVIDER", "static_upi")
 
 # --- Demo data ---------------------------------------------------------------
 # reset-demo-data.bat only works when DEMO_MODE is true. Never true with real patients.
