@@ -12,7 +12,8 @@ import { expiryText, qty } from './common';
 
 export function StockCheckTab() {
   const { t } = useTranslation();
-  const { can } = useAuth();
+  const { can, hasFeature } = useAuth();
+  const racks = hasFeature('pharmacy_racks');
   const [rows, setRows] = useState<StockCheck[]>([]);
   const [loading, setLoading] = useState(false);
   const [starting, setStarting] = useState(false);
@@ -47,7 +48,7 @@ export function StockCheckTab() {
         onRow={(r) => ({ onClick: () => setOpen(r.id), style: { cursor: 'pointer' } })}
         columns={[
           { title: t('pharmacy.checkTitle'), dataIndex: 'title', render: (v: string) => <b>{v}</b> },
-          { title: t('pharmacy.rack'), dataIndex: 'rack_code', width: 90, render: (v: string) => v || t('pharmacy.allRacks') },
+          ...(racks ? [{ title: t('pharmacy.rack'), dataIndex: 'rack_code', width: 90, render: (v: string) => v || t('pharmacy.allRacks') }] : []),
           { title: t('appointments.date'), dataIndex: 'created_at', width: 120, render: (d: string) => dayjs(d).format('DD-MM-YYYY') },
           {
             title: t('pharmacy.counted'), key: 'c', width: 180,
@@ -71,12 +72,13 @@ function StartModal({ onClose }: { onClose: (id?: string) => void }) {
   const { t } = useTranslation();
   const { message } = App.useApp();
   const [form] = Form.useForm();
+  const useRacks = useAuth().hasFeature('pharmacy_racks');
   const [racks, setRacks] = useState<Rack[]>([]);
   const [saving, setSaving] = useState(false);
   useEffect(() => {
     form.setFieldsValue({ title: t('pharmacy.checkDefaultTitle', { date: dayjs().format('DD-MM-YYYY') }) });
-    api.get<Rack[]>('/racks/').then(({ data }) => setRacks(data.filter((r) => r.is_active))).catch(() => undefined);
-  }, [form, t]);
+    if (useRacks) api.get<Rack[]>('/racks/').then(({ data }) => setRacks(data.filter((r) => r.is_active))).catch(() => undefined);
+  }, [form, t, useRacks]);
   const save = async () => {
     const values = await form.validateFields();
     setSaving(true);
@@ -95,9 +97,11 @@ function StartModal({ onClose }: { onClose: (id?: string) => void }) {
       <div className="form-help">{t('pharmacy.startCheckHelp')}</div>
       <Form form={form} layout="vertical" requiredMark={false}>
         <Form.Item name="title" label={t('pharmacy.checkTitle')} rules={[{ required: true, message: t('common.required') }]}><Input maxLength={120} /></Form.Item>
-        <Form.Item name="rack" label={t('pharmacy.rack')} extra={t('pharmacy.checkRackHelp')}>
-          <Select allowClear placeholder={t('pharmacy.allRacks')} options={racks.map((r) => ({ value: r.id, label: `${r.code}${r.name ? ` · ${r.name}` : ''}` }))} />
-        </Form.Item>
+        {useRacks && (
+          <Form.Item name="rack" label={t('pharmacy.rack')} extra={t('pharmacy.checkRackHelp')}>
+            <Select allowClear placeholder={t('pharmacy.allRacks')} options={racks.map((r) => ({ value: r.id, label: `${r.code}${r.name ? ` · ${r.name}` : ''}` }))} />
+          </Form.Item>
+        )}
       </Form>
     </Modal>
   );
@@ -106,7 +110,7 @@ function StartModal({ onClose }: { onClose: (id?: string) => void }) {
 function CountModal({ id, onClose }: { id: string; onClose: () => void }) {
   const { t } = useTranslation();
   const { message, modal } = App.useApp();
-  const { can } = useAuth();
+  const { can, hasFeature } = useAuth();
   const [check, setCheck] = useState<StockCheck | null>(null);
   const [counts, setCounts] = useState<Record<string, number | null>>({});
   const [saving, setSaving] = useState(false);
@@ -168,7 +172,7 @@ function CountModal({ id, onClose }: { id: string; onClose: () => void }) {
           </div>
           <Table<StockCheckItem> size="small" rowKey="id" pagination={false} dataSource={items} scroll={items.length > 8 ? { y: 420 } : undefined}
             columns={[
-              { title: t('pharmacy.location'), dataIndex: 'location', width: 90, render: (v: string) => v || '—' },
+              ...(hasFeature('pharmacy_racks') ? [{ title: t('pharmacy.location'), dataIndex: 'location', width: 90, render: (v: string) => v || '—' }] : []),
               { title: t('rx.medicine'), dataIndex: 'medicine_name' },
               { title: t('pharmacy.batch'), dataIndex: 'batch_no', width: 120, render: (b: string) => <span className="mono">{b}</span> },
               { title: t('pharmacy.expiry'), dataIndex: 'expiry_date', width: 90, render: expiryText },

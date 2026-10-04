@@ -1,5 +1,6 @@
-// Stock of this branch: alerts, one row per medicine (location, available, near expiry, minimum level),
-// batches inside with corrections and returns to the supplier, barcode search, stock history.
+// Stock of this branch: one row per medicine (available, near expiry, minimum level), batches inside with
+// corrections, stock history. Extras (Additional settings): alerts, rack location, barcode search,
+// opening stock, returns to the supplier, detailed batch prices.
 import { EditOutlined, EnvironmentOutlined, HistoryOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import { App, Button, Form, Input, InputNumber, Modal, Segmented, Select, Space, Spin, Table, Tag, Tooltip } from 'antd';
 import dayjs from 'dayjs';
@@ -40,8 +41,12 @@ export function AlertTiles({ onPick, active }: { onPick?: (show: Show) => void; 
 export function StockTab() {
   const { t } = useTranslation();
   const { message } = App.useApp();
-  const { can } = useAuth();
+  const { can, hasFeature } = useAuth();
   const canStock = can('pharmacy.stock');
+  const alerts = hasFeature('pharmacy_stock_alerts');
+  const useRacks = hasFeature('pharmacy_racks');
+  const barcode = hasFeature('pharmacy_barcode');
+  const extraDetails = hasFeature('medicine_extra_details');
   const [params] = useSearchParams();
   const [show, setShow] = useState<Show>((params.get('show') as Show) || 'all');
   const [rack, setRack] = useState<string>();
@@ -56,19 +61,25 @@ export function StockTab() {
   const [expanded, setExpanded] = useState<string[]>([]);
   const [version, setVersion] = useState(0);
 
-  useEffect(() => { api.get<Rack[]>('/racks/').then(({ data }) => setRacks(data.filter((r) => r.is_active))).catch(() => setRacks([])); }, []);
+  useEffect(() => {
+    if (!useRacks) return;
+    api.get<Rack[]>('/racks/').then(({ data }) => setRacks(data.filter((r) => r.is_active))).catch(() => setRacks([]));
+  }, [useRacks]);
+  // Filters of a switched-off extra are not used
+  const shown: Show = alerts ? show : 'all';
+  const rackFilter = useRacks ? rack : undefined;
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await api.get<StockRow[]>('/stock/', { params: { show, q: query || undefined, rack } });
+      const { data } = await api.get<StockRow[]>('/stock/', { params: { show: shown, q: query || undefined, rack: rackFilter } });
       setRows(data);
     } catch (err) {
       message.error(errorMessage(err, t('common.loadFailed')));
     } finally {
       setLoading(false);
     }
-  }, [show, query, rack, message, t]);
+  }, [shown, query, rackFilter, message, t]);
   useEffect(() => { load(); }, [load, version]);
 
   const changed = () => setVersion((v) => v + 1);
@@ -99,20 +110,24 @@ export function StockTab() {
 
   return (
     <>
-      <AlertTiles key={version} active={show} onPick={setShow} />
+      {alerts && <AlertTiles key={version} active={show} onPick={setShow} />}
       <div className="filter-bar">
-        <ScanInput onScan={onScan} />
+        {barcode && <ScanInput onScan={onScan} />}
         <Input.Search allowClear placeholder={t('pharmacy.stockSearch')} value={search} style={{ width: 240 }}
           onChange={(e) => { setSearch(e.target.value); if (!e.target.value) setQuery(''); }} onSearch={(v) => setQuery(v.trim())} />
-        <Select allowClear placeholder={t('pharmacy.allRacks')} value={rack} onChange={setRack} style={{ width: 150 }}
-          options={racks.map((r) => ({ value: r.id, label: `${r.code}${r.name ? ` · ${r.name}` : ''}` }))} />
-        <Segmented value={show} onChange={(v) => setShow(v as Show)}
-          options={(['all', 'low', 'out', 'expiring', 'expired'] as const).map((k) => ({ value: k, label: t(`pharmacy.show.${k}`) }))} />
+        {useRacks && (
+          <Select allowClear placeholder={t('pharmacy.allRacks')} value={rack} onChange={setRack} style={{ width: 150 }}
+            options={racks.map((r) => ({ value: r.id, label: `${r.code}${r.name ? ` · ${r.name}` : ''}` }))} />
+        )}
+        {alerts && (
+          <Segmented value={show} onChange={(v) => setShow(v as Show)}
+            options={(['all', 'low', 'out', 'expiring', 'expired'] as const).map((k) => ({ value: k, label: t(`pharmacy.show.${k}`) }))} />
+        )}
         <Button icon={<ReloadOutlined />} onClick={changed} aria-label={t('appointments.refresh')} />
         <span style={{ flex: 1 }} />
         {canStock && (
           <Space>
-            <Button onClick={() => setPurchase('opening')}>{t('pharmacy.openingStock')}</Button>
+            {hasFeature('pharmacy_opening_stock') && <Button onClick={() => setPurchase('opening')}>{t('pharmacy.openingStock')}</Button>}
             <Button type="primary" icon={<PlusOutlined />} onClick={() => setPurchase('purchase')}>{t('pharmacy.addPurchase')}</Button>
           </Space>
         )}
@@ -123,7 +138,7 @@ export function StockTab() {
         dataSource={rows}
         pagination={{ pageSize: 50, hideOnSinglePage: true }}
         scroll={{ x: 980 }}
-        locale={{ emptyText: show === 'all' && !query ? t('pharmacy.stockEmpty') : t('pharmacy.nothingHere') }}
+        locale={{ emptyText: shown === 'all' && !query ? t('pharmacy.stockEmpty') : t('pharmacy.nothingHere') }}
         expandable={{
           expandedRowKeys: expanded,
           onExpandedRowsChange: (keys) => setExpanded(keys as string[]),
@@ -135,11 +150,11 @@ export function StockTab() {
             render: (_: unknown, r: StockRow) => (
               <div style={{ lineHeight: 1.35 }}>
                 <b>{r.name}</b> <span className="cell-sub">{r.pack_size}</span>
-                <div className="cell-sub">{[r.generic_name, r.category, r.manufacturer].filter(Boolean).join(' · ') || '—'}</div>
+                <div className="cell-sub">{[...(extraDetails ? [r.generic_name, r.category] : []), r.manufacturer].filter(Boolean).join(' · ') || '—'}</div>
               </div>
             ),
           },
-          {
+          ...(useRacks ? [{
             title: t('pharmacy.location'), key: 'loc', width: 130,
             render: (_: unknown, r: StockRow) => (
               <Space size={2}>
@@ -147,7 +162,7 @@ export function StockTab() {
                 {canStock && <Button size="small" type="text" icon={<EditOutlined />} onClick={() => setLocating(r)} aria-label={t('pharmacy.setLocation')} />}
               </Space>
             ),
-          },
+          }] : []),
           {
             title: t('pharmacy.available'), key: 'available', width: 130, align: 'right' as const,
             render: (_: unknown, r: StockRow) => (
@@ -199,6 +214,10 @@ export function StockTab() {
 
 function BatchList({ row, canStock, onChanged }: { row: StockRow; canStock: boolean; onChanged: () => void }) {
   const { t } = useTranslation();
+  const { hasFeature } = useAuth();
+  const details = hasFeature('pharmacy_purchase_details');
+  const barcode = hasFeature('pharmacy_barcode');
+  const supplierReturns = hasFeature('pharmacy_supplier_returns');
   const [batches, setBatches] = useState<StockBatch[] | null>(null);
   const [correcting, setCorrecting] = useState<StockBatch | null>(null);
   const [returning, setReturning] = useState<StockBatch | null>(null);
@@ -220,16 +239,16 @@ function BatchList({ row, canStock, onChanged }: { row: StockRow; canStock: bool
         className="inner-table"
         locale={{ emptyText: t('pharmacy.noBatches') }}
         columns={[
-          { title: t('pharmacy.batch'), dataIndex: 'batch_no', render: (b: string, x: StockBatch) => <><span className="mono">{b}</span>{x.barcode && <div className="cell-sub mono">{x.barcode}</div>}</> },
-          { title: t('pharmacy.mfg'), dataIndex: 'mfg_date', render: expiryText },
+          { title: t('pharmacy.batch'), dataIndex: 'batch_no', render: (b: string, x: StockBatch) => <><span className="mono">{b}</span>{barcode && x.barcode && <div className="cell-sub mono">{x.barcode}</div>}</> },
+          ...(details ? [{ title: t('pharmacy.mfg'), dataIndex: 'mfg_date', render: expiryText }] : []),
           {
             title: t('pharmacy.expiry'), dataIndex: 'expiry_date',
             render: (d: string | null) => (d && d < today ? <Tag color="magenta" className="tag-tight" style={{ marginInlineStart: 0 }}>{expiryText(d)}</Tag> : expiryText(d)),
           },
           { title: 'MRP', dataIndex: 'mrp', align: 'right' as const, render: (v: string) => <span className="num">{money(v)}</span> },
-          { title: t('pharmacy.sellingPrice'), dataIndex: 'sale_price', align: 'right' as const, render: (v: string) => <span className="num">{money(v)}</span> },
+          ...(details ? [{ title: t('pharmacy.sellingPrice'), dataIndex: 'sale_price', align: 'right' as const, render: (v: string) => <span className="num">{money(v)}</span> }] : []),
           { title: t('pharmacy.purchaseRate'), dataIndex: 'purchase_rate', align: 'right' as const, render: (v: string | null) => <span className="num">{money(v)}</span> },
-          { title: 'GST', dataIndex: 'gst_rate', align: 'right' as const, render: (v: string) => `${qty(v)}%` },
+          ...(details ? [{ title: 'GST', dataIndex: 'gst_rate', align: 'right' as const, render: (v: string) => `${qty(v)}%` }] : []),
           { title: t('pharmacy.supplier'), dataIndex: 'supplier_name', render: (v: string) => v || '—' },
           { title: t('pharmacy.available'), dataIndex: 'quantity', align: 'right' as const, render: (v: string) => <b className="num">{qty(v)}</b> },
           {
@@ -237,7 +256,7 @@ function BatchList({ row, canStock, onChanged }: { row: StockRow; canStock: bool
             render: (_: unknown, b: StockBatch) => canStock ? (
               <Space size={4}>
                 <Button size="small" onClick={() => setCorrecting(b)}>{t('pharmacy.correct')}</Button>
-                <Button size="small" onClick={() => setReturning(b)}>{t('pharmacy.returnToSupplier')}</Button>
+                {supplierReturns && <Button size="small" onClick={() => setReturning(b)}>{t('pharmacy.returnToSupplier')}</Button>}
               </Space>
             ) : null,
           },

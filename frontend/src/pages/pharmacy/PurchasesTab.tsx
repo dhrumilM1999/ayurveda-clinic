@@ -1,4 +1,4 @@
-// Purchase invoices (stock in), opening stock, and returns to suppliers.
+// Purchase invoices (stock in). Extras (Additional settings): opening stock, returns to suppliers.
 import { PlusOutlined } from '@ant-design/icons';
 import { Button, Input, Segmented, Space, Table, Tag } from 'antd';
 import dayjs from 'dayjs';
@@ -13,21 +13,23 @@ import { PurchaseModal } from './PurchaseModal';
 
 export function PurchasesTab() {
   const { t } = useTranslation();
-  const { can } = useAuth();
-  const [view, setView] = useState<'purchases' | 'opening' | 'returns'>('purchases');
+  const { can, hasFeature } = useAuth();
+  const [chosen, setView] = useState<'purchases' | 'opening' | 'returns'>('purchases');
   const [open, setOpen] = useState<'purchase' | 'opening' | null>(null);
   const [search, setSearch] = useState('');
   const [query, setQuery] = useState('');
 
+  const views = [
+    { value: 'purchases', label: t('pharmacy.purchaseInvoices') },
+    ...(hasFeature('pharmacy_opening_stock') ? [{ value: 'opening', label: t('pharmacy.openingStock') }] : []),
+    ...(hasFeature('pharmacy_supplier_returns') ? [{ value: 'returns', label: t('pharmacy.supplierReturns') }] : []),
+  ];
+  const view = views.some((v) => v.value === chosen) ? chosen : 'purchases';
+
   return (
     <>
       <div className="filter-bar">
-        <Segmented value={view} onChange={(v) => setView(v as typeof view)}
-          options={[
-            { value: 'purchases', label: t('pharmacy.purchaseInvoices') },
-            { value: 'opening', label: t('pharmacy.openingStock') },
-            { value: 'returns', label: t('pharmacy.supplierReturns') },
-          ]} />
+        {views.length > 1 && <Segmented value={view} onChange={(v) => setView(v as typeof view)} options={views} />}
         {view !== 'returns' && (
           <Input.Search allowClear placeholder={t('pharmacy.purchaseSearch')} value={search} style={{ width: 260 }}
             onChange={(e) => { setSearch(e.target.value); if (!e.target.value) setQuery(''); }} onSearch={(v) => setQuery(v.trim())} />
@@ -47,6 +49,7 @@ export function PurchasesTab() {
 
 function PurchaseList({ opening, query }: { opening: boolean; query: string }) {
   const { t } = useTranslation();
+  const details = useAuth().hasFeature('pharmacy_purchase_details');
   const { rows, loading, pagination } = useList<PurchaseRecord>('/purchases/', { opening: opening ? 1 : 0, q: query || undefined });
   return (
     <Table<PurchaseRecord>
@@ -61,14 +64,16 @@ function PurchaseList({ opening, query }: { opening: boolean; query: string }) {
             columns={[
               { title: t('rx.medicine'), dataIndex: 'medicine_name' },
               { title: t('pharmacy.batch'), dataIndex: 'batch_no', render: (b: string) => <span className="mono">{b}</span> },
-              { title: t('pharmacy.mfg'), dataIndex: 'mfg_date', render: expiryText },
+              ...(details ? [{ title: t('pharmacy.mfg'), dataIndex: 'mfg_date', render: expiryText }] : []),
               { title: t('pharmacy.expiry'), dataIndex: 'expiry_date', render: expiryText },
               { title: t('pharmacy.qty'), key: 'q', align: 'right' as const, render: (_: unknown, i: PurchaseItemRecord) => <span className="num">{qty(i.quantity)}{Number(i.free_quantity) ? ` + ${qty(i.free_quantity)} ${t('pharmacy.freeShort')}` : ''}</span> },
               { title: t('pharmacy.rateNoGst'), dataIndex: 'purchase_rate', align: 'right' as const, render: (v: string | null) => <span className="num">{money(v)}</span> },
-              { title: t('pharmacy.discount'), dataIndex: 'discount_percent', align: 'right' as const, render: (v: string) => (Number(v) ? `${qty(v)}%` : '—') },
-              { title: 'GST', dataIndex: 'gst_rate', align: 'right' as const, render: (v: string) => `${qty(v)}%` },
+              ...(details ? [
+                { title: t('pharmacy.discount'), dataIndex: 'discount_percent', align: 'right' as const, render: (v: string) => (Number(v) ? `${qty(v)}%` : '—') },
+                { title: 'GST', dataIndex: 'gst_rate', align: 'right' as const, render: (v: string) => `${qty(v)}%` },
+              ] : []),
               { title: 'MRP', dataIndex: 'mrp', align: 'right' as const, render: (v: string) => <span className="num">{money(v)}</span> },
-              { title: t('pharmacy.sellingPrice'), dataIndex: 'selling_price', align: 'right' as const, render: (v: string | null) => <span className="num">{money(v)}</span> },
+              ...(details ? [{ title: t('pharmacy.sellingPrice'), dataIndex: 'selling_price', align: 'right' as const, render: (v: string | null) => <span className="num">{money(v)}</span> }] : []),
               { title: t('pharmacy.amount'), dataIndex: 'amount', align: 'right' as const, render: (v: string) => <span className="num">{money(v)}</span> },
             ]} />
         ),
@@ -80,7 +85,7 @@ function PurchaseList({ opening, query }: { opening: boolean; query: string }) {
           { title: t('pharmacy.supplier'), dataIndex: 'supplier_name', render: (v: string) => v || '—' },
         ]),
         { title: t('pharmacy.medicines'), key: 'n', width: 110, align: 'center' as const, render: (_: unknown, p: PurchaseRecord) => p.items.length },
-        ...(opening ? [] : [{ title: 'GST', dataIndex: 'gst_amount', width: 110, align: 'right' as const, render: (v: string) => <span className="num">{money(v)}</span> }]),
+        ...(opening || !details ? [] : [{ title: 'GST', dataIndex: 'gst_amount', width: 110, align: 'right' as const, render: (v: string) => <span className="num">{money(v)}</span> }]),
         { title: t('pharmacy.purchaseTotal'), dataIndex: 'total_amount', width: 130, align: 'right' as const, render: (v: string) => <b className="num">{money(v)}</b> },
         { title: t('pharmacy.enteredBy'), dataIndex: 'created_by_name', width: 160 },
       ]}
