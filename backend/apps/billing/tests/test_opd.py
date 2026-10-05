@@ -103,6 +103,17 @@ def test_fees_and_services_setup(org_admin, branch_a, doctor, service):
 
 
 @pytest.mark.django_db
+def test_preview_is_not_counted_as_print(branch_a, receptionist, appointment):
+    client = client_for(receptionist, branch_a)
+    bill = client.post("/api/v1/opd-bills/charge/", {"appointment": str(appointment.id),
+                                                     "lines": [consultation_line(300)]}, format="json").data
+    assert client.get(f"/api/v1/invoices/{bill['id']}/pdf/", {"preview": "1"}).status_code == 200
+    assert Invoice.objects.get(pk=bill["id"]).print_count == 0
+    client.get(f"/api/v1/invoices/{bill['id']}/pdf/")
+    assert Invoice.objects.get(pk=bill["id"]).print_count == 1
+
+
+@pytest.mark.django_db
 def test_cancel_opd_bill_makes_credit_note(branch_a, receptionist, org, roles, appointment):
     admin = make_user(org, "branchadmin2", {branch_a: roles["admin"]})
     bill = client_for(receptionist, branch_a).post("/api/v1/opd-bills/charge/", {

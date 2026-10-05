@@ -116,16 +116,23 @@ class InvoiceViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.
 
     @action(detail=True, methods=["get"])
     def pdf(self, request, pk=None):
-        """?size=a4|a5|80mm  ?download=1. The first print is the original; later prints say DUPLICATE COPY."""
+        """
+        ?size=a4|a5|80mm  ?download=1. The first print is the original; later prints say DUPLICATE COPY.
+        ?preview=1 shows the bill on screen only: it is not counted as a print (logged as a view).
+        """
         invoice = self.get_object()
         size = request.query_params.get("size", "a4")
         if size not in SIZES:
             raise ValidationError({"size": "Choose a4, a5 or 80mm."})
         duplicate = invoice.print_count > 0
         content = render_pdf(invoice=invoice, size=size, duplicate=duplicate)
-        Invoice.objects.filter(pk=invoice.pk).update(print_count=invoice.print_count + 1)
-        log_action(request, "print", invoice, changes={"size": size, "duplicate": duplicate,
-                                                       "patient": str(invoice.patient_id or "")})
+        if request.query_params.get("preview") == "1":
+            log_action(request, "view", invoice, changes={"size": size, "preview": True,
+                                                          "patient": str(invoice.patient_id or "")})
+        else:
+            Invoice.objects.filter(pk=invoice.pk).update(print_count=invoice.print_count + 1)
+            log_action(request, "print", invoice, changes={"size": size, "duplicate": duplicate,
+                                                           "patient": str(invoice.patient_id or "")})
         return pdf_response(content, f"{invoice.number.replace('/', '-')}.pdf", request.query_params.get("download") == "1")
 
     @action(detail=True, methods=["get"])
