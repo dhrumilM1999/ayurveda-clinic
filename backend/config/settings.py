@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     "apps.prescriptions",
     "apps.pharmacy",
     "apps.billing",
+    "apps.reports",
 ]
 
 MIDDLEWARE = [
