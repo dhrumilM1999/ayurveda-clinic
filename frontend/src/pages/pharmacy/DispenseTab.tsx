@@ -108,7 +108,7 @@ type Done = { invoice: string | null; number: string; total_amount: string; invo
 
 function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClose: (done: boolean) => void }) {
   const { t } = useTranslation();
-  const { message } = App.useApp();
+  const { message, modal } = App.useApp();
   const { can, hasFeature } = useAuth();
   const billing = hasFeature('pharmacy_billing');
   const discounts = hasFeature('pharmacy_discounts');
@@ -197,6 +197,25 @@ function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClos
     }
   };
 
+  // Confirm before medicines leave the stock and a bill is made
+  const confirmSave = () => {
+    const paying = billing && payMode !== 'later' ? Math.min(payAmount ?? total, total) : 0;
+    modal.confirm({
+      title: t('opd.confirmTitle'),
+      content: (
+        <div>
+          <div>{t('pharmacy.confirmGive', { count: selected.length, name: detail?.patient_detail.full_name ?? '' })}</div>
+          {billing && <div>{t('pharmacy.confirmBill', { amount: money(total) })}</div>}
+          {billing && (paying > 0
+            ? <div>{t('opd.confirmPay', { amount: money(paying), mode: t(`billing.modes.${payMode}`) })}</div>
+            : <div>{t('opd.confirmLater')}</div>)}
+        </div>
+      ),
+      okText: t('common.yes'), cancelText: t('common.no'),
+      onOk: save,
+    });
+  };
+
   if (done && !done.invoice) {
     return (
       <Modal open width={520} title={t('pharmacy.dispense')} onCancel={() => onClose(true)}
@@ -247,7 +266,7 @@ function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClos
           <Space>
             {billing && <span className="total-text">{t('pharmacy.total')}: <b className="num">{money(total)}</b></span>}
             <Button onClick={() => onClose(false)}>{t('common.cancel')}</Button>
-            <Button type="primary" loading={saving} disabled={!selected.length} onClick={save}>
+            <Button type="primary" loading={saving} disabled={!selected.length} onClick={confirmSave}>
               {!billing ? t('pharmacy.giveOnly', { count: selected.length })
                 : hasFeature('combined_opd_bill') ? t('pharmacy.giveToOpd', { count: selected.length })
                   : t('pharmacy.giveAndBill', { count: selected.length })}
