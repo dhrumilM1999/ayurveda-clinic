@@ -23,7 +23,27 @@ def patient_summary(patient) -> dict:
     }
 
 
-class AppointmentSerializer(serializers.ModelSerializer):
+class OpdBillFieldMixin:
+    """Adds `opd_bill` (short OPD bill status) for staff who may see or make bills."""
+
+    def _can_see_bills(self) -> bool:
+        if "can_see_bills" not in self.context:
+            from apps.accounts.services import user_has_perm
+
+            request, branch = self.context.get("request"), self.context.get("branch")
+            self.context["can_see_bills"] = bool(request and branch and any(
+                user_has_perm(request.user, code, branch) for code in ("billing.view", "billing.charge")))
+        return self.context["can_see_bills"]
+
+    def get_opd_bill(self, obj):
+        if not obj.pk or not self._can_see_bills():
+            return None
+        from apps.billing.opd import opd_bill_summary
+
+        return opd_bill_summary(obj)
+
+
+class AppointmentSerializer(OpdBillFieldMixin, serializers.ModelSerializer):
     patient_detail = serializers.SerializerMethodField()
     # Short OPD bill status (only for staff who may see or make bills)
     opd_bill = serializers.SerializerMethodField()
@@ -48,21 +68,6 @@ class AppointmentSerializer(serializers.ModelSerializer):
     def get_patient_detail(self, obj):
         return patient_summary(obj.patient)
 
-    def _can_see_bills(self) -> bool:
-        if "can_see_bills" not in self.context:
-            from apps.accounts.services import user_has_perm
-
-            request, branch = self.context.get("request"), self.context.get("branch")
-            self.context["can_see_bills"] = bool(request and branch and any(
-                user_has_perm(request.user, code, branch) for code in ("billing.view", "billing.charge")))
-        return self.context["can_see_bills"]
-
-    def get_opd_bill(self, obj):
-        if not obj.pk or not self._can_see_bills():
-            return None
-        from apps.billing.opd import opd_bill_summary
-
-        return opd_bill_summary(obj)
 
     def validate_patient(self, value):
         if value.organization_id != self.context["request"].user.organization_id:
@@ -124,17 +129,18 @@ class CancelSerializer(serializers.Serializer):
     reason = serializers.CharField(max_length=200, required=False, allow_blank=True)
 
 
-class QueueItemSerializer(serializers.ModelSerializer):
+class QueueItemSerializer(OpdBillFieldMixin, serializers.ModelSerializer):
     """One line on the queue screen. display_name is short, for the TV screen in the waiting room."""
 
     patient_detail = serializers.SerializerMethodField()
+    opd_bill = serializers.SerializerMethodField()
     display_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Appointment
         fields = [
             "id", "token_number", "status", "kind", "start_time", "checked_in_at",
-            "consultation_started_at", "patient_detail", "display_name", "reason",
+            "consultation_started_at", "patient_detail", "display_name", "reason", "opd_bill",
         ]
 
     def get_patient_detail(self, obj):
