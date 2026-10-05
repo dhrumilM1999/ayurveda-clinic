@@ -1781,3 +1781,11 @@ body {
 /* OPD bill: button at the end of queue rows, header of the bill popup */
 .queue-bill { margin-left: auto; flex-shrink: 0; }
 .opd-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; padding: 10px 12px; border-radius: 8px; background: var(--clinic-primary-soft); }
+
+/* Dashboard: new case / follow-up tags, next patients card */
+.dash-cases { display: flex; flex-wrap: wrap; gap: 4px; }
+.dash-cases .ant-tag { margin-inline-end: 0; }
+.dash-next { height: 100%; }
+.dash-next-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px dashed var(--clinic-border); }
+.dash-next-row:last-child { border-bottom: none; }
+.dash-next-row > div { flex: 1; }
