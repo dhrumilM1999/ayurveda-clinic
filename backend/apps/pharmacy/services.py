@@ -17,7 +17,7 @@ from django.db.models import Q, Sum
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
-from apps.billing.services import create_credit_note, create_invoice, record_payment
+from apps.billing.services import create_credit_note, create_invoice, invoice_for_dispense, record_payment
 from apps.medicines.models import BranchMedicine, Medicine
 
 from .models import (
@@ -223,9 +223,10 @@ def _unit_label(medicine, loose_units=None):
 
 
 @transaction.atomic
-def sell(prescription, branch, user, lines: list[dict], *, notes="", payment=None, make_bill=True):
+def sell(prescription, branch, user, lines: list[dict], *, notes="", payment=None, make_bill=True, bill_to_opd=False):
     """
     Give medicines for a final prescription and make the bill (make_bill=False: only give, no bill).
+    bill_to_opd=True ("one combined bill"): the medicines go on the visit's OPD bill instead of a pharmacy bill.
     lines: [{"prescription_item", "batch_id", "quantity" (packs) or "loose_units", "discount_percent"}]
     payment: {"mode": "cash"|"upi"|"card", "amount", "reference"} or None (pay later)
     Returns (dispense, invoice or None).
@@ -292,12 +293,18 @@ def sell(prescription, branch, user, lines: list[dict], *, notes="", payment=Non
     record.save(update_fields=["total_amount"])
     if not make_bill:
         return record, None
-    invoice = create_invoice(branch, user, series="PH", lines=invoice_lines, patient=prescription.patient,
-                             prescription=prescription, dispense=record, notes=notes)
+    if bill_to_opd:
+        from apps.billing.opd import add_medicines_to_opd
+
+        invoice = add_medicines_to_opd(branch, user, prescription=prescription, lines=invoice_lines)
+    else:
+        invoice = create_invoice(branch, user, series="PH", lines=invoice_lines, patient=prescription.patient,
+                                 prescription=prescription, dispense=record, notes=notes,
+                                 doctor=prescription.doctor)
     # Ledger lines show the bill number
     StockMovement.objects.filter(reference=str(record.id)).update(reference_label=invoice.number)
     if payment and Decimal(payment.get("amount") or 0) > 0:
-        record_payment(invoice, user, mode=payment["mode"], amount=min(Decimal(payment["amount"]), invoice.total_amount),
+        record_payment(invoice, user, mode=payment["mode"], amount=min(Decimal(payment["amount"]), invoice.balance),
                        reference=payment.get("reference", ""))
         invoice.refresh_from_db()
     return record, invoice
@@ -311,7 +318,7 @@ def take_back(dispense, branch, user, *, items, reason, refund_mode="cash"):
     """
     if dispense.branch_id != branch.id:
         raise ValidationError({"detail": "This sale belongs to another branch."})
-    invoice = getattr(dispense, "invoice", None)
+    invoice = invoice_for_dispense(dispense)
     record = SaleReturn.objects.create(organization_id=branch.organization_id, branch=branch, dispense=dispense,
                                        patient_id=dispense.patient_id, reason=reason[:200], created_by=user, updated_by=user)
     credit_items = []

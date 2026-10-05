@@ -1,6 +1,6 @@
 """
 Billing rules: invoice numbers, GST maths (prices include GST), payments, credit notes, day summary.
-Other modules (pharmacy now; consultation and therapy later) create bills through these functions.
+Other modules (pharmacy, OPD) create bills through these functions.
 """
 from datetime import date as date_cls
 from decimal import ROUND_HALF_UP, Decimal
@@ -67,36 +67,25 @@ def refresh_status(invoice: Invoice):
         invoice.status = "unpaid"
 
 
-@transaction.atomic
-def create_invoice(branch, user, *, series, lines: list[dict], patient=None, prescription=None, dispense=None,
-                   customer_name="", notes="", day=None) -> Invoice:
-    """
-    lines: [{"kind", "description", "quantity", "unit_price", "gst_rate", "discount_percent",
-             "unit_label", "hsn_code", "medicine", "batch", "batch_no", "expiry_date", "dispense_item"}]
-    """
-    if not lines:
-        raise ValidationError({"lines": "A bill needs at least one line."})
-    day = day or timezone.localdate()
-    number, fy = next_number(branch, series, day)
-    invoice = Invoice.objects.create(
-        organization_id=branch.organization_id, branch=branch, number=number, series=series, financial_year=fy,
-        invoice_date=day, patient=patient, prescription=prescription, dispense=dispense,
-        customer_name=customer_name or (patient.full_name if patient else ""), place_of_supply=branch.state,
-        notes=notes[:300], created_by=user, updated_by=user,
+def _add_line(invoice: Invoice, line: dict, user, order: int) -> InvoiceLine:
+    amounts = line_amounts(line["unit_price"], line["quantity"], line.get("discount_percent", 0), line.get("gst_rate", 0))
+    return InvoiceLine.objects.create(
+        organization_id=invoice.organization_id, invoice=invoice, kind=line.get("kind", "medicine"),
+        description=line["description"][:250], medicine=line.get("medicine"), batch=line.get("batch"),
+        service=line.get("service"), dispense_item=line.get("dispense_item"), batch_no=line.get("batch_no", ""),
+        expiry_date=line.get("expiry_date"), hsn_code=line.get("hsn_code", ""), quantity=line["quantity"],
+        unit_label=line.get("unit_label", ""), unit_price=line["unit_price"],
+        discount_percent=line.get("discount_percent", 0), gst_rate=line.get("gst_rate", 0), sort_order=order,
+        created_by=user, updated_by=user, **amounts,
     )
+
+
+def _recalculate(invoice: Invoice):
+    """Bill totals from all its lines; the total is rounded to the rupee (round-off shown on the bill)."""
     totals = {k: ZERO for k in ("gross_amount", "discount_amount", "taxable_amount", "cgst_amount", "sgst_amount")}
-    for order, line in enumerate(lines):
-        amounts = line_amounts(line["unit_price"], line["quantity"], line.get("discount_percent", 0), line.get("gst_rate", 0))
-        InvoiceLine.objects.create(
-            organization_id=branch.organization_id, invoice=invoice, kind=line.get("kind", "medicine"),
-            description=line["description"][:250], medicine=line.get("medicine"), batch=line.get("batch"),
-            dispense_item=line.get("dispense_item"), batch_no=line.get("batch_no", ""), expiry_date=line.get("expiry_date"),
-            hsn_code=line.get("hsn_code", ""), quantity=line["quantity"], unit_label=line.get("unit_label", ""),
-            unit_price=line["unit_price"], discount_percent=line.get("discount_percent", 0),
-            gst_rate=line.get("gst_rate", 0), sort_order=order, created_by=user, updated_by=user, **amounts,
-        )
+    for line in invoice.lines.all():
         for key in totals:
-            totals[key] += amounts[key]
+            totals[key] += getattr(line, key)
     exact = totals["taxable_amount"] + totals["cgst_amount"] + totals["sgst_amount"]
     rounded = exact.quantize(RUPEE, rounding=ROUND_HALF_UP).quantize(PAISA)
     for key, value in totals.items():
@@ -104,6 +93,47 @@ def create_invoice(branch, user, *, series, lines: list[dict], patient=None, pre
     invoice.round_off = rounded - exact
     invoice.total_amount = rounded
     refresh_status(invoice)
+
+
+@transaction.atomic
+def create_invoice(branch, user, *, series, lines: list[dict], patient=None, prescription=None, dispense=None,
+                   customer_name="", notes="", day=None, care_type=None, doctor=None, appointment=None,
+                   visit=None) -> Invoice:
+    """
+    lines: [{"kind", "description", "quantity", "unit_price", "gst_rate", "discount_percent", "unit_label",
+             "hsn_code", "medicine", "batch", "batch_no", "expiry_date", "dispense_item", "service"}]
+    """
+    if not lines:
+        raise ValidationError({"lines": "A bill needs at least one line."})
+    day = day or timezone.localdate()
+    number, fy = next_number(branch, series, day)
+    invoice = Invoice.objects.create(
+        organization_id=branch.organization_id, branch=branch, number=number, series=series, financial_year=fy,
+        care_type=care_type or ("OPD" if series == "OP" else "PHARMACY"), invoice_date=day, patient=patient,
+        prescription=prescription, dispense=dispense, doctor=doctor, appointment=appointment, visit=visit,
+        customer_name=customer_name or (patient.full_name if patient else ""), place_of_supply=branch.state,
+        notes=notes[:300], created_by=user, updated_by=user,
+    )
+    for order, line in enumerate(lines):
+        _add_line(invoice, line, user, order)
+    _recalculate(invoice)
+    invoice.save()
+    return invoice
+
+
+@transaction.atomic
+def add_lines(invoice: Invoice, user, lines: list[dict]) -> Invoice:
+    """Add more lines to an open bill (e.g. services after the check-up). A cancelled bill cannot change."""
+    invoice = Invoice.objects.select_for_update().get(pk=invoice.pk)
+    if invoice.status == "cancelled":
+        raise ValidationError({"detail": "This bill is cancelled. Make a new bill."})
+    if not lines:
+        raise ValidationError({"lines": "Add at least one line."})
+    start = invoice.lines.count()
+    for order, line in enumerate(lines):
+        _add_line(invoice, line, user, start + order)
+    _recalculate(invoice)
+    invoice.updated_by = user
     invoice.save()
     return invoice
 
@@ -204,3 +234,12 @@ def day_summary(branch, day: date_cls) -> dict:
         "cash_in_hand": by_mode["cash"] - refunds["cash"],
         "still_due": rupees(due),
     }
+
+
+def invoice_for_dispense(dispense) -> Invoice | None:
+    """The bill of a pharmacy sale: its own pharmacy bill, or the OPD bill it was added to (combined bill)."""
+    own = Invoice.objects.filter(dispense=dispense).first()
+    if own:
+        return own
+    line = InvoiceLine.objects.filter(dispense_item__dispense=dispense).select_related("invoice").first()
+    return line.invoice if line else None

@@ -13,7 +13,7 @@ from rest_framework.response import Response
 from apps.accounts.permissions import BranchPermission
 from apps.audit.services import log_action
 
-from .models import CreditNote, Invoice
+from .models import CreditNote, Invoice, InvoiceLine
 from .payments import upi_link_for
 from .pdf import SIZES, render_pdf
 from .serializers import CancelInput, CreditNoteSerializer, InvoiceListSerializer, InvoiceSerializer, PaymentInput
@@ -95,16 +95,21 @@ class InvoiceViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.
         invoice = self.get_object()
         if invoice.status == "cancelled":
             raise ValidationError({"detail": "Already cancelled."})
-        if invoice.dispense_id:
-            from apps.pharmacy.services import take_back
+        # Medicines on the bill (pharmacy bill, or OPD bill with medicines) go back into stock first
+        from apps.pharmacy.services import take_back
 
+        dispenses = {line.dispense_item.dispense for line in invoice.lines.select_related("dispense_item__dispense")
+                     if line.dispense_item_id}
+        for dispense in dispenses:
             items = [{"dispense_item": i, "quantity": i.quantity - i.returned_quantity, "back_to_stock": True}
-                     for i in invoice.dispense.items.all() if i.quantity > i.returned_quantity]
-            take_back(invoice.dispense, request.branch, request.user, items=items, reason=data.validated_data["reason"],
-                      refund_mode=data.validated_data["refund_mode"])
-        else:
-            items = [(line, line.quantity - line.credited_quantity) for line in invoice.lines.all()
-                     if line.quantity > line.credited_quantity]
+                     for i in dispense.items.all() if i.quantity > i.returned_quantity]
+            if items:
+                take_back(dispense, request.branch, request.user, items=items, reason=data.validated_data["reason"],
+                          refund_mode=data.validated_data["refund_mode"])
+        # Everything else (consultation, services) with one credit note
+        items = [(line, line.quantity - line.credited_quantity) for line in InvoiceLine.objects.filter(invoice=invoice)
+                 if line.quantity > line.credited_quantity]  # fresh from the database (returns above changed them)
+        if items:
             create_credit_note(invoice, request.user, items=items, **data.validated_data)
         log_action(request, "update", invoice, changes={"cancelled": data.validated_data["reason"]})
         return Response(self.get_serializer(self.get_queryset().get(pk=invoice.pk)).data)

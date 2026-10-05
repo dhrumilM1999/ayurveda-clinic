@@ -272,3 +272,10 @@ def complete_visit(visit: Visit, user) -> Visit:
 
     finalize_for_visit(visit, user)
     return visit
+
+
+def last_visit_date(patient, doctor, before):
+    """Date of the patient's latest check-up with this doctor before a day (any branch), or None.
+    Used by billing to tell a new case from a follow-up."""
+    return (Visit.objects.filter(patient=patient, doctor=doctor, visit_date__lt=before)
+            .order_by("-visit_date").values_list("visit_date", flat=True).first())

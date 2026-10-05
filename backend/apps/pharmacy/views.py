@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from apps.accounts.permissions import BranchPermission
 from apps.appointments.serializers import patient_summary
 from apps.audit.services import log_action
+from apps.billing.services import invoice_for_dispense
 from apps.common.viewsets import AuditedModelViewSet
 from apps.medicines.models import Medicine
 from apps.organizations.services import is_feature_enabled
@@ -375,9 +376,9 @@ class DispensingViewSet(PharmacyMixin, viewsets.ViewSet):
         return Response({
             "id": str(rx.id), "patient_detail": patient_summary(rx.patient), "doctor_name": rx.doctor.full_name,
             "notes": rx.notes, "status": dispense_status(rx), "allergies": allergies,
-            "sales": [{"id": str(d.id), "invoice": str(d.invoice.id) if hasattr(d, "invoice") else None,
-                       "number": d.invoice.number if hasattr(d, "invoice") else "", "total": str(d.total_amount)}
-                      for d in rx.dispenses.all()],
+            "sales": [{"id": str(d.id), "invoice": str(inv.id) if inv else None, "number": inv.number if inv else "",
+                       "total": str(d.total_amount)}
+                      for d, inv in ((d, invoice_for_dispense(d)) for d in rx.dispenses.all())],
             "lines": [{
                 "id": str(i.id), "medicine": str(i.medicine_id) if i.medicine_id else None,
                 "medicine_name": i.medicine_name, "dosage_form": i.dosage_form,
@@ -416,8 +417,10 @@ class DispensingViewSet(PharmacyMixin, viewsets.ViewSet):
                           "loose_units": line.get("loose_units"), "discount_percent": line.get("discount_percent", 0)})
         # Without "Pharmacy bills" the medicines are only given (stock goes down), no bill is made
         make_bill = is_feature_enabled(request.branch, "pharmacy_billing")
+        # "One combined bill" (Additional settings): medicines go on the visit's OPD bill
+        to_opd = make_bill and is_feature_enabled(request.branch, "combined_opd_bill") and rx.visit_id is not None
         record, invoice = sell(rx, request.branch, request.user, lines, notes=v.get("notes", ""),
-                               payment=v.get("payment"), make_bill=make_bill)
+                               payment=v.get("payment"), make_bill=make_bill, bill_to_opd=to_opd)
         log_action(request, "create", invoice or record, changes={
             "patient": str(rx.patient_id), "lines": len(lines), "total": str(record.total_amount)})
         return Response({"dispense": str(record.id), "invoice": str(invoice.id) if invoice else None,
@@ -446,7 +449,7 @@ class SaleViewSet(PharmacyMixin, mixins.ListModelMixin, mixins.RetrieveModelMixi
         return qs
 
     def _row(self, d, with_items=False):
-        invoice = getattr(d, "invoice", None)
+        invoice = invoice_for_dispense(d)
         row = {"id": str(d.id), "patient_detail": patient_summary(d.patient), "created_at": d.created_at,
                "total_amount": str(d.total_amount), "by": d.created_by.full_name if d.created_by_id else "",
                "invoice": str(invoice.id) if invoice else None, "number": invoice.number if invoice else "",
