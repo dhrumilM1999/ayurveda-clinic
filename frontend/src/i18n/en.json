@@ -1121,7 +1121,9 @@
     "supplierReturnsHelp": "To return stock: Stock tab -> open a medicine -> Return to supplier on the batch.",
     "system": "System",
     "type": "Type",
-    "units": "Units"
+    "units": "Units",
+    "giveToOpd_one": "Give {{count}} medicine & add to OPD bill",
+    "giveToOpd_other": "Give {{count}} medicines & add to OPD bill"
   },
   "billing": {
     "status": {
@@ -1211,7 +1213,8 @@
     "allOff": "Turn all off",
     "needs": "Needs: {{name}}",
     "groups": {
-      "pharmacy": "Pharmacy and stock"
+      "pharmacy": "Pharmacy and stock",
+      "billing": "Billing"
     },
     "features": {
       "pharmacy_billing": {
@@ -1265,6 +1268,10 @@
       "medicine_extra_details": {
         "label": "Extra product details",
         "help": "Generic name, category, pack type and default selling price on the medicine form."
+      },
+      "combined_opd_bill": {
+        "label": "Medicines on the OPD bill (one combined bill)",
+        "help": "On: medicines given by the pharmacy are added to the patient's OPD bill of that visit, so the patient gets one bill. Off: the pharmacy makes its own pharmacy bill (keeps GST and the drug licence separate - ask your CA)."
       }
     }
   },

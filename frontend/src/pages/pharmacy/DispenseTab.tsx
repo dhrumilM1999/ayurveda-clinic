@@ -248,7 +248,9 @@ function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClos
             {billing && <span className="total-text">{t('pharmacy.total')}: <b className="num">{money(total)}</b></span>}
             <Button onClick={() => onClose(false)}>{t('common.cancel')}</Button>
             <Button type="primary" loading={saving} disabled={!selected.length} onClick={save}>
-              {billing ? t('pharmacy.giveAndBill', { count: selected.length }) : t('pharmacy.giveOnly', { count: selected.length })}
+              {!billing ? t('pharmacy.giveOnly', { count: selected.length })
+                : hasFeature('combined_opd_bill') ? t('pharmacy.giveToOpd', { count: selected.length })
+                  : t('pharmacy.giveAndBill', { count: selected.length })}
             </Button>
           </Space>
         </div>
