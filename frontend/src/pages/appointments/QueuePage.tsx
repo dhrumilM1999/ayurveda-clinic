@@ -10,6 +10,7 @@ import { api, errorMessage } from '../../api/client';
 import type { QueueData, QueueGroup, QueueItem } from '../../api/types';
 import { useAuth } from '../../auth/AuthContext';
 import { BookAppointmentModal } from './BookAppointmentModal';
+import { OpdBillButton } from '../billing/OpdBillModal';
 
 const REFRESH_SECONDS = 15;
 
@@ -99,6 +100,7 @@ export default function QueuePage() {
                       <Link to={`/patients/${item.patient_detail.id}`}><b>{item.patient_detail.full_name}</b></Link>
                       <div className="cell-sub">{t('queue.since', { n: minutesSince(item.consultation_started_at) })}</div>
                     </div>
+                    <span className="queue-bill"><OpdBillButton appointmentId={item.id} bill={item.opd_bill} onChanged={reload} /></span>
                   </div>
                 )) : <div className="cell-sub">{t('queue.nobody')}</div>}
               </div>
@@ -115,6 +117,7 @@ export default function QueuePage() {
                       <span className="cell-sub">
                         {item.kind === 'walk_in' ? t('appointments.walkInShort') : t('queue.booked')} · {t('queue.waitingFor', { n: minutesSince(item.checked_in_at) })}
                       </span>
+                      <span className="queue-bill"><OpdBillButton appointmentId={item.id} bill={item.opd_bill} onChanged={reload} /></span>
                     </li>
                   ))}
                 </ol>

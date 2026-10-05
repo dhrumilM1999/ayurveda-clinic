@@ -17,6 +17,7 @@ import type {
   ExamField, ExamTemplate, Page, Patient, Prescription, RxLine, RxWarning, Visit, VisitExam, VisitListItem,
 } from '../../api/types';
 import { useAuth } from '../../auth/AuthContext';
+import { OpdBillModal } from '../billing/OpdBillModal';
 import { genderAge } from '../patients/PatientsPage';
 import { VitalsTab } from '../patients/tabs/VitalsTab';
 import {
@@ -78,6 +79,7 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
   const { t } = useTranslation();
   const { message } = App.useApp();
   const { can } = useAuth();
+  const [billOpen, setBillOpen] = useState(false); // OPD bill popup (services & charges for this check-up)
   const templateName = useTemplateName();
   const prakritiName = usePrakritiName();
   const masterLabel = useMasterLabel();
@@ -353,6 +355,7 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
 
   return (
     <div className="workspace" ref={workspaceRef}>
+      {billOpen && <OpdBillModal target={{ visit: visitId }} onClose={() => setBillOpen(false)} />}
       <div className="workspace-main">
         <Card className="visit-head" size="small">
           <div className="visit-head-row">
@@ -385,6 +388,11 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
                   </Tooltip>
                   <Button size="small" icon={<SaveOutlined />} onClick={() => save()}>{t('common.save')}</Button>
                 </>
+              )}
+              {(can('billing.charge') || can('billing.create')) && (
+                <Tooltip title={t('consult.billHelp')}>
+                  <Button size="small" onClick={() => setBillOpen(true)}>₹ {t('opd.visitBill')}</Button>
+                </Tooltip>
               )}
               {!readOnly && visit.status !== 'completed' && (
                 <Button size="small" type="primary" icon={<CheckCircleOutlined />} onClick={complete}>{t('consult.complete')}</Button>

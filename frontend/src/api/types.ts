@@ -378,6 +378,8 @@ export interface Appointment {
   reschedule_count: number;
   created_at: string;
   notification?: PatientNotification;
+  /** Short OPD bill status (staff who may see bills) */
+  opd_bill?: OpdBillSummary | null;
 }
 
 export interface Slot {
@@ -405,6 +407,7 @@ export interface QueueItem {
   patient_detail: AppointmentPatient;
   display_name: string;
   reason: string;
+  opd_bill?: OpdBillSummary | null;
 }
 
 export interface QueueGroup {
@@ -1021,6 +1024,14 @@ export interface ConsultationFeeRow {
   follow_up_fee: string | null;
   follow_up_days: number;
   is_set: boolean;
+}
+
+export interface OpdBillSummary {
+  id: string;
+  number: string;
+  status: InvoiceStatus;
+  total: string;
+  balance: string;
 }
 
 export type VisitKind = 'new' | 'follow_up';
