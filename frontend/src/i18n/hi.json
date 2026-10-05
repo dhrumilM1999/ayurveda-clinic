@@ -1146,6 +1146,9 @@
       "refunded": "वापस"
     },
     "print": "प्रिंट",
+    "preview": "बिल प्रीव्यू",
+    "viewPrint": "देखें / प्रिंट",
+    "download": "डाउनलोड",
     "anyDate": "कोई भी तारीख",
     "billNo": "बिल नं.",
     "billTitle": "बिल {{number}}",

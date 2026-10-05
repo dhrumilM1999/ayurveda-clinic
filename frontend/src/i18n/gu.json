@@ -1146,6 +1146,9 @@
       "refunded": "પરત"
     },
     "print": "છાપો",
+    "preview": "બિલ પ્રિવ્યૂ",
+    "viewPrint": "જુઓ / પ્રિન્ટ",
+    "download": "ડાઉનલોડ",
     "anyDate": "કોઈપણ તારીખ",
     "billNo": "બિલ નં.",
     "billTitle": "બિલ {{number}}",

@@ -1771,3 +1771,9 @@ body {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* Bill preview popup: the PDF is shown inside the screen */
+.bill-preview-modal .ant-modal-body { padding-top: 4px; }
+.bill-preview-frame { position: relative; height: min(70vh, 760px); border: 1px solid var(--clinic-border, #e5e1d8); border-radius: 8px; overflow: hidden; background: #f4f2ee; }
+.bill-preview-frame iframe { width: 100%; height: 100%; border: 0; display: block; }
+.bill-preview-spin { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }

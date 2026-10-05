@@ -1,10 +1,10 @@
 // Pieces shared by the pharmacy and billing screens.
-import { BarcodeOutlined, DownOutlined, PrinterOutlined } from '@ant-design/icons';
-import { App, Button, Dropdown, Input, Select, Spin, Tag } from 'antd';
+import { BarcodeOutlined } from '@ant-design/icons';
+import { Input, Select, Spin, Tag } from 'antd';
 import dayjs from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { api, errorMessage } from '../../api/client';
+import { api } from '../../api/client';
 import type { DispenseStatus, InvoiceStatus, Medicine, Page } from '../../api/types';
 
 /** "12-2027" (expiry is printed as month-year) */
@@ -56,44 +56,8 @@ export function ScanInput({ onScan, placeholder, autoFocus, width = 240 }: {
   );
 }
 
-/** Opens a PDF from the API in a new tab (the PDF needs the login, so it is fetched first). */
-export async function openPdf(url: string, onError: (msg: string) => void, fallback: string) {
-  const tab = window.open('', '_blank');
-  try {
-    const { data } = await api.get(url, { responseType: 'blob' });
-    const blobUrl = URL.createObjectURL(data);
-    if (tab) tab.location.href = blobUrl;
-    else window.location.href = blobUrl;
-    window.setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
-  } catch (err) {
-    tab?.close();
-    onError(errorMessage(err, fallback));
-  }
-}
-
-/** "Print" button with paper sizes. kind: invoices | credit-notes */
-export function PrintButton({ id, kind = 'invoices', size = 'small', type }: {
-  id: string;
-  kind?: 'invoices' | 'credit-notes';
-  size?: 'small' | 'middle';
-  type?: 'primary' | 'default';
-}) {
-  const { t } = useTranslation();
-  const { message } = App.useApp();
-  const print = (paper: string) => openPdf(`/${kind}/${id}/pdf/?size=${paper}`, (m) => message.error(m), t('common.loadFailed'));
-  return (
-    <Dropdown trigger={['click']} menu={{
-      items: [
-        { key: 'a4', label: t('billing.paper.a4') },
-        { key: 'a5', label: t('billing.paper.a5') },
-        { key: '80mm', label: t('billing.paper.thermal') },
-      ],
-      onClick: ({ key }) => print(key),
-    }}>
-      <Button size={size} type={type} icon={<PrinterOutlined />}>{t('billing.print')} <DownOutlined /></Button>
-    </Dropdown>
-  );
-}
+// The bill print button now opens a preview popup on the same screen (components/BillPreview.tsx)
+export { PrintButton } from '../../components/BillPreview';
 
 /** Search the medicine list by any name, synonym or barcode. */
 export function MedicinePicker({ value, label, onPick, size = 'small', placeholder }: {

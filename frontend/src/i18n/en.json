@@ -1146,6 +1146,9 @@
       "refunded": "refunded"
     },
     "print": "Print",
+    "preview": "Bill preview",
+    "viewPrint": "View / print",
+    "download": "Download",
     "anyDate": "Any date",
     "billNo": "Bill no.",
     "billTitle": "Bill {{number}}",
