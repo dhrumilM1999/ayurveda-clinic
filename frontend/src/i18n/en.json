@@ -69,7 +69,8 @@
     "medicines": "Medicines",
     "pharmacy": "Pharmacy",
     "additional": "Additional settings",
-    "fees": "Fees & services"
+    "fees": "Fees & services",
+    "billing": "Billing"
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",
@@ -1158,6 +1159,7 @@
     "billTitle": "Bill {{number}}",
     "cancelBill": "Cancel bill",
     "cancelHelp": "Makes a credit note; medicines go back to stock. The bill is kept.",
+    "cancelHelpNoMedicine": "Makes a credit note (money returned if paid). The bill is kept.",
     "cancelConfirmHelp": "A credit note is made for the whole bill. Money paid is refunded.",
     "cancelled": "Bill cancelled",
     "cancelledBecause": "Cancelled: {{reason}}",
@@ -1187,7 +1189,18 @@
     "upiHelp": "After the patient pays, click Take payment -> UPI.",
     "searchPlaceholder": "Bill no., patient name or ID",
     "takePayment": "Take payment",
-    "taxable": "Taxable value"
+    "taxable": "Taxable value",
+    "title": "Billing",
+    "subtitle": "OPD and pharmacy bills, payments, refunds and the day closing",
+    "newOpdBill": "New OPD bill",
+    "newOpdBillHelp": "For a patient without an appointment today, e.g. only a dressing or a certificate. Patients with an appointment are billed from Appointments or the Queue.",
+    "doctorOptional": "Choose the doctor to add the consultation fee",
+    "kind": "Bill type",
+    "kinds": {
+      "all": "All bills",
+      "OP": "OPD",
+      "PH": "Pharmacy"
+    }
   },
   "additional": {
     "title": "Additional settings",

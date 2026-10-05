@@ -35,12 +35,12 @@ export function UpiPayment({ invoiceId }: { invoiceId: string }) {
   );
 }
 
-function SummaryCards({ day }: { day: Dayjs }) {
+function SummaryCards({ day, series }: { day: Dayjs; series?: string }) {
   const { t } = useTranslation();
   const [s, setS] = useState<DaySummary | null>(null);
   useEffect(() => {
-    api.get<DaySummary>('/invoices/summary/', { params: { date: day.format('YYYY-MM-DD') } }).then(({ data }) => setS(data)).catch(() => setS(null));
-  }, [day]);
+    api.get<DaySummary>('/invoices/summary/', { params: { date: day.format('YYYY-MM-DD'), series } }).then(({ data }) => setS(data)).catch(() => setS(null));
+  }, [day, series]);
   if (!s) return null;
   const tiles = [
     { label: t('billing.summary.bills'), value: `${s.invoice_count}`, sub: money(s.billed) },
@@ -63,8 +63,12 @@ function SummaryCards({ day }: { day: Dayjs }) {
   );
 }
 
-export function BillsTab() {
+type Series = 'PH' | 'OP' | 'all';
+
+/** Bills of one day with the day closing. series: PH (pharmacy tab), OP, or all with a filter (Billing screen). */
+export function BillsTab({ series: fixed = 'PH', seriesFilter = false, version: outside = 0 }: { series?: Series; seriesFilter?: boolean; version?: number }) {
   const { t } = useTranslation();
+  const [series, setSeries] = useState<Series>(fixed);
   const [day, setDay] = useState<Dayjs>(dayjs());
   const [status, setStatus] = useState<'all' | InvoiceStatus>('all');
   const [search, setSearch] = useState('');
@@ -78,15 +82,15 @@ export function BillsTab() {
     setLoading(true);
     try {
       const { data } = await api.get<Page<InvoiceRecord>>('/invoices/', {
-        params: { series: 'PH', page_size: 200, ...(query ? { q: query } : { date: day.format('YYYY-MM-DD') }),
+        params: { series: series === 'all' ? undefined : series, page_size: 200, ...(query ? { q: query } : { date: day.format('YYYY-MM-DD') }),
           ...(status === 'all' ? {} : { status }) },
       });
       setRows(data.results);
     } finally {
       setLoading(false);
     }
-  }, [day, status, query]);
-  useEffect(() => { load(); }, [load, version]);
+  }, [day, status, query, series]);
+  useEffect(() => { load(); }, [load, version, outside]);
 
   return (
     <>
@@ -96,6 +100,14 @@ export function BillsTab() {
           <DatePicker value={day} onChange={(d) => d && setDay(d)} format="ddd, DD-MM-YYYY" allowClear={false} style={{ width: 170 }} />
           <Button icon={<RightOutlined />} onClick={() => setDay(day.add(1, 'day'))} aria-label={t('appointments.nextDay')} />
         </Space.Compact>
+        {seriesFilter && (
+          <Segmented value={series} onChange={(v) => setSeries(v as Series)}
+            options={[
+              { value: 'all', label: t('billing.kinds.all') },
+              { value: 'OP', label: t('billing.kinds.OP') },
+              { value: 'PH', label: t('billing.kinds.PH') },
+            ]} />
+        )}
         <Segmented value={status} onChange={(v) => setStatus(v as typeof status)}
           options={(['all', 'unpaid', 'partly_paid', 'paid', 'cancelled'] as const).map((k) => ({
             value: k, label: k === 'all' ? t('appointments.filters.all') : t(`billing.status.${k}`),
@@ -104,7 +116,7 @@ export function BillsTab() {
           onChange={(e) => { setSearch(e.target.value); if (!e.target.value) setQuery(''); }} onSearch={(v) => setQuery(v.trim())} />
         <Button icon={<ReloadOutlined />} onClick={() => setVersion((v) => v + 1)} aria-label={t('appointments.refresh')} />
       </div>
-      {!query && <SummaryCards key={`${day.format()}-${version}`} day={day} />}
+      {!query && <SummaryCards key={`${day.format()}-${version}-${outside}`} day={day} series={series === 'all' ? undefined : series} />}
       <Table<InvoiceRecord>
         rowKey="id"
         loading={loading}
@@ -114,6 +126,10 @@ export function BillsTab() {
         onRow={(r) => ({ onClick: () => setOpen(r.id), style: { cursor: 'pointer' } })}
         columns={[
           { title: t('billing.billNo'), dataIndex: 'number', render: (v: string) => <b className="mono">{v}</b> },
+          ...(seriesFilter ? [{
+            title: t('billing.kind'), dataIndex: 'series', width: 110,
+            render: (v: string) => <Tag color={v === 'OP' ? 'blue' : 'purple'} className="tag-tight">{t(`billing.kinds.${v}`)}</Tag>,
+          }] : []),
           { title: t('appointments.date'), dataIndex: 'invoice_date', width: 110, render: (d: string) => dayjs(d).format('DD-MM-YYYY') },
           {
             title: t('appointments.patient'), key: 'p',
@@ -240,7 +256,7 @@ export function InvoiceDrawer({ id, onClose }: { id: string; onClose: (changed: 
           {can('billing.refund') && inv.status !== 'cancelled' && (
             <div style={{ marginTop: 16 }}>
               <Button danger onClick={() => setCancelOpen(true)}>{t('billing.cancelBill')}</Button>
-              <div className="cell-sub" style={{ marginTop: 4 }}>{t('billing.cancelHelp')}</div>
+              <div className="cell-sub" style={{ marginTop: 4 }}>{inv.lines?.some((l) => l.kind === 'medicine') ? t('billing.cancelHelp') : t('billing.cancelHelpNoMedicine')}</div>
             </div>
           )}
         </>
