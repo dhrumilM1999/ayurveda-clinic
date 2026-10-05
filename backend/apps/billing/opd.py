@@ -135,3 +135,13 @@ def add_medicines_to_opd(branch, user, *, prescription, lines: list[dict]) -> In
     visit = prescription.visit
     return charge_opd(branch, user, patient=prescription.patient, doctor=prescription.doctor, lines=lines,
                       visit=visit, appointment=visit.appointment if visit else None)
+
+
+def opd_bill_summary(appointment) -> dict | None:
+    """Short status of an appointment's OPD bill, for appointment and queue lists."""
+    invoice = (Invoice.objects.filter(Q(appointment=appointment) | Q(visit__appointment=appointment), series="OP")
+               .exclude(status="cancelled").order_by("created_at").first())
+    if invoice is None:
+        return None
+    return {"id": str(invoice.id), "number": invoice.number, "status": invoice.status,
+            "total": str(invoice.total_amount), "balance": str(invoice.balance)}

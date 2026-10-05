@@ -25,6 +25,8 @@ def patient_summary(patient) -> dict:
 
 class AppointmentSerializer(serializers.ModelSerializer):
     patient_detail = serializers.SerializerMethodField()
+    # Short OPD bill status (only for staff who may see or make bills)
+    opd_bill = serializers.SerializerMethodField()
     doctor_name = serializers.CharField(source="doctor.full_name", read_only=True)
     branch_name = serializers.CharField(source="branch.name", read_only=True)
 
@@ -34,7 +36,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
             "id", "patient", "patient_detail", "doctor", "doctor_name", "branch", "branch_name",
             "date", "start_time", "end_time", "kind", "status", "token_number", "reason", "notes",
             "checked_in_at", "consultation_started_at", "completed_at", "cancelled_at", "cancel_reason",
-            "reschedule_count", "created_at",
+            "reschedule_count", "created_at", "opd_bill",
         ]
         read_only_fields = [
             "id", "branch", "end_time", "status", "token_number", "checked_in_at",
@@ -45,6 +47,22 @@ class AppointmentSerializer(serializers.ModelSerializer):
 
     def get_patient_detail(self, obj):
         return patient_summary(obj.patient)
+
+    def _can_see_bills(self) -> bool:
+        if "can_see_bills" not in self.context:
+            from apps.accounts.services import user_has_perm
+
+            request, branch = self.context.get("request"), self.context.get("branch")
+            self.context["can_see_bills"] = bool(request and branch and any(
+                user_has_perm(request.user, code, branch) for code in ("billing.view", "billing.charge")))
+        return self.context["can_see_bills"]
+
+    def get_opd_bill(self, obj):
+        if not obj.pk or not self._can_see_bills():
+            return None
+        from apps.billing.opd import opd_bill_summary
+
+        return opd_bill_summary(obj)
 
     def validate_patient(self, value):
         if value.organization_id != self.context["request"].user.organization_id:

@@ -167,3 +167,14 @@ def roles_admin(org):
     from apps.accounts.models import Role
 
     return Role.objects.get(organization=org, code="admin")
+
+
+@pytest.mark.django_db
+def test_appointment_rows_show_opd_bill_status(org, roles, branch_a, receptionist, appointment):
+    client = client_for(receptionist, branch_a)
+    client.post("/api/v1/opd-bills/charge/", {"appointment": str(appointment.id), "lines": [consultation_line(300)],
+                                              "payment": {"mode": "cash", "amount": "100"}}, format="json")
+    row = client.get(f"/api/v1/appointments/{appointment.id}/").data
+    assert row["opd_bill"]["status"] == "partly_paid" and row["opd_bill"]["balance"] == "200.00"
+    therapist = make_user(org, "ther2", {branch_a: roles["therapist"]})
+    assert client_for(therapist, branch_a).get(f"/api/v1/appointments/{appointment.id}/").data["opd_bill"] is None
