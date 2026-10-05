@@ -46,12 +46,27 @@ The clinic name printed on documents and bills is set on the **Settings** screen
 
 Check: in VS Code's terminal run `cd frontend` then `npm run check:i18n`. It tells you if a key is missing.
 
+## Change consultation fees and the services list
+
+**Fees & services** (left menu, admin):
+- Consultation fees: type the *New case* fee, the *Follow-up* fee and *Follow-up valid for (days)* for each doctor
+  -> **Save** on that row. Put 0 for a free follow-up.
+- Services & charges: **Add service** (name in English / Gujarati / Hindi, category, price, GST %, SAC). The
+  categories come from the dropdown list "Service category" (Settings -> dropdown lists). Switch a service off
+  instead of deleting it. *Price in <branch>* = that branch's own price.
+
+## One bill or separate bills for medicines
+
+**Additional settings -> Billing -> Medicines on the OPD bill (one combined bill)**. Off = pharmacy bill and OPD
+bill are separate (default); on = the pharmacy adds medicines to the visit's OPD bill. Ask your CA which is right.
+
 ## Edit a print template
 
 Print templates live in `backend/templates/documents/`. They are HTML files (like a web page).
 
-- **Pharmacy bill and credit note**: `invoice.html`. You can change the wording (for example the line
-  "Please check medicines...", "TAX INVOICE"), the colours in the `<style>` part, and the font sizes.
+- **OPD bill, pharmacy bill and credit note**: `invoice.html`. You can change the wording (for example
+  "OPD BILL (Out-patient)", "BILL OF SUPPLY", "TAX INVOICE", "Thank you...", "Please check medicines..."),
+  the colours in the `<style>` part, and the font sizes.
 - Keep everything inside `{{ ... }}` and `{% ... %}` as it is - those put in the real data.
 - The clinic name, address, GSTIN, drug licence and UPI ID come from **Settings -> Branch details**, not from the file.
 - Save the file, then print a bill again to see the change (no restart needed).

@@ -127,6 +127,20 @@ No real SMS is sent yet. You can find the code in two places:
 8. In **Previous check-ups** open an old visit -> **Repeat these medicines**.
 9. **Complete visit**: the prescription becomes *final* (ready for the pharmacy).
 
+### Step 6 check (OPD billing)
+
+1. Log in as `admin` -> **Fees & services**: check the fees of the sample doctors (made up: Rs 300 new case,
+   Rs 150 follow-up within 15 days) and the SAMPLE services. Change them to your real fees.
+2. **Appointments** -> **Check in** a patient -> in the token message click **Next: OPD bill**. The consultation fee
+   is filled (*New case* or *Follow-up*). Choose Cash -> **Create OPD bill** -> **Yes**. The bill opens on the screen:
+   try A4 / A5 / Thermal 80 mm and **Print**.
+3. The appointment row now shows **Rs Paid**. Open the check-up (row menu -> Open check-up) -> **Rs OPD bill** ->
+   add a service (e.g. Agnikarma) -> *Pay later* -> **Add to bill**. The row shows **Due Rs 500**.
+4. **Billing** -> click the bill -> **Take payment**. Try **Cancel bill** on a test bill: a credit note is made.
+5. **Dashboard**: see Waiting / With doctor / Seen, new cases vs follow-ups and today's collection.
+   Log in as `doctor1` to see *My OPD today* and *Next patients*.
+6. Optional: **Additional settings -> Billing -> Medicines on the OPD bill** to give one combined bill.
+
 ### Pharmacy and billing check
 
 0. Log in as `admin` -> **Additional settings** -> switch on the extras you want to try (or **Turn all on**).

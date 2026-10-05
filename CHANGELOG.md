@@ -2,6 +2,40 @@
 
 What changed in each step, in plain words.
 
+## Step 6: OPD billing, bill preview, OPD dashboard (2026-10-05)
+
+**OPD bill (out-patient)**
+- **Fees & services** (menu, admin): each doctor's *New case* fee, *Follow-up* fee and how many days a follow-up
+  counts (e.g. 15). A **Services & charges** list (procedures, Panchakarma, tests, certificates) with prices,
+  GST % (usually 0 - ask your CA), SAC code and a branch's own price. 8 SAMPLE services with made-up prices.
+- **At check-in**: after the token message, *Next: OPD bill* opens the bill with the right fee already filled
+  (New case or Follow-up, from the patient's last visit to that doctor). Take cash / UPI / card or *Pay later*.
+- **After the check-up**: the doctor clicks **Rs OPD bill** on the check-up screen and adds procedures or other
+  charges to the **same** OPD bill. Doctors only add charges; reception collects the money.
+- The **Appointments** list and the **Queue** show each patient's bill: *Bill* / *Paid* / *Due Rs*.
+- **Billing** (menu): all OPD and pharmacy bills of the day with a filter, payments, cancel (credit note) and the
+  day closing. *New OPD bill* for a patient without an appointment.
+- Bill numbers: `MAIN/OP/2026-27/00001` (OPD) and `MAIN/PH/...` (pharmacy), new series each April.
+- A bill with only GST-free items prints as **BILL OF SUPPLY**, with GST as **TAX INVOICE** (confirm with your CA).
+  OPD bills say "OPD BILL (Out-patient)", the consultant and the token.
+
+**Medicines: separate or one combined bill** - your choice in **Additional settings -> Billing**:
+off = the pharmacy makes its own bill (default); on = medicines are added to the patient's OPD bill.
+
+**Confirm and preview on the same screen**
+- Every bill shows a **Please confirm** box (what will be billed and what money is received) before saving.
+- Bills open in a **preview popup** on the same screen (no new browser tab): paper A4 / A5 / thermal 80 mm,
+  Download, Print. Looking at the preview is not counted as a print.
+
+**Dashboard in OPD words**: *My OPD today* for doctors (Waiting, With me now, Seen, Total, Next patients),
+*Clinic OPD today* for the front desk, new cases vs follow-ups, and today's OPD / pharmacy collection and
+what is still to collect.
+
+**IPD** (admitted patients, beds, discharge) is not built - it is kept for a later step; bills already have an
+OPD/IPD type so it can be added without changing old bills.
+
+Built on the Git branch `feature/opd-billing` in small steps (each can be undone on its own).
+
 ## Additional settings: optional extra features (2026-10-05)
 
 The pharmacy extras added today are now **optional**. A new menu item **Additional settings** (organization
