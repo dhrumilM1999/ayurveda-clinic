@@ -142,8 +142,11 @@ class InvoiceViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.
 
     @action(detail=False, methods=["get"])
     def summary(self, request):
-        """Daily closing for one day (default today)."""
-        data = day_summary(request.branch, _day(request.query_params.get("date"), timezone.localdate()))
+        """Daily closing for one day (default today). ?series=OP|PH for one kind of bill only."""
+        series = request.query_params.get("series") or None
+        if series not in (None, "OP", "PH"):
+            raise ValidationError({"series": "Choose OP or PH."})
+        data = day_summary(request.branch, _day(request.query_params.get("date"), timezone.localdate()), series)
 
         def text(value):  # money as "60.00" like everywhere else in the API
             if isinstance(value, dict):

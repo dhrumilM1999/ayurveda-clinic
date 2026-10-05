@@ -214,11 +214,16 @@ def create_credit_note(invoice: Invoice, user, *, items: list[tuple], reason: st
     return note
 
 
-def day_summary(branch, day: date_cls) -> dict:
-    """Daily closing: bills made, money received by mode, refunds by mode, cash in hand."""
+def day_summary(branch, day: date_cls, series: str | None = None) -> dict:
+    """Daily closing: bills made, money received by mode, refunds by mode, cash in hand.
+    series: "OP" (OPD) or "PH" (pharmacy) for one kind of bill only; None = all bills."""
     invoices = Invoice.objects.filter(branch=branch, invoice_date=day)
     payments = Payment.objects.filter(branch=branch, paid_at__date=day)
     notes = CreditNote.objects.filter(branch=branch, note_date=day)
+    if series:
+        invoices = invoices.filter(series=series)
+        payments = payments.filter(invoice__series=series)
+        notes = notes.filter(invoice__series=series)
     by_mode = {m: rupees(payments.filter(mode=m).aggregate(s=Sum("amount"))["s"] or 0) for m in ("cash", "upi", "card")}
     refunds = {m: rupees(notes.filter(refund_mode=m).aggregate(s=Sum("refund_amount"))["s"] or 0) for m in ("cash", "upi", "card")}
     agg = invoices.aggregate(count=Count("id"), total=Sum("total_amount"), taxable=Sum("taxable_amount"),

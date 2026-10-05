@@ -178,3 +178,13 @@ def test_appointment_rows_show_opd_bill_status(org, roles, branch_a, receptionis
     assert row["opd_bill"]["status"] == "partly_paid" and row["opd_bill"]["balance"] == "200.00"
     therapist = make_user(org, "ther2", {branch_a: roles["therapist"]})
     assert client_for(therapist, branch_a).get(f"/api/v1/appointments/{appointment.id}/").data["opd_bill"] is None
+
+
+@pytest.mark.django_db
+def test_day_summary_by_kind_of_bill(branch_a, receptionist, appointment):
+    client = client_for(receptionist, branch_a)
+    client.post("/api/v1/opd-bills/charge/", {"appointment": str(appointment.id), "lines": [consultation_line(300)],
+                                              "payment": {"mode": "cash", "amount": "300"}}, format="json")
+    assert client.get("/api/v1/invoices/summary/", {"series": "OP"}).data["received"]["cash"] == "300.00"
+    assert client.get("/api/v1/invoices/summary/", {"series": "PH"}).data["received"]["cash"] == "0.00"
+    assert client.get("/api/v1/invoices/summary/").data["invoice_count"] == 1
