@@ -68,7 +68,8 @@
     "templates": "Check-up templates",
     "medicines": "Medicines",
     "pharmacy": "Pharmacy",
-    "additional": "Additional settings"
+    "additional": "Additional settings",
+    "fees": "Fees & services"
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",
@@ -288,7 +289,9 @@
     "therapy_view": "See therapy sessions",
     "therapy_manage": "Schedule and record therapy sessions",
     "reports_view": "See reports",
-    "ai_use": "Use AI helpers"
+    "ai_use": "Use AI helpers",
+    "billing_charge": "Add consultation, services and charges to a patient's OPD bill",
+    "billing_manage": "Edit consultation fees and the services & charges list"
   },
   "patients": {
     "title": "Patients",
@@ -1250,5 +1253,32 @@
         "help": "Generic name, category, pack type and default selling price on the medicine form."
       }
     }
+  },
+  "fees": {
+    "title": "Fees & services",
+    "subtitle": "OPD consultation fee of each doctor, and the services & charges list for OPD bills",
+    "consultationTitle": "OPD consultation fees - {{branch}}",
+    "consultationHelp": "New case = first visit, or the last visit with this doctor was longer ago than the follow-up days. Follow-up = seen by this doctor within those days. Put 0 for a free follow-up.",
+    "newCase": "New case fee",
+    "followUp": "Follow-up fee",
+    "followUpDays": "Follow-up valid for",
+    "followUpDaysHelp": "A revisit within these days is charged the follow-up fee",
+    "days": "days",
+    "notSet": "Fee not set",
+    "enterBoth": "Enter both fees (0 is allowed).",
+    "noDoctors": "No doctors in this branch yet.",
+    "servicesTitle": "Services & charges",
+    "servicesHelp": "Procedures, Panchakarma, tests, certificates... that can be added to an OPD bill. Prices include GST. Health care services are usually GST-free - confirm with your CA.",
+    "addService": "Add service",
+    "editService": "Edit service",
+    "noServices": "No services yet. Add your procedures and charges.",
+    "service": "Service",
+    "serviceName": "Service name",
+    "category": "Category",
+    "price": "Price",
+    "branchPrice": "this branch's price",
+    "branchPriceLabel": "Price in {{branch}}",
+    "branchPriceHelp": "Empty = same as the price",
+    "gstHelp": "Usually 0"
   }
 }

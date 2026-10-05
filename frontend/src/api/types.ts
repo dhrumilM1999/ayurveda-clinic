@@ -965,7 +965,10 @@ export interface InvoicePayment {
 export interface InvoiceRecord {
   id: string;
   number: string;
+  /** OP = OPD bill, PH = pharmacy bill */
   series: string;
+  care_type?: 'OPD' | 'IPD' | 'PHARMACY';
+  doctor_name?: string;
   invoice_date: string;
   customer_name: string;
   patient_detail: AppointmentPatient | null;
@@ -989,6 +992,78 @@ export interface InvoiceRecord {
   payments?: InvoicePayment[];
   credit_notes?: CreditNoteRecord[];
   created_by_name?: string;
+  appointment?: string | null;
+  visit?: string | null;
+}
+
+// --- OPD billing ---------------------------------------------------------------------------------
+export interface ServiceCharge {
+  id: string;
+  name: string;
+  name_gu: string;
+  name_hi: string;
+  category: MasterRef | null;
+  price: string;
+  gst_rate: string;
+  sac_code: string;
+  is_active: boolean;
+  sort_order: number;
+  is_sample: boolean;
+  branch_price: string | null;
+  branch_active: boolean;
+  effective_price: string | null;
+}
+
+export interface ConsultationFeeRow {
+  doctor: string;
+  doctor_name: string;
+  new_case_fee: string | null;
+  follow_up_fee: string | null;
+  follow_up_days: number;
+  is_set: boolean;
+}
+
+export type VisitKind = 'new' | 'follow_up';
+
+export interface OpdSuggestion {
+  appointment: string | null;
+  visit: string | null;
+  patient_detail: AppointmentPatient;
+  doctor: string | null;
+  doctor_name: string;
+  consultation: {
+    visit_kind: VisitKind;
+    fee: string;
+    fee_set: boolean;
+    last_visit: string | null;
+    follow_up_days: number;
+    description: string;
+  } | null;
+  consultation_billed: boolean;
+  bill: InvoiceRecord | null;
+}
+
+export interface DashboardToday {
+  date: string;
+  is_doctor: boolean;
+  opd?: OpdCounts;
+  my_opd?: OpdCounts;
+  next_patients?: { appointment: string; token_number: number | null; patient: string; uhid: string; status: string; reason: string }[];
+  money?: { opd: string; pharmacy: string; total: string; due_today: string; unpaid_bills: number; bills_today: number };
+}
+
+export interface OpdCounts {
+  booked: number;
+  waiting: number;
+  with_doctor: number;
+  seen: number;
+  not_arrived: number;
+  no_show: number;
+  cancelled: number;
+  walk_ins: number;
+  new_cases: number;
+  follow_ups: number;
+  follow_ups_due: number;
 }
 
 export interface DaySummary {
