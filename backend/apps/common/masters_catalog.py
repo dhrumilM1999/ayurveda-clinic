@@ -30,6 +30,8 @@ CATEGORIES = {
     # Pharmacy
     "product_category": "Product category (pharmacy)",
     "pack_type": "Pack type (bottle, box, strip...)",
+    # Billing (OPD)
+    "service_category": "Service category (OPD bill)",
 }
 
 DEFAULT_VALUES = {
@@ -241,5 +243,15 @@ DEFAULT_VALUES = {
         ("packet", "Packet / pouch", "પેકેટ", "पैकेट"),
         ("tube", "Tube", "ટ્યુબ", "ट्यूब"),
         ("tin", "Tin / can", "ડબ્બો", "डिब्बा"),
+    ],
+
+    # --- Billing (OPD services and charges) ---
+    "service_category": [
+        ("procedure", "Procedure", "પ્રોસીજર", "प्रक्रिया"),
+        ("panchakarma", "Panchakarma therapy", "પંચકર્મ થેરાપી", "पंचकर्म थेरेपी"),
+        ("examination", "Examination / test", "તપાસ / ટેસ્ટ", "जाँच / टेस्ट"),
+        ("dressing", "Dressing", "ડ્રેસિંગ", "ड्रेसिंग"),
+        ("certificate", "Certificate / report", "પ્રમાણપત્ર / રિપોર્ટ", "प्रमाणपत्र / रिपोर्ट"),
+        ("other", "Other", "અન્ય", "अन्य"),
     ],
 }

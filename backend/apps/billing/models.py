@@ -7,7 +7,10 @@ Rules (CLAUDE.md section 9):
 - Prices are GST-INCLUSIVE (like MRP). The bill shows taxable value + CGST + SGST (same state).
 - Cancelling or returning creates a CREDIT NOTE. Invoices are never deleted or changed after payment.
 - Payment modes: cash, UPI, card.
+- OPD bill (series OP): consultation fee at check-in, services/charges added after the check-up, and (if the
+  clinic chose "one combined bill") medicines. care_type is ready for IPD later (admitted patients).
 """
+from django.conf import settings
 from django.db import models
 
 from apps.common.models import BranchScopedModel, OrgScopedModel
@@ -16,9 +19,14 @@ MONEY = {"max_digits": 12, "decimal_places": 2}
 QTY = {"max_digits": 12, "decimal_places": 3}
 RATE = {"max_digits": 5, "decimal_places": 2}
 
-SERIES = [("PH", "Pharmacy"), ("OP", "Clinic (consultation, therapy)")]
+SERIES = [("PH", "Pharmacy"), ("OP", "OPD (consultation, services)")]
+CARE_TYPES = [("OPD", "OPD (out-patient)"), ("IPD", "IPD (admitted) - later"), ("PHARMACY", "Pharmacy counter")]
 PAYMENT_MODES = [("cash", "Cash"), ("upi", "UPI"), ("card", "Card")]
-LINE_KINDS = [("medicine", "Medicine"), ("consultation", "Consultation"), ("therapy", "Therapy"), ("other", "Other")]
+LINE_KINDS = [("medicine", "Medicine"), ("consultation", "Consultation"), ("service", "Service / procedure"),
+              ("therapy", "Therapy"), ("other", "Other")]
+VISIT_KINDS = [("new", "New case (first visit)"), ("follow_up", "Follow-up")]
+# SAC code for health care services (printed on OPD bills). Confirm with your CA.
+HEALTHCARE_SAC = "999312"
 STATUSES = [("unpaid", "Not paid"), ("partly_paid", "Partly paid"), ("paid", "Paid"), ("cancelled", "Cancelled")]
 
 
@@ -39,8 +47,14 @@ class DocumentSequence(models.Model):
 class Invoice(BranchScopedModel):
     number = models.CharField(max_length=40)
     series = models.CharField(max_length=10, choices=SERIES, default="PH")
+    care_type = models.CharField(max_length=10, choices=CARE_TYPES, default="PHARMACY", db_index=True)
     financial_year = models.CharField(max_length=7)
     invoice_date = models.DateField(db_index=True)
+    doctor = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT,
+                               related_name="+")
+    appointment = models.ForeignKey("appointments.Appointment", null=True, blank=True, on_delete=models.PROTECT,
+                                    related_name="invoices")
+    visit = models.ForeignKey("emr.Visit", null=True, blank=True, on_delete=models.PROTECT, related_name="invoices")
     patient = models.ForeignKey("patients.Patient", null=True, blank=True, on_delete=models.PROTECT, related_name="invoices")
     prescription = models.ForeignKey("prescriptions.Prescription", null=True, blank=True, on_delete=models.PROTECT,
                                      related_name="invoices")
@@ -89,6 +103,7 @@ class InvoiceLine(OrgScopedModel):
     description = models.CharField(max_length=250)
     medicine = models.ForeignKey("medicines.Medicine", null=True, blank=True, on_delete=models.PROTECT, related_name="+")
     batch = models.ForeignKey("pharmacy.StockBatch", null=True, blank=True, on_delete=models.PROTECT, related_name="+")
+    service = models.ForeignKey("billing.ServiceCharge", null=True, blank=True, on_delete=models.PROTECT, related_name="+")
     dispense_item = models.ForeignKey("pharmacy.DispenseItem", null=True, blank=True, on_delete=models.PROTECT,
                                       related_name="invoice_lines")
     batch_no = models.CharField(max_length=60, blank=True)
@@ -157,3 +172,63 @@ class CreditNoteLine(OrgScopedModel):
     sgst_amount = models.DecimalField(default=0, **MONEY)
     total_amount = models.DecimalField(**MONEY)
 
+
+
+class ServiceCharge(OrgScopedModel):
+    """
+    The "Services & charges" list for OPD bills (procedures, Panchakarma, certificates...). Organization-wide;
+    a branch can change the price or switch one off (BranchServicePrice).
+    """
+
+    name = models.CharField(max_length=150)
+    name_gu = models.CharField("Name (Gujarati)", max_length=150, blank=True)
+    name_hi = models.CharField("Name (Hindi)", max_length=150, blank=True)
+    category = models.ForeignKey("common.MasterValue", null=True, blank=True, on_delete=models.PROTECT, related_name="+")
+    price = models.DecimalField(**MONEY)  # including GST, like MRP
+    gst_rate = models.DecimalField(default=0, **RATE)  # health care services are usually exempt (0) - ask your CA
+    sac_code = models.CharField("SAC code", max_length=10, blank=True, default=HEALTHCARE_SAC)
+    is_active = models.BooleanField(default=True)
+    sort_order = models.PositiveSmallIntegerField(default=0)
+    is_sample = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["sort_order", "name"]
+        constraints = [
+            models.UniqueConstraint(fields=["organization", "name"], condition=models.Q(is_deleted=False),
+                                    name="uniq_service_name_per_org"),
+        ]
+
+    def __str__(self):
+        return self.name
+
+
+class BranchServicePrice(BranchScopedModel):
+    """A branch's own price for a service, or the service switched off in that branch."""
+
+    service = models.ForeignKey(ServiceCharge, on_delete=models.CASCADE, related_name="branch_prices")
+    price = models.DecimalField(null=True, blank=True, **MONEY)  # empty = organization price
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["branch", "service"], condition=models.Q(is_deleted=False),
+                                    name="uniq_service_price_per_branch"),
+        ]
+
+
+class ConsultationFee(BranchScopedModel):
+    """
+    A doctor's OPD consultation fee in one branch.
+    Follow-up fee applies when the patient saw this doctor within `follow_up_days`; otherwise the new-case fee.
+    """
+
+    doctor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="consultation_fees")
+    new_case_fee = models.DecimalField(default=0, **MONEY)
+    follow_up_fee = models.DecimalField(default=0, **MONEY)
+    follow_up_days = models.PositiveSmallIntegerField(default=15)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["branch", "doctor"], condition=models.Q(is_deleted=False),
+                                    name="uniq_consultation_fee_per_doctor"),
+        ]
