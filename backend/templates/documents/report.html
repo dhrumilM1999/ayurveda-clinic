@@ -1,0 +1,53 @@
+{% comment %}
+SAFE TO EDIT: the look of the Reports PDF (collection, income, patients, follow-ups, GST).
+- Colours, font sizes and margins are in the <style> part.
+- The figures come from backend/apps/reports/reports.py (ASK FIRST there).
+Keep everything inside {{ }} and {% %}.
+{% endcomment %}<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: {{ page_size }}; margin: 10mm; @bottom-right { content: "Page " counter(page) " of " counter(pages); font-size: 8pt; color: #777; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Noto Sans", "Noto Sans Gujarati", "Noto Sans Devanagari", sans-serif; font-size: 9pt; color: #1d1d1d; }
+  .head { border-bottom: 0.6mm solid #1f5c46; padding-bottom: 2mm; margin-bottom: 3mm; display: flex; justify-content: space-between; align-items: flex-end; }
+  .org { font-size: 14pt; font-weight: 700; color: #1f5c46; }
+  .title { font-size: 12pt; font-weight: 700; margin-top: 1mm; }
+  .muted { color: #5c5c5c; font-size: 8pt; }
+  table { width: 100%; border-collapse: collapse; }
+  thead { display: table-header-group; }
+  th { background: #eef3f0; text-align: left; font-size: 8pt; padding: 1.2mm; }
+  td { padding: 1.1mm 1.2mm; border-bottom: 0.2mm solid #e2e2e2; }
+  .num { text-align: right; white-space: nowrap; }
+  tr.total td { font-weight: 700; border-top: 0.4mm solid #1f5c46; border-bottom: none; }
+  .empty { text-align: center; color: #777; padding: 8mm; }
+  .notes { margin-top: 4mm; font-size: 8pt; color: #5c5c5c; }
+</style>
+</head>
+<body>
+<div class="head">
+  <div>
+    <div class="org">{{ organization.name }}</div>
+    <div class="title">{{ title }}</div>
+    <div class="muted">{{ subtitle }}</div>
+  </div>
+  <div class="muted">Printed {{ printed_at }}</div>
+</div>
+
+<table>
+  <thead><tr>{% for c in columns %}<th{% if c.number %} class="num"{% endif %}>{{ c.label }}</th>{% endfor %}</tr></thead>
+  <tbody>
+  {% for row in rows %}
+    <tr>{% for cell in row %}<td{% if cell.number %} class="num"{% endif %}>{{ cell.text }}</td>{% endfor %}</tr>
+  {% empty %}
+    <tr><td class="empty" colspan="{{ columns|length }}">Nothing in these dates.</td></tr>
+  {% endfor %}
+  {% if totals %}
+    <tr class="total">{% for cell in totals %}<td{% if cell.number %} class="num"{% endif %}>{{ cell.text }}</td>{% endfor %}</tr>
+  {% endif %}
+  </tbody>
+</table>
+{% if notes %}<div class="notes">{{ notes }}</div>{% endif %}
+</body>
+</html>
