@@ -120,6 +120,16 @@ export interface FeatureFlag {
   enabled: boolean;
 }
 
+/** An additional setting that is a choice, e.g. the default medicine label format. */
+export interface AdditionalChoice {
+  code: string;
+  group: string;
+  label: string;
+  options: string[];
+  requires: string;
+  value: string;
+}
+
 /** An optional extra feature, switched on/off for the whole organization (Additional settings). */
 export interface AdditionalFeature {
   code: string;
