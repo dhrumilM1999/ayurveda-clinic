@@ -68,3 +68,32 @@ def test_sale_return_without_bills(org, pharmacist, branch_a, meds, final_rx):
     assert res.status_code == 201, res.data
     assert res.data["credit_note"] is None  # no bill, so no credit note
     assert StockBatch.objects.get(batch_no="B1").quantity == 4
+
+
+@pytest.mark.django_db
+def test_without_batch_tracking_an_automatic_batch_is_used(org, pharmacist, branch_a, meds):
+    client = client_for(pharmacist, branch_a)
+    item = {"medicine": str(meds["Triphala Churna"].id), "quantity": "3", "mrp": "90", "expiry_date": LATER}
+    res = client.post("/api/v1/purchases/", {"invoice_date": str(TODAY), "items": [item]}, format="json")
+    assert res.status_code == 400  # batch tracking is on by default: the batch number is needed
+    set_additional_features(org, on=False, codes=["pharmacy_batch_tracking"])
+    assert client.post("/api/v1/purchases/", {"invoice_date": str(TODAY), "items": [item, item]}, format="json").status_code == 201
+    batch = StockBatch.objects.get()
+    assert batch.batch_no.startswith("EXP-") and batch.quantity == 6  # same expiry month -> one batch
+
+
+@pytest.mark.django_db
+def test_mrp_needed_only_while_prices_are_on(org, pharmacist, branch_a, meds):
+    client = client_for(pharmacist, branch_a)
+    item = {"medicine": str(meds["Triphala Churna"].id), "batch_no": "B9", "quantity": "1", "expiry_date": LATER}
+    assert client.post("/api/v1/purchases/", {"invoice_date": str(TODAY), "items": [item]}, format="json").status_code == 400
+    set_additional_features(org, on=False, codes=["pharmacy_selling_price"])
+    assert client.post("/api/v1/purchases/", {"invoice_date": str(TODAY), "items": [item]}, format="json").status_code == 201
+
+
+@pytest.mark.django_db
+def test_supplier_management_switch(org, pharmacist, branch_a):
+    client = client_for(pharmacist, branch_a)
+    assert client.get("/api/v1/suppliers/").status_code == 200
+    set_additional_features(org, on=False, codes=["pharmacy_suppliers"])
+    assert client.get("/api/v1/suppliers/").status_code == 403

@@ -101,7 +101,8 @@ class PurchaseSerializer(serializers.ModelSerializer):
 
 class PurchaseLineInput(serializers.Serializer):
     medicine = serializers.UUIDField()
-    batch_no = serializers.CharField(max_length=60)
+    # Empty is allowed only when "Batch tracking" is off (the view then fills an automatic batch)
+    batch_no = serializers.CharField(max_length=60, required=False, allow_blank=True, default="")
     mfg_date = serializers.DateField(required=False, allow_null=True)
     expiry_date = serializers.DateField(required=False, allow_null=True)
     quantity = serializers.DecimalField(**POSITIVE)
@@ -111,7 +112,8 @@ class PurchaseLineInput(serializers.Serializer):
                                                 max_value=Decimal("100"), required=False, default=0)
     gst_rate = serializers.DecimalField(max_digits=5, decimal_places=2, min_value=Decimal("0"), max_value=Decimal("40"),
                                         required=False)
-    mrp = serializers.DecimalField(**MONEY)
+    # Needed while "Selling price / MRP" is on (checked in the view)
+    mrp = serializers.DecimalField(required=False, allow_null=True, default=None, **MONEY)
     selling_price = serializers.DecimalField(required=False, allow_null=True, **MONEY)
     barcode = serializers.CharField(max_length=64, required=False, allow_blank=True)
 
@@ -122,10 +124,7 @@ class PurchaseLineInput(serializers.Serializer):
         return super().to_internal_value(data)
 
     def validate_batch_no(self, value):
-        value = value.strip().upper()
-        if not value:
-            raise serializers.ValidationError("Please enter the batch number.")
-        return value
+        return (value or "").strip().upper()
 
 
 class PurchaseInput(serializers.Serializer):
