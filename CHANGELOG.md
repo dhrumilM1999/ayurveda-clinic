@@ -2,6 +2,27 @@
 
 What changed in each step, in plain words.
 
+## Step 7: print-outs - prescription, certificates, follow-up card, Prakriti report (2026-10-06)
+
+- **Print menu** on the check-up screen: Prescription (A5 or A4), Follow-up card (A6), Prakriti report,
+  Medical / fitness certificate, and **Share prescription on WhatsApp** (as text, only with the patient's
+  message consent). Unsaved changes are saved first; everything opens in a popup on the same screen with paper
+  size and language (the patient's language by default: English / Gujarati / Hindi).
+- **Letterhead** on every print-out: clinic logo and name, branch address and phone, doctor's qualification and
+  registration no., the doctor's **signature image** (Staff -> the doctor -> Signature) and a footer line
+  (Settings -> Branch details).
+- **Prescription**: today's vitals, complaints, diagnosis, medicines with Morning / Noon / Night boxes, days,
+  quantity, instructions, diet & lifestyle advice, next visit. Numbered MAIN/RX/2026-27/00001 at the first print.
+- **Certificates**: medical (rest from - to) or fitness (fit from); numbered MAIN/MC/...; never deleted, only
+  cancelled.
+- **QR code** on each print-out opens a public page "Is this document genuine?" (number, date, clinic, doctor,
+  patient initials - no medical details). Cancelled certificates show as cancelled.
+- **DUPLICATE COPY** from the second print; looking at the preview is not counted. Every view, print and share
+  is in the audit log.
+- Bills and receipts: thermal **58 mm** as well as 80 mm.
+- Not done yet: background jobs (Celery / Redis) - PDFs are made in under a second, so they are not needed yet;
+  they will come with SMS / WhatsApp reminders. Editing templates from the screen (they are files for now).
+
 ## Prescription speed-ups, follow-up days, medicine labels, stock switches (2026-10-06)
 
 **Faster prescription (check-up screen)**

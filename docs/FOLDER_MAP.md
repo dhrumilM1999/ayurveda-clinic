@@ -45,6 +45,8 @@
 | `backend/apps/billing/` | Bills (invoices), payments, credit notes, bill numbers, PDF printing, UPI link; `opd.py` = OPD bill rules (fees, new case / follow-up) | ASK FIRST |
 | `backend/apps/billing/sample_services.py` | The SAMPLE services & charges for a new clinic | **SAFE TO EDIT** |
 | `backend/apps/reports/` | Dashboard numbers in OPD words (`/dashboard/today/`) | ASK FIRST |
+| `backend/apps/documents/` | Print-outs (prescription, certificate, follow-up card, Prakriti report), QR "genuine?" check, WhatsApp share | ASK FIRST |
+| `backend/apps/documents/words.py` | Words on print-outs in EN/GU/HI and the Prakriti guidance | **SAFE TO EDIT** |
 | `backend/apps/prescriptions/safety.py` | **Prescription safety rules** (fixed rules, not AI) | ASK FIRST |
 | `backend/apps/emr/templates_catalog.py` | **Starting check-up templates**: Ashtavidha, Dashavidha, Agni & habits, Prakriti questions (EN/GU/HI) | **SAFE TO EDIT** |
 | `backend/apps/appointments/messages_catalog.py` | **SMS/WhatsApp text** for booking, change, cancel, token (EN/GU/HI) | **SAFE TO EDIT** |
@@ -66,6 +68,8 @@
 | `frontend/src/pages/consult/` | The check-up screen | ASK FIRST |
 | `frontend/src/pages/consult/VisitWorkspace.tsx` | Check-up autosave and undo: `AUTOSAVE_MS`, `RETRY_MS`, `UNDO_STEPS` at the top | **SAFE TO EDIT** (those lines) |
 | `frontend/src/pages/medicines/` | Medicines screen, import, version history | ASK FIRST |
+| `frontend/src/pages/consult/PrintMenu.tsx` | The Print menu and certificate form on the check-up screen | ASK FIRST |
+| `frontend/src/pages/VerifyPage.tsx` | Public "Is this document genuine?" page (QR code) | ASK FIRST |
 | `frontend/src/pages/billing/` | Billing screen and the OPD bill popup | ASK FIRST |
 | `frontend/src/pages/FeesServicesPage.tsx` | Fees & services screen | ASK FIRST |
 | `frontend/src/components/BillPreview.tsx` | PDF popup for bills and medicine labels (paper / format, print, download) | ASK FIRST |
