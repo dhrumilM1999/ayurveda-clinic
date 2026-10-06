@@ -1,4 +1,5 @@
-// Today's final prescriptions of this branch -> give medicines, make the bill, take payment, print.
+// Today's final prescriptions of this branch -> give medicines (and, when switched on in Additional settings:
+// make the bill, take payment, print, discounts, loose sale, barcode scan, rack location).
 import { CheckCircleFilled, EnvironmentOutlined, LeftOutlined, ReloadOutlined, RightOutlined } from '@ant-design/icons';
 import {
   Alert, App, Button, Checkbox, DatePicker, Input, InputNumber, Modal, Result, Segmented, Select, Space, Spin, Table,
@@ -103,12 +104,17 @@ export function DispenseTab() {
 }
 
 type Choice = { give: boolean; batch?: string; quantity: number; loose: boolean; units: number; discount: number };
-type Done = { invoice: string; number: string; total_amount: string; invoice_status: string };
+type Done = { invoice: string | null; number: string; total_amount: string; invoice_status: string };
 
 function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClose: (done: boolean) => void }) {
   const { t } = useTranslation();
   const { message } = App.useApp();
-  const { can } = useAuth();
+  const { can, hasFeature } = useAuth();
+  const billing = hasFeature('pharmacy_billing');
+  const discounts = hasFeature('pharmacy_discounts');
+  const looseSale = hasFeature('pharmacy_loose_sale');
+  const barcode = hasFeature('pharmacy_barcode');
+  const racks = hasFeature('pharmacy_racks');
   const [detail, setDetail] = useState<DispenseDetail | null>(null);
   const [choices, setChoices] = useState<Record<string, Choice>>({});
   const [payMode, setPayMode] = useState<PaymentMode | 'later'>('cash');
@@ -177,11 +183,11 @@ function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClos
         items: selected.map((l) => {
           const c = choices[l.id]!;
           return {
-            prescription_item: l.id, batch: c.batch, discount_percent: c.discount || 0,
-            ...(c.loose ? { loose_units: c.units } : { quantity: c.quantity }),
+            prescription_item: l.id, batch: c.batch, discount_percent: discounts ? c.discount || 0 : 0,
+            ...(looseSale && c.loose ? { loose_units: c.units } : { quantity: c.quantity }),
           };
         }),
-        payment: payMode === 'later' ? null : { mode: payMode, amount: payAmount ?? total, reference: payRef },
+        payment: !billing || payMode === 'later' ? null : { mode: payMode, amount: payAmount ?? total, reference: payRef },
       });
       setDone(data);
     } catch (err) {
@@ -191,7 +197,17 @@ function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClos
     }
   };
 
-  if (done) {
+  if (done && !done.invoice) {
+    return (
+      <Modal open width={520} title={t('pharmacy.dispense')} onCancel={() => onClose(true)}
+        footer={<Button type="primary" onClick={() => onClose(true)}>{t('common.close')}</Button>}>
+        <Result className="compact-result" icon={<CheckCircleFilled style={{ color: 'var(--clinic-primary)' }} />}
+          title={t('pharmacy.givenDone')} />
+      </Modal>
+    );
+  }
+
+  if (done && done.invoice) {
     return (
       <Modal open width={520} title={t('pharmacy.dispense')} onCancel={() => onClose(true)}
         footer={<Button type="primary" onClick={() => onClose(true)}>{t('common.close')}</Button>}>
@@ -215,9 +231,9 @@ function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClos
       footer={canSell ? (
         <div className="sell-footer">
           <div className="sell-pay">
-            <Segmented size="small" value={payMode} onChange={(v) => setPayMode(v as typeof payMode)}
-              options={(['cash', 'upi', 'card', 'later'] as const).map((m) => ({ value: m, label: t(`billing.modes.${m}`) }))} />
-            {payMode !== 'later' && (
+            {billing && <Segmented size="small" value={payMode} onChange={(v) => setPayMode(v as typeof payMode)}
+              options={(['cash', 'upi', 'card', 'later'] as const).map((m) => ({ value: m, label: t(`billing.modes.${m}`) }))} />}
+            {billing && payMode !== 'later' && (
               <>
                 <InputNumber size="small" min={0} max={total} prefix="₹" value={payAmount ?? total} style={{ width: 120 }}
                   onChange={(v) => setPayAmount(v)} />
@@ -229,10 +245,10 @@ function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClos
             )}
           </div>
           <Space>
-            <span className="total-text">{t('pharmacy.total')}: <b className="num">{money(total)}</b></span>
+            {billing && <span className="total-text">{t('pharmacy.total')}: <b className="num">{money(total)}</b></span>}
             <Button onClick={() => onClose(false)}>{t('common.cancel')}</Button>
             <Button type="primary" loading={saving} disabled={!selected.length} onClick={save}>
-              {t('pharmacy.giveAndBill', { count: selected.length })}
+              {billing ? t('pharmacy.giveAndBill', { count: selected.length }) : t('pharmacy.giveOnly', { count: selected.length })}
             </Button>
           </Space>
         </div>
@@ -241,18 +257,22 @@ function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClos
         <>
           <div className="section-toolbar">
             <span className="cell-sub">{detail.patient_detail.uhid} · {t('pharmacy.byDoctor', { name: detail.doctor_name })}</span>
-            {canSell && (
+            {canSell && (discounts || barcode) && (
               <Space size={8}>
-                <span className="cell-sub">{t('pharmacy.discountAll')}</span>
-                <InputNumber size="small" min={0} max={100} suffix="%" style={{ width: 90 }} onChange={(v) => allDiscount(Number(v ?? 0))} />
-                <ScanInput onScan={onScan} autoFocus />
+                {discounts && (
+                  <>
+                    <span className="cell-sub">{t('pharmacy.discountAll')}</span>
+                    <InputNumber size="small" min={0} max={100} suffix="%" style={{ width: 90 }} onChange={(v) => allDiscount(Number(v ?? 0))} />
+                  </>
+                )}
+                {barcode && <ScanInput onScan={onScan} autoFocus />}
               </Space>
             )}
           </div>
           {detail.allergies.length > 0 && (
             <Alert type="error" showIcon style={{ marginBottom: 12 }} message={<><b>{t('patients.allergyAlert')}:</b> {detail.allergies.join(', ')}</>} />
           )}
-          {detail.sales.length > 0 && (
+          {billing && detail.sales.some((s) => s.number) && (
             <div className="cell-sub" style={{ marginBottom: 8 }}>
               {t('pharmacy.earlierBills')}: {detail.sales.map((s) => s.number).filter(Boolean).join(', ')}
             </div>
@@ -276,7 +296,7 @@ function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClos
                 render: (_: unknown, l: DispenseLine) => (
                   <div style={{ lineHeight: 1.35 }}>
                     <b>{l.medicine_name}</b> <span className="cell-sub">{l.pack_size}</span>
-                    {l.location && <Tag icon={<EnvironmentOutlined />} color="geekblue" className="tag-tight">{l.location}</Tag>}
+                    {racks && l.location && <Tag icon={<EnvironmentOutlined />} color="geekblue" className="tag-tight">{l.location}</Tag>}
                     <div className="cell-sub">{rxText(l)}</div>
                     {l.instructions && <div className="cell-sub">{l.instructions}</div>}
                     {l.given && <Tag color="green" className="tag-tight" style={{ marginInlineStart: 0 }}>{t('pharmacy.alreadyGiven', { n: qty(l.given) })}</Tag>}
@@ -306,12 +326,12 @@ function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClos
                   const disabled = !canSell || !c.give;
                   return (
                     <Space size={4}>
-                      {l.allow_loose && (
+                      {looseSale && l.allow_loose && (
                         <Segmented size="small" value={c.loose ? 'loose' : 'pack'} disabled={disabled}
                           onChange={(v) => set(l.id, { loose: v === 'loose' })}
                           options={[{ value: 'pack', label: t('pharmacy.packs') }, { value: 'loose', label: l.unit_label || t('pharmacy.units') }]} />
                       )}
-                      {c.loose ? (
+                      {looseSale && c.loose ? (
                         <InputNumber size="small" min={1} style={{ width: 70 }} value={c.units || undefined} disabled={disabled}
                           onChange={(v) => set(l.id, { units: Number(v ?? 0) })} />
                       ) : (
@@ -323,20 +343,20 @@ function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClos
                   );
                 },
               },
-              {
+              ...(discounts ? [{
                 title: t('pharmacy.discount'), key: 'disc', width: 90,
                 render: (_: unknown, l: DispenseLine) => l.batches.length ? (
                   <InputNumber size="small" min={0} max={100} suffix="%" style={{ width: 76 }} value={choices[l.id]?.discount}
                     disabled={!canSell || !choices[l.id]?.give} onChange={(v) => set(l.id, { discount: Number(v ?? 0) })} />
                 ) : null,
-              },
-              {
+              }] : []),
+              ...(billing ? [{
                 title: t('pharmacy.amount'), key: 'amount', width: 100, align: 'right' as const,
                 render: (_: unknown, l: DispenseLine) => {
                   const a = lineAmount(l);
                   return a ? <span className="num">{money(a)}</span> : <span className="cell-sub">—</span>;
                 },
-              },
+              }] : []),
             ]}
           />
           {detail.notes && <Typography.Paragraph className="pre-line cell-sub" style={{ marginTop: 12, marginBottom: 0 }}>{detail.notes}</Typography.Paragraph>}

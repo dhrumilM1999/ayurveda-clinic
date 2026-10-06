@@ -71,6 +71,21 @@ def branch_b(org):
     return Branch.objects.create(organization=org, name="Branch B", code="B")
 
 
+def set_additional_features(org, on=True, codes=None):
+    """Switch optional additional features on/off for an organization (all of them by default)."""
+    from apps.organizations.features_catalog import ADDITIONAL_FEATURES
+    from apps.organizations.models import OrganizationFeature
+
+    for code in codes or ADDITIONAL_FEATURES:
+        OrganizationFeature.objects.update_or_create(organization=org, code=code, defaults={"enabled": on})
+
+
+@pytest.fixture
+def all_additional_features(org):
+    """Tests of the extra pharmacy features need them switched on."""
+    set_additional_features(org)
+
+
 def make_user(org, username, branch_roles=None, **extra):
     user = User.objects.create_user(
         username=username, password=PASSWORD, full_name=username.title(), organization=org,

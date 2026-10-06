@@ -43,16 +43,30 @@ def money(value):
 
 
 class PharmacyMixin:
-    """All pharmacy screens: current branch, and the Pharmacy module must be switched on (Settings)."""
+    """
+    All pharmacy screens: current branch, and the Pharmacy module must be switched on (Settings).
+    required_features: {action: additional feature code} ("*" = every action). Those extras must be
+    switched on by the organization admin in Additional settings.
+    """
 
     permission_classes = [IsAuthenticated, BranchPermission]
     branch_scoped = True
+    required_features: dict[str, str] = {}
 
     def check_permissions(self, request):
         super().check_permissions(request)
         branch = getattr(request, "branch", None)
-        if branch is not None and not is_feature_enabled(branch, "pharmacy"):
+        if branch is None:
+            return
+        if not is_feature_enabled(branch, "pharmacy"):
             raise PermissionDenied("Pharmacy is switched off for this branch (Settings -> Modules).")
+        code = self.required_features.get(getattr(self, "action", None)) or self.required_features.get("*")
+        if code:
+            self.need_feature(request, code)
+
+    def need_feature(self, request, code):
+        if not is_feature_enabled(request.branch, code):
+            raise PermissionDenied(f"This feature is switched off ({code}). An admin can switch it on in Additional settings.")
 
     def _medicine(self, request, medicine_id):
         medicine = Medicine.objects.filter(organization_id=request.user.organization_id, pk=medicine_id).first()
@@ -64,6 +78,7 @@ class PharmacyMixin:
 # --- Racks and suppliers ------------------------------------------------------------------------
 class RackViewSet(PharmacyMixin, AuditedModelViewSet):
     queryset = Rack.objects.all()
+    required_features = {"*": "pharmacy_racks"}
     serializer_class = RackSerializer
     http_method_names = ["get", "post", "patch", "head", "options"]
     pagination_class = None
@@ -114,6 +129,8 @@ class PurchaseViewSet(PharmacyMixin, mixins.ListModelMixin, mixins.RetrieveModel
         data = PurchaseInput(data=request.data)
         data.is_valid(raise_exception=True)
         v = data.validated_data
+        if v.get("is_opening"):
+            self.need_feature(request, "pharmacy_opening_stock")
         org_id = request.user.organization_id
         supplier = None
         if v.get("supplier"):
@@ -143,6 +160,7 @@ def purchases_of(branch):
 
 class PurchaseReturnViewSet(PharmacyMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = PurchaseReturnSerializer
+    required_features = {"*": "pharmacy_supplier_returns"}
     required_permissions = {"list": "pharmacy.view", "create": "pharmacy.stock"}
 
     def get_queryset(self):
@@ -172,6 +190,7 @@ class StockViewSet(PharmacyMixin, viewsets.ViewSet):
         "movements": "pharmacy.view", "adjust": "pharmacy.stock", "reorder_level": "pharmacy.stock",
         "location": "pharmacy.stock",
     }
+    required_features = {"alerts": "pharmacy_stock_alerts", "scan": "pharmacy_barcode", "location": "pharmacy_racks"}
 
     def list(self, request):
         p = request.query_params
@@ -263,6 +282,7 @@ class StockViewSet(PharmacyMixin, viewsets.ViewSet):
 
 # --- Physical stock check ------------------------------------------------------------------------
 class VerificationViewSet(PharmacyMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    required_features = {"*": "pharmacy_stock_check"}
     serializer_class = VerificationSerializer
     required_permissions = {"list": "pharmacy.view", "retrieve": "pharmacy.view", "create": "pharmacy.stock",
                             "count": "pharmacy.stock", "complete": "pharmacy.stock"}
@@ -388,20 +408,30 @@ class DispensingViewSet(PharmacyMixin, viewsets.ViewSet):
             item = items.get(line["prescription_item"])
             if item is None:
                 raise ValidationError({"items": "A line does not belong to this prescription."})
+            if line.get("loose_units"):
+                self.need_feature(request, "pharmacy_loose_sale")
+            if line.get("discount_percent"):
+                self.need_feature(request, "pharmacy_discounts")
             lines.append({"prescription_item": item, "batch_id": line["batch"], "quantity": line.get("quantity"),
                           "loose_units": line.get("loose_units"), "discount_percent": line.get("discount_percent", 0)})
-        record, invoice = sell(rx, request.branch, request.user, lines, notes=v.get("notes", ""), payment=v.get("payment"))
-        log_action(request, "create", invoice, changes={"patient": str(rx.patient_id), "lines": len(lines),
-                                                         "total": str(invoice.total_amount)})
-        return Response({"dispense": str(record.id), "invoice": str(invoice.id), "number": invoice.number,
-                         "total_amount": str(invoice.total_amount), "status": dispense_status(rx),
-                         "invoice_status": invoice.status}, status=http.HTTP_201_CREATED)
+        # Without "Pharmacy bills" the medicines are only given (stock goes down), no bill is made
+        make_bill = is_feature_enabled(request.branch, "pharmacy_billing")
+        record, invoice = sell(rx, request.branch, request.user, lines, notes=v.get("notes", ""),
+                               payment=v.get("payment"), make_bill=make_bill)
+        log_action(request, "create", invoice or record, changes={
+            "patient": str(rx.patient_id), "lines": len(lines), "total": str(record.total_amount)})
+        return Response({"dispense": str(record.id), "invoice": str(invoice.id) if invoice else None,
+                         "number": invoice.number if invoice else "",
+                         "total_amount": str(invoice.total_amount if invoice else record.total_amount),
+                         "status": dispense_status(rx), "invoice_status": invoice.status if invoice else ""},
+                        status=http.HTTP_201_CREATED)
 
 
 class SaleViewSet(PharmacyMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """Sales (dispensed prescriptions) of this branch, and sales returns."""
 
     required_permissions = {"list": "pharmacy.view", "retrieve": "pharmacy.view", "take_back": "pharmacy.dispense"}
+    required_features = {"take_back": "pharmacy_sales_returns"}
 
     def get_queryset(self):
         qs = (Dispense.objects.filter(branch=self.request.branch)

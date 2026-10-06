@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Branch, BranchFeatureFlag, Organization, Room, RoomType
+from .models import Branch, BranchFeatureFlag, Organization, OrganizationFeature, Room, RoomType
 
 
 @admin.register(Organization)
@@ -30,3 +30,9 @@ class RoomAdmin(admin.ModelAdmin):
 class BranchFeatureFlagAdmin(admin.ModelAdmin):
     list_display = ("branch", "code", "enabled")
     list_filter = ("branch", "code")
+
+
+@admin.register(OrganizationFeature)
+class OrganizationFeatureAdmin(admin.ModelAdmin):
+    list_display = ("organization", "code", "enabled")
+    list_filter = ("organization", "code")

@@ -14,6 +14,8 @@ from apps.pharmacy.models import StockBatch, StockMovement
 from apps.prescriptions.services import save_prescription
 from conftest import client_for
 
+pytestmark = pytest.mark.usefixtures("all_additional_features")
+
 TODAY = date.today()
 LATER = str(TODAY + timedelta(days=400))
 

@@ -9,6 +9,8 @@ from apps.billing.services import create_invoice, financial_year, line_amounts, 
 from apps.billing.templatetags.humanize_money import money, qty
 from conftest import client_for
 
+pytestmark = pytest.mark.usefixtures("all_additional_features")
+
 
 def test_financial_year():
     assert financial_year(date(2026, 4, 1)) == "2026-27"

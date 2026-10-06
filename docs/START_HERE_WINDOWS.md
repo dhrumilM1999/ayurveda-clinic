@@ -129,6 +129,8 @@ No real SMS is sent yet. You can find the code in two places:
 
 ### Pharmacy and billing check
 
+0. Log in as `admin` -> **Additional settings** -> switch on the extras you want to try (or **Turn all on**).
+   With everything off you get the simple pharmacy: To dispense, Stock, Purchases, Suppliers.
 1. **Settings -> Branch details**: check the address, add a GSTIN, drug licence no. and a UPI ID (made-up for now).
 2. **Pharmacy -> Racks & suppliers**: **Add rack** (code `A`, 5 shelves). **Suppliers** -> add one.
 3. **Purchases -> Add purchase**: supplier, invoice no., then a line: medicine, batch, mfg and expiry month,

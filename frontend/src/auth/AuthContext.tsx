@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, setSessionExpiredHandler } from '../api/client';
-import type { FeatureFlag, Me, MyBranch } from '../api/types';
+import type { AdditionalFeature, FeatureFlag, Me, MyBranch } from '../api/types';
 import i18n, { setLanguage } from '../i18n';
 import { clearAllDrafts } from '../utils/formDraft';
 import { tokenStore } from './tokenStore';
@@ -12,7 +12,12 @@ interface AuthValue {
   me: Me | null;
   loading: boolean;
   branch: MyBranch | null;
+  /** Module switches of the branch plus the organization's additional features: {code: on/off} */
   features: Record<string, boolean>;
+  /** Is this optional additional feature switched on (Additional settings)? */
+  hasFeature: (code: string) => boolean;
+  /** Load the switches again (after changing them). */
+  reloadFeatures: () => Promise<void>;
   /** Does the user have this permission in the current branch? */
   can: (code: string) => boolean;
   completeLogin: (access: string, refresh: string) => Promise<void>;
@@ -62,14 +67,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loadMe();
   }, [loadMe]);
 
-  // Load the module on/off switches whenever the branch changes.
+  // Load the module on/off switches (branch) and the additional features (organization).
+  const reloadFeatures = useCallback(async () => {
+    try {
+      const [modules, extras] = await Promise.all([
+        api.get<FeatureFlag[]>('/feature-flags/'),
+        api.get<AdditionalFeature[]>('/additional-features/'),
+      ]);
+      setFeatures(Object.fromEntries([...modules.data, ...extras.data].map((f) => [f.code, f.enabled])));
+    } catch {
+      setFeatures({});
+    }
+  }, []);
+
+  // ...whenever the branch changes.
   useEffect(() => {
     if (!me || !branchId) return;
-    api
-      .get<FeatureFlag[]>('/feature-flags/')
-      .then(({ data }) => setFeatures(Object.fromEntries(data.map((f) => [f.code, f.enabled]))))
-      .catch(() => setFeatures({}));
-  }, [me, branchId]);
+    reloadFeatures();
+  }, [me, branchId, reloadFeatures]);
+  const hasFeature = useCallback((code: string) => features[code] === true, [features]);
 
   const logout = useCallback(async (reason?: 'idle' | 'expired') => {
     const refresh = tokenStore.getRefresh();
@@ -114,7 +130,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const can = useCallback((code: string) => !!branch?.permissions.includes(code), [branch]);
 
   const value: AuthValue = {
-    me, loading, branch, features, can, completeLogin, switchBranch, logout, logoutReason,
+    me, loading, branch, features, hasFeature, reloadFeatures, can, completeLogin, switchBranch, logout, logoutReason,
   };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

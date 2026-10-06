@@ -57,6 +57,9 @@
 | **Financial year (FY)** | April to March. Bill numbers start again from 1 each April (e.g. 2026-27). |
 | **Taxable value** | The price without GST. GST is worked out on this amount. |
 | **CGST / SGST** | The two halves of GST inside one state (central and state). |
+| **Additional settings** | Optional extra features switched on/off for the whole clinic group by its admin. |
+| **Git branch** | A separate copy of the code history to try a change safely before it joins `main`. |
+| **Revert** | Undo one saved change (commit) in Git without touching the others. |
 | **Loose sale** | Selling part of a pack, such as 10 tablets from a strip of 60. |
 | **Token** | The queue number (1, 2, 3...) a patient gets on arrival, per doctor per day. |
 | **Walk-in** | A patient who comes without an appointment; gets a token straight away. |

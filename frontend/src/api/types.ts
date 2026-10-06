@@ -120,6 +120,19 @@ export interface FeatureFlag {
   enabled: boolean;
 }
 
+/** An optional extra feature, switched on/off for the whole organization (Additional settings). */
+export interface AdditionalFeature {
+  code: string;
+  group: string;
+  label: string;
+  /** Another additional feature this one needs ('' = none) */
+  requires: string;
+  /** What the admin chose */
+  switched_on: boolean;
+  /** Really working (switched on, and what it needs is on too) */
+  enabled: boolean;
+}
+
 export interface AuditLogEntry {
   id: string;
   created_at: string;
