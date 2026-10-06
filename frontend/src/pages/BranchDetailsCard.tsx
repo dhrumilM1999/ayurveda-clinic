@@ -1,5 +1,6 @@
-// Details of the current branch that are printed on bills: address, phone, GSTIN, drug licence, UPI ID.
-import { App, Button, Card, Col, Form, Input, Row } from 'antd';
+// Details of the current branch that are printed on bills: address, phone, GSTIN, drug licence, UPI ID,
+// and the pre-printed prescription pad (blank space at the top / bottom of prescriptions).
+import { App, Button, Card, Col, Form, Input, InputNumber, Row, Switch } from 'antd';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from '../api/client';
@@ -13,6 +14,7 @@ export function BranchDetailsCard() {
   const [form] = Form.useForm();
   const [saving, setSaving] = useState(false);
   const canEdit = can('branches.manage');
+  const onPad: boolean = Form.useWatch('print_on_pad', form) ?? false;
 
   useEffect(() => {
     if (!branch) return;
@@ -52,6 +54,23 @@ export function BranchDetailsCard() {
           </Col>
           <Col xs={24} md={12}>
             <Form.Item name="upi_vpa" label={t('settings.upiId')} extra={t('settings.upiIdHelp')}><Input maxLength={100} placeholder="clinic@okbank" /></Form.Item>
+          </Col>
+        </Row>
+        {/* Pre-printed prescription pad: the paper already has the logo, clinic, doctor and reg. no. at the top */}
+        <div className="section-title" style={{ marginTop: 4 }}>{t('settings.padTitle')}</div>
+        <Form.Item name="print_on_pad" valuePropName="checked" extra={t('settings.padHelp')} style={{ marginBottom: 8 }}>
+          <Switch checkedChildren={t('settings.padOn')} unCheckedChildren={t('settings.padOff')} />
+        </Form.Item>
+        <Row gutter={12}>
+          <Col xs={12} md={8}>
+            <Form.Item name="pad_top_mm" label={t('settings.padTop')}>
+              <InputNumber min={0} max={120} addonAfter="mm" style={{ width: '100%' }} disabled={!onPad} />
+            </Form.Item>
+          </Col>
+          <Col xs={12} md={8}>
+            <Form.Item name="pad_bottom_mm" label={t('settings.padBottom')}>
+              <InputNumber min={0} max={80} addonAfter="mm" style={{ width: '100%' }} disabled={!onPad} />
+            </Form.Item>
           </Col>
         </Row>
         {canEdit && <Button type="primary" onClick={save} loading={saving}>{t('common.save')}</Button>}

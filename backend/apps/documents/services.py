@@ -229,7 +229,7 @@ def detailed_context(prescription, lang: str) -> dict:
         if c.get("duration"):
             extra.append(f"{w['duration']} {c['duration']} {DURATION_WORDS.get(c.get('duration_unit') or 'days', DURATION_WORDS['days'])[lang]}")
         if c.get("severity"):
-            extra.append(f"{w['severity']} {c['severity']}")
+            extra.append(str(c["severity"]))
         if c.get("notes"):
             extra.append(c["notes"])
         complaints.append({"label": c["label"], "extra": ", ".join(extra)})
@@ -249,7 +249,8 @@ def detailed_context(prescription, lang: str) -> dict:
             continue
         rows = _exam_rows(exam, lang)
         if rows:
-            exams.append({"name": name, "rows": rows})
+            # Two answers side by side, so a full examination fits on less paper
+            exams.append({"name": name, "rows": rows, "pairs": [rows[i:i + 2] for i in range(0, len(rows), 2)]})
     return {
         "detailed": True,
         "vitals_full": vitals_full, "complaints_full": complaints, "diagnoses_full": diagnoses,

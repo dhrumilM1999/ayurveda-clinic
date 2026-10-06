@@ -1629,6 +1629,16 @@ body {
   text-align: right;
 }
 
+/* Clinic logo preview (Settings -> Clinic) */
+.logo-preview {
+  max-height: 56px;
+  max-width: 180px;
+  padding: 4px;
+  border: 1px solid var(--clinic-border);
+  border-radius: 6px;
+  background: #fff;
+}
+
 /* Dispense / sell footer: payment on the left, total and buttons on the right */
 .sell-footer {
   display: flex;

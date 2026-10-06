@@ -1,11 +1,12 @@
 // Settings: clinic details and module on/off switches for the current branch.
-import { App, Button, Card, Col, Form, Input, List, Row, Select, Switch, Typography } from 'antd';
+import { App, Button, Card, Col, Form, Input, List, Row, Select, Space, Switch, Typography } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from '../api/client';
 import type { FeatureFlag } from '../api/types';
 import { useAuth } from '../auth/AuthContext';
 import { LANGUAGES } from '../i18n';
+import { LogoUpload } from '../components/LogoUpload';
 import { BranchDetailsCard } from './BranchDetailsCard';
 
 export default function SettingsPage() {
@@ -15,11 +16,13 @@ export default function SettingsPage() {
   const [flags, setFlags] = useState<FeatureFlag[]>([]);
   const [saving, setSaving] = useState(false);
   const [form] = Form.useForm();
+  const [hasLogo, setHasLogo] = useState(false);
 
   const load = useCallback(async () => {
     try {
       const [org, features] = await Promise.all([api.get('/organization/'), api.get<FeatureFlag[]>('/feature-flags/')]);
       form.setFieldsValue(org.data);
+      setHasLogo(!!org.data.has_logo);
       setFlags(features.data);
     } catch (err) {
       message.error(errorMessage(err, t('common.loadFailed')));
@@ -71,6 +74,13 @@ export default function SettingsPage() {
               <Form.Item name="phone" label={t('branches.phone')}><Input /></Form.Item>
               <Form.Item name="email" label={t('branches.email')} rules={[{ type: 'email' }]}><Input /></Form.Item>
               <Form.Item name="address" label={t('branches.address')}><Input.TextArea rows={2} /></Form.Item>
+              <Form.Item label={t('settings.logo')} extra={t('settings.logoHelp')}>
+                <LogoUpload hasLogo={hasLogo} />
+              </Form.Item>
+              <Space size={24} wrap>
+                <Form.Item name="logo_on_documents" label={t('settings.logoOnDocuments')} valuePropName="checked"><Switch /></Form.Item>
+                <Form.Item name="logo_on_bills" label={t('settings.logoOnBills')} valuePropName="checked"><Switch /></Form.Item>
+              </Space>
               <Form.Item name="uhid_prefix" label={t('settings.uhidPrefix')} extra={t('settings.uhidPrefixHelp')}
                 rules={[{ required: true, message: t('common.required') }, { pattern: /^[A-Za-z0-9]{1,6}$/, message: t('settings.uhidPrefixInvalid') }]}>
                 <Input maxLength={6} style={{ textTransform: 'uppercase', width: 140 }} />

@@ -230,7 +230,21 @@
     "upiIdHelp": "Shown as a QR code on bills, e.g. clinic@okbank",
     "letterheadFooter": "Footer line on print-outs",
     "letterheadFooterHelp": "Printed at the bottom of prescriptions, certificates and reports.",
-    "letterheadFooterPlaceholder": "e.g. Timings 10 am - 1 pm, 5 - 8 pm · Sunday closed"
+    "letterheadFooterPlaceholder": "e.g. Timings 10 am - 1 pm, 5 - 8 pm · Sunday closed",
+    "logo": "Clinic logo",
+    "logoHelp": "PNG or JPG, up to 2 MB. A logo on a white or clear background prints best.",
+    "noLogo": "No logo yet",
+    "logoUpload": "Upload logo",
+    "logoChange": "Change logo",
+    "logoSaved": "Logo saved",
+    "logoOnDocuments": "Logo on prescriptions, certificates, reports",
+    "logoOnBills": "Logo on bills and receipts",
+    "padTitle": "Prescription paper",
+    "padHelp": "On: prescriptions are printed on your own pre-printed pad (it already has the logo, clinic, doctor and reg. no.). The software prints no letterhead and leaves blank space at the top and bottom. Measure your pad with a ruler.",
+    "padOn": "Our pre-printed pad",
+    "padOff": "Plain paper",
+    "padTop": "Blank space at the top",
+    "padBottom": "Blank space at the bottom"
   },
   "audit": {
     "title": "Audit log",
@@ -1531,7 +1545,9 @@
       "en": "English",
       "gu": "ગુજરાતી",
       "hi": "हिंदी"
-    }
+    },
+    "prescriptionDetailed": "Detailed prescription (full check-up)",
+    "prescriptionDetailedOf": "Detailed prescription - {{name}}"
   },
   "verify": {
     "genuine": "This document is genuine",

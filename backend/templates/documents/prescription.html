@@ -18,8 +18,13 @@
   .kv b { font-weight: 600; }
   .exam { margin-top: 1.5mm; }
   .exam-name { font-weight: 600; font-size: 0.9em; }
-  .exam table td { padding: 0.6mm 1mm; border-bottom: 0.15mm solid #ececec; font-size: 0.9em; }
-  .exam table td:first-child { width: 38%; color: #444; }
+  .exam table td { padding: 0.5mm 1mm; border-bottom: 0.15mm solid #ececec; font-size: 0.88em; }
+  .exam table td.q { width: 24%; color: #555; }
+  .exam table td.a { width: 26%; }
+  .exam table tr, .exam-name, .section b.h { page-break-inside: avoid; }
+  .section b.h, .exam-name { page-break-after: avoid; }
+  .section { page-break-inside: avoid; }
+  .section.long { page-break-inside: auto; }
   .alert { color: #a3261b; font-weight: 600; }
   .pre { white-space: pre-line; }
 {% endblock %}
@@ -57,12 +62,12 @@
 {% endif %}
 {% if history_notes %}<div class="section small"><b class="h">{{ w.history }}</b><div class="pre">{{ history_notes }}</div></div>{% endif %}
 {% if exams or examination_notes or prakriti %}
-<div class="section small"><b class="h">{{ w.examination }}</b>
+<div class="section long small"><b class="h">{{ w.examination }}</b>
   {% if prakriti %}<div><b>{{ w.prakriti_result }}:</b> {{ prakriti.type }} ({% for name, pct in prakriti.bars %}{{ name }} {{ pct }}%{% if not forloop.last %}, {% endif %}{% endfor %})</div>{% endif %}
   {% for e in exams %}
   <div class="exam">
     <div class="exam-name">{{ e.name }}</div>
-    <table>{% for label, value in e.rows %}<tr><td>{{ label }}</td><td>{{ value }}</td></tr>{% endfor %}</table>
+    <table>{% for pair in e.pairs %}<tr>{% for label, value in pair %}<td class="q">{{ label }}</td><td class="a">{{ value }}</td>{% endfor %}{% if pair|length == 1 %}<td class="q"></td><td class="a"></td>{% endif %}</tr>{% endfor %}</table>
   </div>
   {% endfor %}
   {% if examination_notes %}<div class="pre" style="margin-top: 1mm">{{ examination_notes }}</div>{% endif %}
