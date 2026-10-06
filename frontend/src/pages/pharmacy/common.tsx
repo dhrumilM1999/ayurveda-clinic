@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api/client';
-import type { DispenseStatus, InvoiceStatus, Medicine, Page } from '../../api/types';
+import type { DispenseLine, DispenseStatus, InvoiceStatus, Medicine, Page, ScanResult } from '../../api/types';
 
 /** "12-2027" (expiry is printed as month-year) */
 export function expiryText(date: string | null | undefined) {
@@ -54,6 +54,19 @@ export function ScanInput({ onScan, placeholder, autoFocus, width = 240 }: {
       onPressEnter={() => { const code = value.trim(); if (code) { onScan(code); setValue(''); } }}
     />
   );
+}
+
+/**
+ * A sale line made from a scanned (or picked) medicine that is not on a prescription:
+ * used for extra medicines in a prescription sale and for every line of a counter sale.
+ */
+export function lineFromScan(scan: ScanResult): DispenseLine {
+  return {
+    id: `extra:${scan.medicine}`, medicine: scan.medicine, medicine_name: scan.name, dosage_form: '',
+    pack_size: scan.pack_size, pack_type: '', allow_loose: scan.allow_loose, units_per_pack: scan.units_per_pack,
+    unit_label: '', location: scan.location, dose: '', dose_unit: '', frequency: '', timing: '', anupana: '',
+    duration: null, duration_unit: 'days', instructions: '', given: null, batches: scan.batches, extra: true,
+  };
 }
 
 // The bill print button now opens a preview popup on the same screen (components/BillPreview.tsx)

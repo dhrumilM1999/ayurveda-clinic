@@ -1629,6 +1629,26 @@ body {
   text-align: right;
 }
 
+/* Counter sale: scan / search on the left, customer on the right; payment bar under the lines */
+.counter-top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 12px;
+}
+.counter-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #faf8f3;
+  border: 1px solid var(--clinic-border);
+}
+
 /* Dispense / sell footer: payment on the left, total and buttons on the right */
 .sell-footer {
   display: flex;

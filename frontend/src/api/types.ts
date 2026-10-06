@@ -783,6 +783,9 @@ export interface ScanResult {
   medicine: string;
   name: string;
   pack_size: string;
+  schedule_e1: boolean;
+  allow_loose: boolean;
+  units_per_pack: string | null;
   location: string;
   scanned_batch: string | null;
   batches: StockBatch[];
@@ -873,6 +876,8 @@ export interface DispenseLine {
   instructions: string;
   given: string | null;
   batches: StockBatch[];
+  /** A medicine scanned at the counter that is not on the prescription (screen only) */
+  extra?: boolean;
 }
 
 export interface DispenseDetail {
@@ -898,7 +903,12 @@ export interface SaleItem {
 
 export interface SaleRow {
   id: string;
-  patient_detail: AppointmentPatient;
+  /** null for a counter sale (no registered patient) */
+  patient_detail: AppointmentPatient | null;
+  counter_sale: boolean;
+  customer_name: string;
+  /** masked, e.g. 98XXXXXX21 */
+  customer_phone: string;
   created_at: string;
   total_amount: string;
   by: string;

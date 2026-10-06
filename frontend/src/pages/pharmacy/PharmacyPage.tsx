@@ -1,10 +1,12 @@
 // Pharmacy: dispense, stock by batch, purchases, suppliers - always.
-// Extra tabs follow the switches in Additional settings: sales & returns, bills, stock check, stock ledger, racks.
+// Extra tabs follow the switches in Additional settings: counter sale, sales & returns, bills, stock check,
+// stock ledger, racks.
 import { Tabs, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
 import { BillsTab } from './BillsTab';
+import { CounterSaleTab } from './CounterSaleTab';
 import { DispenseTab } from './DispenseTab';
 import { LedgerTab } from './LedgerTab';
 import { PurchasesTab } from './PurchasesTab';
@@ -21,6 +23,8 @@ export default function PharmacyPage() {
 
   const tabs = [
     { key: 'dispense', label: t('pharmacy.tabs.dispense'), children: <DispenseTab /> },
+    ...(billing && hasFeature('pharmacy_counter_sale') && can('pharmacy.dispense')
+      ? [{ key: 'counter', label: t('pharmacy.tabs.counter'), children: <CounterSaleTab /> }] : []),
     ...(billing || hasFeature('pharmacy_sales_returns') ? [{ key: 'sales', label: t('pharmacy.tabs.sales'), children: <SalesTab /> }] : []),
     ...(billing && can('billing.view') ? [{ key: 'bills', label: t('pharmacy.tabs.bills'), children: <BillsTab /> }] : []),
     { key: 'stock', label: t('pharmacy.tabs.stock'), children: <StockTab /> },

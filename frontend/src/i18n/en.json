@@ -21,7 +21,8 @@
     "loadFailed": "Could not load data. Please try again.",
     "noAccessTitle": "No access",
     "noAccessText": "You don't have permission to open this screen in this branch.",
-    "notFound": "This page does not exist."
+    "notFound": "This page does not exist.",
+    "delete": "Delete"
   },
   "login": {
     "username": "Username",
@@ -967,7 +968,8 @@
       "bills": "Bills",
       "check": "Stock check",
       "ledger": "Stock ledger",
-      "setup": "Racks & suppliers"
+      "setup": "Racks & suppliers",
+      "counter": "Counter sale"
     },
     "status": {
       "pending": "To give",
@@ -1163,7 +1165,7 @@
     "returnDoneNoBill": "Returned. Stock updated.",
     "returnToSupplier": "Return to supplier",
     "returnToSupplierTitle": "Return to supplier: {{name}} / {{batch}}",
-    "salesHelp": "Medicines given against prescriptions. Use Return when a patient brings medicines back.",
+    "salesHelp": "Prescription sales and counter sales. Use Return when a customer brings medicines back.",
     "saveCounts": "Save counts",
     "scanNotInRx": "{{name}} is not in this prescription",
     "scanPlaceholder": "Scan barcode or type batch no.",
@@ -1188,7 +1190,12 @@
     "type": "Type",
     "units": "Units",
     "giveToOpd_one": "Give {{count}} medicine & add to OPD bill",
-    "giveToOpd_other": "Give {{count}} medicines & add to OPD bill"
+    "giveToOpd_other": "Give {{count}} medicines & add to OPD bill",
+    "counterSale": "Counter sale",
+    "e1NeedsRx": "{{name}} is a Schedule E1 medicine: sell it only against a doctor's prescription.",
+    "addedExtra": "{{name}} added (not on the prescription).",
+    "notOnRx": "Not on prescription",
+    "outOfStockName": "{{name}}: no stock that can be sold."
   },
   "billing": {
     "status": {
@@ -1282,7 +1289,8 @@
       "pharmacy": "Pharmacy and stock",
       "billing": "Billing",
       "stock": "Medicine stock",
-      "labels": "Medicine labels"
+      "labels": "Patient medicine labels",
+      "stock_labels": "Pharmacy stock labels"
     },
     "features": {
       "pharmacy_billing": {
@@ -1362,7 +1370,7 @@
         "help": "Supplier list and the supplier on purchases."
       },
       "medicine_labels": {
-        "label": "Medicine labels",
+        "label": "Patient medicine labels",
         "help": "Print a small label for each medicine given (from the pharmacy or the prescription). Medicine name, dose, days and instructions are always printed."
       },
       "label_patient": {
@@ -1408,6 +1416,14 @@
       "label_clinic": {
         "label": "Label: clinic / pharmacy name",
         "help": ""
+      },
+      "pharmacy_stock_labels": {
+        "label": "Pharmacy stock labels (barcode)",
+        "help": "Labels for medicine packs on the shelf: medicine, pack, MRP, GST, batch, expiry and a barcode. No patient details. Print them from Stock (Labels button on a batch). Needs \"Barcodes and scanning\"."
+      },
+      "pharmacy_counter_sale": {
+        "label": "Counter sale (without a prescription)",
+        "help": "A Counter sale tab: scan or search medicines, bill a walk-in customer and take payment. Schedule E1 medicines are never sold here. Needs \"Pharmacy bills\"."
       }
     },
     "choices": {
@@ -1418,6 +1434,14 @@
           "compact": "Compact",
           "standard": "Standard",
           "detailed": "Detailed"
+        }
+      },
+      "stock_label_format": {
+        "label": "Stock label size",
+        "help": "Small 50 × 25 mm or large 75 × 50 mm (adds the clinic name and HSN). You can change it in the print popup too.",
+        "options": {
+          "compact": "Small 50 × 25 mm",
+          "standard": "Large 75 × 50 mm"
         }
       }
     }
@@ -1551,5 +1575,32 @@
       "follow_up_card": "Follow-up card",
       "prakriti_report": "Prakriti report"
     }
+  },
+  "stockLabels": {
+    "button": "Labels",
+    "title": "Stock labels: {{name}}",
+    "show": "Show labels",
+    "help": "One label for each pack: medicine, pack, MRP, GST, batch, expiry and a barcode. Scanning it at billing adds this batch.",
+    "howMany": "How many labels?",
+    "size": {
+      "compact": "Small 50 × 25 mm",
+      "standard": "Large 75 × 50 mm"
+    }
+  },
+  "counter": {
+    "title": "Counter sale",
+    "scanPlaceholder": "Scan the barcode on the label",
+    "searchPlaceholder": "Or search a medicine by name",
+    "customerName": "Customer name (optional)",
+    "customerPhone": "Mobile (optional)",
+    "help": "For a customer without a prescription. Scan the same pack again to add one more. Schedule E1 medicines need a prescription.",
+    "empty": "Scan a stock label or search a medicine to start.",
+    "price": "Price",
+    "confirmSell": "Sell {{count}} medicine(s) to {{name}}.",
+    "walkIn": "a walk-in customer",
+    "clear": "Clear",
+    "makeBill": "Make bill ({{count}})",
+    "phoneInvalid": "Mobile number must be 10 digits (or leave it empty).",
+    "next": "Next customer"
   }
 }

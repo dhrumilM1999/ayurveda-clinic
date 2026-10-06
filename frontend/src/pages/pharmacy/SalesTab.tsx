@@ -1,6 +1,6 @@
-// Sales (dispensed prescriptions) and sales returns: medicines brought back -> stock + credit note.
+// Sales (prescription sales and counter sales) and sales returns: medicines brought back -> stock + credit note.
 import { RollbackOutlined } from '@ant-design/icons';
-import { App, Button, Checkbox, DatePicker, Form, Input, InputNumber, Modal, Segmented, Space, Spin, Table } from 'antd';
+import { App, Button, Checkbox, DatePicker, Form, Input, InputNumber, Modal, Segmented, Space, Spin, Table, Tag } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -56,7 +56,15 @@ export function SalesTab() {
         columns={[
           { title: t('pharmacy.when'), dataIndex: 'created_at', width: 130, render: (d: string) => dayjs(d).format('DD-MM-YY h:mm A') },
           ...(billing ? [{ title: t('billing.billNo'), dataIndex: 'number', render: (v: string, r: SaleRow) => (r.invoice ? <a className="mono" onClick={() => setBill(r.invoice)}>{v}</a> : '—') }] : []),
-          { title: t('appointments.patient'), key: 'p', render: (_: unknown, r: SaleRow) => <PatientCell patient={r.patient_detail} /> },
+          {
+            title: t('appointments.patient'), key: 'p',
+            render: (_: unknown, r: SaleRow) => (r.patient_detail ? <PatientCell patient={r.patient_detail} /> : (
+              <div style={{ lineHeight: 1.35 }}>
+                <b>{r.customer_name}</b> <Tag color="purple" className="tag-tight">{t('pharmacy.counterSale')}</Tag>
+                {r.customer_phone && <div className="cell-sub mono">{r.customer_phone}</div>}
+              </div>
+            )),
+          },
           ...(billing ? [{ title: t('pharmacy.total'), dataIndex: 'total_amount', width: 120, align: 'right' as const, render: (v: string) => <b className="num">{money(v)}</b> },
           { title: t('common.status'), dataIndex: 'invoice_status', width: 120, render: (s: InvoiceStatus | '') => (s ? <InvoiceStatusTag status={s} /> : '—') }] : []),
           {
@@ -64,7 +72,7 @@ export function SalesTab() {
             render: (_: unknown, r: SaleRow) => (
               <Space size={4}>
                 {billing && r.invoice && <PrintButton id={r.invoice} />}
-                <LabelsButton dispense={r.id} />
+                {!r.counter_sale && <LabelsButton dispense={r.id} />}
                 {returns && can('pharmacy.dispense') && r.invoice_status !== 'cancelled' && (
                   <Button size="small" icon={<RollbackOutlined />} onClick={() => setReturning(r.id)}>{t('pharmacy.return')}</Button>
                 )}
@@ -125,7 +133,7 @@ function ReturnModal({ saleId, onClose }: { saleId: string; onClose: (saved: boo
 
   return (
     <Modal open width={760} onCancel={() => onClose(false)} onOk={save}
-      title={billed ? t('pharmacy.returnTitle', { number: sale?.number }) : t('pharmacy.returnTitleNoBill', { name: sale?.patient_detail.full_name ?? '' })}
+      title={billed ? t('pharmacy.returnTitle', { number: sale?.number }) : t('pharmacy.returnTitleNoBill', { name: sale?.patient_detail?.full_name ?? sale?.customer_name ?? '' })}
       okText={billed ? t('pharmacy.returnButton', { amount: money(value) }) : t('pharmacy.returnButtonNoBill')} okButtonProps={{ disabled: !chosen.length }}
       cancelText={t('common.cancel')} confirmLoading={saving} keyboard={false} maskClosable={false}>
       {!sale ? <Spin /> : (

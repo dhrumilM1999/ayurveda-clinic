@@ -268,7 +268,8 @@ class StockViewSet(PharmacyMixin, viewsets.ViewSet):
         m = found["medicine"]
         location = locations_for(request.branch, [m.id]).get(m.id)
         return Response({
-            "medicine": str(m.id), "name": m.name, "pack_size": m.pack_size,
+            "medicine": str(m.id), "name": m.name, "pack_size": m.pack_size, "schedule_e1": m.schedule_e1,
+            "allow_loose": bool(m.allow_loose and m.units_per_pack), "units_per_pack": money(m.units_per_pack),
             "location": location.label if location else "",
             "scanned_batch": str(found["batch"].id) if found["batch"] else None,
             "batches": BatchSerializer(found["batches"], many=True).data,
