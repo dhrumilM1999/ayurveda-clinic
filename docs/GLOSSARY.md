@@ -47,6 +47,12 @@
 | **M-N-N (1-0-1)** | How many doses in the Morning, at Noon and at Night. |
 | **Batch** | One lot of a medicine from the maker, with its own number and expiry date. |
 | **FEFO** | First Expiry, First Out: the batch that expires first is given first. |
+| **Medicine days** | How long the medicines continue (e.g. 30 days). |
+| **Follow-up days** | After how many days the patient should come back; starts equal to the medicine days. |
+| **Quick dosage** | Typing three digits for Morning-Noon-Night: 222 means 2-2-2. |
+| **Strength** | The amount of active ingredient, e.g. 500 mg. |
+| **SKU / medicine code** | The clinic's own short code for a medicine, to find it quickly. |
+| **Medicine label** | A small sticker on the medicine pack: name, dose, times, days, instructions. |
 | **OPD** | Out-Patient Department: patients who come, are seen and go home the same day. |
 | **IPD** | In-Patient Department: admitted patients with a bed (not built yet). |
 | **New case** | A patient's first visit to a doctor, or a visit after the follow-up days are over: new-case fee. |
