@@ -123,7 +123,7 @@ class InvoiceViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.
         invoice = self.get_object()
         size = request.query_params.get("size", "a4")
         if size not in SIZES:
-            raise ValidationError({"size": "Choose a4, a5 or 80mm."})
+            raise ValidationError({"size": "Choose a4, a5, 80mm or 58mm."})
         duplicate = invoice.print_count > 0
         content = render_pdf(invoice=invoice, size=size, duplicate=duplicate)
         if request.query_params.get("preview") == "1":
@@ -173,7 +173,7 @@ class CreditNoteViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewse
         note = self.get_object()
         size = request.query_params.get("size", "a4")
         if size not in SIZES:
-            raise ValidationError({"size": "Choose a4, a5 or 80mm."})
+            raise ValidationError({"size": "Choose a4, a5, 80mm or 58mm."})
         content = render_pdf(invoice=note.invoice, credit_note=note, size=size)
         log_action(request, "print", note, changes={"size": size})
         return pdf_response(content, f"{note.number.replace('/', '-')}.pdf", request.query_params.get("download") == "1")

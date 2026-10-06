@@ -12,7 +12,7 @@ Keep the {{ ... }} and {% ... %} parts. Sizes: A4, A5 and 80 mm thermal ("size" 
   * { box-sizing: border-box; }
   body {
     font-family: "Noto Sans", "Noto Sans Gujarati", "Noto Sans Devanagari", sans-serif;
-    font-size: {% if size == "80mm" %}8.5pt{% elif size == "a5" %}8.5pt{% else %}9.5pt{% endif %};
+    font-size: {% if narrow %}8.5pt{% elif size == "a5" %}8.5pt{% else %}9.5pt{% endif %};
     color: #1d2a24; margin: 0;
   }
   .head { display: flex; justify-content: space-between; gap: 12px; border-bottom: 2px solid #1f5c45; padding-bottom: 6px; }
@@ -37,7 +37,10 @@ Keep the {{ ... }} and {% ... %} parts. Sizes: A4, A5 and 80 mm thermal ("size" 
     position: fixed; top: 40%; left: 0; right: 0; text-align: center; transform: rotate(-24deg);
     font-size: 40pt; font-weight: 800; color: rgba(194, 65, 45, 0.16); letter-spacing: 0.1em;
   }
-  {% if size == "80mm" %}
+  {% if size == "58mm" %}
+  body { font-size: 7pt; }
+  {% endif %}
+  {% if narrow %}
   .head { display: block; text-align: center; }
   .meta { display: block; }
   .totals { width: 100%; }
@@ -57,7 +60,7 @@ Keep the {{ ... }} and {% ... %} parts. Sizes: A4, A5 and 80 mm thermal ("size" 
     <div class="muted small">{{ branch.address }}{% if branch.city %}, {{ branch.city }}{% endif %} {{ branch.pincode }}</div>
     <div class="muted small">{% if branch.phone %}Phone {{ branch.phone }}{% endif %}{% if branch.email %} · {{ branch.email }}{% endif %}</div>
   </div>
-  <div class="small {% if size != '80mm' %}r{% endif %}">
+  <div class="small {% if not narrow %}r{% endif %}">
     {% if branch.gstin %}<div>GSTIN: <b>{{ branch.gstin }}</b></div>{% endif %}
     {% if branch.drug_licence_no %}<div>Licence: {{ branch.drug_licence_no }}</div>{% endif %}
     <div>State: {{ invoice.place_of_supply }}</div>
@@ -75,7 +78,7 @@ Keep the {{ ... }} and {% ... %} parts. Sizes: A4, A5 and 80 mm thermal ("size" 
     {% if doctor %}<div class="muted small">{% if is_opd %}Consultant{% else %}Prescribed by{% endif %} {{ doctor.full_name }}</div>{% endif %}
     {% if is_opd and invoice.appointment and invoice.appointment.token_number %}<div class="muted small">OPD token #{{ invoice.appointment.token_number }}</div>{% endif %}
   </div>
-  <div class="{% if size != '80mm' %}r{% endif %}">
+  <div class="{% if not narrow %}r{% endif %}">
     {% if credit_note %}
       <div>Credit note <b>{{ credit_note.number }}</b></div>
       <div>Date {{ credit_note.note_date|date:"d-m-Y" }}</div>
@@ -91,9 +94,9 @@ Keep the {{ ... }} and {% ... %} parts. Sizes: A4, A5 and 80 mm thermal ("size" 
   <thead>
     <tr>
       <th>#</th><th>Item</th>
-      {% if size != "80mm" %}{% if has_batches %}<th>Batch</th><th>Exp.</th>{% endif %}<th>HSN/SAC</th>{% endif %}
+      {% if not narrow %}{% if has_batches %}<th>Batch</th><th>Exp.</th>{% endif %}<th>HSN/SAC</th>{% endif %}
       <th class="r">Qty</th><th class="r">Rate</th>
-      {% if size != "80mm" %}<th class="r">Disc %</th>{% if has_gst %}<th class="r">GST %</th>{% endif %}{% endif %}
+      {% if not narrow %}<th class="r">Disc %</th>{% if has_gst %}<th class="r">GST %</th>{% endif %}{% endif %}
       <th class="r">Amount</th>
     </tr>
   </thead>
@@ -102,11 +105,11 @@ Keep the {{ ... }} and {% ... %} parts. Sizes: A4, A5 and 80 mm thermal ("size" 
     {% for cl in credit_lines %}
     <tr>
       <td>{{ forloop.counter }}</td>
-      <td>{{ cl.invoice_line.description }}{% if size == "80mm" %}<div class="muted small">{{ cl.invoice_line.batch_no }}</div>{% endif %}</td>
-      {% if size != "80mm" %}{% if has_batches %}<td>{{ cl.invoice_line.batch_no }}</td><td>{{ cl.invoice_line.expiry_date|date:"m-Y" }}</td>{% endif %}<td>{{ cl.invoice_line.hsn_code }}</td>{% endif %}
+      <td>{{ cl.invoice_line.description }}{% if narrow %}<div class="muted small">{{ cl.invoice_line.batch_no }}</div>{% endif %}</td>
+      {% if not narrow %}{% if has_batches %}<td>{{ cl.invoice_line.batch_no }}</td><td>{{ cl.invoice_line.expiry_date|date:"m-Y" }}</td>{% endif %}<td>{{ cl.invoice_line.hsn_code }}</td>{% endif %}
       <td class="r">{{ cl.quantity|qty }} {{ cl.invoice_line.unit_label }}</td>
       <td class="r">{{ cl.invoice_line.unit_price|money }}</td>
-      {% if size != "80mm" %}<td class="r">{{ cl.invoice_line.discount_percent|qty }}</td>{% if has_gst %}<td class="r">{{ cl.invoice_line.gst_rate|qty }}</td>{% endif %}{% endif %}
+      {% if not narrow %}<td class="r">{{ cl.invoice_line.discount_percent|qty }}</td>{% if has_gst %}<td class="r">{{ cl.invoice_line.gst_rate|qty }}</td>{% endif %}{% endif %}
       <td class="r">{{ cl.total_amount|money }}</td>
     </tr>
     {% endfor %}
@@ -114,11 +117,11 @@ Keep the {{ ... }} and {% ... %} parts. Sizes: A4, A5 and 80 mm thermal ("size" 
     {% for line in lines %}
     <tr>
       <td>{{ forloop.counter }}</td>
-      <td>{{ line.description }}{% if size == "80mm" and line.batch_no %}<div class="muted small">B: {{ line.batch_no }} · Exp {{ line.expiry_date|date:"m-Y" }}</div>{% endif %}</td>
-      {% if size != "80mm" %}{% if has_batches %}<td>{{ line.batch_no }}</td><td>{{ line.expiry_date|date:"m-Y" }}</td>{% endif %}<td>{{ line.hsn_code }}</td>{% endif %}
+      <td>{{ line.description }}{% if narrow and line.batch_no %}<div class="muted small">B: {{ line.batch_no }} · Exp {{ line.expiry_date|date:"m-Y" }}</div>{% endif %}</td>
+      {% if not narrow %}{% if has_batches %}<td>{{ line.batch_no }}</td><td>{{ line.expiry_date|date:"m-Y" }}</td>{% endif %}<td>{{ line.hsn_code }}</td>{% endif %}
       <td class="r">{{ line.quantity|qty }} {{ line.unit_label }}</td>
       <td class="r">{{ line.unit_price|money }}</td>
-      {% if size != "80mm" %}<td class="r">{{ line.discount_percent|qty }}</td>{% if has_gst %}<td class="r">{{ line.gst_rate|qty }}</td>{% endif %}{% endif %}
+      {% if not narrow %}<td class="r">{{ line.discount_percent|qty }}</td>{% if has_gst %}<td class="r">{{ line.gst_rate|qty }}</td>{% endif %}{% endif %}
       <td class="r">{{ line.total_amount|money }}</td>
     </tr>
     {% endfor %}
@@ -154,7 +157,7 @@ Keep the {{ ... }} and {% ... %} parts. Sizes: A4, A5 and 80 mm thermal ("size" 
 </table>
 <div class="words">{{ amount_words }}</div>
 
-{% if size != "80mm" and gst_summary|length > 1 %}
+{% if not narrow and gst_summary|length > 1 %}
 <table style="margin-top:6px; width:60%">
   <thead><tr><th>GST %</th><th class="r">Taxable</th><th class="r">CGST</th><th class="r">SGST</th></tr></thead>
   <tbody>
