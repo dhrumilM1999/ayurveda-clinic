@@ -222,38 +222,31 @@ def _unit_label(medicine, loose_units=None):
     return medicine.pack_type.label if medicine.pack_type_id else "pack"
 
 
-@transaction.atomic
-def sell(prescription, branch, user, lines: list[dict], *, notes="", payment=None, make_bill=True, bill_to_opd=False):
+def _give_lines(record, branch, user, lines: list[dict], *, prescription=None, reason=""):
     """
-    Give medicines for a final prescription and make the bill (make_bill=False: only give, no bill).
-    bill_to_opd=True ("one combined bill"): the medicines go on the visit's OPD bill instead of a pharmacy bill.
-    lines: [{"prescription_item", "batch_id", "quantity" (packs) or "loose_units", "discount_percent"}]
-    payment: {"mode": "cash"|"upi"|"card", "amount", "reference"} or None (pay later)
-    Returns (dispense, invoice or None).
+    Take the medicines out of stock for one sale. Returns (bill lines, total).
+    lines: [{"prescription_item" (or None for a medicine not on the prescription), "batch_id",
+             "quantity" (packs) or "loose_units", "discount_percent"}]
+    A line without a prescription line (scanned extra, counter sale) may not be a Schedule E1 medicine:
+    those are sold only against a doctor's prescription.
     """
-    if prescription.branch_id != branch.id:
-        raise ValidationError({"detail": "This prescription belongs to another branch."})
-    if prescription.status != "final":
-        raise ValidationError({"detail": "The doctor has not completed this prescription yet."})
-    if not lines:
-        raise ValidationError({"items": "Choose at least one medicine to give."})
     today = timezone.localdate()
-    record = Dispense.objects.create(
-        organization_id=branch.organization_id, branch=branch, prescription=prescription,
-        patient_id=prescription.patient_id, notes=notes[:300], created_by=user, updated_by=user,
-    )
     invoice_lines = []
     total = ZERO
     for line in lines:
-        item = line["prescription_item"]
-        if item.prescription_id != prescription.id or not item.medicine_id:
-            raise ValidationError({"items": "A line does not belong to this prescription."})
+        item = line.get("prescription_item")
         batch = _locked_batch(branch, line["batch_id"])
         medicine = batch.medicine
-        if batch.medicine_id != item.medicine_id:
-            raise ValidationError({"items": f"{item.medicine_name}: choose a batch of this medicine."})
+        name = item.medicine_name if item else medicine.name
+        if item is not None:
+            if prescription is None or item.prescription_id != prescription.id or not item.medicine_id:
+                raise ValidationError({"items": "A line does not belong to this prescription."})
+            if batch.medicine_id != item.medicine_id:
+                raise ValidationError({"items": f"{name}: choose a batch of this medicine."})
+        elif medicine.schedule_e1:
+            raise ValidationError({"items": f"{name} is a Schedule E1 medicine: sell it only against a doctor's prescription."})
         if batch.expiry_date and batch.expiry_date < today:
-            raise ValidationError({"items": f"{item.medicine_name}: batch {batch.batch_no} has expired."})
+            raise ValidationError({"items": f"{name}: batch {batch.batch_no} has expired."})
         loose = line.get("loose_units")
         if loose:
             if not (medicine.allow_loose and medicine.units_per_pack):
@@ -262,9 +255,9 @@ def sell(prescription, branch, user, lines: list[dict], *, notes="", payment=Non
         else:
             quantity = Decimal(line["quantity"])
         if quantity <= 0:
-            raise ValidationError({"items": f"{item.medicine_name}: quantity must be more than 0."})
+            raise ValidationError({"items": f"{name}: quantity must be more than 0."})
         if batch.quantity < quantity:
-            raise ValidationError({"items": f"{item.medicine_name}: only {batch.quantity.normalize()} left in batch {batch.batch_no}."})
+            raise ValidationError({"items": f"{name}: only {batch.quantity.normalize()} left in batch {batch.batch_no}."})
         discount = Decimal(line.get("discount_percent") or 0)
         if not 0 <= discount <= 100:
             raise ValidationError({"items": "Discount must be between 0 and 100 %."})
@@ -280,7 +273,7 @@ def sell(prescription, branch, user, lines: list[dict], *, notes="", payment=Non
             batch=batch, quantity=quantity, loose_units=loose or None, mrp=price, discount_percent=discount,
             amount=amount, created_by=user, updated_by=user,
         )
-        _move(batch, "dispense", -quantity, user, reason=f"Rx of {prescription.patient.full_name}", reference=record.id)
+        _move(batch, "dispense", -quantity, user, reason=reason, reference=record.id)
         invoice_lines.append({
             "kind": "medicine", "description": f"{medicine.name}{f' ({medicine.pack_size})' if medicine.pack_size else ''}",
             "medicine": medicine, "batch": batch, "dispense_item": sold, "batch_no": batch.batch_no,
@@ -291,6 +284,38 @@ def sell(prescription, branch, user, lines: list[dict], *, notes="", payment=Non
         total += amount
     record.total_amount = total
     record.save(update_fields=["total_amount"])
+    return invoice_lines, total
+
+
+def _take_payment(invoice, user, payment):
+    if payment and Decimal(payment.get("amount") or 0) > 0:
+        record_payment(invoice, user, mode=payment["mode"], amount=min(Decimal(payment["amount"]), invoice.balance),
+                       reference=payment.get("reference", ""))
+        invoice.refresh_from_db()
+
+
+@transaction.atomic
+def sell(prescription, branch, user, lines: list[dict], *, notes="", payment=None, make_bill=True, bill_to_opd=False):
+    """
+    Give medicines for a final prescription and make the bill (make_bill=False: only give, no bill).
+    bill_to_opd=True ("one combined bill"): the medicines go on the visit's OPD bill instead of a pharmacy bill.
+    lines: [{"prescription_item" (None = extra medicine scanned at the counter), "batch_id",
+             "quantity" (packs) or "loose_units", "discount_percent"}]
+    payment: {"mode": "cash"|"upi"|"card", "amount", "reference"} or None (pay later)
+    Returns (dispense, invoice or None).
+    """
+    if prescription.branch_id != branch.id:
+        raise ValidationError({"detail": "This prescription belongs to another branch."})
+    if prescription.status != "final":
+        raise ValidationError({"detail": "The doctor has not completed this prescription yet."})
+    if not lines:
+        raise ValidationError({"items": "Choose at least one medicine to give."})
+    record = Dispense.objects.create(
+        organization_id=branch.organization_id, branch=branch, prescription=prescription,
+        patient_id=prescription.patient_id, notes=notes[:300], created_by=user, updated_by=user,
+    )
+    invoice_lines, _ = _give_lines(record, branch, user, lines, prescription=prescription,
+                                   reason=f"Rx of {prescription.patient.full_name}")
     if not make_bill:
         return record, None
     if bill_to_opd:
@@ -303,10 +328,33 @@ def sell(prescription, branch, user, lines: list[dict], *, notes="", payment=Non
                                  doctor=prescription.doctor)
     # Ledger lines show the bill number
     StockMovement.objects.filter(reference=str(record.id)).update(reference_label=invoice.number)
-    if payment and Decimal(payment.get("amount") or 0) > 0:
-        record_payment(invoice, user, mode=payment["mode"], amount=min(Decimal(payment["amount"]), invoice.balance),
-                       reference=payment.get("reference", ""))
-        invoice.refresh_from_db()
+    _take_payment(invoice, user, payment)
+    return record, invoice
+
+
+WALK_IN = "Walk-in customer"
+
+
+@transaction.atomic
+def counter_sell(branch, user, lines: list[dict], *, customer_name="", customer_phone="", notes="", payment=None):
+    """
+    Counter sale: medicines sold without a prescription (a walk-in customer), always with a pharmacy bill.
+    lines: [{"batch_id", "quantity" (packs) or "loose_units", "discount_percent"}]. Schedule E1 medicines are refused.
+    Returns (dispense, invoice).
+    """
+    if not lines:
+        raise ValidationError({"items": "Scan or choose at least one medicine."})
+    name = customer_name.strip()[:200]
+    record = Dispense.objects.create(
+        organization_id=branch.organization_id, branch=branch, customer_name=name,
+        customer_phone=customer_phone.strip()[:15], notes=notes[:300], created_by=user, updated_by=user,
+    )
+    invoice_lines, _ = _give_lines(record, branch, user, [{**line, "prescription_item": None} for line in lines],
+                                   reason=f"Counter sale{f' - {name}' if name else ''}")
+    invoice = create_invoice(branch, user, series="PH", lines=invoice_lines, dispense=record,
+                             customer_name=name or WALK_IN, notes=notes)
+    StockMovement.objects.filter(reference=str(record.id)).update(reference_label=invoice.number)
+    _take_payment(invoice, user, payment)
     return record, invoice
 
 

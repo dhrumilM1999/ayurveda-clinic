@@ -172,6 +172,8 @@ class MedicineLabelView(APIView):
                 "prescription__patient", "prescription__doctor", "prescription__branch__organization").first()
             if dispense is None:
                 raise NotFound("Sale not found.")
+            if dispense.prescription_id is None:
+                raise ValidationError({"detail": "Patient labels need a prescription; a counter sale has none."})
             prescription = dispense.prescription
         elif p.get("prescription"):
             if not (user_has_perm(request.user, "prescriptions.view", branch) or user_has_perm(request.user, "pharmacy.view", branch)):

@@ -201,7 +201,8 @@ class LocationInput(serializers.Serializer):
 
 
 class SellLineInput(serializers.Serializer):
-    prescription_item = serializers.UUIDField()
+    # Empty = a medicine that is not on the prescription (scanned at the counter); the batch says which medicine
+    prescription_item = serializers.UUIDField(required=False, allow_null=True)
     batch = serializers.UUIDField()
     quantity = serializers.DecimalField(required=False, allow_null=True, **POSITIVE)
     loose_units = serializers.DecimalField(required=False, allow_null=True, **POSITIVE)
@@ -224,6 +225,12 @@ class SellInput(serializers.Serializer):
     items = SellLineInput(many=True)
     notes = serializers.CharField(max_length=300, required=False, allow_blank=True)
     payment = PaymentNowInput(required=False, allow_null=True)
+
+
+class CounterSaleInput(SellInput):
+    customer_name = serializers.CharField(max_length=200, required=False, allow_blank=True)
+    customer_phone = serializers.RegexField(r"^\d{10}$", required=False, allow_blank=True,
+                                            error_messages={"invalid": "Phone must be 10 digits."})
 
 
 class ReturnLineInput(serializers.Serializer):
