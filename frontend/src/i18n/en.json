@@ -1485,5 +1485,9 @@
     "billColumn": "OPD bill",
     "visitBill": "OPD bill",
     "next": "Next: OPD bill"
+  },
+  "labels": {
+    "button": "Labels",
+    "title": "Medicine labels"
   }
 }

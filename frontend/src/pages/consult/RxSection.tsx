@@ -12,6 +12,7 @@ import { api, errorMessage } from '../../api/client';
 import { useMasterLabel, useMasters } from '../../api/masters';
 import type { Diagnosis, Medicine, Page, Prescription, PrescriptionTemplate, RxLine, RxWarning } from '../../api/types';
 import { autoQuantity, quickDosage } from '../../utils/dosage';
+import { LabelsButton } from '../../components/BillPreview';
 import { MasterSelect } from '../../components/MasterSelect';
 import { MedicineFlags, money } from '../medicines/shared';
 
@@ -165,6 +166,7 @@ export function RxSection({ rx, onChange, warnings, diagnoses, readOnly, daysBar
                 label: `${dxCodes.has(tpl.diagnosis?.code ?? '') ? '★ ' : ''}${tpl.name}`,
               }))} />
             <Button size="small" icon={<SaveOutlined />} disabled={!items.length} onClick={() => setSaveOpen(true)}>{t('rx.saveTemplate')}</Button>
+            {rx.id && items.length > 0 && <LabelsButton prescription={rx.id} />}
           </Space>
         )}
       </div>

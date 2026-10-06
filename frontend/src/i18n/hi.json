@@ -1485,5 +1485,9 @@
     "billColumn": "OPD बिल",
     "visitBill": "OPD बिल",
     "next": "आगे: OPD बिल"
+  },
+  "labels": {
+    "button": "लेबल",
+    "title": "दवा के लेबल"
   }
 }
