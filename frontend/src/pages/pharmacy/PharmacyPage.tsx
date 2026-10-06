@@ -27,10 +27,12 @@ export default function PharmacyPage() {
     { key: 'purchases', label: t('pharmacy.tabs.purchases'), children: <PurchasesTab /> },
     ...(hasFeature('pharmacy_stock_check') ? [{ key: 'check', label: t('pharmacy.tabs.check'), children: <StockCheckTab /> }] : []),
     ...(hasFeature('pharmacy_stock_ledger') ? [{ key: 'ledger', label: t('pharmacy.tabs.ledger'), children: <LedgerTab /> }] : []),
-    {
-      key: 'setup', label: hasFeature('pharmacy_racks') ? t('pharmacy.tabs.setup') : t('pharmacy.tabs.suppliers'),
+    // Racks & suppliers tab: whichever of the two is switched on (Additional settings)
+    ...(hasFeature('pharmacy_racks') || hasFeature('pharmacy_suppliers') ? [{
+      key: 'setup',
+      label: !hasFeature('pharmacy_racks') ? t('pharmacy.tabs.suppliers') : !hasFeature('pharmacy_suppliers') ? t('pharmacy.racks') : t('pharmacy.tabs.setup'),
       children: <SetupTab />,
-    },
+    }] : []),
   ];
   // A tab that was switched off (e.g. an old link) falls back to the first tab
   const asked = params.get('tab') ?? 'dispense';

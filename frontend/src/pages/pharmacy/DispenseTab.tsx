@@ -334,7 +334,12 @@ function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClos
                       onChange={(v) => set(l.id, { batch: v })} popupMatchSelectWidth={false}
                       options={l.batches.map((b) => ({
                         value: b.id,
-                        label: `${b.batch_no} · ${t('pharmacy.exp')} ${expiryText(b.expiry_date)} · ${qty(b.quantity)} ${t('pharmacy.left')} · ${money(b.sale_price)}`,
+                        label: [
+                          hasFeature('pharmacy_batch_tracking') ? b.batch_no : '',
+                          hasFeature('pharmacy_expiry_tracking') ? `${t('pharmacy.exp')} ${expiryText(b.expiry_date)}` : '',
+                          `${qty(b.quantity)} ${t('pharmacy.left')}`,
+                          hasFeature('pharmacy_selling_price') ? money(b.sale_price) : '',
+                        ].filter(Boolean).join(' · '),
                       }))} />
                   );
                 },

@@ -46,6 +46,12 @@ export function PurchaseModal({ opening = false, onClose }: { opening?: boolean;
   const { hasFeature } = useAuth();
   const details = hasFeature('pharmacy_purchase_details');
   const barcode = hasFeature('pharmacy_barcode');
+  // Stock basics (Additional settings -> Medicine stock)
+  const batches = hasFeature('pharmacy_batch_tracking');
+  const expiryOn = hasFeature('pharmacy_expiry_tracking');
+  const rateOn = hasFeature('pharmacy_purchase_price');
+  const prices = hasFeature('pharmacy_selling_price');
+  const suppliersOn = hasFeature('pharmacy_suppliers');
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [lines, setLines] = useState<Line[]>([emptyLine()]);
   const [saving, setSaving] = useState(false);
@@ -53,7 +59,7 @@ export function PurchaseModal({ opening = false, onClose }: { opening?: boolean;
 
   useEffect(() => {
     form.setFieldsValue({ invoice_date: dayjs(), other_charges: 0 });
-    if (!opening) api.get<Supplier[]>('/suppliers/').then(({ data }) => setSuppliers(data.filter((s) => s.is_active))).catch(() => setSuppliers([]));
+    if (!opening && suppliersOn) api.get<Supplier[]>('/suppliers/').then(({ data }) => setSuppliers(data.filter((s) => s.is_active))).catch(() => setSuppliers([]));
   }, [form, opening]);
 
   const update = (key: number, patch: Partial<Line>) => setLines((ls) => ls.map((l) => (l.key === key ? { ...l, ...patch } : l)));
@@ -89,7 +95,7 @@ export function PurchaseModal({ opening = false, onClose }: { opening?: boolean;
   }, { taxable: 0, gst: 0 });
   const exact = totals.taxable + totals.gst + (otherCharges || 0);
   const grand = Math.round(exact);
-  const ready = lines.filter((l) => l.medicine && l.batch_no.trim() && l.quantity && l.mrp !== undefined);
+  const ready = lines.filter((l) => l.medicine && (!batches || l.batch_no.trim()) && l.quantity && (!prices || l.mrp !== undefined));
 
   const save = async () => {
     const values = await form.validateFields();
@@ -101,7 +107,7 @@ export function PurchaseModal({ opening = false, onClose }: { opening?: boolean;
     try {
       await api.post('/purchases/', {
         is_opening: opening,
-        supplier: opening ? null : values.supplier ?? null,
+        supplier: opening || !suppliersOn ? null : values.supplier ?? null,
         invoice_no: opening ? '' : values.invoice_no ?? '',
         invoice_date: values.invoice_date?.format('YYYY-MM-DD'),
         other_charges: opening ? 0 : values.other_charges ?? 0,
@@ -134,8 +140,12 @@ export function PurchaseModal({ opening = false, onClose }: { opening?: boolean;
       footer={(
         <div className="modal-footer-split">
           <span className="total-text">
-            {!opening && details && <>{t('billing.taxable')} <span className="num">{money(totals.taxable)}</span> · GST <span className="num">{money(totals.gst)}</span> · </>}
-            {t('pharmacy.purchaseTotal')}: <b className="num">{money(opening ? totals.taxable + totals.gst : grand)}</b>
+            {rateOn && (
+              <>
+                {!opening && details && <>{t('billing.taxable')} <span className="num">{money(totals.taxable)}</span> · GST <span className="num">{money(totals.gst)}</span> · </>}
+                {t('pharmacy.purchaseTotal')}: <b className="num">{money(opening ? totals.taxable + totals.gst : grand)}</b>
+              </>
+            )}
           </span>
           <span>
             <Button onClick={() => onClose(false)}>{t('common.cancel')}</Button>
@@ -150,11 +160,11 @@ export function PurchaseModal({ opening = false, onClose }: { opening?: boolean;
         <Row gutter={12}>
           {!opening && (
             <>
-              <Col xs={24} md={8}>
+              {suppliersOn && <Col xs={24} md={8}>
                 <Form.Item name="supplier" label={t('pharmacy.supplier')} extra={!suppliers.length ? t('pharmacy.noSuppliersYet') : undefined}>
                   <Select allowClear showSearch optionFilterProp="label" options={suppliers.map((s) => ({ value: s.id, label: s.name }))} />
                 </Form.Item>
-              </Col>
+              </Col>}
               <Col xs={12} md={5}><Form.Item name="invoice_no" label={t('pharmacy.invoiceNo')}><Input maxLength={60} /></Form.Item></Col>
               <Col xs={12} md={5}>
                 <Form.Item name="invoice_date" label={t('pharmacy.invoiceDate')} rules={[{ required: true, message: t('common.required') }]}>
@@ -185,13 +195,13 @@ export function PurchaseModal({ opening = false, onClose }: { opening?: boolean;
               <div className="rx-controls" style={{ paddingLeft: 0 }}>
                 <span className="rx-num" style={{ alignSelf: 'flex-end', marginBottom: 2 }}>{index + 1}</span>
                 {field(t('rx.medicine'), <MedicinePicker value={l.medicine} label={l.medicine_name} onPick={(med) => pick(l.key, med)} />, true)}
-                {field(t('pharmacy.batch'), <Input size="small" value={l.batch_no} maxLength={60} style={{ width: 110 }} placeholder="B1234"
+                {batches && field(t('pharmacy.batch'), <Input size="small" value={l.batch_no} maxLength={60} style={{ width: 110 }} placeholder="B1234"
                   onChange={(e) => update(l.key, { batch_no: e.target.value.toUpperCase() })} />)}
                 {barcode && field(t('pharmacy.barcode'), <Input size="small" value={l.barcode} maxLength={64} style={{ width: 130 }}
                   onChange={(e) => update(l.key, { barcode: e.target.value.trim() })} />)}
-                {details && field(t('pharmacy.mfg'), <DatePicker size="small" picker="month" format="MM-YYYY" value={l.mfg ?? null} style={{ width: 104 }}
+                {details && expiryOn && field(t('pharmacy.mfg'), <DatePicker size="small" picker="month" format="MM-YYYY" value={l.mfg ?? null} style={{ width: 104 }}
                   onChange={(d) => update(l.key, { mfg: d })} />)}
-                {field(t('pharmacy.expiry'), <DatePicker size="small" picker="month" format="MM-YYYY" value={l.expiry ?? null} style={{ width: 104 }}
+                {expiryOn && field(t('pharmacy.expiry'), <DatePicker size="small" picker="month" format="MM-YYYY" value={l.expiry ?? null} style={{ width: 104 }}
                   disabledDate={(d) => d.isBefore(dayjs(), 'month')} onChange={(d) => update(l.key, { expiry: d })} />)}
                 <Button size="small" type="text" icon={<DeleteOutlined />} disabled={lines.length === 1} aria-label={t('common.remove')}
                   style={{ alignSelf: 'flex-end' }} onClick={() => setLines((ls) => ls.filter((x) => x.key !== l.key))} />
@@ -199,11 +209,11 @@ export function PurchaseModal({ opening = false, onClose }: { opening?: boolean;
               <div className="rx-controls" style={{ paddingLeft: 30, marginTop: 6 }}>
                 {field(t('pharmacy.qty'), <InputNumber size="small" min={0.001} value={l.quantity} style={{ width: 80 }} onChange={(v) => update(l.key, { quantity: v ?? undefined })} />)}
                 {details && field(t('pharmacy.free'), <InputNumber size="small" min={0} value={l.free} style={{ width: 70 }} onChange={(v) => update(l.key, { free: v ?? undefined })} />)}
-                {field(t('pharmacy.rateNoGst'), <InputNumber size="small" min={0} precision={2} value={l.rate} style={{ width: 96 }} onChange={(v) => update(l.key, { rate: v ?? undefined })} />)}
+                {rateOn && field(t('pharmacy.rateNoGst'), <InputNumber size="small" min={0} precision={2} value={l.rate} style={{ width: 96 }} onChange={(v) => update(l.key, { rate: v ?? undefined })} />)}
                 {details && field(t('pharmacy.discount'), <InputNumber size="small" min={0} max={100} suffix="%" value={l.discount} style={{ width: 76 }} onChange={(v) => update(l.key, { discount: v ?? undefined })} />)}
                 {details && field('GST', <InputNumber size="small" min={0} max={40} suffix="%" value={l.gst} style={{ width: 76 }} onChange={(v) => update(l.key, { gst: v ?? undefined })} />)}
-                {field('MRP', <InputNumber size="small" min={0} precision={2} value={l.mrp} style={{ width: 96 }} onChange={(v) => update(l.key, { mrp: v ?? undefined })} />)}
-                {details && field(t('pharmacy.sellingPrice'), <InputNumber size="small" min={0} max={l.mrp} precision={2} value={l.selling} style={{ width: 96 }}
+                {prices && field('MRP', <InputNumber size="small" min={0} precision={2} value={l.mrp} style={{ width: 96 }} onChange={(v) => update(l.key, { mrp: v ?? undefined })} />)}
+                {details && prices && field(t('pharmacy.sellingPrice'), <InputNumber size="small" min={0} max={l.mrp} precision={2} value={l.selling} style={{ width: 96 }}
                   placeholder={l.mrp ? String(l.mrp) : ''} onChange={(v) => update(l.key, { selling: v ?? undefined })} />)}
                 {field(t('pharmacy.amount'), <span className="num line-amount">{money(m.total)}</span>)}
               </div>

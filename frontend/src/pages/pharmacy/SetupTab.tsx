@@ -11,8 +11,9 @@ export function SetupTab() {
   const { t } = useTranslation();
   const { hasFeature } = useAuth();
   const [view, setView] = useState<'racks' | 'suppliers'>('racks');
-  // Racks are an extra (Additional settings); suppliers are always here
+  // Racks and suppliers each have a switch in Additional settings
   if (!hasFeature('pharmacy_racks')) return <Suppliers />;
+  if (!hasFeature('pharmacy_suppliers')) return <Racks />;
   return (
     <>
       <div className="filter-bar">
