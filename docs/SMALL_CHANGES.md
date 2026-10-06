@@ -96,7 +96,13 @@ Print templates live in `backend/templates/documents/`. They are HTML files (lik
 - Keep everything inside `{{ ... }}` and `{% ... %}` as it is - those put in the real data.
 - The clinic name, address, GSTIN, drug licence and UPI ID come from **Settings -> Branch details**, not from the file.
 - Save the file, then print a bill again to see the change (no restart needed).
-- More templates (prescription, certificates...) come in Step 7.
+- **Reports PDF**: `report.html` (colours, font size, margins, the "Nothing in these dates." text).
+
+## Who can see Reports
+
+**Roles** -> pick a role -> tick **See reports**. Each report also needs the permission for its data:
+money reports (Collection, Income, GST) need **See bills**, New vs repeat needs **See appointments and queue**,
+Missed follow-ups needs **See patients**. At the start Admin and Doctor have Reports; Receptionist does not.
 
 ## Add a role or change what a role can do
 

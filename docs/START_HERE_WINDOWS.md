@@ -182,6 +182,22 @@ No real SMS is sent yet. You can find the code in two places:
 8. **Stock check -> Start stock check**: type what you count -> **Complete check**: differences are corrected.
 9. **Stock ledger**: pick a medicine to see every + and - with the balance. The **Dashboard** shows stock alerts.
 
+### Step 8 check (reports)
+
+1. Log in as `admin` -> **Reports** (left menu).
+2. **Collection**: this month's money by Cash / UPI / Card, refunds and net, day by day. Click **Month-wise** for one
+   row per month. Click the dates -> choose **Last month** or **This financial year**.
+3. **Income by doctor**: consultation, services, medicines, billed, received and still due for each doctor.
+4. **New vs repeat patients**: new cases (first check-up ever) and follow-ups.
+5. **Missed follow-ups**: patients whose follow-up date has passed and who have not come back (phones are masked;
+   click the name to open the patient).
+6. **GST summary**: taxable value and GST per HSN / SAC code and rate, minus credit notes (check with your CA).
+7. Click **Excel** or **PDF** to download what is on screen. **Audit log** shows "Exported" for each download.
+8. With more than one branch, a branch choice appears: this branch, another branch or **All branches**, and an
+   extra report **Income by branch**.
+9. Who sees Reports: Admin and Doctor at the start. To give a receptionist Reports, **Roles** -> Receptionist ->
+   tick "See reports". Money reports also need "See bills"; Missed follow-ups needs "See patients".
+
 ## 5. Other addresses
 
 | What | Address |

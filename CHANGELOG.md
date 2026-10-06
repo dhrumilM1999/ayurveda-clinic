@@ -2,6 +2,27 @@
 
 What changed in each step, in plain words.
 
+## Step 8: Reports (2026-10-06)
+
+- New **Reports** screen (left menu) with six reports, for any dates (quick choices: Today, Yesterday, This month,
+  Last month, This financial year):
+  - **Collection**: money received by Cash / UPI / Card, refunds and net, day-wise or month-wise. Same figures as
+    the daily closing.
+  - **Income by doctor**: consultation, services & therapy, medicines, round off, billed (after returns), received
+    and still due. Pharmacy bills count for the doctor who wrote the prescription.
+  - **Income by branch**: the same per branch (shows only with more than one branch).
+  - **New vs repeat patients**: check-ups, patients, new cases, follow-ups and repeat %, day-wise or month-wise.
+  - **Missed follow-ups**: follow-up date passed and the patient has not come back (any branch). Phones masked.
+  - **GST summary**: per HSN / SAC code and GST rate: taxable value, CGST, SGST, minus credit notes. Check with your CA.
+- **Excel** and **PDF** download of every report. Every download (and every look at Missed follow-ups) is in the
+  audit log.
+- **Branch choice**: this branch, another branch you work in, or All branches.
+- **Permissions**: "See reports" plus the data's own permission (bills / appointments / patients) in each branch.
+  Admin and Doctor have Reports at the start; give it to others on the Roles screen.
+- The **Dashboard** already shows today's patients, collection and queue (built in Steps 3 and 6).
+- Not done yet: Excel / PDF headings are in English only; very large reports in the background (later, Step 16);
+  stock and expiry reports are on the Pharmacy screen.
+
 ## Share mode and demo video captions (2026-10-06)
 
 - **`start-share.bat`**: double-click to open the clinic software from a phone or another laptop on the **same
