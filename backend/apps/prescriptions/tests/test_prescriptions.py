@@ -136,3 +136,17 @@ def test_templates(org, doctor, branch_a, meds, roles):
     assert client.post("/api/v1/prescription-templates/", {"name": "Empty", "items": []}, format="json").status_code == 400
     client.patch(f"/api/v1/prescription-templates/{res.data['id']}/", {"is_active": False}, format="json")
     assert client.get("/api/v1/prescription-templates/").data == []
+
+
+@pytest.mark.django_db
+def test_medicine_days_saved_and_kept(doctor, branch_a, visit, meds):
+    client = client_for(doctor, branch_a)
+    created = client.post(URL, {"visit": str(visit.id), "items": [line(meds["Triphala Churna"], duration=180)],
+                                "medicine_days": 180}, format="json")
+    assert created.status_code == 201, created.data
+    assert created.data["medicine_days"] == 180
+    # Saving lines without medicine_days keeps it; null clears it; bad values are refused
+    res = client.patch(f"{URL}{created.data['id']}/", {"items": [line(meds["Triphala Churna"])]}, format="json")
+    assert res.data["medicine_days"] == 180
+    assert client.patch(f"{URL}{created.data['id']}/", {"medicine_days": 0}, format="json").status_code == 400
+    assert client.patch(f"{URL}{created.data['id']}/", {"medicine_days": None}, format="json").data["medicine_days"] is None

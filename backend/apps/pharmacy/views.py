@@ -30,6 +30,11 @@ from .services import (
 )
 
 
+def auto_batch_no(expiry_date) -> str:
+    """'Batch tracking' off: one automatic batch per expiry month (or one batch when expiry is not tracked)."""
+    return f"EXP-{expiry_date:%m%Y}" if expiry_date else "GENERAL"
+
+
 def _day(raw, default=None):
     if not raw:
         return default
@@ -93,6 +98,7 @@ class RackViewSet(PharmacyMixin, AuditedModelViewSet):
 
 class SupplierViewSet(PharmacyMixin, AuditedModelViewSet):
     queryset = Supplier.objects.all()
+    required_features = {"*": "pharmacy_suppliers"}
     serializer_class = SupplierSerializer
     branch_scoped = False
     branch_required = True
@@ -134,17 +140,30 @@ class PurchaseViewSet(PharmacyMixin, mixins.ListModelMixin, mixins.RetrieveModel
             self.need_feature(request, "pharmacy_opening_stock")
         org_id = request.user.organization_id
         supplier = None
+        if v.get("supplier") and not is_feature_enabled(request.branch, "pharmacy_suppliers"):
+            raise PermissionDenied("Supplier management is switched off (Additional settings).")
         if v.get("supplier"):
             supplier = Supplier.objects.filter(organization_id=org_id, pk=v["supplier"]).first()
             if supplier is None:
                 raise ValidationError({"supplier": "Supplier not found."})
         medicines = {m.id: m for m in Medicine.objects.filter(organization_id=org_id, id__in=[i["medicine"] for i in v["items"]])}
+        batches_on = is_feature_enabled(request.branch, "pharmacy_batch_tracking")
+        prices_on = is_feature_enabled(request.branch, "pharmacy_selling_price")
         items = []
         for line in v["items"]:
             medicine = medicines.get(line["medicine"])
             if medicine is None:
                 raise ValidationError({"items": "A medicine was not found."})
-            items.append({**line, "medicine": medicine, "gst_rate": line.get("gst_rate", medicine.gst_rate)})
+            line = {**line, "medicine": medicine, "gst_rate": line.get("gst_rate", medicine.gst_rate)}
+            if not line["batch_no"]:
+                if batches_on:
+                    raise ValidationError({"items": f"{medicine.name}: please enter the batch number."})
+                line["batch_no"] = auto_batch_no(line.get("expiry_date"))
+            if line.get("mrp") is None:
+                if prices_on:
+                    raise ValidationError({"items": f"{medicine.name}: please enter the MRP."})
+                line["mrp"] = medicine.mrp or 0
+            items.append(line)
         purchase = receive_stock(request.branch, request.user, items=items, supplier=supplier,
                                  invoice_no=v.get("invoice_no", ""), invoice_date=v.get("invoice_date"),
                                  notes=v.get("notes", ""), other_charges=v.get("other_charges", 0),

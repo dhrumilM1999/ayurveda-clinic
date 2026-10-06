@@ -104,7 +104,7 @@ export default function MedicinesPage() {
             title: t('medicines.kind'), dataIndex: 'kind', width: 120,
             render: (k: MedicineKind) => <Tag color={k === 'classical' ? 'green' : 'blue'} className="tag-tight">{t(`medicines.kinds.${k}`)}</Tag>,
           },
-          { title: t('medicines.form'), key: 'form', width: 200, ellipsis: true, render: (_: unknown, m: Medicine) => masterLabel(m.dosage_form) || '—' },
+          { title: t('medicines.form'), key: 'form', width: 200, ellipsis: true, render: (_: unknown, m: Medicine) => [masterLabel(m.dosage_form), m.strength].filter(Boolean).join(' · ') || '—' },
           { title: t('medicines.safety'), key: 'flags', width: 250, render: (_: unknown, m: Medicine) => (FLAGS.some((f) => m[f]) ? <MedicineFlags medicine={m} /> : <span className="cell-sub">—</span>) },
           {
             title: t('medicines.price'), key: 'price', width: 110, align: 'right' as const,

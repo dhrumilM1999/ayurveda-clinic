@@ -1,0 +1,83 @@
+{% load humanize_money %}{% comment %}
+SAFE TO EDIT: the medicine label (one label per page, for label printers).
+- format: compact (50 x 25 mm), standard (75 x 50 mm), detailed (100 x 70 mm). Sizes are in apps/pharmacy/labels.py.
+- show.label_... : the label fields switched on in Additional settings. Keep the {% if %} checks.
+- words.* : fixed words in the patient's language (Morning / Noon / Night ...), see WORDS in labels.py.
+You may change the wording, colours and font sizes. Keep everything inside {{ }} and {% %}.
+{% endcomment %}<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: {{ width }} {{ height }}; margin: 1.5mm; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Noto Sans", "Noto Sans Gujarati", "Noto Sans Devanagari", sans-serif; color: #111; }
+  .label { page-break-after: always; height: 100%; overflow: hidden; display: flex; flex-direction: column; gap: 0.6mm; }
+  .label:last-child { page-break-after: auto; }
+  .top { display: flex; justify-content: space-between; gap: 2mm; font-size: 6pt; color: #333; border-bottom: 0.3mm solid #1f5c46; padding-bottom: 0.5mm; }
+  .clinic { font-weight: 700; color: #1f5c46; }
+  .med { font-weight: 700; font-size: 9pt; line-height: 1.15; }
+  .strength { font-weight: 400; font-size: 7pt; }
+  .patient { font-size: 7pt; }
+  .row { display: flex; align-items: center; gap: 2mm; font-size: 7pt; }
+  .times { display: flex; gap: 1mm; }
+  .time { border: 0.3mm solid #111; border-radius: 1mm; text-align: center; min-width: 9mm; padding: 0.3mm 0.6mm; }
+  .time b { display: block; font-size: 9pt; line-height: 1; }
+  .time span { font-size: 5pt; }
+  .freq { font-size: 11pt; font-weight: 700; letter-spacing: 0.5mm; }
+  .instr { font-size: 7pt; }
+  .meta { font-size: 6pt; color: #333; display: flex; flex-wrap: wrap; gap: 0 2.5mm; }
+  .bottom { margin-top: auto; display: flex; justify-content: space-between; align-items: flex-end; gap: 2mm; }
+  .qr img { width: 14mm; height: 14mm; }
+  {% if format == "compact" %}
+  .med { font-size: 8pt; }
+  .freq { font-size: 10pt; }
+  .instr { font-size: 6pt; }
+  {% endif %}
+  {% if format == "detailed" %}
+  .med { font-size: 11pt; }
+  .row, .instr, .patient { font-size: 8pt; }
+  .time b { font-size: 11pt; }
+  .qr img { width: 18mm; height: 18mm; }
+  {% endif %}
+</style>
+</head>
+<body>
+{% for l in labels %}
+<div class="label">
+  {% if format != "compact" %}
+  <div class="top">
+    <span>{% if show.label_clinic %}<span class="clinic">{{ clinic }}</span>{% if format == "detailed" %} · {{ branch.name }}{% if branch.phone %} · {{ branch.phone }}{% endif %}{% endif %}{% endif %}</span>
+    <span>{% if show.label_date %}{{ words.date }} {{ date|date:"d-m-Y" }}{% endif %}{% if show.label_rx_no and rx_number %} · {{ rx_number }}{% elif show.label_rx_no %} · {{ words.rx }} {{ rx_short }}{% endif %}</span>
+  </div>
+  {% if show.label_patient %}<div class="patient">{{ words.for }}: <b>{{ patient }}</b></div>{% endif %}
+  {% endif %}
+
+  <div class="med">{{ l.medicine }}{% if l.strength %} <span class="strength">{{ l.strength }}</span>{% endif %}</div>
+
+  <div class="row">
+    {% if l.times %}
+      <div class="times">{% for key, n in l.times %}<div class="time"><b>{{ n }}</b><span>{% if key == "morning" %}{{ words.morning }}{% elif key == "noon" %}{{ words.noon }}{% else %}{{ words.night }}{% endif %}</span></div>{% endfor %}</div>
+    {% elif l.frequency %}<span class="freq">{{ l.frequency }}</span>{% endif %}
+    <div>
+      {% if l.dose and format != "compact" %}<div>{{ words.dose }}: <b>{{ l.dose }}</b></div>{% endif %}
+      {% if l.duration %}<div><b>{{ l.duration }}</b></div>{% endif %}
+    </div>
+  </div>
+
+  {% if l.instructions %}<div class="instr">{{ l.instructions }}</div>{% endif %}
+
+  <div class="bottom">
+    <div class="meta">
+      {% if format != "compact" and l.quantity %}<span>{{ words.qty }}: {{ l.quantity }}</span>{% endif %}
+      {% if format != "compact" and l.expiry %}<span>{{ words.exp }}: {{ l.expiry|date:"m-Y" }}</span>{% endif %}
+      {% if format == "detailed" and l.batch %}<span>{{ words.batch }}: {{ l.batch }}</span>{% endif %}
+      {% if format == "detailed" and l.price is not None %}<span>{{ words.mrp }}: ₹{{ l.price|money }}</span>{% endif %}
+      {% if format != "compact" and show.label_doctor %}<span>{{ doctor }}</span>{% endif %}
+    </div>
+    {% if format == "detailed" and l.qr %}<div class="qr"><img src="{{ l.qr }}" alt=""></div>{% endif %}
+  </div>
+</div>
+{% endfor %}
+</body>
+</html>

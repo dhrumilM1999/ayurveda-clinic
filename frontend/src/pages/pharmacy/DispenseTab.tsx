@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from '../../api/client';
 import type { DispenseDetail, DispenseLine, DispenseQueueRow, DispenseStatus, PaymentMode, ScanResult } from '../../api/types';
 import { useAuth } from '../../auth/AuthContext';
+import { LabelsButton } from '../../components/BillPreview';
 import { PatientCell } from '../appointments/shared';
 import { money } from '../medicines/shared';
 import { UpiPayment } from './BillsTab';
@@ -104,7 +105,7 @@ export function DispenseTab() {
 }
 
 type Choice = { give: boolean; batch?: string; quantity: number; loose: boolean; units: number; discount: number };
-type Done = { invoice: string | null; number: string; total_amount: string; invoice_status: string };
+type Done = { dispense: string; invoice: string | null; number: string; total_amount: string; invoice_status: string };
 
 function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClose: (done: boolean) => void }) {
   const { t } = useTranslation();
@@ -221,7 +222,7 @@ function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClos
       <Modal open width={520} title={t('pharmacy.dispense')} onCancel={() => onClose(true)}
         footer={<Button type="primary" onClick={() => onClose(true)}>{t('common.close')}</Button>}>
         <Result className="compact-result" icon={<CheckCircleFilled style={{ color: 'var(--clinic-primary)' }} />}
-          title={t('pharmacy.givenDone')} />
+          title={t('pharmacy.givenDone')} extra={<LabelsButton dispense={done.dispense} size="middle" />} />
       </Modal>
     );
   }
@@ -233,7 +234,7 @@ function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClos
         <Result className="compact-result" icon={<CheckCircleFilled style={{ color: 'var(--clinic-primary)' }} />}
           title={t('pharmacy.billMade', { number: done.number })}
           subTitle={`${money(done.total_amount)} · ${t(`billing.status.${done.invoice_status}`)}`}
-          extra={<PrintButton id={done.invoice} size="middle" type="primary" />} />
+          extra={<Space size={8}><PrintButton id={done.invoice} size="middle" type="primary" /><LabelsButton dispense={done.dispense} size="middle" /></Space>} />
         {done.invoice_status !== 'paid' && <UpiPayment invoiceId={done.invoice} />}
       </Modal>
     );
@@ -278,8 +279,9 @@ function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClos
         <>
           <div className="section-toolbar">
             <span className="cell-sub">{detail.patient_detail.uhid} · {t('pharmacy.byDoctor', { name: detail.doctor_name })}</span>
-            {canSell && (discounts || barcode) && (
+            {canSell && (
               <Space size={8}>
+                <LabelsButton prescription={prescriptionId} />
                 {discounts && (
                   <>
                     <span className="cell-sub">{t('pharmacy.discountAll')}</span>
@@ -334,7 +336,12 @@ function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClos
                       onChange={(v) => set(l.id, { batch: v })} popupMatchSelectWidth={false}
                       options={l.batches.map((b) => ({
                         value: b.id,
-                        label: `${b.batch_no} · ${t('pharmacy.exp')} ${expiryText(b.expiry_date)} · ${qty(b.quantity)} ${t('pharmacy.left')} · ${money(b.sale_price)}`,
+                        label: [
+                          hasFeature('pharmacy_batch_tracking') ? b.batch_no : '',
+                          hasFeature('pharmacy_expiry_tracking') ? `${t('pharmacy.exp')} ${expiryText(b.expiry_date)}` : '',
+                          `${qty(b.quantity)} ${t('pharmacy.left')}`,
+                          hasFeature('pharmacy_selling_price') ? money(b.sale_price) : '',
+                        ].filter(Boolean).join(' · '),
                       }))} />
                   );
                 },

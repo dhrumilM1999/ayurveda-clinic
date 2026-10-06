@@ -783,7 +783,7 @@
     "empty": "No medicines found.",
     "name": "Name",
     "kind": "Type",
-    "form": "Form",
+    "form": "Medicine type / form",
     "safety": "Safety",
     "price": "Price",
     "inUse": "In use",
@@ -887,10 +887,34 @@
     "allowLoose": "Sell loose",
     "allowLooseHelp": "Part of a pack can be given",
     "sellingPrice": "Selling price",
-    "sellingPriceHelp": "Empty = MRP"
+    "sellingPriceHelp": "Empty = MRP",
+    "strength": "Strength",
+    "sku": "Medicine code (SKU)",
+    "skuHelp": "Your own short code; search finds it",
+    "notes": "Notes",
+    "notesPlaceholder": "e.g. keep in a cool place"
   },
   "rx": {
     "title": "Prescription",
+    "medicineDays": "Medicine days",
+    "followUpDays": "Follow-up after",
+    "daysShort": "{{n}} days",
+    "daysUnit": "days",
+    "customDays": "Other",
+    "sameAsMedicine": "Same as medicine days",
+    "linkedHelp": "Changing the medicine days also changes the follow-up. Type another follow-up to keep it separate.",
+    "makeSame": "Make same ({{n}} days)",
+    "orChooseDate": "or choose a date:",
+    "quantity": "Qty",
+    "quantityHelp": "Worked out from dose x M-N-N x days (e.g. 180 tablets). Type your own if needed.",
+    "quantityPlaceholder": "e.g. 1 bottle",
+    "lastPrescription": "Last prescription",
+    "continueAll_one": "Continue {{count}} medicine",
+    "continueAll_other": "Continue all {{count}} medicines",
+    "continueOne": "Continue",
+    "alreadyAdded": "Added",
+    "continued_one": "{{count}} medicine continued - check the dose and days",
+    "continued_other": "{{count}} medicines continued - check the doses and days",
     "applyTemplate": "Apply template",
     "noTemplates": "No templates yet",
     "saveTemplate": "Save as template",
@@ -908,7 +932,7 @@
     "medicine": "Medicine",
     "dose": "Dose",
     "frequency": "M-N-N",
-    "frequencyHelp": "Morning - Noon - Night, e.g. 1-0-1",
+    "frequencyHelp": "Morning - Noon - Night. Quick: type 222 for 2-2-2, 101 for 1-0-1",
     "timing": "When",
     "anupana": "Anupana",
     "duration": "For",
@@ -1245,7 +1269,9 @@
     "needs": "Needs: {{name}}",
     "groups": {
       "pharmacy": "Pharmacy and stock",
-      "billing": "Billing"
+      "billing": "Billing",
+      "stock": "Medicine stock",
+      "labels": "Medicine labels"
     },
     "features": {
       "pharmacy_billing": {
@@ -1303,6 +1329,85 @@
       "combined_opd_bill": {
         "label": "Medicines on the OPD bill (one combined bill)",
         "help": "On: medicines given by the pharmacy are added to the patient's OPD bill of that visit, so the patient gets one bill. Off: the pharmacy makes its own pharmacy bill (keeps GST and the drug licence separate - ask your CA)."
+      },
+      "pharmacy_batch_tracking": {
+        "label": "Batch tracking",
+        "help": "Enter the batch number of each purchase. Off: stock is kept by expiry month (or as one lot) without batch numbers."
+      },
+      "pharmacy_expiry_tracking": {
+        "label": "Expiry tracking",
+        "help": "Expiry month on purchases and stock; the earliest expiry is given first."
+      },
+      "pharmacy_purchase_price": {
+        "label": "Purchase price",
+        "help": "Purchase rate on purchases and stock (needed for the detailed purchase entry)."
+      },
+      "pharmacy_selling_price": {
+        "label": "Selling price / MRP",
+        "help": "MRP and selling price of each batch (needed for pharmacy bills)."
+      },
+      "pharmacy_suppliers": {
+        "label": "Supplier management",
+        "help": "Supplier list and the supplier on purchases."
+      },
+      "medicine_labels": {
+        "label": "Medicine labels",
+        "help": "Print a small label for each medicine given (from the pharmacy or the prescription). Medicine name, dose, days and instructions are always printed."
+      },
+      "label_patient": {
+        "label": "Label: patient name",
+        "help": ""
+      },
+      "label_quantity": {
+        "label": "Label: quantity",
+        "help": ""
+      },
+      "label_times": {
+        "label": "Label: morning / noon / night boxes",
+        "help": "Big boxes like 1 | 0 | 1 under Morning, Noon, Night."
+      },
+      "label_expiry": {
+        "label": "Label: expiry date",
+        "help": ""
+      },
+      "label_batch": {
+        "label": "Label: batch number",
+        "help": "Detailed label only."
+      },
+      "label_price": {
+        "label": "Label: MRP / price",
+        "help": "Detailed label only."
+      },
+      "label_code": {
+        "label": "Label: QR code",
+        "help": "Detailed label only. Holds the medicine barcode (or the bill / Rx number)."
+      },
+      "label_doctor": {
+        "label": "Label: doctor name",
+        "help": ""
+      },
+      "label_rx_no": {
+        "label": "Label: Rx / bill number",
+        "help": ""
+      },
+      "label_date": {
+        "label": "Label: date given",
+        "help": ""
+      },
+      "label_clinic": {
+        "label": "Label: clinic / pharmacy name",
+        "help": ""
+      }
+    },
+    "choices": {
+      "label_format": {
+        "label": "Default label format",
+        "help": "Compact 50x25 mm: medicine, dose, days, instructions. Standard 75x50 mm: adds patient, quantity, expiry. Detailed 100x70 mm: adds batch, price, QR code.",
+        "options": {
+          "compact": "Compact",
+          "standard": "Standard",
+          "detailed": "Detailed"
+        }
       }
     }
   },
@@ -1380,5 +1485,9 @@
     "billColumn": "OPD bill",
     "visitBill": "OPD bill",
     "next": "Next: OPD bill"
+  },
+  "labels": {
+    "button": "Labels",
+    "title": "Medicine labels"
   }
 }

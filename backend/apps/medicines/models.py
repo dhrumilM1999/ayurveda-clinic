@@ -45,6 +45,9 @@ class Medicine(OrgScopedModel):
     selling_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True,
                                         help_text="Usual selling price per pack (MRP is the maximum)")
     barcode = models.CharField(max_length=64, blank=True, db_index=True)
+    strength = models.CharField(max_length=60, blank=True)  # e.g. "500 mg", "10 mg/ml"
+    sku = models.CharField("Medicine code (SKU)", max_length=40, blank=True)  # the clinic's own short code
+    notes = models.TextField(blank=True)
 
     # What the prescription screen fills in by default
     default_dose = models.CharField(max_length=20, blank=True)  # e.g. "2", "3-5"
@@ -71,6 +74,8 @@ class Medicine(OrgScopedModel):
                                     name="uniq_medicine_name_per_kind"),
             models.UniqueConstraint(fields=["organization", "barcode"], condition=Q(is_deleted=False) & ~Q(barcode=""),
                                     name="uniq_medicine_barcode"),
+            models.UniqueConstraint(fields=["organization", "sku"], condition=Q(is_deleted=False) & ~Q(sku=""),
+                                    name="uniq_medicine_sku"),
         ]
         indexes = [models.Index(fields=["organization", "is_active"])]
 

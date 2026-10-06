@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from '../../api/client';
 import type { InvoiceStatus, Page, SaleItem, SaleRow } from '../../api/types';
 import { useAuth } from '../../auth/AuthContext';
+import { LabelsButton } from '../../components/BillPreview';
 import { PatientCell } from '../appointments/shared';
 import { money } from '../medicines/shared';
 import { InvoiceDrawer } from './BillsTab';
@@ -63,6 +64,7 @@ export function SalesTab() {
             render: (_: unknown, r: SaleRow) => (
               <Space size={4}>
                 {billing && r.invoice && <PrintButton id={r.invoice} />}
+                <LabelsButton dispense={r.id} />
                 {returns && can('pharmacy.dispense') && r.invoice_status !== 'cancelled' && (
                   <Button size="small" icon={<RollbackOutlined />} onClick={() => setReturning(r.id)}>{t('pharmacy.return')}</Button>
                 )}

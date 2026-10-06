@@ -2,6 +2,37 @@
 
 What changed in each step, in plain words.
 
+## Prescription speed-ups, follow-up days, medicine labels, stock switches (2026-10-06)
+
+**Faster prescription (check-up screen)**
+- **Quick dosage**: type `222` in M-N-N and it becomes `2-2-2` (101 -> 1-0-1, 010 -> 0-1-0). You can still type
+  anything, e.g. `1/2-0-1/2`. Also works for a medicine's default dose.
+- **Medicine days**: 3 / 5 / 7 / 15 / 30 / 60 / 90 / 180 days or any number. Every medicine without its own days
+  gets them. The **Follow-up** is set to the same days automatically - but you can change the follow-up on its
+  own (e.g. medicines 180 days, follow-up 30 days); changing the follow-up never changes the medicine days.
+  "Make same" puts them together again. The same bar is in the Follow-up section. One Undo step for all.
+- **Qty** for each medicine is worked out (e.g. 2-2-2 x 30 days = 180 tablets; 2 g x 1-0-1 x 30 days = 120 g)
+  until you type your own.
+- **Last prescription** card: the patient's previous medicines with **Continue all** or **Continue** for one.
+  They are copied into today's prescription to change freely; the old prescription is never changed.
+
+**Medicines**: new types Tablet, Injection, Drops, Powder / sachet (and units vial, ampoule, sachet); new fields
+Strength, Medicine code (SKU, with "Extra product details") and Notes. Pack type is always shown.
+
+**Medicine labels** (Additional settings -> Medicine labels, off at the start): a **Labels** button on the
+prescription, in the pharmacy dispense popup, after giving medicines and on Sales. Three formats - Compact
+50x25 mm, Standard 75x50 mm, Detailed 100x70 mm - with the clinic's default chosen in Additional settings.
+Morning / Noon / Night boxes, days and instructions in the patient's language. One switch per optional field
+(patient, quantity, times, expiry, batch, price, QR code, doctor, Rx / bill no., date, clinic name).
+
+**Medicine stock switches** (Additional settings -> Medicine stock, ON at the start = how it worked before):
+batch tracking, expiry tracking, purchase price, selling price / MRP, supplier management. Switching one off
+hides it everywhere (batch off = automatic batch per expiry month). Pharmacy bills need selling price / MRP.
+Stock tracking itself is still the "Pharmacy and stock" module in Settings -> Modules.
+
+Existing patients, prescriptions, medicines and stock are unchanged (only new, optional fields were added).
+Built on the Git branch `feature/rx-followup-labels` in small steps.
+
 ## Step 6: OPD billing, bill preview, OPD dashboard (2026-10-05)
 
 **OPD bill (out-patient)**

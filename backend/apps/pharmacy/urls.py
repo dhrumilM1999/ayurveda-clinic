@@ -1,4 +1,7 @@
+from django.urls import path
 from rest_framework.routers import DefaultRouter
+
+from .labels import MedicineLabelView
 
 from .views import (
     DispensingViewSet, PurchaseReturnViewSet, PurchaseViewSet, RackViewSet, SaleViewSet, StockViewSet, SupplierViewSet,
@@ -15,4 +18,4 @@ router.register("stock-checks", VerificationViewSet, basename="stock-check")
 router.register("dispensing", DispensingViewSet, basename="dispensing")
 router.register("sales", SaleViewSet, basename="sale")
 
-urlpatterns = router.urls
+urlpatterns = [path("medicine-labels/", MedicineLabelView.as_view(), name="medicine-labels")] + router.urls

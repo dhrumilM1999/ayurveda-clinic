@@ -24,6 +24,8 @@ class Prescription(BranchScopedModel):
     doctor = models.ForeignKey("accounts.User", on_delete=models.PROTECT, related_name="prescriptions")
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="draft", db_index=True)
     notes = EncryptedTextField(blank=True)  # general instructions for the patient
+    # How many days the medicines continue (quick choice for all lines; each line keeps its own duration)
+    medicine_days = models.PositiveSmallIntegerField(null=True, blank=True)
     finalized_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:

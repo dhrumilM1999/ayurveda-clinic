@@ -120,6 +120,16 @@ export interface FeatureFlag {
   enabled: boolean;
 }
 
+/** An additional setting that is a choice, e.g. the default medicine label format. */
+export interface AdditionalChoice {
+  code: string;
+  group: string;
+  label: string;
+  options: string[];
+  requires: string;
+  value: string;
+}
+
 /** An optional extra feature, switched on/off for the whole organization (Additional settings). */
 export interface AdditionalFeature {
   code: string;
@@ -592,6 +602,9 @@ export interface Medicine {
   branch_price: string | null;
   branch_active: boolean;
   updated_at: string;
+  strength: string;
+  sku: string;
+  notes: string;
 }
 
 export interface MedicineVersion {
@@ -647,6 +660,8 @@ export interface Prescription {
   branch_name: string;
   status: 'draft' | 'final';
   notes: string;
+  /** Quick "Medicine days" for the whole prescription */
+  medicine_days: number | null;
   finalized_at: string | null;
   items: RxLine[];
   warnings: RxWarning[];

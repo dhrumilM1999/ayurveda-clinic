@@ -31,11 +31,16 @@ def warnings_for(prescription: Prescription) -> list[dict]:
     return check_prescription(prescription.patient, lines_for_check(items))
 
 
+UNCHANGED = object()
+
+
 @transaction.atomic
-def save_prescription(visit, items: list[dict], notes, user, prescription: Prescription | None = None) -> Prescription:
+def save_prescription(visit, items: list[dict], notes, user, prescription: Prescription | None = None,
+                      medicine_days=UNCHANGED) -> Prescription:
     """
     Create or update the prescription of a check-up. `items` are cleaned lines (see serializers).
     Lines keep their id when edited, new lines are added, removed lines are soft-deleted.
+    medicine_days: the quick "Medicine days" choice (None = not set); leave out to keep it as it is.
     """
     if prescription is None:
         prescription = Prescription.objects.filter(visit=visit).first()
@@ -46,6 +51,8 @@ def save_prescription(visit, items: list[dict], notes, user, prescription: Presc
         )
     if notes is not None:
         prescription.notes = notes
+    if medicine_days is not UNCHANGED:
+        prescription.medicine_days = medicine_days
     prescription.updated_by = user
     prescription.save()
 

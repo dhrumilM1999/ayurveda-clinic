@@ -46,6 +46,20 @@ The clinic name printed on documents and bills is set on the **Settings** screen
 
 Check: in VS Code's terminal run `cd frontend` then `npm run check:i18n`. It tells you if a key is missing.
 
+## Medicine labels: fields, format, wording
+
+- **Additional settings -> Medicine labels**: switch labels on, choose the default format (Compact / Standard /
+  Detailed) and switch each optional field on or off (price, batch, expiry, QR code...). Medicine name, dose,
+  days and instructions are always printed.
+- Label wording, colours and font sizes: `backend/templates/documents/medicine_label.html` (SAFE TO EDIT).
+- The fixed words in Gujarati / Hindi (Morning, Noon, Night, Qty...) are in `WORDS` at the top of
+  `backend/apps/pharmacy/labels.py`; label sizes are in `FORMATS` in the same file (ask first).
+
+## Quick day choices on the check-up screen
+
+The buttons 3 / 5 / 7 / 15 / 30 / 60 / 90 / 180 days come from `DAY_CHOICES` at the top of
+`frontend/src/utils/dosage.ts` (SAFE TO EDIT that line). Any other number can be typed in "Other".
+
 ## Change consultation fees and the services list
 
 **Fees & services** (left menu, admin):

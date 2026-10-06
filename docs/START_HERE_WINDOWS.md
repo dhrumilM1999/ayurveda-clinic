@@ -127,6 +127,17 @@ No real SMS is sent yet. You can find the code in two places:
 8. In **Previous check-ups** open an old visit -> **Repeat these medicines**.
 9. **Complete visit**: the prescription becomes *final* (ready for the pharmacy).
 
+### Prescription and label check
+
+1. Log in as `doctor1`, open a check-up of a patient who came before (e.g. Ramesh) -> **Rx (medicines)**.
+2. **Last prescription** shows the old medicines -> **Continue all**.
+3. Click **30 days**: every medicine gets 30 days, the follow-up shows 30 days ("Same as medicine days"),
+   Qty is filled (e.g. 60 tablets).
+4. In M-N-N type `222` -> it becomes `2-2-2` and the Qty changes.
+5. Change **Follow-up after** to 15, then click **180 days**: medicines get 180 days, follow-up stays 15.
+6. As `admin`: **Additional settings -> Medicine labels** -> switch on, choose the format. Back on the
+   prescription click **Labels**: switch Compact / Standard / Detailed and Print.
+
 ### Step 6 check (OPD billing)
 
 1. Log in as `admin` -> **Fees & services**: check the fees of the sample doctors (made up: Rs 300 new case,

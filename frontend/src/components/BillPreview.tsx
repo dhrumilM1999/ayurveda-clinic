@@ -1,34 +1,39 @@
-// Bill / credit note preview in a popup on the same screen (no new browser tab).
-// The preview is not counted as a print; "Print" makes the real copy (later copies say DUPLICATE COPY).
-import { DownloadOutlined, PrinterOutlined } from '@ant-design/icons';
+// PDF preview in a popup on the same screen (no new browser tab): bills, credit notes and medicine labels.
+// Bills: the preview is not counted as a print; "Print" loads the real copy (later copies say DUPLICATE COPY).
+import { DownloadOutlined, PrinterOutlined, TagsOutlined } from '@ant-design/icons';
 import { App, Button, Modal, Segmented, Space, Spin } from 'antd';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from '../api/client';
+import { useAuth } from '../auth/AuthContext';
 
 type Kind = 'invoices' | 'credit-notes';
-type Paper = 'a4' | 'a5' | '80mm';
+type Choice = { value: string; label: string };
 
-async function fetchPdf(kind: Kind, id: string, paper: Paper, preview: boolean): Promise<string> {
-  const { data } = await api.get(`/${kind}/${id}/pdf/`, { params: { size: paper, ...(preview ? { preview: 1 } : {}) }, responseType: 'blob' });
-  return URL.createObjectURL(data);
-}
-
-export function BillPreviewModal({ id, kind = 'invoices', title, onClose }: {
-  id: string;
-  kind?: Kind;
-  title?: string;
+/**
+ * A PDF on screen with a choice (paper size or label format), Download and Print.
+ * fetchPdf(choice, forPrint) returns the PDF; forPrint=true is the copy that is printed / downloaded.
+ */
+export function PdfModal({ title, choices, initial, fetchPdf, fileName, onClose }: {
+  title: string;
+  choices: Choice[];
+  initial: string;
+  fetchPdf: (choice: string, forPrint: boolean) => Promise<Blob>;
+  fileName: string;
   onClose: () => void;
 }) {
   const { t } = useTranslation();
   const { message } = App.useApp();
-  const [paper, setPaper] = useState<Paper>('a4');
+  const [choice, setChoice] = useState(initial);
   const [url, setUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState<'load' | 'print' | 'download' | null>('load');
   const frame = useRef<HTMLIFrameElement>(null);
   const printOnLoad = useRef(false);
+  const fetchRef = useRef(fetchPdf);
+  fetchRef.current = fetchPdf;
 
-  const show = useCallback(async (next: string) => {
+  const show = useCallback((blob: Blob) => {
+    const next = URL.createObjectURL(blob);
     setUrl((old) => {
       if (old) URL.revokeObjectURL(old);
       return next;
@@ -38,21 +43,21 @@ export function BillPreviewModal({ id, kind = 'invoices', title, onClose }: {
   useEffect(() => {
     let alive = true;
     setBusy('load');
-    fetchPdf(kind, id, paper, true)
-      .then((u) => (alive ? show(u) : URL.revokeObjectURL(u)))
+    fetchRef.current(choice, false)
+      .then((blob) => alive && show(blob))
       .catch((err) => message.error(errorMessage(err, t('common.loadFailed'))))
       .finally(() => alive && setBusy(null));
     return () => { alive = false; };
-  }, [kind, id, paper, show, message, t]);
+  }, [choice, show, message, t]);
 
   useEffect(() => () => { if (url) URL.revokeObjectURL(url); }, [url]);
 
-  // Print: load the real (counted) copy into the same frame, then open the print window
+  // Print: load the copy to print into the same frame, then open the print window
   const print = async () => {
     setBusy('print');
     try {
       printOnLoad.current = true;
-      await show(await fetchPdf(kind, id, paper, false));
+      show(await fetchRef.current(choice, true));
     } catch (err) {
       printOnLoad.current = false;
       message.error(errorMessage(err, t('common.loadFailed')));
@@ -70,10 +75,10 @@ export function BillPreviewModal({ id, kind = 'invoices', title, onClose }: {
   const download = async () => {
     setBusy('download');
     try {
-      const file = await fetchPdf(kind, id, paper, false);
+      const file = URL.createObjectURL(await fetchRef.current(choice, true));
       const a = document.createElement('a');
       a.href = file;
-      a.download = `${title ?? 'bill'}.pdf`.replace(/[/\\ ]+/g, '-');
+      a.download = `${fileName}.pdf`.replace(/[/\\ ]+/g, '-');
       a.click();
       window.setTimeout(() => URL.revokeObjectURL(file), 10_000);
     } catch (err) {
@@ -84,16 +89,11 @@ export function BillPreviewModal({ id, kind = 'invoices', title, onClose }: {
   };
 
   return (
-    <Modal open width={920} title={title ?? t('billing.preview')} onCancel={onClose} keyboard={false} maskClosable={false}
+    <Modal open width={920} title={title} onCancel={onClose} keyboard={false} maskClosable={false}
       className="bill-preview-modal"
       footer={(
         <div className="modal-footer-split">
-          <Segmented value={paper} onChange={(v) => setPaper(v as Paper)} disabled={!!busy}
-            options={[
-              { value: 'a4', label: t('billing.paper.a4') },
-              { value: 'a5', label: t('billing.paper.a5') },
-              { value: '80mm', label: t('billing.paper.thermal') },
-            ]} />
+          <Segmented value={choice} onChange={(v) => setChoice(String(v))} disabled={!!busy} options={choices} />
           <Space size={8}>
             <Button onClick={onClose}>{t('common.close')}</Button>
             <Button icon={<DownloadOutlined />} loading={busy === 'download'} disabled={!url} onClick={download}>{t('billing.download')}</Button>
@@ -103,9 +103,32 @@ export function BillPreviewModal({ id, kind = 'invoices', title, onClose }: {
       )}>
       <div className="bill-preview-frame">
         {busy === 'load' && <Spin className="bill-preview-spin" />}
-        {url && <iframe ref={frame} title={title ?? t('billing.preview')} src={`${url}#toolbar=0&navpanes=0&view=FitH`} onLoad={onFrameLoad} />}
+        {url && <iframe ref={frame} title={title} src={`${url}#toolbar=0&navpanes=0&view=FitH`} onLoad={onFrameLoad} />}
       </div>
     </Modal>
+  );
+}
+
+async function blobOf(path: string, params: Record<string, unknown>): Promise<Blob> {
+  const { data } = await api.get(path, { params, responseType: 'blob' });
+  return data;
+}
+
+export function BillPreviewModal({ id, kind = 'invoices', title, onClose }: {
+  id: string;
+  kind?: Kind;
+  title?: string;
+  onClose: () => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <PdfModal title={title ?? t('billing.preview')} fileName={title ?? 'bill'} initial="a4" onClose={onClose}
+      choices={[
+        { value: 'a4', label: t('billing.paper.a4') },
+        { value: 'a5', label: t('billing.paper.a5') },
+        { value: '80mm', label: t('billing.paper.thermal') },
+      ]}
+      fetchPdf={(paper, forPrint) => blobOf(`/${kind}/${id}/pdf/`, { size: paper, ...(forPrint ? {} : { preview: 1 }) })} />
   );
 }
 
@@ -124,6 +147,39 @@ export function PrintButton({ id, kind = 'invoices', size = 'small', type, label
     <>
       <Button size={size} type={type} icon={<PrinterOutlined />} onClick={() => setOpen(true)}>{label ?? t('billing.viewPrint')}</Button>
       {open && <BillPreviewModal id={id} kind={kind} title={title} onClose={() => setOpen(false)} />}
+    </>
+  );
+}
+
+/**
+ * "Labels" button: medicine labels for a sale (dispense) or a prescription, in the clinic's default label
+ * format (Additional settings). Shows nothing while "Medicine labels" is switched off.
+ */
+export function LabelsButton({ dispense, prescription, size = 'small' }: {
+  dispense?: string;
+  prescription?: string;
+  size?: 'small' | 'middle';
+}) {
+  const { t } = useTranslation();
+  const { hasFeature } = useAuth();
+  const [initial, setInitial] = useState<string | null>(null);
+  if (!hasFeature('medicine_labels') || (!dispense && !prescription)) return null;
+  const open = async () => {
+    try {
+      const { data } = await api.get<{ code: string; value: string }[]>('/additional-choices/');
+      setInitial(data.find((c) => c.code === 'label_format')?.value ?? 'standard');
+    } catch {
+      setInitial('standard');
+    }
+  };
+  return (
+    <>
+      <Button size={size} icon={<TagsOutlined />} onClick={open}>{t('labels.button')}</Button>
+      {initial && (
+        <PdfModal title={t('labels.title')} fileName="medicine-labels" initial={initial} onClose={() => setInitial(null)}
+          choices={(['compact', 'standard', 'detailed'] as const).map((v) => ({ value: v, label: t(`additional.choices.label_format.options.${v}`) }))}
+          fetchPdf={(layout) => blobOf('/medicine-labels/', { layout, ...(dispense ? { dispense } : { prescription }) })} />
+      )}
     </>
   );
 }

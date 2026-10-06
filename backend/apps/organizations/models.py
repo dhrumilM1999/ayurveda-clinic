@@ -119,6 +119,24 @@ class BranchFeatureFlag(BranchScopedModel):
         return f"{self.branch} / {self.code} = {self.enabled}"
 
 
+class OrganizationChoice(OrgScopedModel):
+    """A chosen option of the organization's additional settings, e.g. label_format = "compact".
+    Codes and options: ADDITIONAL_CHOICES."""
+
+    code = models.CharField(max_length=50)
+    value = models.CharField(max_length=50)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["organization", "code"], condition=Q(is_deleted=False), name="uniq_choice_per_org"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.organization} / {self.code} = {self.value}"
+
+
 class OrganizationFeature(OrgScopedModel):
     """An optional extra feature switched on/off for the whole organization. Codes: ADDITIONAL_FEATURES."""
 

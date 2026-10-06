@@ -1,11 +1,11 @@
 // Additional settings: optional extra features, switched on/off for the whole organization (clinic).
 // Only organization admins can change them. The list itself comes from the server
 // (backend/apps/organizations/features_catalog.py -> ADDITIONAL_FEATURES); screen text is in src/i18n.
-import { Alert, App, Button, Card, List, Space, Switch, Tag, Typography } from 'antd';
+import { Alert, App, Button, Card, List, Segmented, Space, Switch, Tag, Typography } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from '../api/client';
-import type { AdditionalFeature } from '../api/types';
+import type { AdditionalChoice, AdditionalFeature } from '../api/types';
 import { useAuth } from '../auth/AuthContext';
 
 export default function AdditionalSettingsPage() {
@@ -13,12 +13,17 @@ export default function AdditionalSettingsPage() {
   const { message } = App.useApp();
   const { me, reloadFeatures } = useAuth();
   const [rows, setRows] = useState<AdditionalFeature[]>([]);
+  const [choices, setChoices] = useState<AdditionalChoice[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
   const canEdit = !!me?.user.is_org_admin;
 
   const load = useCallback(async () => {
     try {
-      setRows((await api.get<AdditionalFeature[]>('/additional-features/')).data);
+      const [features, options] = await Promise.all([
+        api.get<AdditionalFeature[]>('/additional-features/'), api.get<AdditionalChoice[]>('/additional-choices/'),
+      ]);
+      setRows(features.data);
+      setChoices(options.data);
     } catch (err) {
       message.error(errorMessage(err, t('common.loadFailed')));
     }
@@ -39,6 +44,18 @@ export default function AdditionalSettingsPage() {
       }
       setRows(latest);
       await reloadFeatures(); // menus and screens follow straight away
+      message.success(t('common.saved'));
+    } catch (err) {
+      message.error(errorMessage(err, t('common.saveFailed')));
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const choose = async (code: string, value: string) => {
+    setBusy(code);
+    try {
+      setChoices((await api.patch<AdditionalChoice[]>(`/additional-choices/${code}/`, { value })).data);
       message.success(t('common.saved'));
     } catch (err) {
       message.error(errorMessage(err, t('common.saveFailed')));
@@ -73,6 +90,19 @@ export default function AdditionalSettingsPage() {
                 </Button>
               </Space>
             )}>
+            {choices.filter((c) => c.group === group).map((c) => {
+              const off = !!c.requires && !rows.find((r) => r.code === c.requires)?.enabled;
+              return (
+                <div className="choice-row" key={c.code}>
+                  <div>
+                    <div><b>{t(`additional.choices.${c.code}.label`, { defaultValue: c.label })}</b></div>
+                    <div className="cell-sub">{t(`additional.choices.${c.code}.help`, { defaultValue: '' })}</div>
+                  </div>
+                  <Segmented value={c.value} disabled={!canEdit || off || busy === c.code} onChange={(v) => choose(c.code, String(v))}
+                    options={c.options.map((o) => ({ value: o, label: t(`additional.choices.${c.code}.options.${o}`, { defaultValue: o }) }))} />
+                </div>
+              );
+            })}
             <List
               dataSource={list}
               renderItem={(row) => (

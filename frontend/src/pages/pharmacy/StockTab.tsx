@@ -173,7 +173,7 @@ export function StockTab() {
               </Space>
             ),
           },
-          {
+          ...(!hasFeature('pharmacy_expiry_tracking') ? [] : [{
             title: t('pharmacy.nearestExpiry'), key: 'expiry', width: 190,
             render: (_: unknown, r: StockRow) => (
               <Space size={6} wrap>
@@ -186,7 +186,7 @@ export function StockTab() {
                 )}
               </Space>
             ),
-          },
+          }]),
           {
             title: <Tooltip title={t('pharmacy.reorderHelp')}>{t('pharmacy.reorderLevel')}</Tooltip>, key: 'level', width: 140,
             render: (_: unknown, r: StockRow) => (
@@ -218,6 +218,11 @@ function BatchList({ row, canStock, onChanged }: { row: StockRow; canStock: bool
   const details = hasFeature('pharmacy_purchase_details');
   const barcode = hasFeature('pharmacy_barcode');
   const supplierReturns = hasFeature('pharmacy_supplier_returns');
+  const batchesOn = hasFeature('pharmacy_batch_tracking');
+  const expiryOn = hasFeature('pharmacy_expiry_tracking');
+  const prices = hasFeature('pharmacy_selling_price');
+  const rateOn = hasFeature('pharmacy_purchase_price');
+  const suppliersOn = hasFeature('pharmacy_suppliers');
   const [batches, setBatches] = useState<StockBatch[] | null>(null);
   const [correcting, setCorrecting] = useState<StockBatch | null>(null);
   const [returning, setReturning] = useState<StockBatch | null>(null);
@@ -239,17 +244,17 @@ function BatchList({ row, canStock, onChanged }: { row: StockRow; canStock: bool
         className="inner-table"
         locale={{ emptyText: t('pharmacy.noBatches') }}
         columns={[
-          { title: t('pharmacy.batch'), dataIndex: 'batch_no', render: (b: string, x: StockBatch) => <><span className="mono">{b}</span>{barcode && x.barcode && <div className="cell-sub mono">{x.barcode}</div>}</> },
-          ...(details ? [{ title: t('pharmacy.mfg'), dataIndex: 'mfg_date', render: expiryText }] : []),
-          {
+          ...(batchesOn ? [{ title: t('pharmacy.batch'), dataIndex: 'batch_no', render: (b: string, x: StockBatch) => <><span className="mono">{b}</span>{barcode && x.barcode && <div className="cell-sub mono">{x.barcode}</div>}</> }] : []),
+          ...(details && expiryOn ? [{ title: t('pharmacy.mfg'), dataIndex: 'mfg_date', render: expiryText }] : []),
+          ...(expiryOn ? [{
             title: t('pharmacy.expiry'), dataIndex: 'expiry_date',
             render: (d: string | null) => (d && d < today ? <Tag color="magenta" className="tag-tight" style={{ marginInlineStart: 0 }}>{expiryText(d)}</Tag> : expiryText(d)),
-          },
-          { title: 'MRP', dataIndex: 'mrp', align: 'right' as const, render: (v: string) => <span className="num">{money(v)}</span> },
-          ...(details ? [{ title: t('pharmacy.sellingPrice'), dataIndex: 'sale_price', align: 'right' as const, render: (v: string) => <span className="num">{money(v)}</span> }] : []),
-          { title: t('pharmacy.purchaseRate'), dataIndex: 'purchase_rate', align: 'right' as const, render: (v: string | null) => <span className="num">{money(v)}</span> },
+          }] : []),
+          ...(prices ? [{ title: 'MRP', dataIndex: 'mrp', align: 'right' as const, render: (v: string) => <span className="num">{money(v)}</span> }] : []),
+          ...(details && prices ? [{ title: t('pharmacy.sellingPrice'), dataIndex: 'sale_price', align: 'right' as const, render: (v: string) => <span className="num">{money(v)}</span> }] : []),
+          ...(rateOn ? [{ title: t('pharmacy.purchaseRate'), dataIndex: 'purchase_rate', align: 'right' as const, render: (v: string | null) => <span className="num">{money(v)}</span> }] : []),
           ...(details ? [{ title: 'GST', dataIndex: 'gst_rate', align: 'right' as const, render: (v: string) => `${qty(v)}%` }] : []),
-          { title: t('pharmacy.supplier'), dataIndex: 'supplier_name', render: (v: string) => v || '—' },
+          ...(suppliersOn ? [{ title: t('pharmacy.supplier'), dataIndex: 'supplier_name', render: (v: string) => v || '—' }] : []),
           { title: t('pharmacy.available'), dataIndex: 'quantity', align: 'right' as const, render: (v: string) => <b className="num">{qty(v)}</b> },
           {
             title: '', key: 'actions', width: 190, align: 'right' as const,

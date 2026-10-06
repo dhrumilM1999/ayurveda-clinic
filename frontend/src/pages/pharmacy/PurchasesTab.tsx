@@ -49,7 +49,13 @@ export function PurchasesTab() {
 
 function PurchaseList({ opening, query }: { opening: boolean; query: string }) {
   const { t } = useTranslation();
-  const details = useAuth().hasFeature('pharmacy_purchase_details');
+  const { hasFeature } = useAuth();
+  const details = hasFeature('pharmacy_purchase_details');
+  const batchesOn = hasFeature('pharmacy_batch_tracking');
+  const expiryOn = hasFeature('pharmacy_expiry_tracking');
+  const rateOn = hasFeature('pharmacy_purchase_price');
+  const prices = hasFeature('pharmacy_selling_price');
+  const suppliersOn = hasFeature('pharmacy_suppliers');
   const { rows, loading, pagination } = useList<PurchaseRecord>('/purchases/', { opening: opening ? 1 : 0, q: query || undefined });
   return (
     <Table<PurchaseRecord>
@@ -63,16 +69,16 @@ function PurchaseList({ opening, query }: { opening: boolean; query: string }) {
           <Table<PurchaseItemRecord> size="small" rowKey="id" pagination={false} dataSource={p.items} className="inner-table" scroll={{ x: 900 }}
             columns={[
               { title: t('rx.medicine'), dataIndex: 'medicine_name' },
-              { title: t('pharmacy.batch'), dataIndex: 'batch_no', render: (b: string) => <span className="mono">{b}</span> },
+              ...(batchesOn ? [{ title: t('pharmacy.batch'), dataIndex: 'batch_no', render: (b: string) => <span className="mono">{b}</span> }] : []),
               ...(details ? [{ title: t('pharmacy.mfg'), dataIndex: 'mfg_date', render: expiryText }] : []),
-              { title: t('pharmacy.expiry'), dataIndex: 'expiry_date', render: expiryText },
+              ...(expiryOn ? [{ title: t('pharmacy.expiry'), dataIndex: 'expiry_date', render: expiryText }] : []),
               { title: t('pharmacy.qty'), key: 'q', align: 'right' as const, render: (_: unknown, i: PurchaseItemRecord) => <span className="num">{qty(i.quantity)}{Number(i.free_quantity) ? ` + ${qty(i.free_quantity)} ${t('pharmacy.freeShort')}` : ''}</span> },
-              { title: t('pharmacy.rateNoGst'), dataIndex: 'purchase_rate', align: 'right' as const, render: (v: string | null) => <span className="num">{money(v)}</span> },
+              ...(rateOn ? [{ title: t('pharmacy.rateNoGst'), dataIndex: 'purchase_rate', align: 'right' as const, render: (v: string | null) => <span className="num">{money(v)}</span> }] : []),
               ...(details ? [
                 { title: t('pharmacy.discount'), dataIndex: 'discount_percent', align: 'right' as const, render: (v: string) => (Number(v) ? `${qty(v)}%` : '—') },
                 { title: 'GST', dataIndex: 'gst_rate', align: 'right' as const, render: (v: string) => `${qty(v)}%` },
               ] : []),
-              { title: 'MRP', dataIndex: 'mrp', align: 'right' as const, render: (v: string) => <span className="num">{money(v)}</span> },
+              ...(prices ? [{ title: 'MRP', dataIndex: 'mrp', align: 'right' as const, render: (v: string) => <span className="num">{money(v)}</span> }] : []),
               ...(details ? [{ title: t('pharmacy.sellingPrice'), dataIndex: 'selling_price', align: 'right' as const, render: (v: string | null) => <span className="num">{money(v)}</span> }] : []),
               { title: t('pharmacy.amount'), dataIndex: 'amount', align: 'right' as const, render: (v: string) => <span className="num">{money(v)}</span> },
             ]} />
@@ -82,11 +88,11 @@ function PurchaseList({ opening, query }: { opening: boolean; query: string }) {
         { title: t('pharmacy.invoiceDate'), dataIndex: 'invoice_date', width: 120, render: (d: string) => <b>{dayjs(d).format('DD-MM-YYYY')}</b> },
         ...(opening ? [] : [
           { title: t('pharmacy.invoiceNo'), dataIndex: 'invoice_no', render: (v: string) => v || '—' },
-          { title: t('pharmacy.supplier'), dataIndex: 'supplier_name', render: (v: string) => v || '—' },
+          ...(suppliersOn ? [{ title: t('pharmacy.supplier'), dataIndex: 'supplier_name', render: (v: string) => v || '—' }] : []),
         ]),
         { title: t('pharmacy.medicines'), key: 'n', width: 110, align: 'center' as const, render: (_: unknown, p: PurchaseRecord) => p.items.length },
-        ...(opening || !details ? [] : [{ title: 'GST', dataIndex: 'gst_amount', width: 110, align: 'right' as const, render: (v: string) => <span className="num">{money(v)}</span> }]),
-        { title: t('pharmacy.purchaseTotal'), dataIndex: 'total_amount', width: 130, align: 'right' as const, render: (v: string) => <b className="num">{money(v)}</b> },
+        ...(opening || !details || !rateOn ? [] : [{ title: 'GST', dataIndex: 'gst_amount', width: 110, align: 'right' as const, render: (v: string) => <span className="num">{money(v)}</span> }]),
+        ...(!rateOn ? [] : [{ title: t('pharmacy.purchaseTotal'), dataIndex: 'total_amount', width: 130, align: 'right' as const, render: (v: string) => <b className="num">{money(v)}</b> }]),
         { title: t('pharmacy.enteredBy'), dataIndex: 'created_by_name', width: 160 },
       ]}
     />

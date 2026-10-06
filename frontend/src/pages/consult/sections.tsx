@@ -157,16 +157,19 @@ export function AdviceSection({ draft, onChange, readOnly }: SectionProps) {
 }
 
 // --- Follow-up -------------------------------------------------------------------------------
-export function FollowUpSection({ draft, onChange, readOnly }: SectionProps) {
+export function FollowUpSection({ draft, onChange, readOnly, daysBar }: SectionProps & { daysBar?: ReactNode }) {
   const { t } = useTranslation();
   const set = (days: number) => onChange({ follow_up_date: dayjs().add(days, 'day').format('YYYY-MM-DD') });
   return (
     <>
       <SectionTitle>{t('consult.sections.followUp')}</SectionTitle>
+      {/* Medicine days and follow-up days (the follow-up follows the medicine days until changed) */}
+      {daysBar}
       <Space wrap size={6}>
-        {[7, 15, 30, 45].map((d) => (
+        {!daysBar && [7, 15, 30, 45].map((d) => (
           <Button key={d} size="small" disabled={readOnly} onClick={() => set(d)}>{t('consult.afterDays', { n: d })}</Button>
         ))}
+        <span className="cell-sub">{t('rx.orChooseDate')}</span>
         <DatePicker size="small" format="DD-MM-YYYY" disabled={readOnly}
           value={draft.follow_up_date ? dayjs(draft.follow_up_date) : null}
           disabledDate={(d) => d.isBefore(dayjs(), 'day')}

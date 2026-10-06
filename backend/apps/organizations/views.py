@@ -1,5 +1,5 @@
 from rest_framework import viewsets
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,12 +9,12 @@ from apps.accounts.services import accessible_branches, user_has_perm
 from apps.audit.services import log_action
 from apps.common.viewsets import AuditedModelViewSet
 
-from .features_catalog import ADDITIONAL_FEATURES, FEATURES
-from .models import Branch, BranchFeatureFlag, Organization, OrganizationFeature, Room, RoomType
+from .features_catalog import ADDITIONAL_CHOICES, ADDITIONAL_FEATURES, FEATURES
+from .models import Branch, BranchFeatureFlag, Organization, OrganizationChoice, OrganizationFeature, Room, RoomType
 from .serializers import (
     BranchSerializer, FeatureFlagSerializer, OrganizationSerializer, RoomSerializer, RoomTypeSerializer,
 )
-from .services import branch_features, organization_features
+from .services import branch_features, organization_choices, organization_features
 
 
 class CurrentOrganizationView(APIView):
@@ -147,6 +147,39 @@ class AdditionalFeatureViewSet(viewsets.ViewSet):
             flag.updated_by = request.user
             flag.save(update_fields=["enabled", "updated_by", "updated_at"])
         log_action(request, "update", flag, changes={"code": code, "enabled": enabled})
+        return Response(self._rows(request.user.organization_id))
+
+    update = partial_update
+
+
+class AdditionalChoiceViewSet(viewsets.ViewSet):
+    """Additional settings that are a choice (e.g. the default label format). Read: everyone; change: org admins."""
+
+    permission_classes = [IsAuthenticated, BranchPermission]
+    lookup_field = "code"
+
+    def _rows(self, organization_id):
+        chosen = organization_choices(organization_id)
+        return [{"code": code, "group": info["group"], "label": info["label"], "options": info["options"],
+                 "requires": info.get("requires", ""), "value": chosen[code]} for code, info in ADDITIONAL_CHOICES.items()]
+
+    def list(self, request):
+        return Response(self._rows(request.user.organization_id))
+
+    def partial_update(self, request, code=None):
+        if not (request.user.is_org_admin and user_has_perm(request.user, "settings.manage")):
+            self.permission_denied(request, message="Only an organization admin can change additional settings.")
+        info = ADDITIONAL_CHOICES.get(code)
+        if info is None:
+            raise NotFound("Unknown setting.")
+        value = request.data.get("value")
+        if value not in info["options"]:
+            raise ValidationError({"value": f"Choose one of: {', '.join(info['options'])}."})
+        row, _ = OrganizationChoice.objects.update_or_create(
+            organization_id=request.user.organization_id, code=code,
+            defaults={"value": value, "updated_by": request.user, "created_by": request.user},
+        )
+        log_action(request, "update", row, changes={"code": code, "value": value})
         return Response(self._rows(request.user.organization_id))
 
     update = partial_update
