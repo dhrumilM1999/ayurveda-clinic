@@ -14,6 +14,8 @@
 | `.env` | **Your settings and secrets** (created by start.bat). Never share it. | SAFE TO EDIT (carefully) |
 | `.env.example` | Template for `.env` with safe practice values | ASK FIRST |
 | `docker-compose.yml` | Describes the 4 containers | ASK FIRST |
+| `start-share.bat` / `docker-compose.share.yml` | Share mode: open the app from a phone on the same Wi-Fi | ASK FIRST |
+| `demo-video/` | Demo videos (kept on the PC only, not in Git) and their English / Gujarati / Hindi captions | SAFE TO EDIT |
 | `.gitattributes`, `.gitignore`, `.htaccess` | Technical housekeeping | ASK FIRST |
 | `docs/` | These guide files | SAFE TO EDIT |
 

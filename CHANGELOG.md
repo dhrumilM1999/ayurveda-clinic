@@ -2,6 +2,14 @@
 
 What changed in each step, in plain words.
 
+## Share mode and demo video captions (2026-10-06)
+
+- **`start-share.bat`**: double-click to open the clinic software from a phone or another laptop on the **same
+  Wi-Fi**. It prints the address to type on the phone. Only the screens are opened to the Wi-Fi; `start.bat`
+  goes back to private mode (this PC only).
+- **`demo-video/`**: English, Gujarati and Hindi captions for the demo video. The video files themselves are kept
+  only on the PC (too big for Git).
+
 ## Step 7: print-outs - prescription, certificates, follow-up card, Prakriti report (2026-10-06)
 
 - **Print menu** on the check-up screen: Prescription (A5 or A4), Follow-up card (A6), Prakriti report,

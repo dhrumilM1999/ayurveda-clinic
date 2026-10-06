@@ -1,0 +1,12 @@
+# SHARE MODE - lets phones / other laptops on the SAME Wi-Fi open the clinic software.
+# Used only by start-share.bat. Normal start.bat does not use this file (it stays private).
+# ASK FIRST before editing.
+services:
+  backend:
+    environment:
+      # Needed because the phone's address (e.g. 192.168.1.50) is not in the normal list.
+      # The backend itself is still NOT opened to the network; only the screens (port 5173) are.
+      DJANGO_ALLOWED_HOSTS: "*"
+  frontend:
+    ports: !override
+      - "0.0.0.0:5173:5173"

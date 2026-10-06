@@ -198,6 +198,7 @@ No real SMS is sent yet. You can find the code in two places:
 | `stop.bat` | Stops the app. **Your data is kept.** |
 | `logs.bat` | Shows live messages and errors (and login OTPs). Press Ctrl+C to stop watching. |
 | `reset-demo-data.bat` | **Deletes all data** and creates fresh sample data. You must type `YES`. Works only while `DEMO_MODE=true` in `.env`. |
+| `start-share.bat` | **Share mode**: starts the app so a phone or laptop on the **same Wi-Fi** can open it. It shows the address to type on the phone (e.g. `http://192.168.1.50:5173`). Use only on a Wi-Fi you trust. Double-click `start.bat` to go back to private mode (this PC only). |
 
 ## 7. Use only made-up data for now
 
