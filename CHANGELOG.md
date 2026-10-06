@@ -2,6 +2,19 @@
 
 What changed in each step, in plain words.
 
+## Detailed prescription, pre-printed pad, clinic logo (2026-10-06)
+
+- **Detailed prescription** (Check-up -> Print): the whole check-up on paper - vitals, allergies, known conditions,
+  other medicines, complaints with how long, history notes, every examination form (Ashtavidha, Dashavidha, Agni...),
+  Prakriti result, diagnoses with codes - then the medicines, advice and next visit. A4 or A5, English / Gujarati /
+  Hindi, Download (PDF export) and Print. Same Rx number and QR code as the normal prescription. Only staff who may
+  see the full medical history can print it.
+- **Pre-printed pad** (Settings -> Branch details -> Prescription paper): when switched on, prescriptions print no
+  letterhead of their own and leave blank space at the top (default 45 mm) and bottom (20 mm) of every page for the
+  clinic's own printed pad. Measure the pad and change the mm.
+- **Clinic logo** (Settings -> Clinic details): upload / change / remove (PNG or JPG). Switches for where it
+  prints: prescriptions, certificates and reports, and bills and receipts (bills now show the logo too).
+
 ## Share mode and demo video captions (2026-10-06)
 
 - **`start-share.bat`**: double-click to open the clinic software from a phone or another laptop on the **same

@@ -137,6 +137,10 @@ No real SMS is sent yet. You can find the code in two places:
 4. **Print -> Medical / fitness certificate**: fill the dates -> Make certificate -> Yes -> it opens to print.
 5. Set a follow-up date -> **Print -> Follow-up card**. Fill the Prakriti questionnaire -> **Print -> Prakriti report**.
 6. **Billing** -> a bill -> View / print -> **Thermal 58 mm**.
+7. **Print -> Detailed prescription (full check-up)**: vitals, complaints, examination, diagnosis and medicines on
+   one print-out. **Download** saves the PDF; **Print** prints it.
+8. As `admin`: **Settings -> Clinic details -> Upload logo**. **Settings -> Branch details -> Prescription paper** ->
+   switch on "Our pre-printed pad", set the blank space -> Save. Print a prescription on your pad and adjust the mm.
 
 ### Prescription and label check
 

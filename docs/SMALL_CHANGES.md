@@ -58,6 +58,16 @@ Check: in VS Code's terminal run `cd frontend` then `npm run check:i18n`. It tel
 - The QR code link uses `PUBLIC_APP_URL` in `.env` (http://localhost:5173 on one PC; on the clinic network put
   the main PC's address, e.g. http://192.168.1.10:5173).
 
+## Clinic logo, pre-printed pad and the detailed prescription
+
+- **Logo**: Settings -> Clinic details -> Clinic logo -> Upload. Two switches say where it prints (documents, bills).
+- **Your own printed pad**: Settings -> Branch details -> Prescription paper -> switch on. Measure with a ruler how
+  much of the top of your pad is already printed (logo, clinic, doctor) and type that in "Blank space at the top";
+  same for the bottom. Print one prescription on the pad and adjust by a few mm if needed.
+- **Detailed prescription words** (headings like "Check-up summary and prescription"): `DETAILED_WORDS` in
+  `backend/apps/documents/words.py` (SAFE TO EDIT). Its look is the "detailed" part of
+  `backend/templates/documents/prescription.html` (SAFE TO EDIT).
+
 ## Medicine labels: fields, format, wording
 
 - **Additional settings -> Medicine labels**: switch labels on, choose the default format (Compact / Standard /
