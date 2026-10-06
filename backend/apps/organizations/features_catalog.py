@@ -38,4 +38,7 @@ ADDITIONAL_FEATURES = {
     "pharmacy_stock_ledger": {"group": "pharmacy", "label": "Stock ledger screen", "default": False},
     "pharmacy_stock_check": {"group": "pharmacy", "label": "Physical stock check", "default": False},
     "medicine_extra_details": {"group": "pharmacy", "label": "Extra product details", "default": False},
+    # Billing
+    "combined_opd_bill": {"group": "billing", "label": "Medicines on the OPD bill (one combined bill)",
+                          "default": False, "requires": "pharmacy_billing"},
 }

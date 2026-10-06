@@ -13,7 +13,7 @@ from rest_framework.response import Response
 from apps.accounts.permissions import BranchPermission
 from apps.audit.services import log_action
 
-from .models import CreditNote, Invoice
+from .models import CreditNote, Invoice, InvoiceLine
 from .payments import upi_link_for
 from .pdf import SIZES, render_pdf
 from .serializers import CancelInput, CreditNoteSerializer, InvoiceListSerializer, InvoiceSerializer, PaymentInput
@@ -95,32 +95,44 @@ class InvoiceViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.
         invoice = self.get_object()
         if invoice.status == "cancelled":
             raise ValidationError({"detail": "Already cancelled."})
-        if invoice.dispense_id:
-            from apps.pharmacy.services import take_back
+        # Medicines on the bill (pharmacy bill, or OPD bill with medicines) go back into stock first
+        from apps.pharmacy.services import take_back
 
+        dispenses = {line.dispense_item.dispense for line in invoice.lines.select_related("dispense_item__dispense")
+                     if line.dispense_item_id}
+        for dispense in dispenses:
             items = [{"dispense_item": i, "quantity": i.quantity - i.returned_quantity, "back_to_stock": True}
-                     for i in invoice.dispense.items.all() if i.quantity > i.returned_quantity]
-            take_back(invoice.dispense, request.branch, request.user, items=items, reason=data.validated_data["reason"],
-                      refund_mode=data.validated_data["refund_mode"])
-        else:
-            items = [(line, line.quantity - line.credited_quantity) for line in invoice.lines.all()
-                     if line.quantity > line.credited_quantity]
+                     for i in dispense.items.all() if i.quantity > i.returned_quantity]
+            if items:
+                take_back(dispense, request.branch, request.user, items=items, reason=data.validated_data["reason"],
+                          refund_mode=data.validated_data["refund_mode"])
+        # Everything else (consultation, services) with one credit note
+        items = [(line, line.quantity - line.credited_quantity) for line in InvoiceLine.objects.filter(invoice=invoice)
+                 if line.quantity > line.credited_quantity]  # fresh from the database (returns above changed them)
+        if items:
             create_credit_note(invoice, request.user, items=items, **data.validated_data)
         log_action(request, "update", invoice, changes={"cancelled": data.validated_data["reason"]})
         return Response(self.get_serializer(self.get_queryset().get(pk=invoice.pk)).data)
 
     @action(detail=True, methods=["get"])
     def pdf(self, request, pk=None):
-        """?size=a4|a5|80mm  ?download=1. The first print is the original; later prints say DUPLICATE COPY."""
+        """
+        ?size=a4|a5|80mm  ?download=1. The first print is the original; later prints say DUPLICATE COPY.
+        ?preview=1 shows the bill on screen only: it is not counted as a print (logged as a view).
+        """
         invoice = self.get_object()
         size = request.query_params.get("size", "a4")
         if size not in SIZES:
             raise ValidationError({"size": "Choose a4, a5 or 80mm."})
         duplicate = invoice.print_count > 0
         content = render_pdf(invoice=invoice, size=size, duplicate=duplicate)
-        Invoice.objects.filter(pk=invoice.pk).update(print_count=invoice.print_count + 1)
-        log_action(request, "print", invoice, changes={"size": size, "duplicate": duplicate,
-                                                       "patient": str(invoice.patient_id or "")})
+        if request.query_params.get("preview") == "1":
+            log_action(request, "view", invoice, changes={"size": size, "preview": True,
+                                                          "patient": str(invoice.patient_id or "")})
+        else:
+            Invoice.objects.filter(pk=invoice.pk).update(print_count=invoice.print_count + 1)
+            log_action(request, "print", invoice, changes={"size": size, "duplicate": duplicate,
+                                                           "patient": str(invoice.patient_id or "")})
         return pdf_response(content, f"{invoice.number.replace('/', '-')}.pdf", request.query_params.get("download") == "1")
 
     @action(detail=True, methods=["get"])
@@ -130,8 +142,11 @@ class InvoiceViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.
 
     @action(detail=False, methods=["get"])
     def summary(self, request):
-        """Daily closing for one day (default today)."""
-        data = day_summary(request.branch, _day(request.query_params.get("date"), timezone.localdate()))
+        """Daily closing for one day (default today). ?series=OP|PH for one kind of bill only."""
+        series = request.query_params.get("series") or None
+        if series not in (None, "OP", "PH"):
+            raise ValidationError({"series": "Choose OP or PH."})
+        data = day_summary(request.branch, _day(request.query_params.get("date"), timezone.localdate()), series)
 
         def text(value):  # money as "60.00" like everywhere else in the API
             if isinstance(value, dict):

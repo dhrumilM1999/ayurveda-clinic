@@ -40,6 +40,8 @@ PERMISSIONS = {
     "billing.view": "See bills",
     "billing.create": "Create bills and take payments",
     "billing.refund": "Cancel bills and give refunds",
+    "billing.charge": "Add consultation, services and charges to a patient's OPD bill",
+    "billing.manage": "Edit consultation fees and the services & charges list",
     "pharmacy.view": "See pharmacy stock",
     "pharmacy.dispense": "Dispense medicines",
     "pharmacy.stock": "Add purchases and suppliers, correct stock",
@@ -71,7 +73,7 @@ DEFAULT_ROLES = {
             "emr.view", "emr.edit",
             "prescriptions.view", "prescriptions.create",
             "medicines.view", "therapy.view", "therapy.manage",
-            "billing.view", "reports.view", "ai.use",
+            "billing.view", "billing.charge", "reports.view", "ai.use",
         ],
     },
     "receptionist": {
@@ -82,7 +84,7 @@ DEFAULT_ROLES = {
             "dashboard.view", "schedules.view", "rooms.view",
             "patients.view", "patients.create", "patients.edit", "patients.vitals",
             "appointments.view", "appointments.manage",
-            "billing.view", "billing.create",
+            "billing.view", "billing.create", "billing.charge",
         ],
     },
     "therapist": {

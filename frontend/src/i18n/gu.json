@@ -68,23 +68,53 @@
     "templates": "તપાસ ટેમ્પ્લેટ",
     "medicines": "દવાઓ",
     "pharmacy": "ફાર્મસી",
-    "additional": "વધારાના સેટિંગ્સ"
+    "additional": "વધારાના સેટિંગ્સ",
+    "fees": "ફી અને સેવાઓ",
+    "billing": "બિલિંગ"
   },
   "dashboard": {
     "welcome": "સ્વાગત છે, {{name}}",
     "workingIn": "તમે {{branch}} માં {{role}} તરીકે કામ કરી રહ્યા છો.",
-    "todayPatients": "આજના દર્દીઓ",
-    "appointments": "એપોઇન્ટમેન્ટ",
-    "queue": "કતારમાં",
-    "collection": "આજની આવક",
-    "comingSoon": "આગળના તબક્કામાં આવશે",
     "goodMorning": "સુપ્રભાત, {{name}}",
     "goodAfternoon": "નમસ્કાર, {{name}}",
     "goodEvening": "શુભ સાંજ, {{name}}",
-    "today": "આજે, રદ સિવાય",
-    "waitingNow": "હમણાં રાહ જુએ છે",
-    "collectionNote": "આજે મળેલ (બિલ)",
-    "stockAlerts": "ફાર્મસી સ્ટોક ચેતવણીઓ"
+    "stockAlerts": "ફાર્મસી સ્ટોક ચેતવણીઓ",
+    "myOpd": "મારી આજની OPD",
+    "clinicOpd": "ક્લિનિકની આજની OPD",
+    "moneyToday": "આજની આવક",
+    "waiting": "રાહ જુએ છે",
+    "waitingNote": "ચેક-ઇન થયા, વેઇટિંગ રૂમમાં",
+    "withMe": "હમણાં મારી પાસે",
+    "withDoctor": "ડૉક્ટર પાસે",
+    "withDoctorNote": "કન્સલ્ટેશન ચાલુ",
+    "seen": "જોયા (OPD પૂર્ણ)",
+    "seenNote": "તપાસ પૂર્ણ",
+    "booked": "આજની કુલ OPD",
+    "bookedNote": "{{n}} હજી આવ્યા નથી",
+    "newCases_one": "{{count}} નવો કેસ",
+    "newCases_other": "{{count}} નવા કેસ",
+    "followUps_one": "{{count}} ફોલો-અપ",
+    "followUps_other": "{{count}} ફોલો-અપ",
+    "walkIns_one": "{{count}} વોક-ઇન",
+    "walkIns_other": "{{count}} વોક-ઇન",
+    "followUpsDue_one": "{{count}} ફોલો-અપ આજે બાકી",
+    "followUpsDue_other": "{{count}} ફોલો-અપ આજે બાકી",
+    "noShow_one": "{{count}} આવ્યા નહીં",
+    "noShow_other": "{{count}} આવ્યા નહીં",
+    "nextPatients": "આગળના દર્દી",
+    "openCheckup": "તપાસ ખોલો",
+    "withMeShort": "મારી પાસે",
+    "waitingShort": "રાહ",
+    "nobodyWaiting": "કોઈ રાહ જોતું નથી",
+    "opdCollection": "OPD આવક",
+    "opdCollectionNote": "કન્સલ્ટેશન અને સેવાઓ, આજે મળ્યા",
+    "pharmacyCollection": "ફાર્મસી આવક",
+    "pharmacyCollectionNote": "દવા, આજે મળ્યા",
+    "totalCollection": "કુલ આવક",
+    "totalCollectionNote": "રોકડ + UPI + કાર્ડ, રિફંડ બાદ",
+    "stillDue": "હજી લેવાના",
+    "stillDueNote_one": "આજનું {{count}} બિલ પૂરું ચૂકવાયું નથી",
+    "stillDueNote_other": "આજના {{count}} બિલ પૂરા ચૂકવાયા નથી"
   },
   "branches": {
     "title": "બ્રાંચ",
@@ -288,7 +318,9 @@
     "therapy_view": "થેરાપી સત્રો જુઓ",
     "therapy_manage": "થેરાપી સત્રો ગોઠવો અને નોંધો",
     "reports_view": "રિપોર્ટ જુઓ",
-    "ai_use": "AI મદદનો ઉપયોગ કરો"
+    "ai_use": "AI મદદનો ઉપયોગ કરો",
+    "billing_charge": "દર્દીના OPD બિલમાં કન્સલ્ટેશન, સેવાઓ અને ચાર્જ ઉમેરો",
+    "billing_manage": "કન્સલ્ટેશન ફી અને સેવાઓ-ચાર્જની યાદી બદલો"
   },
   "patients": {
     "title": "દર્દીઓ",
@@ -603,6 +635,7 @@
     "appointmentsOff": "એપોઇન્ટમેન્ટ બંધ છે. \"એપોઇન્ટમેન્ટ વગર તપાસ\" વાપરો.",
     "choosePatient": "તપાસ શરૂ કરવા ડાબી બાજુથી દર્દી પસંદ કરો.",
     "complete": "તપાસ પૂર્ણ કરો",
+    "billHelp": "આ તપાસના પ્રોસીજર કે અન્ય ચાર્જ દર્દીના OPD બિલમાં ઉમેરો",
     "completed": "પૂર્ણ",
     "completedMsg": "તપાસ પૂર્ણ. એપોઇન્ટમેન્ટ પૂર્ણ તરીકે નોંધાઈ.",
     "prakritiTag": "પ્રકૃતિ: {{type}}",
@@ -1010,6 +1043,9 @@
     "giveOnly_one": "{{count}} દવા આપો",
     "giveOnly_other": "{{count}} દવા આપો",
     "givenDone": "દવા આપી દીધી. સ્ટોક અપડેટ થયો.",
+    "confirmGive_one": "{{name}} ને {{count}} દવા આપો (સ્ટોક ઘટશે).",
+    "confirmGive_other": "{{name}} ને {{count}} દવા આપો (સ્ટોક ઘટશે).",
+    "confirmBill": "બિલની રકમ {{amount}}.",
     "addRack": "રેક ઉમેરો",
     "editRack": "રેક ફેરફાર",
     "allMedicines": "બધી દવાઓ",
@@ -1116,7 +1152,9 @@
     "supplierReturnsHelp": "સ્ટોક પરત કરવા: સ્ટોક ટેબ -> દવા ખોલો -> બેચ પર સપ્લાયરને પરત.",
     "system": "સિસ્ટમ",
     "type": "પ્રકાર",
-    "units": "એકમ"
+    "units": "એકમ",
+    "giveToOpd_one": "{{count}} દવા આપો અને OPD બિલમાં ઉમેરો",
+    "giveToOpd_other": "{{count}} દવા આપો અને OPD બિલમાં ઉમેરો"
   },
   "billing": {
     "status": {
@@ -1146,11 +1184,15 @@
       "refunded": "પરત"
     },
     "print": "છાપો",
+    "preview": "બિલ પ્રિવ્યૂ",
+    "viewPrint": "જુઓ / પ્રિન્ટ",
+    "download": "ડાઉનલોડ",
     "anyDate": "કોઈપણ તારીખ",
     "billNo": "બિલ નં.",
     "billTitle": "બિલ {{number}}",
     "cancelBill": "બિલ રદ કરો",
     "cancelHelp": "ક્રેડિટ નોટ બને છે; દવાઓ સ્ટોકમાં પાછી જાય છે. બિલ રહે છે.",
+    "cancelHelpNoMedicine": "ક્રેડિટ નોટ બને (ચૂકવેલા હોય તો પૈસા પાછા). બિલ રહે છે.",
     "cancelConfirmHelp": "આખા બિલની ક્રેડિટ નોટ બનશે. ચૂકવેલ રકમ પરત થશે.",
     "cancelled": "બિલ રદ થયું",
     "cancelledBecause": "રદ: {{reason}}",
@@ -1180,7 +1222,18 @@
     "upiHelp": "દર્દી ચૂકવે પછી ચુકવણી લો -> UPI ક્લિક કરો.",
     "searchPlaceholder": "બિલ નં., દર્દીનું નામ કે ID",
     "takePayment": "ચુકવણી લો",
-    "taxable": "કરપાત્ર રકમ"
+    "taxable": "કરપાત્ર રકમ",
+    "title": "બિલિંગ",
+    "subtitle": "OPD અને ફાર્મસી બિલ, ચુકવણી, રિફંડ અને દિવસનો હિસાબ",
+    "newOpdBill": "નવું OPD બિલ",
+    "newOpdBillHelp": "આજે અપોઇન્ટમેન્ટ વગરના દર્દી માટે, જેમ કે ફક્ત ડ્રેસિંગ કે પ્રમાણપત્ર. અપોઇન્ટમેન્ટવાળા દર્દીનું બિલ અપોઇન્ટમેન્ટ અથવા કતારમાંથી બને.",
+    "doctorOptional": "કન્સલ્ટેશન ફી ઉમેરવા ડૉક્ટર પસંદ કરો",
+    "kind": "બિલ પ્રકાર",
+    "kinds": {
+      "all": "બધા બિલ",
+      "OP": "OPD",
+      "PH": "ફાર્મસી"
+    }
   },
   "additional": {
     "title": "વધારાના સેટિંગ્સ",
@@ -1191,7 +1244,8 @@
     "allOff": "બધું બંધ",
     "needs": "જરૂરી: {{name}}",
     "groups": {
-      "pharmacy": "ફાર્મસી અને સ્ટોક"
+      "pharmacy": "ફાર્મસી અને સ્ટોક",
+      "billing": "બિલિંગ"
     },
     "features": {
       "pharmacy_billing": {
@@ -1245,7 +1299,86 @@
       "medicine_extra_details": {
         "label": "ઉત્પાદનની વધારાની વિગતો",
         "help": "દવા ફોર્મમાં જેનેરિક નામ, કેટેગરી, પેક પ્રકાર અને સામાન્ય વેચાણ કિંમત."
+      },
+      "combined_opd_bill": {
+        "label": "દવા OPD બિલમાં (એક જ સંયુક્ત બિલ)",
+        "help": "ચાલુ: ફાર્મસીએ આપેલી દવા એ મુલાકાતના દર્દીના OPD બિલમાં ઉમેરાય, દર્દીને એક જ બિલ મળે. બંધ: ફાર્મસી પોતાનું અલગ બિલ બનાવે (GST અને ડ્રગ લાઇસન્સ અલગ રહે - તમારા CA ને પૂછો)."
       }
     }
+  },
+  "fees": {
+    "title": "ફી અને સેવાઓ",
+    "subtitle": "દરેક ડૉક્ટરની OPD કન્સલ્ટેશન ફી, અને OPD બિલ માટે સેવાઓ અને ચાર્જની યાદી",
+    "consultationTitle": "OPD કન્સલ્ટેશન ફી - {{branch}}",
+    "consultationHelp": "નવો કેસ = પહેલી મુલાકાત, અથવા આ ડૉક્ટર પાસે છેલ્લી મુલાકાત ફોલો-અપ દિવસ કરતાં જૂની. ફોલો-અપ = એ દિવસોની અંદર આ ડૉક્ટરે જોયા હોય. મફત ફોલો-અપ માટે 0 લખો.",
+    "newCase": "નવા કેસની ફી",
+    "followUp": "ફોલો-અપ ફી",
+    "followUpDays": "ફોલો-અપ માન્ય",
+    "followUpDaysHelp": "આટલા દિવસમાં ફરી આવે તો ફોલો-અપ ફી લાગે",
+    "days": "દિવસ",
+    "notSet": "ફી નક્કી નથી",
+    "enterBoth": "બંને ફી લખો (0 ચાલે).",
+    "noDoctors": "આ શાખામાં હજી કોઈ ડૉક્ટર નથી.",
+    "servicesTitle": "સેવાઓ અને ચાર્જ",
+    "servicesHelp": "પ્રોસીજર, પંચકર્મ, ટેસ્ટ, પ્રમાણપત્ર... જે OPD બિલમાં ઉમેરી શકાય. ભાવમાં GST સામેલ છે. આરોગ્ય સેવાઓ સામાન્ય રીતે GST મુક્ત છે - તમારા CA ને પૂછો.",
+    "addService": "સેવા ઉમેરો",
+    "editService": "સેવા બદલો",
+    "noServices": "હજી કોઈ સેવા નથી. તમારી પ્રોસીજર અને ચાર્જ ઉમેરો.",
+    "service": "સેવા",
+    "serviceName": "સેવાનું નામ",
+    "category": "કેટેગરી",
+    "price": "ભાવ",
+    "branchPrice": "આ શાખાનો ભાવ",
+    "branchPriceLabel": "{{branch}} માં ભાવ",
+    "branchPriceHelp": "ખાલી = ઉપરનો જ ભાવ",
+    "gstHelp": "સામાન્ય રીતે 0"
+  },
+  "opd": {
+    "title": "OPD બિલ - {{name}}",
+    "titlePlain": "OPD બિલ",
+    "previewTitle": "OPD બિલ {{number}}",
+    "consultant": "કન્સલ્ટન્ટ: {{name}}",
+    "noDoctor": "ડૉક્ટર પસંદ નથી",
+    "lastVisit": "છેલ્લી મુલાકાત {{date}}",
+    "feeNotSet": "આ ડૉક્ટરની કન્સલ્ટેશન ફી હજી નક્કી નથી (મેનુ: ફી અને સેવાઓ). નીચે રકમ લખી શકો છો.",
+    "onBill": "બિલ {{number}} માં પહેલેથી",
+    "paidOf": "{{total}} માંથી {{paid}} ચૂકવ્યા",
+    "item": "વિગત",
+    "charges": "ચાર્જ",
+    "addMore": "વધુ ચાર્જ ઉમેરો",
+    "addService": "સેવા ઉમેરો (પ્રોસીજર, થેરાપી...)",
+    "noServices": "હજી કોઈ સેવા નથી (મેનુ: ફી અને સેવાઓ)",
+    "consultation": "કન્સલ્ટેશન ફી",
+    "consultationShort": "OPD",
+    "otherCharge": "અન્ય ચાર્જ",
+    "descriptionPlaceholder": "શેના માટે?",
+    "needDescription": "દરેક ચાર્જનું વર્ણન લખો.",
+    "nothingNew": "ઉમેરવા માટે કંઈ નવું નથી. સેવા ઉમેરો અથવા ચુકવણી લો.",
+    "addSomething": "કન્સલ્ટેશન ફી અથવા સેવા ઉમેરો.",
+    "newTotal": "નવા ચાર્જ",
+    "dueAfter": "ચૂકવવાના",
+    "collectNow": "હમણાં લો:",
+    "receptionCollects": "રિસેપ્શન ચુકવણી લેશે.",
+    "createBill": "OPD બિલ બનાવો",
+    "addToBill": "બિલમાં ઉમેરો",
+    "takePayment": "ચુકવણી લો",
+    "confirmTitle": "કૃપા કરી ખાતરી કરો",
+    "confirmCreate": "{{name}} માટે {{amount}} નું OPD બિલ બનાવો.",
+    "confirmAdd": "બિલ {{number}} માં {{amount}} ઉમેરો.",
+    "confirmPay": "{{mode}} થી {{amount}} મેળવો.",
+    "confirmLater": "હમણાં ચુકવણી નહીં (પછી).",
+    "saved": "બિલ {{number}} સાચવ્યું",
+    "kind": {
+      "new": "નવો કેસ",
+      "follow_up": "ફોલો-અપ"
+    },
+    "chip": {
+      "none": "બિલ",
+      "paid": "ચૂકવ્યું",
+      "due": "બાકી {{amount}}"
+    },
+    "billColumn": "OPD બિલ",
+    "visitBill": "OPD બિલ",
+    "next": "આગળ: OPD બિલ"
   }
 }

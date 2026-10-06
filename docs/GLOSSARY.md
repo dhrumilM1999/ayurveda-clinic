@@ -47,6 +47,13 @@
 | **M-N-N (1-0-1)** | How many doses in the Morning, at Noon and at Night. |
 | **Batch** | One lot of a medicine from the maker, with its own number and expiry date. |
 | **FEFO** | First Expiry, First Out: the batch that expires first is given first. |
+| **OPD** | Out-Patient Department: patients who come, are seen and go home the same day. |
+| **IPD** | In-Patient Department: admitted patients with a bed (not built yet). |
+| **New case** | A patient's first visit to a doctor, or a visit after the follow-up days are over: new-case fee. |
+| **Follow-up** | A revisit to the same doctor within the follow-up days: follow-up fee (can be 0). |
+| **Bill of supply** | The bill for GST-free items (most health care services); a bill with GST is a tax invoice. |
+| **SAC code** | Tax code of a service (health care services 999312), like HSN for goods. |
+| **Day closing** | The day's totals: bills made, money received by cash / UPI / card, refunds, cash in hand. |
 | **Dispense** | Give the prescribed medicines to the patient (stock goes down). |
 | **MRP** | Maximum Retail Price printed on the pack; the selling price can be lower, never higher. |
 | **Free quantity** | Extra packs the supplier gives free with a purchase; they add to stock at no cost. |

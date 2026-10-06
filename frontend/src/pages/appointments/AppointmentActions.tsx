@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from '../../api/client';
 import type { Appointment, PatientNotification, Slot } from '../../api/types';
 import { useAuth } from '../../auth/AuthContext';
+import { OpdBillModal } from '../billing/OpdBillModal';
 import { NotificationResult, SlotPicker, fmtTime } from './shared';
 
 type Step = 'check-in' | 'start' | 'complete' | 'no-show';
@@ -21,7 +22,9 @@ export function AppointmentActions({ appointment: a, onChanged }: { appointment:
   const [busy, setBusy] = useState(false);
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
-  const [notice, setNotice] = useState<{ title: string; notification?: PatientNotification } | null>(null);
+  const [notice, setNotice] = useState<{ title: string; notification?: PatientNotification; thenBill?: boolean } | null>(null);
+  const [billOpen, setBillOpen] = useState(false);
+  const canBill = can('billing.charge') || can('billing.create');
 
   if (!can('appointments.manage') && !can('emr.edit')) return null;
   const isToday = a.date === dayjs().format('YYYY-MM-DD');
@@ -31,7 +34,8 @@ export function AppointmentActions({ appointment: a, onChanged }: { appointment:
     try {
       const { data } = await api.post<Appointment>(`/appointments/${a.id}/${step}/`);
       if (step === 'check-in') {
-        setNotice({ title: t('appointments.checkedInMsg', { token: data.token_number }), notification: data.notification });
+        // After the token message, the OPD bill opens for the consultation fee (fee at check-in)
+        setNotice({ title: t('appointments.checkedInMsg', { token: data.token_number }), notification: data.notification, thenBill: canBill && !data.opd_bill });
       } else {
         message.success(t('common.saved'));
       }
@@ -41,6 +45,11 @@ export function AppointmentActions({ appointment: a, onChanged }: { appointment:
     } finally {
       setBusy(false);
     }
+  };
+
+  const closeNotice = () => {
+    if (notice?.thenBill) setBillOpen(true);
+    setNotice(null);
   };
 
   // Doctors: open the check-up screen for this appointment (marks it "With doctor")
@@ -78,6 +87,7 @@ export function AppointmentActions({ appointment: a, onChanged }: { appointment:
 
   const menu = [
     ...(canCheckup ? [{ key: 'checkup', label: t('consult.openCheckup') }] : []),
+    ...(canBill && !['cancelled', 'no_show'].includes(a.status) ? [{ key: 'bill', label: t('opd.titlePlain') }] : []),
     ...(a.status === 'booked' ? [{ key: 'reschedule', label: t('appointments.reschedule') }] : []),
     ...(a.status === 'checked_in' ? [{ key: 'complete', label: t('appointments.complete') }] : []),
     ...(a.status === 'booked' && !dayjs(a.date).isAfter(dayjs(), 'day') ? [{ key: 'no-show', label: t('appointments.markNoShow') }] : []),
@@ -87,6 +97,7 @@ export function AppointmentActions({ appointment: a, onChanged }: { appointment:
 
   const onMenu = ({ key }: { key: string }) => {
     if (key === 'checkup') openCheckup();
+    else if (key === 'bill') setBillOpen(true);
     else if (key === 'reschedule') setRescheduleOpen(true);
     else if (key === 'cancel') setCancelOpen(true);
     else if (key === 'whatsapp') whatsapp();
@@ -129,10 +140,11 @@ export function AppointmentActions({ appointment: a, onChanged }: { appointment:
           }
         }} />
       )}
-      <Modal open={!!notice} title={notice?.title} onCancel={() => setNotice(null)} width={520}
-        footer={<Button type="primary" onClick={() => setNotice(null)}>{t('common.close')}</Button>}>
+      <Modal open={!!notice} title={notice?.title} onCancel={() => closeNotice()} width={520}
+        footer={<Button type="primary" onClick={() => closeNotice()}>{notice?.thenBill ? t('opd.next') : t('common.close')}</Button>}>
         <NotificationResult notification={notice?.notification} />
       </Modal>
+      {billOpen && <OpdBillModal target={{ appointment: a.id }} onClose={(changed) => { setBillOpen(false); if (changed) onChanged(); }} />}
     </>
   );
 }

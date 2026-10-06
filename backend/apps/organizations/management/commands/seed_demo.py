@@ -133,6 +133,21 @@ class Command(BaseCommand):
         from apps.medicines.services import add_sample_medicines
 
         add_sample_medicines(org)
+        self._seed_billing(org, branch)
+
+    def _seed_billing(self, org, branch):
+        """SAMPLE services & charges, and made-up consultation fees for the sample doctors."""
+        from decimal import Decimal
+
+        from apps.billing.models import ConsultationFee
+        from apps.billing.sample_services import add_sample_services
+
+        add_sample_services(org)
+        for doctor in User.objects.filter(organization=org, is_doctor=True):
+            ConsultationFee.objects.get_or_create(
+                organization=org, branch=branch, doctor=doctor,
+                defaults={"new_case_fee": Decimal("300"), "follow_up_fee": Decimal("150"), "follow_up_days": 15},
+            )
 
     def _seed_patients(self, org, branch):
         from datetime import date

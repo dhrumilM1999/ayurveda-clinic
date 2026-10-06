@@ -26,6 +26,8 @@ import RoomsPage from './pages/RoomsPage';
 import SchedulesPage from './pages/SchedulesPage';
 import SettingsPage from './pages/SettingsPage';
 import AdditionalSettingsPage from './pages/AdditionalSettingsPage';
+import FeesServicesPage from './pages/FeesServicesPage';
+import BillingPage from './pages/billing/BillingPage';
 import StaffPage from './pages/StaffPage';
 import TemplatesPage from './pages/TemplatesPage';
 import { antTheme, applyCssVariables } from './theme';
@@ -61,6 +63,7 @@ export default function App() {
               <Route path="consult" element={<RequirePermission code="emr.view"><ConsultPage /></RequirePermission>} />
               <Route path="consult/:visitId" element={<RequirePermission code="emr.view"><ConsultPage /></RequirePermission>} />
               <Route path="medicines" element={<RequirePermission code="medicines.view"><MedicinesPage /></RequirePermission>} />
+              <Route path="billing" element={<RequirePermission code="billing.view"><BillingPage /></RequirePermission>} />
               <Route path="pharmacy" element={<RequirePermission code="pharmacy.view"><PharmacyPage /></RequirePermission>} />
               <Route path="queue" element={<RequirePermission code="appointments.view"><QueuePage /></RequirePermission>} />
               <Route path="branches" element={<RequirePermission code="branches.view"><BranchesPage /></RequirePermission>} />
@@ -69,6 +72,7 @@ export default function App() {
               <Route path="roles" element={<RequirePermission code="roles.view"><RolesPage /></RequirePermission>} />
               <Route path="schedules" element={<RequirePermission code="schedules.view"><SchedulesPage /></RequirePermission>} />
               <Route path="templates" element={<RequirePermission code="settings.manage"><TemplatesPage /></RequirePermission>} />
+              <Route path="fees-services" element={<RequirePermission code="billing.manage"><FeesServicesPage /></RequirePermission>} />
               <Route path="settings" element={<RequirePermission code="settings.manage"><SettingsPage /></RequirePermission>} />
               <Route path="additional-settings" element={<RequirePermission code="settings.manage"><AdditionalSettingsPage /></RequirePermission>} />
               <Route path="audit-log" element={<RequirePermission code="audit.view"><AuditLogPage /></RequirePermission>} />

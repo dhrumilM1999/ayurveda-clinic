@@ -9,6 +9,7 @@ import { api } from '../../api/client';
 import type { Appointment, AppointmentDoctor, AppointmentStatus } from '../../api/types';
 import { useList } from '../../api/useList';
 import { useAuth } from '../../auth/AuthContext';
+import { OpdBillButton } from '../billing/OpdBillModal';
 import { AppointmentActions } from './AppointmentActions';
 import { BookAppointmentModal } from './BookAppointmentModal';
 import { PatientCell, StatusTag, fmtTime } from './shared';
@@ -151,6 +152,12 @@ export default function AppointmentsPage() {
             ),
           },
           { title: t('common.status'), dataIndex: 'status', width: 120, render: (s: AppointmentStatus) => <StatusTag status={s} /> },
+          {
+            title: t('opd.billColumn'), key: 'bill', width: 130,
+            render: (_: unknown, r: Appointment) => (['cancelled', 'no_show', 'booked'].includes(r.status) && !r.opd_bill
+              ? <span className="cell-sub">—</span>
+              : <OpdBillButton appointmentId={r.id} bill={r.opd_bill} onChanged={reload} />),
+          },
           {
             // fixed: the buttons stay visible on small screens
             title: '', key: 'actions', width: 150, align: 'right' as const, fixed: 'right' as const,

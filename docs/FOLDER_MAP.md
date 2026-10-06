@@ -42,7 +42,9 @@
 | `backend/apps/medicines/sample_catalog.py` | The 23 SAMPLE medicines for a new clinic (**pharmacist to verify**) | **SAFE TO EDIT** |
 | `backend/apps/prescriptions/` | Prescriptions and prescription templates | ASK FIRST |
 | `backend/apps/pharmacy/` | Stock by batch, racks, purchases, returns, stock checks, dispensing, stock ledger | ASK FIRST |
-| `backend/apps/billing/` | Bills (invoices), payments, credit notes, bill numbers, PDF printing, UPI link | ASK FIRST |
+| `backend/apps/billing/` | Bills (invoices), payments, credit notes, bill numbers, PDF printing, UPI link; `opd.py` = OPD bill rules (fees, new case / follow-up) | ASK FIRST |
+| `backend/apps/billing/sample_services.py` | The SAMPLE services & charges for a new clinic | **SAFE TO EDIT** |
+| `backend/apps/reports/` | Dashboard numbers in OPD words (`/dashboard/today/`) | ASK FIRST |
 | `backend/apps/prescriptions/safety.py` | **Prescription safety rules** (fixed rules, not AI) | ASK FIRST |
 | `backend/apps/emr/templates_catalog.py` | **Starting check-up templates**: Ashtavidha, Dashavidha, Agni & habits, Prakriti questions (EN/GU/HI) | **SAFE TO EDIT** |
 | `backend/apps/appointments/messages_catalog.py` | **SMS/WhatsApp text** for booking, change, cancel, token (EN/GU/HI) | **SAFE TO EDIT** |
@@ -63,6 +65,9 @@
 | `frontend/src/pages/consult/` | The check-up screen | ASK FIRST |
 | `frontend/src/pages/consult/VisitWorkspace.tsx` | Check-up autosave and undo: `AUTOSAVE_MS`, `RETRY_MS`, `UNDO_STEPS` at the top | **SAFE TO EDIT** (those lines) |
 | `frontend/src/pages/medicines/` | Medicines screen, import, version history | ASK FIRST |
+| `frontend/src/pages/billing/` | Billing screen and the OPD bill popup | ASK FIRST |
+| `frontend/src/pages/FeesServicesPage.tsx` | Fees & services screen | ASK FIRST |
+| `frontend/src/components/BillPreview.tsx` | Bill preview popup (paper size, print, download) | ASK FIRST |
 | `frontend/src/pages/pharmacy/` | Pharmacy screen: dispense, sales & returns, bills, stock, purchases, stock check, ledger, racks & suppliers | ASK FIRST |
 | `frontend/src/pages/consult/RxSection.tsx` | The prescription part of the check-up | ASK FIRST |
 | `frontend/src/pages/AdditionalSettingsPage.tsx` | The Additional settings screen (optional extra features) | ASK FIRST |
