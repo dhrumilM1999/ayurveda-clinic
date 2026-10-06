@@ -170,7 +170,14 @@
     "branchRolesHelp": "Choose each branch this person works in, and their role there.",
     "addBranchRole": "Add branch",
     "role": "Role",
-    "lastLogin": "Last login"
+    "lastLogin": "Last login",
+    "signature": "Signature (for print-outs)",
+    "signatureHelp": "PNG or JPG up to 1 MB. Sign on white paper, take a photo and crop it close.",
+    "signatureAfterSave": "Save the staff member first, then add the signature.",
+    "signatureOn": "Signature saved",
+    "signatureUpload": "Upload signature",
+    "signatureChange": "Change",
+    "signatureSaved": "Signature saved"
   },
   "roles": {
     "title": "Roles & permissions",
@@ -220,7 +227,10 @@
     "branchDetailsHelp": "Printed on bills and documents.",
     "branchName": "Branch name",
     "upiId": "UPI ID for payments",
-    "upiIdHelp": "Shown as a QR code on bills, e.g. clinic@okbank"
+    "upiIdHelp": "Shown as a QR code on bills, e.g. clinic@okbank",
+    "letterheadFooter": "Footer line on print-outs",
+    "letterheadFooterHelp": "Printed at the bottom of prescriptions, certificates and reports.",
+    "letterheadFooterPlaceholder": "e.g. Timings 10 am - 1 pm, 5 - 8 pm · Sunday closed"
   },
   "audit": {
     "title": "Audit log",
@@ -1197,7 +1207,8 @@
     "paper": {
       "a4": "A4 paper",
       "a5": "A5 (half page)",
-      "thermal": "Thermal 80 mm"
+      "thermal": "Thermal 80 mm",
+      "thermal58": "Thermal 58 mm"
     },
     "summary": {
       "bills": "Bills today",
@@ -1489,5 +1500,56 @@
   "labels": {
     "button": "Labels",
     "title": "Medicine labels"
+  },
+  "print": {
+    "menu": "Print",
+    "prescription": "Prescription",
+    "prescriptionOf": "Prescription - {{name}}",
+    "followUpCard": "Follow-up card",
+    "prakriti": "Prakriti report",
+    "certificate": "Medical / fitness certificate",
+    "whatsapp": "Share prescription on WhatsApp",
+    "noConsent": "The patient has not agreed to messages (Patient -> Consent).",
+    "makeCertificate": "Make certificate",
+    "certificateHelp": "The certificate gets a number and cannot be deleted; a wrong one can only be cancelled. Check the dates.",
+    "certificateConfirm": "Make this certificate now? It will get a number.",
+    "diagnosis": "Illness / diagnosis",
+    "restDates": "Rest advised from - to",
+    "fitFrom": "Fit to resume work / school from",
+    "remarks": "Remarks",
+    "certificateKinds": {
+      "medical": "Medical (rest)",
+      "fitness": "Fitness",
+      "general": "Other"
+    },
+    "size": {
+      "a4": "A4",
+      "a5": "A5",
+      "a6": "A6 card"
+    },
+    "lang": {
+      "en": "English",
+      "gu": "ગુજરાતી",
+      "hi": "हिंदी"
+    }
+  },
+  "verify": {
+    "genuine": "This document is genuine",
+    "cancelled": "This document was cancelled",
+    "notFound": "Document not found",
+    "subtitle": "Issued by the clinic below. Medical details are not shown here.",
+    "notFoundHelp": "This QR code does not match any document of the clinic. Please contact the clinic.",
+    "document": "Document",
+    "number": "Number",
+    "date": "Date",
+    "clinic": "Clinic",
+    "doctor": "Doctor",
+    "patient": "Patient (initials)",
+    "kinds": {
+      "prescription": "Prescription",
+      "certificate": "Certificate",
+      "follow_up_card": "Follow-up card",
+      "prakriti_report": "Prakriti report"
+    }
   }
 }

@@ -14,17 +14,21 @@ type Choice = { value: string; label: string };
  * A PDF on screen with a choice (paper size or label format), Download and Print.
  * fetchPdf(choice, forPrint) returns the PDF; forPrint=true is the copy that is printed / downloaded.
  */
-export function PdfModal({ title, choices, initial, fetchPdf, fileName, onClose }: {
+export function PdfModal({ title, choices, initial, fetchPdf, fileName, onClose, choices2, initial2 }: {
   title: string;
   choices: Choice[];
   initial: string;
-  fetchPdf: (choice: string, forPrint: boolean) => Promise<Blob>;
+  fetchPdf: (choice: string, forPrint: boolean, choice2: string) => Promise<Blob>;
   fileName: string;
   onClose: () => void;
+  /** An optional second choice, e.g. the language of the print-out */
+  choices2?: Choice[];
+  initial2?: string;
 }) {
   const { t } = useTranslation();
   const { message } = App.useApp();
   const [choice, setChoice] = useState(initial);
+  const [choice2, setChoice2] = useState(initial2 ?? '');
   const [url, setUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState<'load' | 'print' | 'download' | null>('load');
   const frame = useRef<HTMLIFrameElement>(null);
@@ -43,12 +47,12 @@ export function PdfModal({ title, choices, initial, fetchPdf, fileName, onClose 
   useEffect(() => {
     let alive = true;
     setBusy('load');
-    fetchRef.current(choice, false)
+    fetchRef.current(choice, false, choice2)
       .then((blob) => alive && show(blob))
       .catch((err) => message.error(errorMessage(err, t('common.loadFailed'))))
       .finally(() => alive && setBusy(null));
     return () => { alive = false; };
-  }, [choice, show, message, t]);
+  }, [choice, choice2, show, message, t]);
 
   useEffect(() => () => { if (url) URL.revokeObjectURL(url); }, [url]);
 
@@ -57,7 +61,7 @@ export function PdfModal({ title, choices, initial, fetchPdf, fileName, onClose 
     setBusy('print');
     try {
       printOnLoad.current = true;
-      show(await fetchRef.current(choice, true));
+      show(await fetchRef.current(choice, true, choice2));
     } catch (err) {
       printOnLoad.current = false;
       message.error(errorMessage(err, t('common.loadFailed')));
@@ -75,7 +79,7 @@ export function PdfModal({ title, choices, initial, fetchPdf, fileName, onClose 
   const download = async () => {
     setBusy('download');
     try {
-      const file = URL.createObjectURL(await fetchRef.current(choice, true));
+      const file = URL.createObjectURL(await fetchRef.current(choice, true, choice2));
       const a = document.createElement('a');
       a.href = file;
       a.download = `${fileName}.pdf`.replace(/[/\\ ]+/g, '-');
@@ -93,7 +97,10 @@ export function PdfModal({ title, choices, initial, fetchPdf, fileName, onClose 
       className="bill-preview-modal"
       footer={(
         <div className="modal-footer-split">
-          <Segmented value={choice} onChange={(v) => setChoice(String(v))} disabled={!!busy} options={choices} />
+          <Space size={8} wrap>
+            <Segmented value={choice} onChange={(v) => setChoice(String(v))} disabled={!!busy} options={choices} />
+            {choices2 && <Segmented value={choice2} onChange={(v) => setChoice2(String(v))} disabled={!!busy} options={choices2} />}
+          </Space>
           <Space size={8}>
             <Button onClick={onClose}>{t('common.close')}</Button>
             <Button icon={<DownloadOutlined />} loading={busy === 'download'} disabled={!url} onClick={download}>{t('billing.download')}</Button>
@@ -127,6 +134,7 @@ export function BillPreviewModal({ id, kind = 'invoices', title, onClose }: {
         { value: 'a4', label: t('billing.paper.a4') },
         { value: 'a5', label: t('billing.paper.a5') },
         { value: '80mm', label: t('billing.paper.thermal') },
+        { value: '58mm', label: t('billing.paper.thermal58') },
       ]}
       fetchPdf={(paper, forPrint) => blobOf(`/${kind}/${id}/pdf/`, { size: paper, ...(forPrint ? {} : { preview: 1 }) })} />
   );
@@ -181,5 +189,29 @@ export function LabelsButton({ dispense, prescription, size = 'small' }: {
           fetchPdf={(layout) => blobOf('/medicine-labels/', { layout, ...(dispense ? { dispense } : { prescription }) })} />
       )}
     </>
+  );
+}
+
+type DocKind = 'prescription' | 'follow-up-card' | 'prakriti' | 'certificate';
+
+/** A medical document (prescription, follow-up card, Prakriti report, certificate) on screen, in the patient's
+ *  language (can be changed), with paper size, Download and Print. Reprints say DUPLICATE COPY. */
+export function DocumentModal({ kind, id, title, language, onClose }: {
+  kind: DocKind;
+  id: string;
+  title: string;
+  language?: string;
+  onClose: () => void;
+}) {
+  const { t } = useTranslation();
+  const sizes: Record<DocKind, string[]> = {
+    prescription: ['a5', 'a4'], 'follow-up-card': ['a6', 'a5'], prakriti: ['a4', 'a5'], certificate: ['a4', 'a5'],
+  };
+  return (
+    <PdfModal title={title} fileName={`${kind}`} initial={sizes[kind][0]} onClose={onClose}
+      choices={sizes[kind].map((v) => ({ value: v, label: t(`print.size.${v}`) }))}
+      choices2={(['en', 'gu', 'hi'] as const).map((v) => ({ value: v, label: t(`print.lang.${v}`) }))}
+      initial2={language && ['en', 'gu', 'hi'].includes(language) ? language : 'en'}
+      fetchPdf={(size, forPrint, lang) => blobOf(`/documents/${kind}/${id}/`, { size, lang, ...(forPrint ? {} : { preview: 1 }) })} />
   );
 }

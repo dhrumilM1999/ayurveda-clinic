@@ -43,6 +43,7 @@ export interface Branch {
   drug_licence_no: string;
   upi_vpa: string;
   is_active: boolean;
+  letterhead_footer?: string;
 }
 
 export interface RoomType {
@@ -101,6 +102,7 @@ export interface Staff {
   is_active: boolean;
   last_login: string | null;
   branch_roles: BranchRole[];
+  has_signature?: boolean;
 }
 
 export interface DoctorSchedule {

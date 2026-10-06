@@ -170,7 +170,14 @@
     "branchRolesHelp": "આ વ્યક્તિ જ્યાં કામ કરે છે તે દરેક બ્રાંચ અને ત્યાંની ભૂમિકા પસંદ કરો.",
     "addBranchRole": "બ્રાંચ ઉમેરો",
     "role": "ભૂમિકા",
-    "lastLogin": "છેલ્લું લૉગ ઇન"
+    "lastLogin": "છેલ્લું લૉગ ઇન",
+    "signature": "સહી (પ્રિન્ટ માટે)",
+    "signatureHelp": "PNG અથવા JPG, 1 MB સુધી. સફેદ કાગળ પર સહી કરી ફોટો લો અને નજીકથી કાપો.",
+    "signatureAfterSave": "પહેલાં સ્ટાફ સાચવો, પછી સહી ઉમેરો.",
+    "signatureOn": "સહી સાચવી છે",
+    "signatureUpload": "સહી અપલોડ કરો",
+    "signatureChange": "બદલો",
+    "signatureSaved": "સહી સાચવી"
   },
   "roles": {
     "title": "ભૂમિકા અને પરવાનગી",
@@ -220,7 +227,10 @@
     "branchDetailsHelp": "બિલ અને દસ્તાવેજો પર છપાય છે.",
     "branchName": "શાખાનું નામ",
     "upiId": "ચુકવણી માટે UPI ID",
-    "upiIdHelp": "બિલ પર QR કોડ તરીકે દેખાય છે, દા.ત. clinic@okbank"
+    "upiIdHelp": "બિલ પર QR કોડ તરીકે દેખાય છે, દા.ત. clinic@okbank",
+    "letterheadFooter": "પ્રિન્ટ પર નીચેની લાઇન",
+    "letterheadFooterHelp": "પ્રિસ્ક્રિપ્શન, પ્રમાણપત્ર અને રિપોર્ટની નીચે છપાય.",
+    "letterheadFooterPlaceholder": "દા.ત. સમય સવારે 10 - 1, સાંજે 5 - 8 · રવિવારે બંધ"
   },
   "audit": {
     "title": "ઓડિટ લોગ",
@@ -1197,7 +1207,8 @@
     "paper": {
       "a4": "A4 કાગળ",
       "a5": "A5 (અડધું પાનું)",
-      "thermal": "થર્મલ 80 mm"
+      "thermal": "થર્મલ 80 mm",
+      "thermal58": "થર્મલ 58 mm"
     },
     "summary": {
       "bills": "આજના બિલ",
@@ -1489,5 +1500,56 @@
   "labels": {
     "button": "લેબલ",
     "title": "દવાના લેબલ"
+  },
+  "print": {
+    "menu": "પ્રિન્ટ",
+    "prescription": "પ્રિસ્ક્રિપ્શન",
+    "prescriptionOf": "પ્રિસ્ક્રિપ્શન - {{name}}",
+    "followUpCard": "ફોલો-અપ કાર્ડ",
+    "prakriti": "પ્રકૃતિ રિપોર્ટ",
+    "certificate": "મેડિકલ / ફિટનેસ પ્રમાણપત્ર",
+    "whatsapp": "પ્રિસ્ક્રિપ્શન WhatsApp પર મોકલો",
+    "noConsent": "દર્દીએ મેસેજ માટે સંમતિ આપી નથી (દર્દી -> સંમતિ).",
+    "makeCertificate": "પ્રમાણપત્ર બનાવો",
+    "certificateHelp": "પ્રમાણપત્રને નંબર મળે અને તે કાઢી શકાતું નથી; ખોટું હોય તો ફક્ત રદ કરી શકાય. તારીખો તપાસો.",
+    "certificateConfirm": "આ પ્રમાણપત્ર હમણાં બનાવવું છે? તેને નંબર મળશે.",
+    "diagnosis": "બીમારી / નિદાન",
+    "restDates": "આરામની સલાહ તારીખથી - સુધી",
+    "fitFrom": "કામ / શાળા ફરી શરૂ કરવા યોગ્ય તારીખ",
+    "remarks": "નોંધ",
+    "certificateKinds": {
+      "medical": "મેડિકલ (આરામ)",
+      "fitness": "ફિટનેસ",
+      "general": "અન્ય"
+    },
+    "size": {
+      "a4": "A4",
+      "a5": "A5",
+      "a6": "A6 કાર્ડ"
+    },
+    "lang": {
+      "en": "English",
+      "gu": "ગુજરાતી",
+      "hi": "हिंदी"
+    }
+  },
+  "verify": {
+    "genuine": "આ દસ્તાવેજ સાચો છે",
+    "cancelled": "આ દસ્તાવેજ રદ થયો છે",
+    "notFound": "દસ્તાવેજ મળ્યો નથી",
+    "subtitle": "નીચેના ક્લિનિક દ્વારા આપેલ. અહીં તબીબી વિગતો બતાવાતી નથી.",
+    "notFoundHelp": "આ QR કોડ ક્લિનિકના કોઈ દસ્તાવેજ સાથે મેળ ખાતો નથી. કૃપા કરી ક્લિનિકનો સંપર્ક કરો.",
+    "document": "દસ્તાવેજ",
+    "number": "નંબર",
+    "date": "તારીખ",
+    "clinic": "ક્લિનિક",
+    "doctor": "ડૉક્ટર",
+    "patient": "દર્દી (આદ્યાક્ષર)",
+    "kinds": {
+      "prescription": "પ્રિસ્ક્રિપ્શન",
+      "certificate": "પ્રમાણપત્ર",
+      "follow_up_card": "ફોલો-અપ કાર્ડ",
+      "prakriti_report": "પ્રકૃતિ રિપોર્ટ"
+    }
   }
 }

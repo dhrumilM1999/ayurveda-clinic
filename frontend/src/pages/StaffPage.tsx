@@ -8,6 +8,7 @@ import { api, errorMessage } from '../api/client';
 import type { Role, Staff } from '../api/types';
 import { useList } from '../api/useList';
 import { useAuth } from '../auth/AuthContext';
+import { SignatureUpload } from '../components/SignatureUpload';
 import { LANGUAGES } from '../i18n';
 
 export default function StaffPage() {
@@ -174,6 +175,11 @@ export default function StaffPage() {
               <Row gutter={12}>
                 <Col xs={24} md={12}><Form.Item name="qualification" label={t('staff.qualification')}><Input placeholder="BAMS, MD (Ayu)" /></Form.Item></Col>
                 <Col xs={24} md={12}><Form.Item name="registration_number" label={t('staff.registrationNumber')}><Input /></Form.Item></Col>
+                <Col span={24}>
+                  <Form.Item label={t('staff.signature')} extra={editing?.id ? t('staff.signatureHelp') : t('staff.signatureAfterSave')}>
+                    {editing?.id && <SignatureUpload staffId={editing.id} hasSignature={!!editing.has_signature} />}
+                  </Form.Item>
+                </Col>
               </Row>
             )}
           </Form.Item>
