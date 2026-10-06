@@ -88,8 +88,11 @@ export function MedicineFormModal({ medicine, onClose }: { medicine: Medicine | 
               <Input maxLength={200} />
             </Form.Item>
           </Col>
-          <Col xs={24} md={12}>
+          <Col xs={12} md={6}>
             <Form.Item name="dosage_form" label={t('medicines.form')}><MasterSelect category="dosage_form" /></Form.Item>
+          </Col>
+          <Col xs={12} md={6}>
+            <Form.Item name="strength" label={t('medicines.strength')}><Input maxLength={60} placeholder="500 mg" /></Form.Item>
           </Col>
           {extra && (
             <>
@@ -124,12 +127,13 @@ export function MedicineFormModal({ medicine, onClose }: { medicine: Medicine | 
             </>
           )}
           <Col xs={24} md={12}><Form.Item name="ayush_licence_no" label={t('medicines.licence')}><Input maxLength={60} /></Form.Item></Col>
+          {extra && <Col xs={24} md={12}><Form.Item name="sku" label={t('medicines.sku')} extra={t('medicines.skuHelp')}><Input maxLength={40} style={{ textTransform: 'uppercase' }} /></Form.Item></Col>}
           {barcode && <Col xs={24} md={12}><Form.Item name="barcode" label={t('medicines.barcode')} extra={t('medicines.barcodeHelp')}><Input maxLength={64} /></Form.Item></Col>}
         </Row>
 
         <div className="section-title">{t('medicines.sections.pack')}</div>
         <Row gutter={12}>
-          {extra && <Col xs={12} md={6}><Form.Item name="pack_type" label={t('medicines.packType')}><MasterSelect category="pack_type" /></Form.Item></Col>}
+          <Col xs={12} md={6}><Form.Item name="pack_type" label={t('medicines.packType')}><MasterSelect category="pack_type" /></Form.Item></Col>
           <Col xs={12} md={6}><Form.Item name="pack_size" label={t('medicines.packSize')}><Input placeholder="100 g, 60 tablets" maxLength={60} /></Form.Item></Col>
           {loose && (
             <>
@@ -189,6 +193,9 @@ export function MedicineFormModal({ medicine, onClose }: { medicine: Medicine | 
         </div>
         <Form.Item name="safety_notes" label={t('medicines.safetyNotes')} style={{ marginTop: 12 }}>
           <Input maxLength={300} placeholder={t('medicines.safetyNotesPlaceholder')} />
+        </Form.Item>
+        <Form.Item name="notes" label={t('medicines.notes')}>
+          <Input.TextArea autoSize={{ minRows: 2, maxRows: 4 }} maxLength={2000} placeholder={t('medicines.notesPlaceholder')} />
         </Form.Item>
       </Form>
     </Modal>

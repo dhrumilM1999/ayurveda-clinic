@@ -783,7 +783,7 @@
     "empty": "कोई दवा नहीं मिली।",
     "name": "नाम",
     "kind": "प्रकार",
-    "form": "रूप",
+    "form": "दवा का प्रकार / रूप",
     "safety": "सुरक्षा",
     "price": "कीमत",
     "inUse": "उपयोग में",
@@ -887,7 +887,12 @@
     "allowLoose": "खुला बेचें",
     "allowLooseHelp": "पैक का हिस्सा दिया जा सकता है",
     "sellingPrice": "बिक्री मूल्य",
-    "sellingPriceHelp": "खाली = MRP"
+    "sellingPriceHelp": "खाली = MRP",
+    "strength": "शक्ति (स्ट्रेंथ)",
+    "sku": "दवा कोड (SKU)",
+    "skuHelp": "आपका छोटा कोड; खोज में मिलता है",
+    "notes": "नोट",
+    "notesPlaceholder": "जैसे ठंडी जगह रखें"
   },
   "rx": {
     "title": "पर्चा",

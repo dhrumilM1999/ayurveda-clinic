@@ -783,7 +783,7 @@
     "empty": "No medicines found.",
     "name": "Name",
     "kind": "Type",
-    "form": "Form",
+    "form": "Medicine type / form",
     "safety": "Safety",
     "price": "Price",
     "inUse": "In use",
@@ -887,7 +887,12 @@
     "allowLoose": "Sell loose",
     "allowLooseHelp": "Part of a pack can be given",
     "sellingPrice": "Selling price",
-    "sellingPriceHelp": "Empty = MRP"
+    "sellingPriceHelp": "Empty = MRP",
+    "strength": "Strength",
+    "sku": "Medicine code (SKU)",
+    "skuHelp": "Your own short code; search finds it",
+    "notes": "Notes",
+    "notesPlaceholder": "e.g. keep in a cool place"
   },
   "rx": {
     "title": "Prescription",

@@ -783,7 +783,7 @@
     "empty": "કોઈ દવા મળી નથી.",
     "name": "નામ",
     "kind": "પ્રકાર",
-    "form": "સ્વરૂપ",
+    "form": "દવાનો પ્રકાર / સ્વરૂપ",
     "safety": "સલામતી",
     "price": "કિંમત",
     "inUse": "વપરાશમાં",
@@ -887,7 +887,12 @@
     "allowLoose": "છૂટક વેચાણ",
     "allowLooseHelp": "પેકનો ભાગ આપી શકાય",
     "sellingPrice": "વેચાણ કિંમત",
-    "sellingPriceHelp": "ખાલી = MRP"
+    "sellingPriceHelp": "ખાલી = MRP",
+    "strength": "શક્તિ (સ્ટ્રેન્થ)",
+    "sku": "દવા કોડ (SKU)",
+    "skuHelp": "તમારો ટૂંકો કોડ; શોધમાં મળે",
+    "notes": "નોંધ",
+    "notesPlaceholder": "દા.ત. ઠંડી જગ્યાએ રાખો"
   },
   "rx": {
     "title": "પ્રિસ્ક્રિપ્શન",
