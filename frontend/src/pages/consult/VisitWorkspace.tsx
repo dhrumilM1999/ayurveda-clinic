@@ -25,7 +25,8 @@ import {
   TemplateSection, type VisitDraft,
 } from './sections';
 import { PhotosSection, ProgressSection } from './extraSections';
-import { RxSection, type RxDraft } from './RxSection';
+import { DaysBar } from './DaysBar';
+import { RxSection, withQuantity, type RxDraft } from './RxSection';
 import { usePrakritiName, useTemplateName } from './shared';
 
 const AUTOSAVE_MS = 1500; // save this long after the last change
@@ -137,7 +138,7 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
           api.get<Page<Prescription>>('/prescriptions/', { params: { visit: data.id } }).then(({ data: page }) => {
             const found = page.results[0];
             if (found) {
-              setRx({ id: found.id, items: found.items, notes: found.notes, status: found.status });
+              setRx({ id: found.id, items: found.items, notes: found.notes, status: found.status, medicine_days: found.medicine_days });
               setRxWarnings(found.warnings);
             }
           }).catch(() => undefined);
@@ -176,7 +177,7 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
         }
         if (sendRx) {
           const sent = r.items;
-          const body = { items: rxPayload(sent), notes: r.notes };
+          const body = { items: rxPayload(sent), notes: r.notes, medicine_days: r.medicine_days ?? null };
           const { data } = r.id
             ? await api.patch<Prescription>(`/prescriptions/${r.id}/`, body)
             : await api.post<Prescription>('/prescriptions/', { ...body, visit: visitId });
@@ -252,6 +253,32 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
     dirtyRx.current = true;
     scheduleSave();
   };
+  /**
+   * Medicine days: every medicine without its own days (or with the old medicine days) gets the new days,
+   * and the follow-up moves along unless the doctor set a different follow-up. One Undo step for all.
+   */
+  const changeMedicineDays = (days: number | null) => {
+    const current = latest.current;
+    if (!current.draft || !visit) return;
+    const before = current.rx.medicine_days ?? null;
+    const items = current.rx.items.map((l) => (days && (!l.duration || (l.duration === before && l.duration_unit === 'days'))
+      ? withQuantity(l, { ...l, duration: days, duration_unit: 'days' }) : l));
+    const fuDays = current.draft.follow_up_date ? dayjs(current.draft.follow_up_date).diff(dayjs(visit.visit_date), 'day') : null;
+    const followUpMoves = days !== null && (fuDays === null || fuDays === before);
+    remember('days');
+    setRx((r) => ({ ...r, medicine_days: days, items }));
+    dirtyRx.current = true;
+    if (followUpMoves && !readOnly) {
+      setDraft((d) => (d ? { ...d, follow_up_date: dayjs(visit.visit_date).add(days, 'day').format('YYYY-MM-DD') } : d));
+      dirtyDraft.current = true;
+    }
+    scheduleSave();
+  };
+  const changeFollowUpDays = (days: number | null) => {
+    if (!visit) return;
+    changeDraft({ follow_up_date: days ? dayjs(visit.visit_date).add(days, 'day').format('YYYY-MM-DD') : null });
+  };
+
   const changeExam = (code: string, values: Record<string, unknown>) => {
     remember(`exam:${code}`);
     setExams((e) => ({ ...e, [code]: values }));
@@ -352,6 +379,11 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
   const openTemplate = section.startsWith('tpl:') ? templates.find((tpl) => `tpl:${tpl.code}` === section) : undefined;
   const p = visit.patient_detail;
   const props = { draft, onChange: changeDraft, readOnly };
+  const followUpDays = draft.follow_up_date ? dayjs(draft.follow_up_date).diff(dayjs(visit.visit_date), 'day') : null;
+  const daysBar = (
+    <DaysBar medicineDays={rx.medicine_days ?? null} followUpDays={followUpDays} onMedicineDays={changeMedicineDays}
+      onFollowUpDays={changeFollowUpDays} readOnly={rxReadOnly} followUpReadOnly={readOnly} />
+  );
 
   return (
     <div className="workspace" ref={workspaceRef}>
@@ -440,10 +472,11 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
           )}
           {section === 'diagnosis' && <DiagnosisSection {...props} />}
           {section === 'rx' && (
-            <RxSection rx={rx} onChange={changeRx} warnings={rxWarnings} diagnoses={draft.diagnoses} readOnly={rxReadOnly} />
+            <RxSection rx={rx} onChange={changeRx} warnings={rxWarnings} diagnoses={draft.diagnoses} readOnly={rxReadOnly}
+              patientId={visit.patient} visitId={visit.id} daysBar={daysBar} />
           )}
           {section === 'advice' && <AdviceSection {...props} />}
-          {section === 'followUp' && <FollowUpSection {...props} />}
+          {section === 'followUp' && <FollowUpSection {...props} daysBar={daysBar} />}
         </Card>
       </div>
 

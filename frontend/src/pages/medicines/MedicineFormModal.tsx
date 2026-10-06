@@ -7,6 +7,7 @@ import { api, errorMessage } from '../../api/client';
 import type { MasterRef, Medicine, MedicineKind, Page } from '../../api/types';
 import { useAuth } from '../../auth/AuthContext';
 import { MasterSelect } from '../../components/MasterSelect';
+import { quickDosage } from '../../utils/dosage';
 import { FLAGS } from './shared';
 
 const MASTER_FIELDS = ['dosage_form', 'dose_unit', 'default_timing', 'default_anupana', 'category', 'pack_type'] as const;
@@ -150,7 +151,7 @@ export function MedicineFormModal({ medicine, onClose }: { medicine: Medicine | 
         <Row gutter={12}>
           <Col xs={12} md={4}><Form.Item name="default_dose" label={t('medicines.dose')}><Input maxLength={20} placeholder="2" /></Form.Item></Col>
           <Col xs={12} md={5}><Form.Item name="dose_unit" label={t('medicines.unit')}><MasterSelect category="dose_unit" /></Form.Item></Col>
-          <Col xs={12} md={5}><Form.Item name="default_frequency" label={t('medicines.frequency')}><Input maxLength={20} placeholder="1-0-1" /></Form.Item></Col>
+          <Col xs={12} md={5}><Form.Item name="default_frequency" label={t('medicines.frequency')} getValueFromEvent={(e) => quickDosage(e.target.value)}><Input maxLength={20} placeholder="1-0-1 / 101" /></Form.Item></Col>
           <Col xs={12} md={5}><Form.Item name="default_timing" label={t('medicines.timing')}><MasterSelect category="medicine_timing" /></Form.Item></Col>
           <Col xs={24} md={5}><Form.Item name="default_anupana" label={t('medicines.anupana')}><MasterSelect category="anupana" /></Form.Item></Col>
         </Row>

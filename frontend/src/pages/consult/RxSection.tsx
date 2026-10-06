@@ -1,16 +1,28 @@
 // The prescription (Rx) part of the check-up: search medicines, dose / frequency / timing / anupana /
-// duration, safety warnings (fixed rules), and disease-wise templates.
+// duration / quantity, safety warnings (fixed rules), disease-wise templates, medicine days, and the
+// patient's last prescription to continue.
+// Quick dosage: type 222 in "M-N-N" and it becomes 2-2-2. The quantity is worked out (e.g. 180 tablets)
+// until the doctor types their own.
 import { CloseOutlined, ExclamationCircleFilled, SaveOutlined, WarningFilled } from '@ant-design/icons';
 import { App, AutoComplete, Button, Empty, Form, Input, InputNumber, Modal, Select, Space, Spin, Tag, Tooltip } from 'antd';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from '../../api/client';
 import { useMasterLabel, useMasters } from '../../api/masters';
-import type { Diagnosis, Medicine, Page, PrescriptionTemplate, RxLine, RxWarning } from '../../api/types';
+import type { Diagnosis, Medicine, Page, Prescription, PrescriptionTemplate, RxLine, RxWarning } from '../../api/types';
+import { autoQuantity, quickDosage } from '../../utils/dosage';
 import { MasterSelect } from '../../components/MasterSelect';
 import { MedicineFlags, money } from '../medicines/shared';
 
-export type RxDraft = { id?: string; items: RxLine[]; notes: string; status?: 'draft' | 'final' };
+export type RxDraft = { id?: string; items: RxLine[]; notes: string; status?: 'draft' | 'final'; medicine_days?: number | null };
+
+/** Keep the worked-out quantity up to date, unless the doctor typed their own. */
+export function withQuantity(before: RxLine | null, after: RxLine): RxLine {
+  const typedOwn = before && before.quantity && before.quantity !== autoQuantity(before);
+  if (typedOwn) return after;
+  return { ...after, quantity: autoQuantity(after) };
+}
 
 const FREQUENCIES = ['1-0-1', '1-1-1', '1-0-0', '0-0-1', '0-1-0', '1-1-0', '0-1-1'];
 
@@ -46,12 +58,17 @@ function LabelSelect({ category, value, onChange, disabled, width }: {
   );
 }
 
-export function RxSection({ rx, onChange, warnings, diagnoses, readOnly }: {
+export function RxSection({ rx, onChange, warnings, diagnoses, readOnly, daysBar, patientId, visitId }: {
   rx: RxDraft;
   onChange: (patch: Partial<RxDraft>) => void;
   warnings: RxWarning[];
   diagnoses: Diagnosis[];
   readOnly?: boolean;
+  /** Medicine days / follow-up days row (from the check-up screen) */
+  daysBar?: ReactNode;
+  /** To show the patient's last prescription */
+  patientId?: string;
+  visitId?: string;
 }) {
   const { t } = useTranslation();
   const { message } = App.useApp();
@@ -84,18 +101,22 @@ export function RxSection({ rx, onChange, warnings, diagnoses, readOnly }: {
 
   const items = rx.items;
   const setItems = (next: RxLine[]) => onChange({ items: next });
-  const update = (i: number, patch: Partial<RxLine>) => setItems(items.map((l, j) => (j === i ? { ...l, ...patch } : l)));
+  const update = (i: number, patch: Partial<RxLine>) =>
+    setItems(items.map((l, j) => (j === i ? ('quantity' in patch ? { ...l, ...patch } : withQuantity(l, { ...l, ...patch })) : l)));
+  // New lines take the prescription's medicine days when they have none
+  const withDays = (line: RxLine): RxLine => withQuantity(null, rx.medicine_days && !line.duration
+    ? { ...line, duration: rx.medicine_days, duration_unit: 'days' } : line);
 
   const addMedicine = (id: string) => {
     if (id.startsWith('free:')) {
       const name = id.slice(5);
-      setItems([...items, {
+      setItems([...items, withDays({
         medicine: null, medicine_name: name, dosage_form: '', dose: '', dose_unit: '', frequency: '', timing: '',
         anupana: '', duration: null, duration_unit: 'days', quantity: '', instructions: '', medicine_flags: [],
-      }]);
+      })]);
     } else {
       const medicine = options.find((m) => m.id === id);
-      if (medicine) setItems([...items, lineFromMedicine(medicine)]);
+      if (medicine) setItems([...items, withDays(lineFromMedicine(medicine))]);
     }
     setSearch('');
   };
@@ -110,7 +131,7 @@ export function RxSection({ rx, onChange, warnings, diagnoses, readOnly }: {
   const applyTemplate = (id: string) => {
     const tpl = templates.find((x) => x.id === id);
     if (!tpl) return;
-    const added = tpl.items.map((l) => ({ ...l, id: undefined }));
+    const added = tpl.items.map((l) => withDays({ ...l, id: undefined }));
     // One change (one Undo step): the lines, and the template's notes if there are none yet
     onChange({ items: [...items, ...added], ...(tpl.notes && !rx.notes ? { notes: tpl.notes } : {}) });
     message.success(t('rx.templateApplied', { name: tpl.name }));
@@ -147,6 +168,16 @@ export function RxSection({ rx, onChange, warnings, diagnoses, readOnly }: {
           </Space>
         )}
       </div>
+
+      {daysBar}
+
+      {!readOnly && patientId && (
+        <LastPrescription patientId={patientId} visitId={visitId} current={items}
+          onContinue={(lines) => {
+            onChange({ items: [...items, ...lines.map(({ id: _id, ...l }) => withDays(l))] });
+            message.success(t('rx.continued', { count: lines.length }));
+          }} />
+      )}
 
       {warnings.length > 0 && (
         <div className="rx-warnings">
@@ -207,7 +238,9 @@ export function RxSection({ rx, onChange, warnings, diagnoses, readOnly }: {
                 <div className="rx-field">
                   <Tooltip title={t('rx.frequencyHelp')}><span>{t('rx.frequency')}</span></Tooltip>
                   <AutoComplete size="small" value={l.frequency} disabled={readOnly} style={{ width: 84 }} placeholder="1-0-1"
-                    options={FREQUENCIES.map((f) => ({ value: f }))} onChange={(v) => update(i, { frequency: v.slice(0, 20) })} />
+                    filterOption={false}
+                    options={FREQUENCIES.filter((f) => !l.frequency || (f.startsWith(l.frequency) && f !== l.frequency)).map((f) => ({ value: f }))}
+                    onChange={(v) => update(i, { frequency: quickDosage(v).slice(0, 20) })} />
                 </div>
                 <div className="rx-field">
                   <span>{t('rx.timing')}</span>
@@ -226,6 +259,11 @@ export function RxSection({ rx, onChange, warnings, diagnoses, readOnly }: {
                       onChange={(v) => update(i, { duration_unit: v })}
                       options={(['days', 'weeks', 'months'] as const).map((u) => ({ value: u, label: t(`consult.units.${u}`) }))} />
                   </Space.Compact>
+                </div>
+                <div className="rx-field">
+                  <Tooltip title={t('rx.quantityHelp')}><span>{t('rx.quantity')}</span></Tooltip>
+                  <Input size="small" value={l.quantity} maxLength={40} disabled={readOnly} style={{ width: 104 }}
+                    placeholder={t('rx.quantityPlaceholder')} onChange={(e) => update(i, { quantity: e.target.value })} />
                 </div>
                 <div className="rx-field rx-field-grow">
                   <span>{t('rx.instructionsLabel')}</span>
@@ -295,5 +333,57 @@ function SaveTemplateModal({ items, notes, diagnoses, onClose }: {
         </Form.Item>
       </Form>
     </Modal>
+  );
+}
+
+/** The patient's last prescription (from an earlier check-up): continue all or some of its medicines. */
+function LastPrescription({ patientId, visitId, current, onContinue }: {
+  patientId: string;
+  visitId?: string;
+  current: RxLine[];
+  onContinue: (lines: RxLine[]) => void;
+}) {
+  const { t } = useTranslation();
+  const [last, setLast] = useState<Prescription | null>(null);
+  const [open, setOpen] = useState(true);
+  useEffect(() => {
+    api.get<Page<Prescription>>('/prescriptions/', { params: { patient: patientId, page_size: 5 } })
+      .then(({ data }) => setLast(data.results.find((p) => p.visit !== visitId && p.items.length > 0) ?? null))
+      .catch(() => setLast(null));
+  }, [patientId, visitId]);
+  if (!last) return null;
+  const already = new Set(current.map((l) => l.medicine ?? l.medicine_name));
+  const left = last.items.filter((l) => !already.has(l.medicine ?? l.medicine_name));
+  const summary = (l: RxLine) => [
+    l.dose ? `${l.dose} ${l.dose_unit}`.trim() : '', l.frequency,
+    l.duration ? `${l.duration} ${t(`consult.units.${l.duration_unit}`)}` : '',
+  ].filter(Boolean).join(' · ');
+  return (
+    <div className="last-rx">
+      <div className="last-rx-head">
+        <button type="button" className="link-button" onClick={() => setOpen(!open)}>
+          <b>{t('rx.lastPrescription')}</b> <span className="cell-sub">
+            {dayjs(last.visit_date).format('DD-MM-YYYY')} · {last.doctor_name}{last.medicine_days ? ` · ${t('rx.daysShort', { n: last.medicine_days })}` : ''}
+          </span>
+        </button>
+        {left.length > 0 && (
+          <Button size="small" type="primary" ghost onClick={() => onContinue(left)}>{t('rx.continueAll', { count: left.length })}</Button>
+        )}
+      </div>
+      {open && (
+        <div className="last-rx-lines">
+          {last.items.map((l) => {
+            const added = already.has(l.medicine ?? l.medicine_name);
+            return (
+              <div className="last-rx-line" key={l.id}>
+                <span><b>{l.medicine_name}</b> <span className="cell-sub">{summary(l)}</span></span>
+                {added ? <Tag className="tag-tight" color="green">{t('rx.alreadyAdded')}</Tag>
+                  : <Button size="small" onClick={() => onContinue([l])}>{t('rx.continueOne')}</Button>}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }

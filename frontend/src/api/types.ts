@@ -592,6 +592,9 @@ export interface Medicine {
   branch_price: string | null;
   branch_active: boolean;
   updated_at: string;
+  strength: string;
+  sku: string;
+  notes: string;
 }
 
 export interface MedicineVersion {
@@ -647,6 +650,8 @@ export interface Prescription {
   branch_name: string;
   status: 'draft' | 'final';
   notes: string;
+  /** Quick "Medicine days" for the whole prescription */
+  medicine_days: number | null;
   finalized_at: string | null;
   items: RxLine[];
   warnings: RxWarning[];
