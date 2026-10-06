@@ -193,6 +193,10 @@ DEFAULT_VALUES = {
         ("capsule", "Capsule", "કેપ્સ્યૂલ", "कैप्सूल"),
         ("syrup", "Syrup", "સિરપ", "सिरप"),
         ("ointment", "Ointment / cream", "મલમ", "मलहम"),
+        ("tablet", "Tablet", "ટેબ્લેટ", "टैबलेट"),
+        ("injection", "Injection", "ઇન્જેક્શન", "इंजेक्शन"),
+        ("drops", "Drops", "ટીપાં", "बूँदें"),
+        ("powder_sachet", "Powder / sachet", "પાવડર / સેશે", "पाउडर / सैशे"),
         ("other", "Other", "અન્ય", "अन्य"),
     ],
     "dose_unit": [
@@ -205,6 +209,9 @@ DEFAULT_VALUES = {
         ("drops", "drops", "ટીપાં", "बूँदें"),
         ("pinch", "pinch", "ચપટી", "चुटकी"),
         ("apply", "apply locally", "લગાવવું", "लगाएँ"),
+        ("vial", "vial", "વાયલ", "वायल"),
+        ("ampoule", "ampoule", "એમ્પ્યુલ", "एम्पुल"),
+        ("sachet", "sachet", "સેશે", "सैशे"),
     ],
     "medicine_timing": [
         ("after_food", "After food", "જમ્યા પછી", "भोजन के बाद"),
@@ -243,6 +250,9 @@ DEFAULT_VALUES = {
         ("packet", "Packet / pouch", "પેકેટ", "पैकेट"),
         ("tube", "Tube", "ટ્યુબ", "ट्यूब"),
         ("tin", "Tin / can", "ડબ્બો", "डिब्बा"),
+        ("vial", "Vial", "વાયલ", "वायल"),
+        ("ampoule", "Ampoule", "એમ્પ્યુલ", "एम्पुल"),
+        ("sachet", "Sachet", "સેશે", "सैशे"),
     ],
 
     # --- Billing (OPD services and charges) ---
