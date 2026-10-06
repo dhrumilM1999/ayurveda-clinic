@@ -1,0 +1,76 @@
+{% comment %}
+SAFE TO EDIT: the shared look of prescriptions, certificates, follow-up cards and Prakriti reports:
+letterhead (logo, clinic, branch, address, phone), the doctor's name and signature, the QR code and the footer.
+- Clinic name / logo: Settings -> Clinic. Address, phone, footer line: Settings -> Branch details.
+- Doctor qualification, registration no. and signature: Staff -> the doctor.
+- Words in Gujarati / Hindi: backend/apps/documents/words.py.
+Keep everything inside {{ }} and {% %}.
+{% endcomment %}<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: {{ page_width }} {{ page_height }}; margin: {{ page_margin }}; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Noto Sans", "Noto Sans Gujarati", "Noto Sans Devanagari", sans-serif; font-size: {% if size == "a6" %}8pt{% elif size == "a5" %}9pt{% else %}10pt{% endif %}; color: #1d1d1d; }
+  .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 4mm; border-bottom: 0.6mm solid #1f5c46; padding-bottom: 2mm; }
+  .brand { display: flex; gap: 3mm; align-items: center; }
+  .brand img { max-height: 16mm; max-width: 30mm; }
+  .org { font-size: 1.6em; font-weight: 700; color: #1f5c46; line-height: 1.1; }
+  .muted { color: #5c5c5c; }
+  .small { font-size: 0.85em; }
+  .doctor { text-align: right; }
+  .doctor b { font-size: 1.1em; }
+  .title { text-align: center; font-weight: 700; letter-spacing: 0.4mm; margin: 2.5mm 0; font-size: 1.15em; }
+  .watermark { position: fixed; top: 40%; left: 0; right: 0; text-align: center; font-size: 36pt; color: rgba(192, 57, 43, 0.15); transform: rotate(-25deg); font-weight: 700; }
+  .cancelled { color: rgba(192, 57, 43, 0.22); }
+  table { width: 100%; border-collapse: collapse; }
+  th { background: #eef3f0; text-align: left; font-size: 0.85em; padding: 1mm 1.2mm; }
+  td { padding: 1.2mm; border-bottom: 0.2mm solid #e2e2e2; vertical-align: top; }
+  .foot { margin-top: 6mm; display: flex; justify-content: space-between; align-items: flex-end; gap: 4mm; }
+  .qr { text-align: center; font-size: 0.75em; color: #5c5c5c; }
+  .qr img { width: 20mm; height: 20mm; }
+  .sign { text-align: center; min-width: 45mm; }
+  .sign img { max-height: 15mm; max-width: 45mm; display: block; margin: 0 auto 1mm; }
+  .sign .line { border-top: 0.2mm solid #555; padding-top: 1mm; }
+  .footer-line { margin-top: 4mm; border-top: 0.2mm solid #ccc; padding-top: 1.5mm; text-align: center; font-size: 0.8em; color: #5c5c5c; }
+  {% block style %}{% endblock %}
+</style>
+</head>
+<body>
+{% if duplicate %}<div class="watermark">{{ w.duplicate }}</div>{% endif %}
+{% if is_cancelled %}<div class="watermark cancelled">{{ w.cancelled }}</div>{% endif %}
+
+<div class="head">
+  <div class="brand">
+    {% if logo %}<img src="{{ logo }}" alt="">{% endif %}
+    <div>
+      <div class="org">{{ organization.name }}</div>
+      <div class="small">{{ branch.name }}</div>
+      <div class="small muted">{{ address }}</div>
+      <div class="small muted">{% if branch.phone %}{{ w.clinic_phone }} {{ branch.phone }}{% endif %}{% if branch.email %} · {{ branch.email }}{% endif %}</div>
+    </div>
+  </div>
+  {% if doctor %}
+  <div class="doctor small">
+    <b>{{ doctor.name }}</b>
+    {% if doctor.qualification %}<div>{{ doctor.qualification }}</div>{% endif %}
+    {% if doctor.registration_number %}<div class="muted">{{ w.reg_no }} {{ doctor.registration_number }}</div>{% endif %}
+  </div>
+  {% endif %}
+</div>
+
+{% block content %}{% endblock %}
+
+<div class="foot">
+  <div class="qr">{% if qr %}<img src="{{ qr }}" alt=""><div>{{ w.verify }}</div>{% if number %}<div>{{ number }}</div>{% endif %}{% endif %}</div>
+  {% if doctor %}
+  <div class="sign">
+    {% if doctor.signature %}<img src="{{ doctor.signature }}" alt="">{% else %}<div style="height: 12mm"></div>{% endif %}
+    <div class="line small">{{ doctor.name }}<br><span class="muted">{{ w.doctor_sign }}</span></div>
+  </div>
+  {% endif %}
+</div>
+{% if branch.letterhead_footer %}<div class="footer-line">{{ branch.letterhead_footer }}</div>{% endif %}
+</body>
+</html>

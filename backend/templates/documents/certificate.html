@@ -1,0 +1,22 @@
+{% extends "documents/_doc_base.html" %}
+{% comment %}SAFE TO EDIT: medical / fitness certificate. Check the wording with your doctors before use.{% endcomment %}
+{% block style %}
+  .text { margin-top: 6mm; line-height: 1.9; font-size: 1.05em; }
+  .meta { display: flex; justify-content: space-between; }
+{% endblock %}
+{% block content %}
+<div class="title">{{ title }}</div>
+<div class="meta small"><span>{{ w.certificate_no }} <b>{{ number }}</b></span><span>{{ w.date }} <b>{{ certificate.issued_on|date:"d-m-Y" }}</b></span></div>
+<div class="text">
+  {{ w.certify }} <b>{{ patient.name }}</b>{% if patient.age is not None %} ({{ patient.age }} {{ w.years }}{% if patient.gender %}, {{ patient.gender }}{% endif %}){% endif %},
+  {{ w.patient_id }} {{ patient.uhid }}, {{ w.was_examined }} <b>{{ certificate.issued_on|date:"d-m-Y" }}</b>
+  {% if certificate.diagnosis %}{{ w.suffering }} <b>{{ certificate.diagnosis }}</b>{% endif %}.
+  {% if certificate.kind == "medical" and certificate.rest_from %}
+    <br>{{ w.rest_advised }} <b>{{ certificate.rest_from|date:"d-m-Y" }}</b>{% if certificate.rest_to %} {{ w.to }} <b>{{ certificate.rest_to|date:"d-m-Y" }}</b>{% endif %}.
+  {% endif %}
+  {% if certificate.kind == "fitness" and certificate.fit_from %}
+    <br><b>{{ patient.name }}</b> {{ w.fit_from }} <b>{{ certificate.fit_from|date:"d-m-Y" }}</b>.
+  {% endif %}
+  {% if certificate.remarks %}<br>{{ w.remarks }}: {{ certificate.remarks }}{% endif %}
+</div>
+{% endblock %}
