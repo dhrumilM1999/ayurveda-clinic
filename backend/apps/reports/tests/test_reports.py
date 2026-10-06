@@ -71,6 +71,8 @@ def test_income_by_doctor_and_branch(branch_a, branch_admin, doctor, billed_day)
     row = client.get(url("by_doctor")).data["rows"][0]
     assert row["name"] == doctor.full_name
     assert Decimal(row["consultation"]) == 800 and Decimal(row["received"]) == 500 and Decimal(row["due"]) == 300
+    parts = sum(Decimal(row[k]) for k in ("consultation", "services", "medicines", "round_off"))
+    assert parts == Decimal(row["billed"])  # each row adds up
     branch_row = client.get(url("by_branch")).data["rows"][0]
     assert branch_row["name"] == "Branch A" and Decimal(branch_row["billed"]) == 800
 
@@ -83,6 +85,11 @@ def test_new_vs_repeat_patients(org, branch_a, branch_admin, doctor):
     Visit.objects.create(organization=org, branch=branch_a, patient=new, doctor=doctor, visit_date=TODAY)
     totals = client_for(branch_admin, branch_a).get(url("patients")).data["totals"]
     assert (totals["visits"], totals["patients"], totals["new"], totals["repeat"]) == (2, 2, 1, 1)
+    # A new patient who comes back in the same period: one new case and one follow-up, still one patient
+    Visit.objects.create(organization=org, branch=branch_a, patient=new, doctor=doctor, visit_date=TODAY + timedelta(days=1))
+    data = client_for(branch_admin, branch_a).get(url("patients", date_to=TODAY + timedelta(days=1))).data
+    assert (data["totals"]["patients"], data["totals"]["new"], data["totals"]["repeat"]) == (2, 1, 2)
+    assert sum(r["repeat"] for r in data["rows"]) == data["totals"]["repeat"]
 
 
 @pytest.mark.django_db

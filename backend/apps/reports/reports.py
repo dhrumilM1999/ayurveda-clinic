@@ -126,6 +126,9 @@ def _income(branches, date_from, date_to, key):
         rows[line["who"]][KIND_GROUPS.get(line["kind"], "services")] += line["s"]
     for line in credits.values("who", "invoice_line__kind").annotate(s=Sum("total_amount")):
         rows[line["who"]][KIND_GROUPS.get(line["invoice_line__kind"], "services")] -= line["s"]
+    # Bills are rounded to the rupee; show the rounding so each row adds up to "Billed"
+    for r in rows.values():
+        r["round_off"] = r["billed"] - r["consultation"] - r["services"] - r["medicines"]
     return rows
 
 
@@ -151,7 +154,7 @@ def by_branch(branches, date_from, date_to, grouping=None):
 def _income_table(out, label):
     columns = [col("name", label), col("bills", "Bills", "int"), col("consultation", "Consultation", "money"),
                col("services", "Services & therapy", "money"), col("medicines", "Medicines", "money"),
-               col("billed", "Billed (after returns)", "money"), col("received", "Received", "money"),
+               col("round_off", "Round off", "money"), col("billed", "Billed (after returns)", "money"), col("received", "Received", "money"),
                col("due", "Still due", "money")]
     return {"columns": columns, "rows": out, "totals": _totals(out, columns, "name") if out else None}
 
@@ -178,18 +181,23 @@ def patients(branches, date_from, date_to, grouping="day"):
         r = rows[period]
         new, repeat = len(r["new"]), len(r["repeat"] - r["new"])
         out.append({"period": period, "visits": r["visits"], "patients": len(r["all"]), "new": new, "repeat": repeat,
-                    "repeat_percent": round(100 * repeat / len(r["all"])) if r["all"] else 0})
+                    "repeat_percent": _percent(repeat, new + repeat)})
     columns = [col("period", "Month" if grouping == "month" else "Date", "month" if grouping == "month" else "date"),
                col("visits", "Check-ups", "int"), col("patients", "Patients", "int"), col("new", "New cases", "int"),
                col("repeat", "Follow-ups (repeat)", "int"), col("repeat_percent", "Repeat %", "int")]
     totals = None
     if out:
-        everyone = {p for r in rows.values() for p in r["all"]}
-        new_people = {p for r in rows.values() for p in r["new"]}
-        totals = {"period": "Total", "visits": sum(r["visits"] for r in out), "patients": len(everyone),
-                  "new": len(new_people), "repeat": len(everyone - new_people),
-                  "repeat_percent": round(100 * len(everyone - new_people) / len(everyone)) if everyone else 0}
+        # New cases and follow-ups add up the rows (a new patient who came back later counts once in each);
+        # "Patients" counts each person once.
+        new, repeat = sum(r["new"] for r in out), sum(r["repeat"] for r in out)
+        totals = {"period": "Total", "visits": sum(r["visits"] for r in out),
+                  "patients": len({p for r in rows.values() for p in r["all"]}),
+                  "new": new, "repeat": repeat, "repeat_percent": _percent(repeat, new + repeat)}
     return {"columns": columns, "rows": out, "totals": totals}
+
+
+def _percent(part, whole):
+    return round(100 * part / whole) if whole else 0
 
 
 # ---------------------------------------------------------------- missed follow-ups
