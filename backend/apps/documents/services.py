@@ -79,10 +79,20 @@ def verify_url(doc: IssuedDocument) -> str:
     return f"{settings.PUBLIC_APP_URL}/verify/{doc.token}"
 
 
+def pad_for(branch, size: str):
+    """
+    Pre-printed pad (Settings -> Branch details): the clinic's own paper already has the letterhead, so the
+    print-out leaves blank space at the top / bottom and prints no letterhead. A4 and A5 only.
+    """
+    if not branch.print_on_pad or size not in ("a4", "a5"):
+        return None
+    return {"top": f"{branch.pad_top_mm}mm", "bottom": f"{branch.pad_bottom_mm}mm"}
+
+
 def letterhead(branch, doctor) -> dict:
     org = branch.organization
     return {
-        "organization": org, "branch": branch, "logo": _data_uri(org.logo),
+        "organization": org, "branch": branch, "logo": _data_uri(org.logo) if org.logo_on_documents else "",
         "address": ", ".join(filter(None, [branch.address, branch.city, branch.pincode])),
         "doctor": {
             "name": doctor.full_name, "qualification": doctor.qualification,
@@ -152,6 +162,102 @@ def prescription_context(prescription, lang: str) -> dict:
         "advice_notes": visit.advice_notes,
         "follow_up_date": visit.follow_up_date, "follow_up_notes": visit.follow_up_notes,
         **letterhead(prescription.branch, prescription.doctor),
+    }
+
+
+def _in(label, lang: str) -> str:
+    """A {"en", "gu", "hi"} label in the language (English when that language is empty)."""
+    if isinstance(label, dict):
+        return label.get(lang) or label.get("en", "")
+    return str(label or "")
+
+
+def _exam_rows(exam, lang: str) -> list[tuple[str, str]]:
+    """The answers of one filled examination form as (question, answer) in the language, in the form's order."""
+    from apps.emr.services import fields_for_version
+
+    values = exam.values or {}
+    rows = []
+    for field in fields_for_version(exam.template, exam.template_version):
+        value = values.get(field["key"])
+        if value in (None, "", []):
+            continue
+        options = {o["value"]: _in(o["label"], lang) for o in field.get("options", [])}
+        if field["type"] == "choice":
+            text = options.get(value, str(value))
+        elif field["type"] == "multi":
+            text = ", ".join(options.get(v, str(v)) for v in value)
+        elif field["type"] == "number":
+            text = f"{value} {field.get('unit', '')}".strip()
+        else:
+            text = str(value)
+        rows.append((_in(field["label"], lang), text))
+    return rows
+
+
+def _condition(item, lang: str, w: dict) -> str:
+    """A known condition, e.g. "Diabetes (since 2019)", in the language when a translation exists."""
+    master = item.condition
+    name = (getattr(master, f"label_{lang}", "") if lang != "en" else "") or master.label
+    return f"{name} ({w['since_x'].format(x=item.since)})" if item.since else name
+
+
+def detailed_context(prescription, lang: str) -> dict:
+    """
+    Extra parts of the DETAILED prescription: the full check-up (history, examination forms, Prakriti result,
+    complaints with duration, diagnoses with codes, all vitals) and the patient's known conditions, allergies and
+    other medicines. Only what was filled in is printed.
+    """
+    visit, patient = prescription.visit, prescription.patient
+    w = words_for(lang)
+    vital = patient.vitals.filter(recorded_at__date=visit.visit_date).order_by("-recorded_at").first()
+    vitals_full = []
+    if vital is not None:
+        if vital.bp_systolic and vital.bp_diastolic:
+            vitals_full.append((w["bp"], f"{vital.bp_systolic}/{vital.bp_diastolic} mmHg"))
+        for label, value, unit in ((w["pulse"], vital.pulse, "/min"), (w["temperature"], vital.temperature_f, "°F"),
+                                   (w["spo2"], vital.spo2, "%"), (w["resp_rate"], vital.respiratory_rate, "/min"),
+                                   (w["weight"], vital.weight_kg, "kg"), (w["height"], vital.height_cm, "cm"),
+                                   (w["bmi"], vital.bmi, "")):
+            if value:
+                vitals_full.append((label, f"{value} {unit}".strip()))
+    complaints = []
+    for c in visit.complaints or []:
+        if not c.get("label"):
+            continue
+        extra = []
+        if c.get("duration"):
+            extra.append(f"{w['duration']} {c['duration']} {DURATION_WORDS.get(c.get('duration_unit') or 'days', DURATION_WORDS['days'])[lang]}")
+        if c.get("severity"):
+            extra.append(f"{w['severity']} {c['severity']}")
+        if c.get("notes"):
+            extra.append(c["notes"])
+        complaints.append({"label": c["label"], "extra": ", ".join(extra)})
+    diagnoses = [{"label": d["label"], "code": d.get("code", ""), "kind": w.get(d.get("kind", ""), "")}
+                 for d in visit.diagnoses or [] if d.get("label")]
+    exams, prakriti = [], None
+    for exam in visit.exams.select_related("template").order_by("created_at"):
+        name = (getattr(exam.template, f"name_{lang}", "") if lang != "en" else "") or exam.template.name
+        if exam.template.kind == "questionnaire":
+            result = exam.result or {}
+            if result.get("answered"):
+                kind = result.get("type", "")
+                prakriti = {
+                    "type": " - ".join(w.get(p, p) for p in kind.split("_")) if kind and kind != "sama" else w["sama"],
+                    "bars": [(w[d], result.get(d, 0)) for d in ("vata", "pitta", "kapha")],
+                }
+            continue
+        rows = _exam_rows(exam, lang)
+        if rows:
+            exams.append({"name": name, "rows": rows})
+    return {
+        "detailed": True,
+        "vitals_full": vitals_full, "complaints_full": complaints, "diagnoses_full": diagnoses,
+        "history_notes": visit.history_notes, "examination_notes": visit.examination_notes,
+        "exams": exams, "prakriti": prakriti,
+        "conditions": [_condition(c, lang, w) for c in patient.conditions.select_related("condition")],
+        "allergies": [a.allergen for a in patient.allergies.all()],
+        "medications": [" ".join(filter(None, [m.name, m.dose, m.frequency])) for m in patient.medications.all()],
     }
 
 

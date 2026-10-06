@@ -4,6 +4,7 @@ Print-outs as PDF, certificates, WhatsApp share of a prescription, and the publi
 GET /documents/<kind>/<id>/   kind: prescription (id = prescription), follow-up-card / prakriti (id = visit),
                               certificate (id = certificate).  ?size=a4|a5|a6  ?lang=en|gu|hi
                               ?preview=1 (on screen, not counted)  ?download=1
+                              ?detail=1 (prescription only: the detailed prescription with the full check-up)
 Every view / print / share is written to the audit log.
 """
 from django.db.models import Q
@@ -25,8 +26,8 @@ from apps.prescriptions.models import Prescription
 from .models import Certificate, IssuedDocument
 from .serializers import CertificateSerializer
 from .services import (
-    SIZES, certificate_context, follow_up_context, issue, language_of, mark_printed, prakriti_context,
-    prescription_context, render, verify_url, _qr,
+    SIZES, certificate_context, detailed_context, follow_up_context, issue, language_of, mark_printed, pad_for,
+    prakriti_context, prescription_context, render, verify_url, _qr,
 )
 from .words import words_for
 
@@ -97,13 +98,24 @@ class DocumentPdfView(APIView):
         record, doc, template, make, patient = _load(kind, request, pk)
         lang = language_of(patient, request.query_params.get("lang"))
         preview = request.query_params.get("preview") == "1"
+        # ?detail=1: the DETAILED prescription (full check-up summary). It has the full medical history, so it
+        # needs "See full medical history" as well.
+        detailed = kind == "prescription" and request.query_params.get("detail") == "1"
+        if detailed:
+            _any_perm(request, ("emr.view",))
         duplicate = doc.print_count > 0 if preview else mark_printed(doc)
+        context = make(lang)
+        if detailed:
+            context.update(detailed_context(record, lang))
         content = render(template, size, {
-            **make(lang), "number": doc.number, "duplicate": duplicate, "qr": _qr(verify_url(doc)),
+            **context, "number": doc.number, "duplicate": duplicate, "qr": _qr(verify_url(doc)),
             "is_cancelled": doc.is_cancelled,
+            # Prescriptions on the clinic's pre-printed pad (Settings -> Branch details)
+            "pad": pad_for(request.branch, size) if kind == "prescription" else None,
         })
         log_action(request, "view" if preview else "print", record, changes={
-            "document": kind, "number": doc.number, "size": size, "duplicate": duplicate, "patient": str(patient.id)})
+            "document": kind, "number": doc.number, "size": size, "duplicate": duplicate, "patient": str(patient.id),
+            **({"detailed": True} if detailed else {})})
         return pdf_response(content, f"{kind}-{doc.number or str(doc.id)[:8]}.pdf".replace("/", "-"),
                             request.query_params.get("download") == "1")
 

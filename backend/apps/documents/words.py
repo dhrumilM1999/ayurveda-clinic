@@ -92,5 +92,32 @@ PRAKRITI_GUIDANCE = {
 }
 
 
+# Words for the DETAILED prescription (full check-up summary). SAFE TO EDIT, like the words above.
+DETAILED_WORDS = {
+    "en": {
+        "detailed_title": "Check-up summary and prescription", "history": "History / clinical notes",
+        "examination": "Examination", "medical_history": "Known conditions", "allergies": "Allergies",
+        "current_medicines": "Other medicines being taken", "height": "Height", "bmi": "BMI", "spo2": "SpO2",
+        "resp_rate": "Resp. rate", "since_x": "since {x}", "severity": "severity", "provisional": "provisional",
+        "final": "final", "prakriti_result": "Prakriti result", "duration": "for",
+    },
+    "gu": {
+        "detailed_title": "તપાસનો સારાંશ અને પ્રિસ્ક્રિપ્શન", "history": "ઇતિહાસ / તપાસ નોંધ",
+        "examination": "તપાસ", "medical_history": "જાણીતી બીમારીઓ", "allergies": "એલર્જી",
+        "current_medicines": "ચાલુ અન્ય દવાઓ", "height": "ઊંચાઈ", "bmi": "BMI", "spo2": "SpO2",
+        "resp_rate": "શ્વાસ દર", "since_x": "{x} થી", "severity": "તીવ્રતા", "provisional": "પ્રાથમિક",
+        "final": "અંતિમ", "prakriti_result": "પ્રકૃતિ પરિણામ", "duration": "સમય",
+    },
+    "hi": {
+        "detailed_title": "जाँच का सारांश और प्रिस्क्रिप्शन", "history": "इतिहास / जाँच नोट",
+        "examination": "जाँच", "medical_history": "ज्ञात बीमारियाँ", "allergies": "एलर्जी",
+        "current_medicines": "चल रही अन्य दवाइयाँ", "height": "लंबाई", "bmi": "BMI", "spo2": "SpO2",
+        "resp_rate": "साँस दर", "since_x": "{x} से", "severity": "गंभीरता", "provisional": "प्रारंभिक",
+        "final": "अंतिम", "prakriti_result": "प्रकृति परिणाम", "duration": "अवधि",
+    },
+}
+
+
 def words_for(lang: str) -> dict:
-    return WORDS.get(lang) or WORDS["en"]
+    base = WORDS.get(lang) or WORDS["en"]
+    return {**base, **(DETAILED_WORDS.get(lang) or DETAILED_WORDS["en"])}

@@ -1,7 +1,10 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 
-from .views import AdditionalChoiceViewSet, AdditionalFeatureViewSet, BranchViewSet, CurrentOrganizationView, FeatureFlagViewSet, RoomTypeViewSet, RoomViewSet
+from .views import (
+    AdditionalChoiceViewSet, AdditionalFeatureViewSet, BranchViewSet, CurrentOrganizationView, FeatureFlagViewSet,
+    OrganizationLogoView, RoomTypeViewSet, RoomViewSet,
+)
 
 router = DefaultRouter()
 router.register("branches", BranchViewSet, basename="branch")
@@ -13,4 +16,5 @@ router.register("additional-choices", AdditionalChoiceViewSet, basename="additio
 
 urlpatterns = [
     path("organization/", CurrentOrganizationView.as_view(), name="current-organization"),
+    path("organization/logo/", OrganizationLogoView.as_view(), name="organization-logo"),
 ] + router.urls

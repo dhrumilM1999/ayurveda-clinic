@@ -1,5 +1,6 @@
 {% extends "documents/_doc_base.html" %}
-{% comment %}SAFE TO EDIT: the prescription (A4 / A5). The shared letterhead and signature are in _doc_base.html.{% endcomment %}
+{% comment %}SAFE TO EDIT: the prescription (A4 / A5). The shared letterhead and signature are in _doc_base.html.
+"detailed" = the detailed prescription (full check-up summary); the words are in apps/documents/words.py.{% endcomment %}
 {% block style %}
   .patient { display: flex; justify-content: space-between; gap: 4mm; margin: 2mm 0; }
   .rx { font-size: 1.8em; font-weight: 700; color: #1f5c46; margin: 1mm 0; }
@@ -10,8 +11,20 @@
   .time b { display: block; }
   .time span { font-size: 0.7em; color: #5c5c5c; }
   .med { font-weight: 700; }
+  /* Detailed prescription (full check-up summary) */
+  .doc-title { text-align: center; font-weight: 700; letter-spacing: 0.3mm; margin: 1mm 0 2mm; font-size: 1.1em; }
+  .kv { display: flex; flex-wrap: wrap; gap: 0.5mm 4mm; }
+  .kv span { white-space: nowrap; }
+  .kv b { font-weight: 600; }
+  .exam { margin-top: 1.5mm; }
+  .exam-name { font-weight: 600; font-size: 0.9em; }
+  .exam table td { padding: 0.6mm 1mm; border-bottom: 0.15mm solid #ececec; font-size: 0.9em; }
+  .exam table td:first-child { width: 38%; color: #444; }
+  .alert { color: #a3261b; font-weight: 600; }
+  .pre { white-space: pre-line; }
 {% endblock %}
 {% block content %}
+{% if detailed %}<div class="doc-title">{{ w.detailed_title }}</div>{% endif %}
 <div class="patient">
   <div>
     <div><b>{{ patient.name }}</b>{% if patient.age is not None %} · {{ patient.age }} {{ w.years }}{% endif %}{% if patient.gender %} · {{ patient.gender }}{% endif %}</div>
@@ -23,6 +36,44 @@
   </div>
 </div>
 
+{% if detailed %}
+{# ---- DETAILED: the full check-up. Only what was filled in is printed. ---- #}
+{% if vitals_full %}
+<div class="section small"><b class="h">{{ w.vitals }}</b>
+  <div class="kv">{% for label, value in vitals_full %}<span><b>{{ label }}</b> {{ value }}</span>{% endfor %}</div>
+</div>
+{% endif %}
+{% if allergies %}<div class="section small alert">{{ w.allergies }}: {{ allergies|join:", " }}</div>{% endif %}
+{% if conditions or medications %}
+<div class="section small">
+  {% if conditions %}<div><b>{{ w.medical_history }}:</b> {{ conditions|join:", " }}</div>{% endif %}
+  {% if medications %}<div><b>{{ w.current_medicines }}:</b> {{ medications|join:"; " }}</div>{% endif %}
+</div>
+{% endif %}
+{% if complaints_full %}
+<div class="section small"><b class="h">{{ w.complaints }}</b>
+  {% for c in complaints_full %}<div>{{ forloop.counter }}. {{ c.label }}{% if c.extra %} <span class="muted">({{ c.extra }})</span>{% endif %}</div>{% endfor %}
+</div>
+{% endif %}
+{% if history_notes %}<div class="section small"><b class="h">{{ w.history }}</b><div class="pre">{{ history_notes }}</div></div>{% endif %}
+{% if exams or examination_notes or prakriti %}
+<div class="section small"><b class="h">{{ w.examination }}</b>
+  {% if prakriti %}<div><b>{{ w.prakriti_result }}:</b> {{ prakriti.type }} ({% for name, pct in prakriti.bars %}{{ name }} {{ pct }}%{% if not forloop.last %}, {% endif %}{% endfor %})</div>{% endif %}
+  {% for e in exams %}
+  <div class="exam">
+    <div class="exam-name">{{ e.name }}</div>
+    <table>{% for label, value in e.rows %}<tr><td>{{ label }}</td><td>{{ value }}</td></tr>{% endfor %}</table>
+  </div>
+  {% endfor %}
+  {% if examination_notes %}<div class="pre" style="margin-top: 1mm">{{ examination_notes }}</div>{% endif %}
+</div>
+{% endif %}
+{% if diagnoses_full %}
+<div class="section small"><b class="h">{{ w.diagnosis }}</b>
+  {% for d in diagnoses_full %}<div>{{ d.label }}{% if d.code %} <span class="muted">[{{ d.code }}]</span>{% endif %}{% if d.kind %} <span class="muted">({{ d.kind }})</span>{% endif %}</div>{% endfor %}
+</div>
+{% endif %}
+{% else %}
 {% if vitals %}
 <div class="small muted">{{ w.vitals }}:
   {% if vitals.bp %}{{ w.bp }} {{ vitals.bp }}{% endif %}{% if vitals.pulse %} · {{ w.pulse }} {{ vitals.pulse }}{% endif %}{% if vitals.weight %} · {{ w.weight }} {{ vitals.weight }} kg{% endif %}{% if vitals.temperature %} · {{ w.temperature }} {{ vitals.temperature }}°F{% endif %}
@@ -30,6 +81,7 @@
 {% endif %}
 {% if complaints %}<div class="section small"><b class="h">{{ w.complaints }}</b>{{ complaints|join:", " }}</div>{% endif %}
 {% if diagnoses %}<div class="section small"><b class="h">{{ w.diagnosis }}</b>{{ diagnoses|join:", " }}</div>{% endif %}
+{% endif %}
 
 <div class="rx">&#8478;</div>
 <table>

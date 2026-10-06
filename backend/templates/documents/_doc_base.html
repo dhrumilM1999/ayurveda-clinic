@@ -3,6 +3,7 @@ SAFE TO EDIT: the shared look of prescriptions, certificates, follow-up cards an
 letterhead (logo, clinic, branch, address, phone), the doctor's name and signature, the QR code and the footer.
 - Clinic name / logo: Settings -> Clinic. Address, phone, footer line: Settings -> Branch details.
 - Doctor qualification, registration no. and signature: Staff -> the doctor.
+- Pre-printed pad (Settings -> Branch details): prescriptions skip this letterhead and leave blank space at the top.
 - Words in Gujarati / Hindi: backend/apps/documents/words.py.
 Keep everything inside {{ }} and {% %}.
 {% endcomment %}<!doctype html>
@@ -10,7 +11,7 @@ Keep everything inside {{ }} and {% %}.
 <head>
 <meta charset="utf-8">
 <style>
-  @page { size: {{ page_width }} {{ page_height }}; margin: {{ page_margin }}; }
+  @page { size: {{ page_width }} {{ page_height }}; margin: {% if pad %}{{ pad.top }} {{ page_margin }} {{ pad.bottom }}{% else %}{{ page_margin }}{% endif %}; }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: "Noto Sans", "Noto Sans Gujarati", "Noto Sans Devanagari", sans-serif; font-size: {% if size == "a6" %}8pt{% elif size == "a5" %}9pt{% else %}10pt{% endif %}; color: #1d1d1d; }
   .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 4mm; border-bottom: 0.6mm solid #1f5c46; padding-bottom: 2mm; }
@@ -41,6 +42,7 @@ Keep everything inside {{ }} and {% %}.
 {% if duplicate %}<div class="watermark">{{ w.duplicate }}</div>{% endif %}
 {% if is_cancelled %}<div class="watermark cancelled">{{ w.cancelled }}</div>{% endif %}
 
+{% if not pad %}{# On the pre-printed pad the paper already has the letterhead (Settings -> Branch details) #}
 <div class="head">
   <div class="brand">
     {% if logo %}<img src="{{ logo }}" alt="">{% endif %}
@@ -59,6 +61,7 @@ Keep everything inside {{ }} and {% %}.
   </div>
   {% endif %}
 </div>
+{% endif %}
 
 {% block content %}{% endblock %}
 
@@ -71,6 +74,6 @@ Keep everything inside {{ }} and {% %}.
   </div>
   {% endif %}
 </div>
-{% if branch.letterhead_footer %}<div class="footer-line">{{ branch.letterhead_footer }}</div>{% endif %}
+{% if branch.letterhead_footer and not pad %}<div class="footer-line">{{ branch.letterhead_footer }}</div>{% endif %}
 </body>
 </html>

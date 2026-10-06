@@ -21,6 +21,9 @@ class Organization(BaseModel):
     email = models.EmailField(blank=True)
     address = models.TextField(blank=True)
     logo = models.ImageField(upload_to="logos/", blank=True)
+    # Where the uploaded logo is printed (Settings -> Clinic). On a pre-printed pad the pad's own logo is used.
+    logo_on_documents = models.BooleanField("Logo on prescriptions, certificates and reports", default=True)
+    logo_on_bills = models.BooleanField("Logo on bills and receipts", default=True)
     default_language = models.CharField(max_length=5, choices=LANGUAGE_CHOICES, default="en")
     uhid_prefix = models.CharField(
         "Patient ID prefix", max_length=6, default="AY",
@@ -61,6 +64,12 @@ class Branch(OrgScopedModel):
     upi_vpa = models.CharField("UPI ID for payments", max_length=100, blank=True, help_text="e.g. clinic@okbank")
     # Printed at the bottom of prescriptions, certificates and reports (e.g. timings, "Sunday closed")
     letterhead_footer = models.CharField(max_length=300, blank=True)
+    # Pre-printed prescription pad: the clinic's own paper already has the logo, name, address, doctor and
+    # reg. no. at the top. Then prescriptions leave this much blank space at the top / bottom and print
+    # no letterhead of their own.
+    print_on_pad = models.BooleanField("Print prescriptions on our pre-printed pad", default=False)
+    pad_top_mm = models.PositiveSmallIntegerField("Blank space at the top (mm)", default=45)
+    pad_bottom_mm = models.PositiveSmallIntegerField("Blank space at the bottom (mm)", default=20)
     is_active = models.BooleanField(default=True)
 
     class Meta:

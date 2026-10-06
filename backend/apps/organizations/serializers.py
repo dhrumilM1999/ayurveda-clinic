@@ -8,9 +8,15 @@ class OrganizationSerializer(serializers.ModelSerializer):
         model = Organization
         fields = [
             "id", "name", "short_name", "legal_name", "gstin", "phone", "email",
-            "address", "logo", "default_language", "uhid_prefix", "multi_branch", "updated_at",
+            "address", "logo", "has_logo", "logo_on_documents", "logo_on_bills", "default_language", "uhid_prefix",
+            "multi_branch", "updated_at",
         ]
         read_only_fields = ["id", "logo", "updated_at"]
+
+    has_logo = serializers.SerializerMethodField()
+
+    def get_has_logo(self, obj) -> bool:
+        return bool(obj.logo)
 
     def validate_multi_branch(self, value):
         if self.instance and value != self.instance.multi_branch and not self.context["request"].user.is_org_admin:
@@ -29,9 +35,11 @@ class BranchSerializer(serializers.ModelSerializer):
         model = Branch
         fields = [
             "id", "name", "code", "address", "city", "state", "pincode",
-            "phone", "email", "gstin", "drug_licence_no", "upi_vpa", "letterhead_footer", "is_active", "created_at", "updated_at",
+            "phone", "email", "gstin", "drug_licence_no", "upi_vpa", "letterhead_footer",
+            "print_on_pad", "pad_top_mm", "pad_bottom_mm", "is_active", "created_at", "updated_at",
         ]
         read_only_fields = ["id", "created_at", "updated_at"]
+        extra_kwargs = {"pad_top_mm": {"min_value": 0, "max_value": 120}, "pad_bottom_mm": {"min_value": 0, "max_value": 80}}
 
     def validate_code(self, value):
         value = value.strip().upper()
