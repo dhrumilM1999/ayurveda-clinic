@@ -2,6 +2,23 @@
 
 What changed in each step, in plain words.
 
+## Pharmacy stock labels, scan to bill, counter sale (2026-10-06)
+
+- **Pharmacy stock labels** (Additional settings, new switch): labels for medicine packs on the shelf - medicine,
+  strength, pack, MRP, GST %, batch, expiry and a **barcode**. No patient details. Small 50 x 25 mm or large
+  75 x 50 mm. Print from Stock -> a batch -> **Labels** (one per pack). A batch without a barcode gets a clinic code.
+- **Scan to bill**: scanning a label at the pharmacy adds that exact batch with its price and GST.
+  - In a prescription sale, a scanned medicine that is not on the prescription is added to the same bill.
+  - New **Counter sale** tab (new switch) for walk-in customers without a prescription: scan or search, optional
+    name and mobile, cash / UPI / card / pay later, bill and print. Shows in Sales with a "Counter sale" tag;
+    returns work as usual.
+- **Schedule E1** medicines are never sold without a doctor's prescription (fixed rule).
+- The old labels are now called **Patient medicine labels** and are switched off for this clinic (switch them on
+  again in Additional settings if wanted). Nothing was deleted.
+- Database: a sale may now have no prescription (counter sale); customer name and mobile were added.
+  Existing sales are unchanged.
+- New package: `python-barcode` (draws the barcodes).
+
 ## Share mode and demo video captions (2026-10-06)
 
 - **`start-share.bat`**: double-click to open the clinic software from a phone or another laptop on the **same

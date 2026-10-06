@@ -146,8 +146,22 @@ No real SMS is sent yet. You can find the code in two places:
    Qty is filled (e.g. 60 tablets).
 4. In M-N-N type `222` -> it becomes `2-2-2` and the Qty changes.
 5. Change **Follow-up after** to 15, then click **180 days**: medicines get 180 days, follow-up stays 15.
-6. As `admin`: **Additional settings -> Medicine labels** -> switch on, choose the format. Back on the
-   prescription click **Labels**: switch Compact / Standard / Detailed and Print.
+6. (Optional) As `admin`: **Additional settings -> Patient medicine labels** -> switch on, choose the format.
+   Back on the prescription click **Labels**: switch Compact / Standard / Detailed and Print.
+
+### Stock labels and counter sale check
+
+1. As `admin`: **Additional settings** -> switch on **Barcodes and scanning**, **Pharmacy bills**,
+   **Pharmacy stock labels** and **Counter sale**.
+2. **Pharmacy -> Stock** -> click **+** on a medicine -> **Labels** on a batch -> how many (one per pack) ->
+   **Show labels** -> Print. The batch now shows its barcode number.
+3. **Pharmacy -> Counter sale**: click in "Scan the barcode" and scan a label (a USB barcode scanner types the
+   number and presses Enter; you can also type the number and press Enter). Scan again = one more pack.
+   Or search a medicine by name. Add a customer name (optional) -> Cash / UPI / Card / Pay later -> **Make bill**.
+4. Try a Schedule E1 medicine (e.g. Arogyavardhini Vati): it is refused - it needs a prescription.
+5. **To dispense** -> open a prescription -> scan a medicine that is not on it: it is added to the same bill
+   ("Not on prescription").
+6. **Sales & returns** shows the counter sale with a purple "Counter sale" tag; **Return** works as usual.
 
 ### Step 6 check (OPD billing)
 

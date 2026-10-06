@@ -58,9 +58,21 @@ Check: in VS Code's terminal run `cd frontend` then `npm run check:i18n`. It tel
 - The QR code link uses `PUBLIC_APP_URL` in `.env` (http://localhost:5173 on one PC; on the clinic network put
   the main PC's address, e.g. http://192.168.1.10:5173).
 
-## Medicine labels: fields, format, wording
+## Pharmacy stock labels (barcode) and counter sale
 
-- **Additional settings -> Medicine labels**: switch labels on, choose the default format (Compact / Standard /
+- **Additional settings -> Pharmacy stock labels**: switch on (needs "Barcodes and scanning") and pick the size
+  (small 50 x 25 mm or large 75 x 50 mm). Print from **Pharmacy -> Stock** -> open a medicine -> **Labels** on a batch.
+- What is printed: medicine, strength, pack, MRP (and "Our" price if lower), GST %, batch, expiry, barcode.
+  Batch / expiry / price follow the Medicine stock switches. No patient details.
+- Look of the label: `backend/templates/documents/stock_label.html` (SAFE TO EDIT). Do not make the barcode smaller.
+- A batch with no barcode gets a clinic code (12 digits starting with 29) the first time. If the maker's barcode
+  was typed or scanned at purchase, that one is printed instead.
+- **Counter sale** (Additional settings -> Pharmacy and stock -> Counter sale): a tab for walk-in customers.
+  Schedule E1 medicines are never sold without a prescription (fixed rule in `backend/apps/pharmacy/services.py`).
+
+## Patient medicine labels: fields, format, wording
+
+- **Additional settings -> Patient medicine labels**: switch labels on, choose the default format (Compact / Standard /
   Detailed) and switch each optional field on or off (price, batch, expiry, QR code...). Medicine name, dose,
   days and instructions are always printed.
 - Label wording, colours and font sizes: `backend/templates/documents/medicine_label.html` (SAFE TO EDIT).
