@@ -22,3 +22,14 @@ def ensure_master_values(organization) -> int:
 
 def master_value(organization, category, code):
     return MasterValue.objects.filter(organization=organization, category=category, code=code).first()
+
+
+def translated_master(organization_id, category: str, label: str, lang: str) -> str:
+    """A dropdown word saved in English (e.g. 'After food') in Gujarati / Hindi, if that translation exists.
+    Used on print-outs and labels in the patient's language."""
+    from .models import MasterValue
+
+    if not label or lang not in ("gu", "hi"):
+        return label
+    value = MasterValue.objects.filter(organization_id=organization_id, category=category, label=label).first()
+    return (getattr(value, f"label_{lang}", "") or label) if value else label

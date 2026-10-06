@@ -4,6 +4,7 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
+from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -200,7 +201,7 @@ class StaffViewSet(AuditedModelViewSet):
     queryset = User.objects.all()
     serializer_class = StaffSerializer
     permission_prefix = "staff"
-    required_permissions = {"set_password": "staff.manage"}
+    required_permissions = {"set_password": "staff.manage", "signature": "staff.manage"}
     search_fields = ["username", "full_name", "phone", "email"]
     filterset_fields = ["is_doctor", "is_active", "is_org_admin"]
     ordering_fields = ["full_name", "created_at", "last_login"]
@@ -237,6 +238,40 @@ class StaffViewSet(AuditedModelViewSet):
         user.save(update_fields=["password"])
         log_action(request, "password_change", user)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+    @action(detail=True, methods=["post", "delete"], parser_classes=[MultiPartParser])
+    def signature(self, request, pk=None):
+        """Upload (POST, field "file": PNG or JPG, up to 1 MB) or remove (DELETE) a doctor's signature image."""
+        user = self.get_object()
+        if request.method == "DELETE":
+            if user.signature:
+                user.signature.delete(save=False)
+            user.signature = ""
+            user.save(update_fields=["signature"])
+            log_action(request, "update", user, changes={"signature": "removed"})
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        upload = request.FILES.get("file")
+        if upload is None:
+            raise ValidationError({"file": "Choose an image."})
+        if upload.size > 1024 * 1024:
+            raise ValidationError({"file": "The image must be smaller than 1 MB."})
+        try:
+            from PIL import Image
+
+            image = Image.open(upload)
+            image.verify()
+            if image.format not in ("PNG", "JPEG"):
+                raise ValueError
+        except Exception:
+            raise ValidationError({"file": "Use a PNG or JPG image."})
+        upload.seek(0)
+        if user.signature:
+            user.signature.delete(save=False)
+        user.signature.save(upload.name, upload, save=False)
+        user.save(update_fields=["signature"])
+        log_action(request, "update", user, changes={"signature": "uploaded"})
+        return Response({"has_signature": True})
 
 
 # --- Doctor schedules ---------------------------------------------------------

@@ -15,6 +15,20 @@ from apps.common.models import BranchScopedModel, OrgScopedModel
 from apps.organizations.models import LANGUAGE_CHOICES
 
 
+def private_storage():
+    from django.core.files.storage import storages
+
+    return storages["private"]
+
+
+def signature_path(instance, filename):
+    """Random file name, so the name never shows who it belongs to."""
+    import uuid as _uuid
+
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else "png"
+    return f"signatures/{_uuid.uuid4().hex}.{ext}"
+
+
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
@@ -52,6 +66,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_doctor = models.BooleanField(default=False, help_text="Shows in doctor lists and schedules")
     qualification = models.CharField(max_length=200, blank=True)
     registration_number = models.CharField(max_length=50, blank=True)
+    # Doctor's signature image, printed on prescriptions and certificates (kept in private storage)
+    signature = models.FileField(storage=private_storage, upload_to=signature_path, blank=True)
     # Access
     is_org_admin = models.BooleanField(default=False, help_text="Can see and manage all branches")
     is_active = models.BooleanField(default=True)
