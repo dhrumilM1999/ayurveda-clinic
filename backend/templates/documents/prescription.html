@@ -1,0 +1,64 @@
+{% extends "documents/_doc_base.html" %}
+{% comment %}SAFE TO EDIT: the prescription (A4 / A5). The shared letterhead and signature are in _doc_base.html.{% endcomment %}
+{% block style %}
+  .patient { display: flex; justify-content: space-between; gap: 4mm; margin: 2mm 0; }
+  .rx { font-size: 1.8em; font-weight: 700; color: #1f5c46; margin: 1mm 0; }
+  .section { margin-top: 2.5mm; }
+  .section b.h { display: block; color: #1f5c46; font-size: 0.9em; margin-bottom: 0.5mm; }
+  .times { display: flex; gap: 1mm; }
+  .time { border: 0.2mm solid #555; border-radius: 1mm; min-width: 9mm; text-align: center; padding: 0.3mm; }
+  .time b { display: block; }
+  .time span { font-size: 0.7em; color: #5c5c5c; }
+  .med { font-weight: 700; }
+{% endblock %}
+{% block content %}
+<div class="patient">
+  <div>
+    <div><b>{{ patient.name }}</b>{% if patient.age is not None %} · {{ patient.age }} {{ w.years }}{% endif %}{% if patient.gender %} · {{ patient.gender }}{% endif %}</div>
+    <div class="small muted">{{ w.patient_id }} {{ patient.uhid }}{% if token %} · {{ w.token }} #{{ token }}{% endif %}</div>
+  </div>
+  <div class="small" style="text-align: right">
+    <div>{{ w.date }} <b>{{ date|date:"d-m-Y" }}</b></div>
+    {% if number %}<div class="muted">{{ w.rx_no }} {{ number }}</div>{% endif %}
+  </div>
+</div>
+
+{% if vitals %}
+<div class="small muted">{{ w.vitals }}:
+  {% if vitals.bp %}{{ w.bp }} {{ vitals.bp }}{% endif %}{% if vitals.pulse %} · {{ w.pulse }} {{ vitals.pulse }}{% endif %}{% if vitals.weight %} · {{ w.weight }} {{ vitals.weight }} kg{% endif %}{% if vitals.temperature %} · {{ w.temperature }} {{ vitals.temperature }}°F{% endif %}
+</div>
+{% endif %}
+{% if complaints %}<div class="section small"><b class="h">{{ w.complaints }}</b>{{ complaints|join:", " }}</div>{% endif %}
+{% if diagnoses %}<div class="section small"><b class="h">{{ w.diagnosis }}</b>{{ diagnoses|join:", " }}</div>{% endif %}
+
+<div class="rx">&#8478;</div>
+<table>
+  <thead><tr><th>#</th><th>{{ w.medicine }}</th><th>{{ w.dose }}</th><th>{{ w.morning }} - {{ w.noon }} - {{ w.night }}</th><th>{{ w.days }}</th>{% if size != "a5" %}<th>{{ w.qty }}</th>{% endif %}</tr></thead>
+  <tbody>
+  {% for i in items %}
+  <tr>
+    <td>{{ forloop.counter }}</td>
+    <td>
+      <span class="med">{{ i.name }}</span>{% if i.strength %} {{ i.strength }}{% endif %}{% if i.form %} <span class="small muted">· {{ i.form }}</span>{% endif %}
+      {% if i.timing or i.with_anupana %}<div class="small">{{ i.timing }}{% if i.timing and i.with_anupana %} · {% endif %}{{ i.with_anupana }}</div>{% endif %}
+      {% if i.instructions %}<div class="small muted">{{ i.instructions }}</div>{% endif %}
+      {% if size == "a5" and i.quantity %}<div class="small muted">{{ w.qty }}: {{ i.quantity }}</div>{% endif %}
+    </td>
+    <td>{{ i.dose }}</td>
+    <td>{% if i.times %}<div class="times">{% for n in i.times %}<div class="time"><b>{{ n }}</b></div>{% endfor %}</div>{% else %}{{ i.frequency }}{% endif %}</td>
+    <td>{{ i.duration }}</td>
+    {% if size != "a5" %}<td>{{ i.quantity }}</td>{% endif %}
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+{% if notes %}<div class="section"><b class="h">{{ w.instructions }}</b>{{ notes|linebreaksbr }}</div>{% endif %}
+{% if advice or advice_notes %}
+<div class="section"><b class="h">{{ w.advice }}</b>
+  {% if advice %}<div>{{ advice|join:" · " }}</div>{% endif %}
+  {% if advice_notes %}<div class="small">{{ advice_notes|linebreaksbr }}</div>{% endif %}
+</div>
+{% endif %}
+{% if follow_up_date %}<div class="section"><b>{{ w.follow_up }}: {{ follow_up_date|date:"d-m-Y" }}</b>{% if follow_up_notes %} · {{ follow_up_notes }}{% endif %}</div>{% endif %}
+{% endblock %}

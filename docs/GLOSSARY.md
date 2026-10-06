@@ -47,6 +47,11 @@
 | **M-N-N (1-0-1)** | How many doses in the Morning, at Noon and at Night. |
 | **Batch** | One lot of a medicine from the maker, with its own number and expiry date. |
 | **FEFO** | First Expiry, First Out: the batch that expires first is given first. |
+| **Letterhead** | The top of a print-out: logo, clinic name, address, doctor details. |
+| **QR verification** | Scanning the QR code on a print-out shows whether the clinic really issued it. |
+| **Duplicate copy** | A reprint of a document; it is marked so it cannot pass as a second original. |
+| **Medical certificate** | A doctor's letter that the patient was ill and needs rest from - to. |
+| **Fitness certificate** | A doctor's letter that the patient is fit to go back to work or school. |
 | **Medicine days** | How long the medicines continue (e.g. 30 days). |
 | **Follow-up days** | After how many days the patient should come back; starts equal to the medicine days. |
 | **Quick dosage** | Typing three digits for Morning-Noon-Night: 222 means 2-2-2. |

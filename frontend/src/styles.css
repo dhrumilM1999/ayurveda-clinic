@@ -1802,3 +1802,11 @@ body {
 
 /* Additional settings: a choice row (e.g. label format) above the switches */
 .choice-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 4px 0 12px; border-bottom: 1px solid var(--clinic-border); margin-bottom: 4px; flex-wrap: wrap; }
+
+/* Public "is this document genuine?" page (QR code on print-outs) */
+.verify-page { min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 32px 16px; background: var(--clinic-bg, #f5f3ee); }
+.verify-brand { font-size: 20px; font-weight: 700; color: var(--clinic-primary); margin-bottom: 16px; }
+.verify-card { width: 100%; max-width: 480px; }
+.verify-list { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; margin: 0; }
+.verify-list dt { color: #777; }
+.verify-list dd { margin: 0; font-weight: 600; }

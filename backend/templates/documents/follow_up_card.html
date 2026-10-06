@@ -1,0 +1,16 @@
+{% extends "documents/_doc_base.html" %}
+{% comment %}SAFE TO EDIT: the follow-up card (small, A6) given to the patient.{% endcomment %}
+{% block style %}
+  .big { text-align: center; margin: 4mm 0; }
+  .big .day { font-size: 2.2em; font-weight: 700; color: #1f5c46; }
+{% endblock %}
+{% block content %}
+<div class="title">{{ w.follow_up_card }}</div>
+<div><b>{{ patient.name }}</b> <span class="small muted">{{ w.patient_id }} {{ patient.uhid }}</span></div>
+<div class="big">
+  <div>{{ w.please_come }}</div>
+  <div class="day">{{ follow_up_date|date:"d-m-Y" }}</div>
+  {% if follow_up_notes %}<div class="small">{{ follow_up_notes }}</div>{% endif %}
+</div>
+<div class="small muted" style="text-align: center">{{ w.bring }}</div>
+{% endblock %}

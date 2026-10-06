@@ -1,0 +1,23 @@
+{% extends "documents/_doc_base.html" %}
+{% comment %}SAFE TO EDIT: the Prakriti report. The general guidance text is in backend/apps/documents/words.py.{% endcomment %}
+{% block style %}
+  .type { text-align: center; font-size: 1.6em; font-weight: 700; color: #1f5c46; margin: 3mm 0; }
+  .bar { display: flex; align-items: center; gap: 3mm; margin: 2mm 0; }
+  .bar .name { width: 18mm; font-weight: 700; }
+  .bar .track { flex: 1; height: 5mm; background: #eef0ee; border-radius: 1mm; overflow: hidden; }
+  .bar .fill { height: 100%; }
+  .fill.vata { background: #7b8fb3; } .fill.pitta { background: #d4824a; } .fill.kapha { background: #5f9e7a; }
+  .bar .pct { width: 12mm; text-align: right; }
+  .guide { margin-top: 5mm; padding: 3mm; border: 0.2mm solid #d8e2dc; border-radius: 1.5mm; background: #f6faf7; }
+{% endblock %}
+{% block content %}
+<div class="title">{{ w.prakriti_report }}</div>
+<div><b>{{ patient.name }}</b>{% if patient.age is not None %} · {{ patient.age }} {{ w.years }}{% endif %}{% if patient.gender %} · {{ patient.gender }}{% endif %}
+  <span class="small muted"> · {{ w.patient_id }} {{ patient.uhid }} · {{ w.assessed_on }} {{ date|date:"d-m-Y" }}</span></div>
+<div class="type">{{ w.prakriti_type }}: {{ type_name }}</div>
+{% for b in bars %}
+<div class="bar"><span class="name">{{ b.name }}</span><span class="track"><span class="fill {{ b.key }}" style="display: block; width: {{ b.percent }}%"></span></span><span class="pct">{{ b.percent }}%</span></div>
+{% endfor %}
+<div class="small muted">{{ answered }} / {{ total }} {{ w.answered }}</div>
+{% if guidance %}<div class="guide"><b>{{ w.guidance }}</b><div>{{ guidance }}</div></div>{% endif %}
+{% endblock %}

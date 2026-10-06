@@ -8,7 +8,8 @@ from django.template.loader import render_to_string
 
 from .payments import upi_link_for
 
-SIZES = {"a4": ("210mm", "297mm", "12mm"), "a5": ("148mm", "210mm", "8mm"), "80mm": ("80mm", None, "3mm")}
+SIZES = {"a4": ("210mm", "297mm", "12mm"), "a5": ("148mm", "210mm", "8mm"), "80mm": ("80mm", None, "3mm"),
+         "58mm": ("58mm", None, "2mm")}
 
 ONES = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve",
         "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"]
@@ -84,6 +85,6 @@ def render_pdf(*, invoice, size="a4", duplicate=False, credit_note=None) -> byte
         "gst_summary": _gst_summary(lines),
         "amount_words": rupees_in_words(credit_note.total_amount if credit_note else invoice.total_amount),
         "upi_qr": _qr_data_uri(upi) if upi else "", "duplicate": duplicate,
-        "size": size, "page_width": width, "page_height": height, "page_margin": margin,
+        "size": size, "narrow": size in ("80mm", "58mm"), "page_width": width, "page_height": height, "page_margin": margin,
     })
     return HTML(string=html).write_pdf()

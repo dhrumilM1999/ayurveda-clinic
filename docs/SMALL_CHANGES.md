@@ -46,6 +46,18 @@ The clinic name printed on documents and bills is set on the **Settings** screen
 
 Check: in VS Code's terminal run `cd frontend` then `npm run check:i18n`. It tells you if a key is missing.
 
+## Edit the prescription, certificate and other print-outs
+
+- Files in `backend/templates/documents/` (SAFE TO EDIT): `_doc_base.html` (letterhead, signature, QR, footer -
+  shared by all), `prescription.html`, `certificate.html`, `follow_up_card.html`, `prakriti_report.html`,
+  `invoice.html` (bills), `medicine_label.html` (labels).
+- Fixed words in English / Gujarati / Hindi and the Prakriti guidance text: `backend/apps/documents/words.py`.
+- Clinic name and logo: Settings -> Clinic. Address, phone, footer line: Settings -> Branch details.
+  Doctor qualification, registration no., signature: Staff -> the doctor.
+- After saving a template, open the print-out again - no restart needed.
+- The QR code link uses `PUBLIC_APP_URL` in `.env` (http://localhost:5173 on one PC; on the clinic network put
+  the main PC's address, e.g. http://192.168.1.10:5173).
+
 ## Medicine labels: fields, format, wording
 
 - **Additional settings -> Medicine labels**: switch labels on, choose the default format (Compact / Standard /

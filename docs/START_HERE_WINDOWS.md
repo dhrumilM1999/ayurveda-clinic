@@ -127,6 +127,17 @@ No real SMS is sent yet. You can find the code in two places:
 8. In **Previous check-ups** open an old visit -> **Repeat these medicines**.
 9. **Complete visit**: the prescription becomes *final* (ready for the pharmacy).
 
+### Step 7 check (print-outs)
+
+1. As `admin`: **Staff** -> edit `doctor1` -> **Upload signature** (any small PNG/JPG). **Settings -> Branch details**
+   -> a footer line (e.g. timings) -> Save.
+2. As `doctor1`, open a check-up with medicines -> **Print -> Prescription**. Switch A5 / A4 and English / Gujarati
+   / Hindi. **Print** once, then print again: the second copy says **DUPLICATE COPY**.
+3. Scan the QR code with a phone on the same Wi-Fi (or open the link): the "genuine" page shows the number.
+4. **Print -> Medical / fitness certificate**: fill the dates -> Make certificate -> Yes -> it opens to print.
+5. Set a follow-up date -> **Print -> Follow-up card**. Fill the Prakriti questionnaire -> **Print -> Prakriti report**.
+6. **Billing** -> a bill -> View / print -> **Thermal 58 mm**.
+
 ### Prescription and label check
 
 1. Log in as `doctor1`, open a check-up of a patient who came before (e.g. Ramesh) -> **Rx (medicines)**.

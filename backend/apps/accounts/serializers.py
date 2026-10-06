@@ -109,6 +109,7 @@ class StaffSerializer(serializers.ModelSerializer):
         data["branch_roles"] = BranchRoleSerializer(
             instance.branch_roles.select_related("branch", "role"), many=True
         ).data
+        data["has_signature"] = bool(instance.signature)
         return data
 
     # --- validation ---

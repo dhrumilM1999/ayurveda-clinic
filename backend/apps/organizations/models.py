@@ -59,6 +59,8 @@ class Branch(OrgScopedModel):
     gstin = models.CharField("GSTIN", max_length=15, blank=True)
     drug_licence_no = models.CharField("Drug / Ayush licence no. (pharmacy)", max_length=100, blank=True)
     upi_vpa = models.CharField("UPI ID for payments", max_length=100, blank=True, help_text="e.g. clinic@okbank")
+    # Printed at the bottom of prescriptions, certificates and reports (e.g. timings, "Sunday closed")
+    letterhead_footer = models.CharField(max_length=300, blank=True)
     is_active = models.BooleanField(default=True)
 
     class Meta:

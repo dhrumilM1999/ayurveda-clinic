@@ -28,6 +28,7 @@ import SettingsPage from './pages/SettingsPage';
 import AdditionalSettingsPage from './pages/AdditionalSettingsPage';
 import FeesServicesPage from './pages/FeesServicesPage';
 import BillingPage from './pages/billing/BillingPage';
+import VerifyPage from './pages/VerifyPage';
 import StaffPage from './pages/StaffPage';
 import TemplatesPage from './pages/TemplatesPage';
 import { antTheme, applyCssVariables } from './theme';
@@ -47,10 +48,13 @@ export default function App() {
           </div>
         ) : !me ? (
           <Routes>
+            {/* Public: the QR code on print-outs opens this without logging in */}
+            <Route path="verify/:token" element={<VerifyPage />} />
             <Route path="*" element={<LoginPage />} />
           </Routes>
         ) : (
           <Routes>
+            <Route path="verify/:token" element={<VerifyPage />} />
             {/* TV screen for the waiting room: full screen, without the menu */}
             <Route path="queue/display" element={<RequirePermission code="appointments.view"><QueueDisplayPage /></RequirePermission>} />
             <Route element={<MainLayout />}>

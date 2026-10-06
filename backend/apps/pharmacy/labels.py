@@ -16,7 +16,7 @@ from rest_framework.views import APIView
 from apps.accounts.permissions import BranchPermission
 from apps.accounts.services import user_has_perm
 from apps.audit.services import log_action
-from apps.common.models import MasterValue
+from apps.common.services import translated_master
 from apps.organizations.services import branch_features, organization_choices
 from apps.prescriptions.models import Prescription
 
@@ -44,12 +44,7 @@ UNITS = {"days": {"en": "days", "gu": "દિવસ", "hi": "दिन"}, "weeks
          "months": {"en": "months", "gu": "મહિના", "hi": "महीने"}}
 
 
-def _translated(organization_id, category, label, lang):
-    """A dropdown word (e.g. 'After food') in the patient's language, if that translation exists."""
-    if not label or lang == "en":
-        return label
-    value = MasterValue.objects.filter(organization_id=organization_id, category=category, label=label).first()
-    return (getattr(value, f"label_{lang}", "") or label) if value else label
+_translated = translated_master  # dropdown word in the patient's language
 
 
 def _times(frequency: str):

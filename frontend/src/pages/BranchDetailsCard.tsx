@@ -45,6 +45,11 @@ export function BranchDetailsCard() {
           <Col xs={12} md={8}><Form.Item name="pincode" label={t('branches.pincode')}><Input maxLength={10} /></Form.Item></Col>
           <Col xs={24} md={12}><Form.Item name="gstin" label={t('branches.gstin')}><Input maxLength={15} style={{ textTransform: 'uppercase' }} /></Form.Item></Col>
           <Col xs={24} md={12}><Form.Item name="drug_licence_no" label={t('pharmacy.drugLicence')}><Input maxLength={100} /></Form.Item></Col>
+          <Col span={24}>
+            <Form.Item name="letterhead_footer" label={t('settings.letterheadFooter')} extra={t('settings.letterheadFooterHelp')}>
+              <Input maxLength={300} placeholder={t('settings.letterheadFooterPlaceholder')} />
+            </Form.Item>
+          </Col>
           <Col xs={24} md={12}>
             <Form.Item name="upi_vpa" label={t('settings.upiId')} extra={t('settings.upiIdHelp')}><Input maxLength={100} placeholder="clinic@okbank" /></Form.Item>
           </Col>

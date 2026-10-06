@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     "apps.pharmacy",
     "apps.billing",
     "apps.reports",
+    "apps.documents",
 ]
 
 MIDDLEWARE = [
@@ -184,8 +185,13 @@ REST_FRAMEWORK = {
         "login_user": env("THROTTLE_LOGIN_USER", "5/min"),
         "otp": env("THROTTLE_OTP", "10/min"),
         "anon": "100/min",
+        "verify": env("THROTTLE_VERIFY", "30/min"),
     },
 }
+
+# Address of the app that patients reach when they scan the QR code on a print-out (the "is this genuine?"
+# page). On one PC this is http://localhost:5173; on the clinic network use the PC's address, later the website.
+PUBLIC_APP_URL = env("PUBLIC_APP_URL", "http://localhost:5173").rstrip("/")
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=env_int("JWT_ACCESS_MINUTES", 15)),
