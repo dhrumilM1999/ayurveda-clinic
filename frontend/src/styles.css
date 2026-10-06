@@ -1591,6 +1591,22 @@ body {
   }
 }
 
+/* ---------- Reports ---------- */
+.stat-row.report-headline {
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  margin-bottom: 12px;
+}
+.report-kinds {
+  overflow-x: auto;
+  margin-bottom: 12px;
+}
+.report-total td {
+  background: #faf8f3;
+}
+.report-table td {
+  white-space: nowrap; /* on a phone the table scrolls sideways instead of breaking dates and amounts */
+}
+
 /* Inside forms the field above already adds 14px, so section titles need only a little extra space */
 .ant-form .section-title {
   margin-top: 4px;

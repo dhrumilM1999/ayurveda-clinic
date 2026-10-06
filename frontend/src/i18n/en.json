@@ -70,7 +70,8 @@
     "pharmacy": "Pharmacy",
     "additional": "Additional settings",
     "fees": "Fees & services",
-    "billing": "Billing"
+    "billing": "Billing",
+    "reports": "Reports"
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",
@@ -1550,6 +1551,84 @@
       "certificate": "Certificate",
       "follow_up_card": "Follow-up card",
       "prakriti_report": "Prakriti report"
+    }
+  },
+  "reports": {
+    "title": "Reports",
+    "subtitle": "Money, doctors, patients and GST for any dates. Download as Excel or PDF.",
+    "nothingAllowed": "You may not see any report in this branch. An admin can allow it on the Roles screen.",
+    "excel": "Excel",
+    "pdf": "PDF",
+    "empty": "Nothing in these dates.",
+    "total": "Total",
+    "currentBranch": "This branch ({{name}})",
+    "allBranches": "All branches",
+    "missedCount": "Missed follow-ups",
+    "kinds": {
+      "collection": "Collection",
+      "by_doctor": "Income by doctor",
+      "by_branch": "Income by branch",
+      "patients": "New vs repeat patients",
+      "follow_ups": "Missed follow-ups",
+      "gst": "GST summary"
+    },
+    "help": {
+      "collection": "Money received each day or month: cash, UPI and card, minus refunds. Same figures as the day closing.",
+      "by_doctor": "Bills of each doctor: consultation, services and medicines; billed, received and still due. Pharmacy bills count for the doctor who wrote the prescription.",
+      "by_branch": "The same figures for each branch, to compare them.",
+      "patients": "Patients seen: new cases (first check-up ever with the clinic) and follow-ups (seen before).",
+      "follow_ups": "The follow-up date has passed and the patient has not come back. Call or message them.",
+      "gst": "Taxable value and GST for each HSN / SAC code and rate, minus credit notes. Confirm with your CA before filing."
+    },
+    "range": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "thisMonth": "This month",
+      "lastMonth": "Last month",
+      "thisYear": "This financial year"
+    },
+    "group": {
+      "day": "Day-wise",
+      "month": "Month-wise"
+    },
+    "cols": {
+      "date": "Date",
+      "month": "Month",
+      "doctor": "Doctor",
+      "branch": "Branch",
+      "bills": "Bills",
+      "cash": "Cash",
+      "upi": "UPI",
+      "card": "Card",
+      "received": "Received",
+      "refunds": "Refunds",
+      "net": "Net collection",
+      "consultation": "Consultation",
+      "services": "Services & therapy",
+      "medicines": "Medicines",
+      "round_off": "Round off",
+      "billed": "Billed (after returns)",
+      "due": "Still due",
+      "visits": "Check-ups",
+      "patients": "Patients",
+      "new": "New cases",
+      "repeat": "Follow-ups (repeat)",
+      "repeat_percent": "Repeat %",
+      "patient": "Patient",
+      "uhid": "UHID",
+      "phone": "Phone",
+      "last_visit": "Last check-up",
+      "follow_up": "Follow-up was due",
+      "days_late": "Days late",
+      "code": "HSN / SAC",
+      "rate": "GST rate",
+      "taxable": "Taxable value",
+      "cgst": "CGST",
+      "sgst": "SGST",
+      "credit_taxable": "Credit notes: taxable",
+      "credit_tax": "Credit notes: GST",
+      "net_taxable": "Net taxable",
+      "net_tax": "Net GST"
     }
   }
 }
