@@ -1,0 +1,50 @@
+{% comment %}
+SAFE TO EDIT: the look of the pharmacy stock labels (stuck on medicine packs; no patient details).
+- One label per page, for label printers. Sizes: compact 50x25 mm, standard 75x50 mm.
+- Which fields show follows Additional settings (batch, expiry, selling price).
+- The barcode must stay readable: do not make it smaller or squeeze it.
+Keep everything inside {{ }} and {% %}.
+{% endcomment %}<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: {{ width }} {{ height }}; margin: 1.5mm 2mm; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Noto Sans", sans-serif; color: #000; font-size: {% if format == "compact" %}6.5pt{% else %}8pt{% endif %}; line-height: {% if format == "compact" %}1.1{% else %}1.2{% endif %}; }
+  .label { page-break-after: always; height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
+  .label:last-child { page-break-after: auto; }
+  .name { font-weight: 700; font-size: 1.35em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row { display: flex; flex-wrap: {% if format == "compact" %}nowrap{% else %}wrap{% endif %}; justify-content: space-between; column-gap: 2mm; }
+  .row span { white-space: nowrap; }
+  .price { font-weight: 700; font-size: 1.2em; }
+  .muted { color: #333; }
+  .code { text-align: center; }
+  .code img { display: block; margin: 0 auto; max-width: 100%; }
+  .code .digits { font-family: "Noto Sans Mono", monospace; font-size: 0.95em; letter-spacing: 0.3mm; }
+  .clinic { font-size: 0.85em; color: #333; }
+</style>
+</head>
+<body>
+{% for l in labels %}
+<div class="label">
+  <div>
+    {% if format == "standard" %}<div class="clinic">{{ clinic }}</div>{% endif %}
+    <div class="name">{{ l.medicine }}{% if l.strength %} {{ l.strength }}{% endif %}</div>
+    <div class="row muted">
+      <span>{{ l.pack }}</span>
+      <span>{% if l.batch %}B: {{ l.batch }}{% endif %}{% if l.expiry %} · Exp {{ l.expiry|date:"m/Y" }}{% endif %}</span>
+    </div>
+    <div class="row">
+      <span class="price">{% if l.mrp is not None %}MRP ₹{{ l.mrp }}{% endif %}{% if l.price is not None %} · Our ₹{{ l.price }}{% endif %}</span>
+      <span>GST {{ l.gst|floatformat:"-2" }}%{% if format == "standard" and l.hsn %} · HSN {{ l.hsn }}{% endif %}</span>
+    </div>
+  </div>
+  <div class="code">
+    <img src="{{ l.barcode }}" alt="">
+    <div class="digits">{{ l.code }}</div>
+  </div>
+</div>
+{% endfor %}
+</body>
+</html>

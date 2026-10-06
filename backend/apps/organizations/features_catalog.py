@@ -48,9 +48,15 @@ ADDITIONAL_FEATURES = {
     "pharmacy_stock_ledger": {"group": "pharmacy", "label": "Stock ledger screen", "default": False},
     "pharmacy_stock_check": {"group": "pharmacy", "label": "Physical stock check", "default": False},
     "medicine_extra_details": {"group": "pharmacy", "label": "Extra product details", "default": False},
-    # Medicine labels (printed for medicines given by the clinic / pharmacy). Medicine name, dosage, days and
+    "pharmacy_counter_sale": {"group": "pharmacy", "label": "Counter sale (without a prescription)", "default": False,
+                              "requires": "pharmacy_billing"},
+    # Pharmacy stock labels: stuck on the packs on the shelf. Medicine, pack, MRP, GST, batch, expiry and a barcode;
+    # no patient details. Scanning the barcode at billing adds that exact batch.
+    "pharmacy_stock_labels": {"group": "stock_labels", "label": "Pharmacy stock labels (barcode)", "default": False,
+                              "requires": "pharmacy_barcode"},
+    # Patient medicine labels (dose labels for medicines given to a patient). Medicine name, dosage, days and
     # instructions are always printed; these switches add the optional fields.
-    "medicine_labels": {"group": "labels", "label": "Medicine labels", "default": False},
+    "medicine_labels": {"group": "labels", "label": "Patient medicine labels", "default": False},
     "label_patient": {"group": "labels", "label": "Label: patient name", "default": True, "requires": "medicine_labels"},
     "label_quantity": {"group": "labels", "label": "Label: quantity", "default": True, "requires": "medicine_labels"},
     "label_times": {"group": "labels", "label": "Label: morning / noon / night boxes", "default": True,
@@ -71,6 +77,8 @@ ADDITIONAL_FEATURES = {
 
 # Additional settings that are a CHOICE (not on/off). "options" are codes; screen text is in frontend/src/i18n.
 ADDITIONAL_CHOICES = {
+    "stock_label_format": {"group": "stock_labels", "label": "Stock label size", "options": ["compact", "standard"],
+                           "default": "compact", "requires": "pharmacy_stock_labels"},
     "label_format": {"group": "labels", "label": "Default label format", "options": ["compact", "standard", "detailed"],
                      "default": "standard", "requires": "medicine_labels"},
 }

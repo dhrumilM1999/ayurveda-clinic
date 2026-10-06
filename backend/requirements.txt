@@ -10,6 +10,7 @@ cryptography>=43                      # encrypts sensitive medical notes in the 
 openpyxl>=3.1                         # reads Excel files (medicine list import)
 weasyprint>=62                        # makes PDF documents (bills) from HTML templates
 segno>=1.6                            # draws QR codes (UPI payment) on documents
+python-barcode>=0.15                  # draws Code 128 barcodes on pharmacy stock labels (read by USB scanners)
 
 # Testing
 pytest>=8.0

@@ -48,6 +48,16 @@ def money(value):
     return str(value) if value is not None else None
 
 
+def _is_uuid(raw) -> bool:
+    import uuid
+
+    try:
+        uuid.UUID(str(raw))
+        return True
+    except ValueError:
+        return False
+
+
 class PharmacyMixin:
     """
     All pharmacy screens: current branch, and the Pharmacy module must be switched on (Settings).
@@ -208,9 +218,10 @@ class StockViewSet(PharmacyMixin, viewsets.ViewSet):
     required_permissions = {
         "list": "pharmacy.view", "alerts": "pharmacy.view", "batches": "pharmacy.view", "scan": "pharmacy.view",
         "movements": "pharmacy.view", "adjust": "pharmacy.stock", "reorder_level": "pharmacy.stock",
-        "location": "pharmacy.stock",
+        "location": "pharmacy.stock", "labels": "pharmacy.view",
     }
-    required_features = {"alerts": "pharmacy_stock_alerts", "scan": "pharmacy_barcode", "location": "pharmacy_racks"}
+    required_features = {"alerts": "pharmacy_stock_alerts", "scan": "pharmacy_barcode", "location": "pharmacy_racks",
+                         "labels": "pharmacy_stock_labels"}
 
     def list(self, request):
         p = request.query_params
@@ -252,6 +263,40 @@ class StockViewSet(PharmacyMixin, viewsets.ViewSet):
             "scanned_batch": str(found["batch"].id) if found["batch"] else None,
             "batches": BatchSerializer(found["batches"], many=True).data,
         })
+
+    @action(detail=False, methods=["get"])
+    def labels(self, request):
+        """
+        Pharmacy stock labels as a PDF: ?items=<batch id>:<copies>,<batch id>:<copies>  ?layout=compact|standard
+        A batch without a barcode gets a clinic code first (so the label can be scanned at billing).
+        """
+        from apps.billing.views import pdf_response
+        from apps.organizations.services import organization_choices
+
+        from .stock_labels import build_stock_labels, render_stock_labels
+
+        wanted = []
+        for part in request.query_params.get("items", "").split(","):
+            batch_id, _, copies = part.partition(":")
+            if not batch_id:
+                continue
+            try:
+                count = int(copies or 1)
+            except ValueError:
+                raise ValidationError({"items": "Copies must be a number."})
+            batch = StockBatch.objects.filter(branch=request.branch, pk=batch_id).select_related("medicine").first() \
+                if _is_uuid(batch_id) else None
+            if batch is None:
+                raise NotFound("Batch not found.")
+            wanted.append((batch, max(0, count)))
+        if not wanted:
+            raise ValidationError({"items": "Choose at least one batch."})
+        layout = request.query_params.get("layout") or organization_choices(request.user.organization_id)["stock_label_format"]
+        data = build_stock_labels(request.branch, request.user, wanted, layout)
+        log_action(request, "print", object_type="pharmacy.stocklabel",
+                   object_repr=", ".join(f"{b.medicine.name} / {b.batch_no}" for b, _ in wanted)[:255],
+                   changes={"labels": len(data["labels"]), "layout": layout})
+        return pdf_response(render_stock_labels(data), "stock-labels.pdf", request.query_params.get("download") == "1")
 
     @action(detail=False, methods=["get"])
     def movements(self, request):
