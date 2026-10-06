@@ -83,7 +83,7 @@ class PrescriptionSerializer(serializers.ModelSerializer):
         model = Prescription
         fields = [
             "id", "visit", "visit_date", "patient", "patient_detail", "doctor", "doctor_name", "branch_name",
-            "status", "notes", "finalized_at", "items", "warnings", "created_at", "updated_at",
+            "status", "notes", "medicine_days", "finalized_at", "items", "warnings", "created_at", "updated_at",
         ]
         read_only_fields = fields
 

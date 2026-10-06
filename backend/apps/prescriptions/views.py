@@ -16,7 +16,7 @@ from apps.patients.models import Patient
 from .models import Prescription, PrescriptionTemplate
 from .safety import check_prescription
 from .serializers import PrescriptionSerializer, PrescriptionTemplateSerializer, clean_lines
-from .services import lines_for_check, save_prescription
+from .services import UNCHANGED, lines_for_check, save_prescription
 
 
 class PrescriptionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
@@ -59,6 +59,22 @@ class PrescriptionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, view
         log_action(request, "view", prescription, changes={"patient": str(prescription.patient_id)})
         return Response(self.get_serializer(prescription).data)
 
+    @staticmethod
+    def _medicine_days(request):
+        """{"medicine_days": 30} -> 30; null / "" -> None; missing -> UNCHANGED."""
+        if "medicine_days" not in request.data:
+            return UNCHANGED
+        raw = request.data.get("medicine_days")
+        if raw in (None, ""):
+            return None
+        try:
+            days = int(raw)
+        except (TypeError, ValueError):
+            raise ValidationError({"medicine_days": "Enter a number of days."})
+        if not 1 <= days <= 3650:
+            raise ValidationError({"medicine_days": "Between 1 and 3650 days."})
+        return days
+
     def create(self, request, *args, **kwargs):
         visit = Visit.objects.filter(organization_id=request.user.organization_id, pk=request.data.get("visit")).first()
         if visit is None:
@@ -66,7 +82,8 @@ class PrescriptionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, view
         if hasattr(visit, "prescription"):
             raise ValidationError({"visit": "This check-up already has a prescription. Edit it instead."})
         lines = clean_lines(self.get_serializer_context(), request.data.get("items", []))
-        prescription = save_prescription(visit, lines, request.data.get("notes", ""), request.user)
+        prescription = save_prescription(visit, lines, request.data.get("notes", ""), request.user,
+                                         medicine_days=self._medicine_days(request))
         log_action(request, "create", prescription, changes={"patient": str(visit.patient_id), "lines": len(lines)})
         return Response(self.get_serializer(prescription).data, status=http.HTTP_201_CREATED)
 
@@ -78,7 +95,8 @@ class PrescriptionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, view
             lines = [{"id": i.id, "medicine": i.medicine, "medicine_name": i.medicine_name}
                      for i in prescription.items.select_related("medicine")]
         notes = request.data.get("notes") if "notes" in request.data else None
-        save_prescription(prescription.visit, lines, notes, request.user, prescription=prescription)
+        save_prescription(prescription.visit, lines, notes, request.user, prescription=prescription,
+                          medicine_days=self._medicine_days(request))
         log_action(request, "update", prescription, changes={
             "patient": str(prescription.patient_id), "lines": len(lines), **({"notes": "changed"} if notes is not None else {}),
         })
