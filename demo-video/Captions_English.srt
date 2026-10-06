@@ -1,0 +1,423 @@
+1
+00:00:02,255 --> 00:00:03,385
+Namaste Doctor.
+
+2
+00:00:03,385 --> 00:00:07,450
+This is a quick tour of your Ayurveda clinic software.
+
+3
+00:00:07,450 --> 00:00:13,173
+We will follow one patient from login to billing, and then see the settings.
+
+4
+00:00:13,173 --> 00:00:16,485
+All patients you see here are demo patients.
+
+5
+00:00:22,726 --> 00:00:24,358
+First, secure login.
+
+6
+00:00:24,358 --> 00:00:28,765
+Each staff member has their own username and password.
+
+7
+00:00:28,765 --> 00:00:33,661
+Doctors and admins also enter a one-time password, an O T P.
+
+8
+00:00:33,661 --> 00:00:36,925
+In this test version it shows on screen.
+
+9
+00:00:36,925 --> 00:00:40,026
+In your clinic, it comes on the phone.
+
+10
+00:00:47,415 --> 00:00:49,077
+This is your dashboard.
+
+11
+00:00:49,077 --> 00:00:51,389
+The top row shows today's O P D:
+
+12
+00:00:51,389 --> 00:00:55,942
+how many are waiting, with the doctor, finished, and the total.
+
+13
+00:00:55,942 --> 00:00:58,471
+The second row shows today's money:
+
+14
+00:00:58,471 --> 00:01:03,602
+O P D and pharmacy collection, the total, and what is still to collect.
+
+15
+00:01:03,602 --> 00:01:06,565
+One look, and you know your clinic's day.
+
+16
+00:01:15,623 --> 00:01:19,942
+The whole screen can change language with one click.
+
+17
+00:01:19,942 --> 00:01:20,690
+Gujarati.
+
+18
+00:01:20,690 --> 00:01:21,188
+Hindi.
+
+19
+00:01:21,188 --> 00:01:22,849
+And back to English.
+
+20
+00:01:22,849 --> 00:01:28,413
+Your staff can work in the language they are most comfortable with.
+
+21
+00:01:32,339 --> 00:01:33,033
+Patients.
+
+22
+00:01:33,033 --> 00:01:35,577
+Every patient has one unique I D.
+
+23
+00:01:35,577 --> 00:01:40,126
+Search by name, I D or mobile number, and filter by gender.
+
+24
+00:01:40,126 --> 00:01:47,374
+Mobile numbers are partly hidden for privacy, and allergies show as a small red tag, so nobody
+
+25
+00:01:47,374 --> 00:01:48,299
+misses them.
+
+26
+00:01:55,766 --> 00:01:59,270
+Open a patient, and you see the complete file.
+
+27
+00:01:59,270 --> 00:02:06,431
+Details, medical history, which is kept encrypted, all check-ups, vitals over time, documents,
+
+28
+00:02:06,431 --> 00:02:11,535
+appointments, consent, and an activity log of who opened this file.
+
+29
+00:02:11,535 --> 00:02:14,506
+One patient, one file, in every branch.
+
+30
+00:02:16,759 --> 00:02:19,378
+Registering a new patient is simple.
+
+31
+00:02:19,378 --> 00:02:22,871
+Only name, age and mobile number are compulsory.
+
+32
+00:02:22,871 --> 00:02:29,565
+Then address, referral, and medical history with one-click chips for diabetes, B P, thyroid,
+
+33
+00:02:29,565 --> 00:02:31,966
+acidity and more, plus allergies.
+
+34
+00:02:31,966 --> 00:02:38,296
+At the bottom is patient consent, as the new data protection law requires, shown in the
+
+35
+00:02:38,296 --> 00:02:39,969
+patient's own language.
+
+36
+00:02:59,466 --> 00:03:00,483
+Appointments.
+
+37
+00:03:00,483 --> 00:03:05,411
+See the day's list with time, patient, doctor, status and bill.
+
+38
+00:03:05,411 --> 00:03:07,523
+Filter by doctor or status.
+
+39
+00:03:07,523 --> 00:03:14,721
+Book a new appointment by choosing patient, doctor and a free slot, or use Walk-in to give a
+
+40
+00:03:14,721 --> 00:03:16,286
+token straight away.
+
+41
+00:03:21,887 --> 00:03:24,081
+The queue page is for reception.
+
+42
+00:03:24,081 --> 00:03:29,362
+It shows who is with each doctor and who is waiting, and refreshes by itself.
+
+43
+00:03:29,362 --> 00:03:35,397
+There is also a T V screen for the waiting room, so patients can see their token number.
+
+44
+00:03:43,305 --> 00:03:45,941
+Now your main screen, the check-up.
+
+45
+00:03:45,941 --> 00:03:48,426
+Today's patients are on the left.
+
+46
+00:03:48,426 --> 00:03:54,075
+Click one, and the allergies and known conditions appear in red at the top.
+
+47
+00:03:54,075 --> 00:03:59,874
+Then record complaints with one click, write history notes, and enter vitals.
+
+48
+00:03:59,874 --> 00:04:02,435
+B M I is calculated automatically.
+
+49
+00:04:07,933 --> 00:04:10,734
+This is what makes it truly Ayurvedic.
+
+50
+00:04:10,734 --> 00:04:16,484
+Ashtavidha Pariksha, the eight-fold examination, is ready with simple options.
+
+51
+00:04:16,484 --> 00:04:23,192
+So are Dashavidha Pariksha, Agni and daily habits, and a Prakriti questionnaire that scores
+
+52
+00:04:23,192 --> 00:04:24,813
+Vata, Pitta and Kapha.
+
+53
+00:04:24,813 --> 00:04:27,393
+All questions can be edited by you.
+
+54
+00:04:36,238 --> 00:04:41,066
+Next, diagnosis, with common Ayurvedic diagnoses ready to select.
+
+55
+00:04:41,066 --> 00:04:42,700
+Then the prescription.
+
+56
+00:04:42,700 --> 00:04:49,682
+Type a few letters of a medicine, in English, Sanskrit, Hindi or Gujarati, and it appears with
+
+57
+00:04:49,682 --> 00:04:53,618
+safety warnings, for example for metals or pregnancy.
+
+58
+00:04:53,618 --> 00:04:57,035
+Save your favourite combinations as templates.
+
+59
+00:04:57,035 --> 00:05:01,418
+Then add advice, set the follow-up, and complete the visit.
+
+60
+00:05:05,272 --> 00:05:11,749
+The medicine master has classical medicines with Ayurvedic Formulary references, and patent
+
+61
+00:05:11,749 --> 00:05:13,315
+medicines with brands.
+
+62
+00:05:13,315 --> 00:05:16,589
+Each shows form, safety tags, price and G S T.
+
+63
+00:05:16,589 --> 00:05:23,279
+Search by any synonym, set price and on or off for each branch, add new medicines, or import a
+
+64
+00:05:23,279 --> 00:05:24,062
+whole list.
+
+65
+00:05:32,205 --> 00:05:32,806
+Billing.
+
+66
+00:05:32,806 --> 00:05:39,045
+The top shows today's bills, cash, U P I and card, refunds, cash in hand and G S T.
+
+67
+00:05:39,045 --> 00:05:45,885
+One bill can combine consultation, therapies and medicines, and bill numbers are automatic,
+
+68
+00:05:45,885 --> 00:05:47,013
+never repeated.
+
+69
+00:05:47,013 --> 00:05:47,915
+Open a bill:
+
+70
+00:05:47,915 --> 00:05:53,628
+a clean print with the amount in words and a U P I Q R code to pay by phone.
+
+71
+00:05:53,628 --> 00:05:56,409
+Print on A4, A5 or a thermal printer.
+
+72
+00:05:56,409 --> 00:05:58,965
+A cancelled bill is never deleted.
+
+73
+00:06:06,549 --> 00:06:07,217
+Pharmacy.
+
+74
+00:06:07,217 --> 00:06:13,528
+To dispense shows the doctor's prescriptions, so the pharmacist does not write again.
+
+75
+00:06:13,528 --> 00:06:20,359
+Then sales and returns, bills, batch-wise stock with expiry dates, purchases, and suppliers.
+
+76
+00:06:20,359 --> 00:06:23,329
+You can switch off what you do not need.
+
+77
+00:06:26,913 --> 00:06:33,045
+In Fees and Services, set each doctor's fee for a new case and for a follow-up, and how many
+
+78
+00:06:33,045 --> 00:06:34,978
+days a follow-up stays valid.
+
+79
+00:06:34,978 --> 00:06:40,643
+Below is your list of services, like Agnikarma or dressing, ready to add to any bill.
+
+80
+00:06:45,859 --> 00:06:49,338
+Check-up templates hold the questions you saw.
+
+81
+00:06:49,338 --> 00:06:53,120
+Edit any question, add options, or build your own.
+
+82
+00:06:53,120 --> 00:06:57,809
+Every change makes a new version, so old records never change.
+
+83
+00:07:02,238 --> 00:07:03,187
+Clinic setup.
+
+84
+00:07:03,187 --> 00:07:08,740
+Add rooms, add staff with their own logins, and use roles to control access.
+
+85
+00:07:08,740 --> 00:07:15,607
+For example, a therapist cannot see billing, and a pharmacist cannot see full patient history.
+
+86
+00:07:15,607 --> 00:07:20,648
+Doctor schedules set each doctor's days and timings for appointments.
+
+87
+00:07:26,869 --> 00:07:34,126
+Settings holds your clinic name, G S T I N, phone and address, which print on every bill, the
+
+88
+00:07:34,126 --> 00:07:37,638
+patient I D prefix, and the default language.
+
+89
+00:07:37,638 --> 00:07:40,057
+Today you work with one branch.
+
+90
+00:07:40,057 --> 00:07:43,880
+When you open a second branch, just switch it on.
+
+91
+00:07:43,880 --> 00:07:45,129
+Nothing is lost.
+
+92
+00:07:48,048 --> 00:07:55,121
+Additional settings switch optional features on or off, like pharmacy bills, discounts, stock
+
+93
+00:07:55,121 --> 00:07:56,185
+and purchases.
+
+94
+00:07:56,185 --> 00:07:58,847
+Switching off only hides a feature.
+
+95
+00:07:58,847 --> 00:08:00,748
+Nothing saved is deleted.
+
+96
+00:08:03,757 --> 00:08:05,413
+Finally, the audit log.
+
+97
+00:08:05,413 --> 00:08:07,933
+Every login and change is recorded:
+
+98
+00:08:07,933 --> 00:08:10,813
+who, when, from where, and which record.
+
+99
+00:08:10,813 --> 00:08:17,437
+These entries can never be edited or deleted, which helps you follow the data protection law
+
+100
+00:08:17,437 --> 00:08:19,957
+and keeps patient information safe.
+
+101
+00:08:27,029 --> 00:08:29,584
+That was the full patient journey:
+
+102
+00:08:29,584 --> 00:08:36,123
+appointment, registration, Ayurvedic check-up, prescription, billing and pharmacy, with
+
+103
+00:08:36,123 --> 00:08:37,401
+privacy built in.
+
+104
+00:08:37,401 --> 00:08:41,235
+Panchakarma plans and diet charts are planned next.
+
+105
+00:08:41,235 --> 00:08:44,016
+Please tell us what to change or add.
+
+106
+00:08:44,016 --> 00:08:45,369
+Thank you, Doctor.
