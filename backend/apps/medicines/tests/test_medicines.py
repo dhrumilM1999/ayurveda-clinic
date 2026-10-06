@@ -122,3 +122,32 @@ def test_excel_import(pharmacist, branch_a, roles):
     f = SimpleUploadedFile("list.xlsx", buffer.getvalue())
     res = client_for(pharmacist, branch_a).post(URL + "import/", {"file": f}, format="multipart")
     assert res.status_code == 200 and res.data["created"] == 1
+
+
+@pytest.mark.django_db
+def test_strength_code_and_notes(org, pharmacist, branch_a, roles):
+    client = client_for(pharmacist, branch_a)
+    res = client.post(URL, {"kind": "proprietary", "name": "Sample Tab", "strength": "500 mg", "sku": "ST-01",
+                            "notes": "Keep dry", "gst_rate": "12"}, format="json")
+    assert res.status_code == 201, res.data
+    assert (res.data["strength"], res.data["sku"], res.data["notes"]) == ("500 mg", "ST-01", "Keep dry")
+    found = client.get(URL, {"q": "st-01"}).data["results"]
+    assert [m["name"] for m in found] == ["Sample Tab"]
+    # The code must be unique in the organization
+    again = client.post(URL, {"kind": "proprietary", "name": "Other Tab", "sku": "ST-01", "gst_rate": "12"}, format="json")
+    assert again.status_code == 400
+
+
+@pytest.mark.django_db
+def test_new_fields_do_not_make_a_new_version_by_themselves(org, pharmacist, branch_a, roles):
+    from apps.medicines.models import MedicineVersion
+
+    client = client_for(pharmacist, branch_a)
+    created = client.post(URL, {"kind": "classical", "name": "Old Churna", "gst_rate": "12"}, format="json").data
+    # An old version saved before strength / code / notes existed
+    version = MedicineVersion.objects.get(medicine_id=created["id"])
+    for key in ("strength", "sku", "notes"):
+        version.data.pop(key, None)
+    version.save()
+    client.patch(f"{URL}{created['id']}/", {"name": "Old Churna"}, format="json")
+    assert MedicineVersion.objects.filter(medicine_id=created["id"]).count() == 1

@@ -22,7 +22,7 @@ class MedicineSerializer(serializers.ModelSerializer):
         fields = [
             "id", "kind", "name", "name_gu", "name_hi", "synonyms", "generic_name", "category", "dosage_form",
             "composition", "reference", "pack_type", "units_per_pack", "allow_loose", "selling_price", "barcode",
-            "manufacturer", "classical_equivalent", "classical_equivalent_name", "ayush_licence_no", "hsn_code",
+            "strength", "sku", "notes", "manufacturer", "classical_equivalent", "classical_equivalent_name", "ayush_licence_no", "hsn_code",
             "gst_rate", "mrp", "pack_size", "default_dose", "dose_unit", "default_frequency", "default_timing",
             "default_anupana", "schedule_e1", "contains_metals", "pregnancy_caution", "child_caution",
             "safety_notes", "is_sample", "is_active", "version", "branch_price", "branch_active", "updated_at",
@@ -62,6 +62,17 @@ class MedicineSerializer(serializers.ModelSerializer):
                 clash = clash.exclude(pk=self.instance.pk)
             if clash.exists():
                 raise serializers.ValidationError(f"This barcode is already used for {clash.first().name}.")
+        return value
+
+    def validate_sku(self, value):
+        value = (value or "").strip().upper()
+        if value:
+            org_id = self.context["request"].user.organization_id
+            clash = Medicine.objects.filter(organization_id=org_id, sku__iexact=value)
+            if self.instance:
+                clash = clash.exclude(pk=self.instance.pk)
+            if clash.exists():
+                raise serializers.ValidationError(f"This code is already used for {clash.first().name}.")
         return value
 
     def validate_gst_rate(self, value):

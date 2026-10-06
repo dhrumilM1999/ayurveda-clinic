@@ -18,6 +18,7 @@ from .models import BranchMedicine, Medicine, MedicineVersion
 TEXT_FIELDS = [
     "kind", "name", "name_gu", "name_hi", "synonyms", "generic_name", "composition", "reference", "manufacturer",
     "ayush_licence_no", "hsn_code", "pack_size", "default_dose", "default_frequency", "safety_notes", "barcode",
+    "strength", "sku", "notes",
 ]
 MASTER_FIELDS = {  # field -> dropdown list
     "dosage_form": "dosage_form", "dose_unit": "dose_unit",
@@ -36,7 +37,7 @@ def search_filter(text: str) -> Q:
         q &= (
             Q(name__icontains=word) | Q(name_gu__icontains=word) | Q(name_hi__icontains=word)
             | Q(synonyms__icontains=word) | Q(composition__icontains=word) | Q(manufacturer__icontains=word)
-            | Q(generic_name__icontains=word) | Q(barcode=word)
+            | Q(generic_name__icontains=word) | Q(barcode=word) | Q(sku__iexact=word)
         )
     return q
 
@@ -60,6 +61,11 @@ def record_version(medicine: Medicine, user=None):
                                    created_by=user)
 
 
+def same_details(old: dict, new: dict) -> bool:
+    """True if nothing that matters changed. Fields added later (missing in old versions) count as empty."""
+    return all(old.get(k, "") == v for k, v in new.items())
+
+
 @transaction.atomic
 def save_medicine(medicine: Medicine, user, is_new: bool) -> Medicine:
     """Save; if anything that matters changed, raise the version and keep a copy of the old details."""
@@ -71,7 +77,7 @@ def save_medicine(medicine: Medicine, user, is_new: bool) -> Medicine:
         return medicine
     previous = MedicineVersion.objects.filter(medicine=medicine).order_by("-version").first()
     medicine.updated_by = user
-    if previous is None or previous.data != snapshot(medicine):
+    if previous is None or not same_details(previous.data, snapshot(medicine)):
         medicine.version += 1
         medicine.save()
         record_version(medicine, user)
@@ -202,7 +208,7 @@ def import_medicines(organization, rows: list[dict], user, dry_run: bool) -> dic
                     if field in row:
                         setattr(medicine, field, row[field].lower() in YES)
                 before = None if is_new else MedicineVersion.objects.filter(medicine=medicine).order_by("-version").first()
-                changed = is_new or before is None or before.data != snapshot(medicine)
+                changed = is_new or before is None or not same_details(before.data, snapshot(medicine))
                 if not dry_run and changed:
                     save_medicine(medicine, user, is_new)
                     existing[(kind, name.lower())] = medicine
