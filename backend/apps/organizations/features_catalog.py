@@ -32,7 +32,9 @@ ADDITIONAL_FEATURES = {
     "pharmacy_purchase_price": {"group": "stock", "label": "Purchase price", "default": True},
     "pharmacy_selling_price": {"group": "stock", "label": "Selling price / MRP", "default": True},
     "pharmacy_suppliers": {"group": "stock", "label": "Supplier management", "default": True},
-    "pharmacy_billing": {"group": "pharmacy", "label": "Pharmacy bills, payments and printing", "default": False,
+    # The two kinds of bill. Both are ON by default; a clinic that does not bill one of them switches it off.
+    "opd_billing": {"group": "billing", "label": "OPD bills (consultation and services)", "default": True},
+    "pharmacy_billing": {"group": "pharmacy", "label": "Pharmacy bills, payments and printing", "default": True,
                          "requires": "pharmacy_selling_price"},
     "pharmacy_discounts": {"group": "pharmacy", "label": "Discounts on pharmacy bills", "default": False,
                            "requires": "pharmacy_billing"},

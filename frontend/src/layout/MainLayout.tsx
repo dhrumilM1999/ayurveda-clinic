@@ -30,7 +30,7 @@ function initials(name: string) {
 export default function MainLayout() {
   const { t, i18n } = useTranslation();
   const { appName, logoUrl } = useBranding();
-  const { me, branch, features, can, switchBranch, logout } = useAuth();
+  const { me, branch, features, hasFeature, can, switchBranch, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -41,6 +41,7 @@ export default function MainLayout() {
   const multiBranch = !!me?.organization?.multi_branch;
   const visibleItems = menuItems.filter(
     (item) => (!item.permission || can(item.permission)) && (!item.feature || features[item.feature] !== false)
+      && (!item.anyFeature || item.anyFeature.some((code) => hasFeature(code)))
       && (!item.multiBranchOnly || multiBranch),
   );
   const selected = visibleItems.find((item) =>

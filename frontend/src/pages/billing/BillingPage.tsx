@@ -13,7 +13,7 @@ import { OpdBillModal, type OpdBillTarget } from './OpdBillModal';
 
 export default function BillingPage() {
   const { t } = useTranslation();
-  const { can } = useAuth();
+  const { can, hasFeature } = useAuth();
   const [choose, setChoose] = useState(false);
   const [target, setTarget] = useState<OpdBillTarget | null>(null);
   const [version, setVersion] = useState(0);
@@ -25,7 +25,7 @@ export default function BillingPage() {
           <Typography.Title level={3} style={{ margin: 0 }}>{t('billing.title')}</Typography.Title>
           <div className="cell-sub">{t('billing.subtitle')}</div>
         </div>
-        {(can('billing.charge') || can('billing.create')) && (
+        {hasFeature('opd_billing') && (can('billing.charge') || can('billing.create')) && (
           <Button type="primary" icon={<PlusOutlined />} onClick={() => setChoose(true)}>{t('billing.newOpdBill')}</Button>
         )}
       </div>

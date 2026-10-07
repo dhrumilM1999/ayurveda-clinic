@@ -10,7 +10,8 @@ from conftest import client_for, set_additional_features
 
 
 @pytest.mark.django_db
-def test_basic_pharmacy_works_with_all_extras_off(pharmacist, branch_a, meds, final_rx):
+def test_basic_pharmacy_works_with_all_extras_off(org, pharmacist, branch_a, meds, final_rx):
+    set_additional_features(org, on=False, codes=["pharmacy_billing"])  # bills are on by default; this test is without bills
     client = client_for(pharmacist, branch_a)
     assert receive(client, meds, [("Triphala Churna", "B1", LATER, "5")]).status_code == 201
     line = client.get(f"/api/v1/dispensing/{final_rx.id}/").data["lines"][0]
@@ -57,6 +58,7 @@ def test_switching_on_one_extra_enables_only_that_one(org, pharmacist, branch_a,
 @pytest.mark.django_db
 def test_sale_return_without_bills(org, pharmacist, branch_a, meds, final_rx):
     set_additional_features(org, codes=["pharmacy_sales_returns"])
+    set_additional_features(org, on=False, codes=["pharmacy_billing"])  # bills are on by default; this test is without bills
     client = client_for(pharmacist, branch_a)
     receive(client, meds, [("Triphala Churna", "B1", str(TODAY + timedelta(days=300)), "5")])
     line = client.get(f"/api/v1/dispensing/{final_rx.id}/").data["lines"][0]

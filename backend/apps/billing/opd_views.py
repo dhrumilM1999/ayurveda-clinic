@@ -12,6 +12,7 @@ from apps.appointments.serializers import patient_summary
 from apps.audit.services import log_action
 from apps.common.viewsets import AuditedModelViewSet
 from apps.emr.models import Visit
+from apps.organizations.services import is_feature_enabled
 from apps.patients.models import Patient
 
 from .models import BranchServicePrice, ConsultationFee, ServiceCharge
@@ -109,6 +110,12 @@ class OpdBillViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated, BranchPermission]
     branch_scoped = True
     required_permissions = {"suggest": ("billing.charge", "billing.create"), "charge": ("billing.charge", "billing.create")}
+
+    def initial(self, request, *args, **kwargs):
+        super().initial(request, *args, **kwargs)
+        # Additional settings -> "OPD bills" (on by default). Off: no OPD bills are made.
+        if getattr(request, "branch", None) is not None and not is_feature_enabled(request.branch, "opd_billing"):
+            raise PermissionDenied("OPD bills are switched off. Switch them on in Additional settings.")
 
     def _context(self, request, *, appointment=None, visit=None, patient=None, doctor=None):
         branch = request.branch

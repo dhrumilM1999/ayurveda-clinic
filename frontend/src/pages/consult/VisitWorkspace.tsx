@@ -80,7 +80,7 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
 }) {
   const { t } = useTranslation();
   const { message } = App.useApp();
-  const { can } = useAuth();
+  const { can, hasFeature } = useAuth();
   const [billOpen, setBillOpen] = useState(false); // OPD bill popup (services & charges for this check-up)
   const templateName = useTemplateName();
   const prakritiName = usePrakritiName();
@@ -427,7 +427,7 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
                 beforePrint={() => save()} />
               {(can('billing.charge') || can('billing.create')) && (
                 <Tooltip title={t('consult.billHelp')}>
-                  <Button size="small" onClick={() => setBillOpen(true)}>₹ {t('opd.visitBill')}</Button>
+                  {hasFeature('opd_billing') && <Button size="small" onClick={() => setBillOpen(true)}>₹ {t('opd.visitBill')}</Button>}
                 </Tooltip>
               )}
               {!readOnly && visit.status !== 'completed' && (

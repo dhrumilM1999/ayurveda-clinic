@@ -17,7 +17,7 @@ type Step = 'check-in' | 'start' | 'complete' | 'no-show';
 export function AppointmentActions({ appointment: a, onChanged }: { appointment: Appointment; onChanged: () => void }) {
   const { t } = useTranslation();
   const { message, modal } = App.useApp();
-  const { can } = useAuth();
+  const { can, hasFeature } = useAuth();
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
@@ -35,7 +35,7 @@ export function AppointmentActions({ appointment: a, onChanged }: { appointment:
       const { data } = await api.post<Appointment>(`/appointments/${a.id}/${step}/`);
       if (step === 'check-in') {
         // After the token message, the OPD bill opens for the consultation fee (fee at check-in)
-        setNotice({ title: t('appointments.checkedInMsg', { token: data.token_number }), notification: data.notification, thenBill: canBill && !data.opd_bill });
+        setNotice({ title: t('appointments.checkedInMsg', { token: data.token_number }), notification: data.notification, thenBill: canBill && hasFeature('opd_billing') && !data.opd_bill });
       } else {
         message.success(t('common.saved'));
       }

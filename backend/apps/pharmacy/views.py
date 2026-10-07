@@ -437,7 +437,8 @@ class DispensingViewSet(PharmacyMixin, viewsets.ViewSet):
         # Without "Pharmacy bills" the medicines are only given (stock goes down), no bill is made
         make_bill = is_feature_enabled(request.branch, "pharmacy_billing")
         # "One combined bill" (Additional settings): medicines go on the visit's OPD bill
-        to_opd = make_bill and is_feature_enabled(request.branch, "combined_opd_bill") and rx.visit_id is not None
+        to_opd = (make_bill and is_feature_enabled(request.branch, "combined_opd_bill") and rx.visit_id is not None
+                  and is_feature_enabled(request.branch, "opd_billing"))
         record, invoice = sell(rx, request.branch, request.user, lines, notes=v.get("notes", ""),
                                payment=v.get("payment"), make_bill=make_bill, bill_to_opd=to_opd)
         log_action(request, "create", invoice or record, changes={
