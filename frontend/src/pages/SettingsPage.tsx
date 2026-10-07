@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from '../api/client';
 import type { FeatureFlag } from '../api/types';
 import { useAuth } from '../auth/AuthContext';
+import { useBranding } from '../branding/BrandingContext';
 import { LANGUAGES } from '../i18n';
 import { LogoUpload } from '../components/LogoUpload';
 import { BranchDetailsCard } from './BranchDetailsCard';
@@ -13,6 +14,7 @@ export default function SettingsPage() {
   const { t } = useTranslation();
   const { message } = App.useApp();
   const { branch, me } = useAuth();
+  const { refresh: refreshBranding } = useBranding();
   const [flags, setFlags] = useState<FeatureFlag[]>([]);
   const [saving, setSaving] = useState(false);
   const [form] = Form.useForm();
@@ -38,6 +40,7 @@ export default function SettingsPage() {
     setSaving(true);
     try {
       await api.patch('/organization/', values);
+      await refreshBranding(); // a new clinic name shows in the menu and the browser tab
       message.success(t('common.saved'));
       // The branch switch changes the menu and top bar: reload the app to apply it.
       if (me && values.multi_branch !== undefined && values.multi_branch !== me.organization?.multi_branch) {

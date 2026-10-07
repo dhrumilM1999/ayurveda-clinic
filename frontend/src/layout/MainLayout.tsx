@@ -7,6 +7,8 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 import { useIdleLogout } from '../auth/useIdleLogout';
+import { BrandLogo } from '../branding/BrandLogo';
+import { useBranding } from '../branding/BrandingContext';
 import { clinicConfig } from '../config/clinic';
 import { menuItems } from '../config/menu';
 import { LANGUAGES, setLanguage } from '../i18n';
@@ -27,6 +29,7 @@ function initials(name: string) {
 
 export default function MainLayout() {
   const { t, i18n } = useTranslation();
+  const { appName, logoUrl } = useBranding();
   const { me, branch, features, can, switchBranch, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
@@ -63,11 +66,11 @@ export default function MainLayout() {
         width={224}
         collapsedWidth={76}
       >
-        <div className="app-brand">
-          <img src={clinicConfig.logoPath} alt="" />
-          {!collapsed && (
+        <div className={`app-brand${logoUrl ? ' has-logo' : ''}`}>
+          <BrandLogo variant="sider" />
+          {!logoUrl && !collapsed && (
             <div>
-              <div className="app-brand-name">{clinicConfig.appName}</div>
+              <div className="app-brand-name">{appName}</div>
               <div className="app-brand-sub">{t('layout.tagline')}</div>
             </div>
           )}

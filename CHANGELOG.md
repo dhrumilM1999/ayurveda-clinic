@@ -2,6 +2,17 @@
 
 What changed in each step, in plain words.
 
+## Branding follows the clinic (2026-10-07)
+
+- The clinic's **own name and logo** (Settings -> Clinic details) now show in the left menu, on the login screen
+  (also on a phone), on the waiting-room TV screen, on the bill-verify page and in the browser tab. Nothing about a
+  clinic is written in the code any more, so each clinic has its own look.
+- A wide logo sits on a white plate so it stays readable on the dark green. Without a logo, the default leaf and the
+  clinic name are shown as before.
+- New public pages for the login screen (they show only the clinic name and logo): `/api/v1/branding/` and
+  `/api/v1/branding/logo/`.
+- Changing the name or logo in Settings updates every screen at once.
+
 ## Ayurveda case sheet prescription - like our own pad (2026-10-07)
 
 - New **Prescription design** (Settings -> Branch details): **Ayurveda case sheet (A4)**, one A4 page laid out like the

@@ -6,7 +6,8 @@ import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { clinicConfig } from '../../config/clinic';
+import { BrandLogo } from '../../branding/BrandLogo';
+import { useBranding } from '../../branding/BrandingContext';
 import { useQueue } from './QueuePage';
 
 const REFRESH_SECONDS = 10;
@@ -14,6 +15,7 @@ const NEXT_COUNT = 5; // how many waiting tokens to show per doctor
 
 export default function QueueDisplayPage() {
   const { t } = useTranslation();
+  const { appName, logoUrl } = useBranding();
   const navigate = useNavigate();
   const { data, error } = useQueue(REFRESH_SECONDS);
   const [now, setNow] = useState(dayjs());
@@ -27,9 +29,9 @@ export default function QueueDisplayPage() {
     <div className="tv">
       <header className="tv-head">
         <div className="tv-brand">
-          <img src={clinicConfig.logoPath} alt="" />
+          <BrandLogo variant="tv" />
           <div>
-            <div className="tv-title">{clinicConfig.appName}</div>
+            {!logoUrl && <div className="tv-title">{appName}</div>}
             <div className="tv-sub">{data?.branch_name}</div>
           </div>
         </div>

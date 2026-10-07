@@ -28,8 +28,11 @@ Pick colours at https://htmlcolorcodes.com and copy the `#xxxxxx` code.
 titles use *Fraunces*. They are stored inside the project, so they work without internet. To use a
 different font, ask Claude Code (the font has to be added to the project first).
 
-**Logo:** replace `frontend/public/logo.svg` with your logo. To use a PNG instead, put
-`logo.png` in `frontend/public/` and set `logoPath: '/logo.png'`.
+**Clinic name and logo (every clinic gets its own):** go to **Settings -> Clinic details**, change the clinic name
+and **upload the logo** (PNG or JPG, up to 2 MB; a logo on a transparent or white background, wider than tall, looks best).
+The name and logo then show by themselves in the left menu, on the login screen, on the waiting-room TV screen and in
+the browser tab. No code change is needed, so a second clinic just uploads its own logo.
+Until a clinic uploads a logo, the small default leaf (`frontend/public/logo.svg`) and the name are shown.
 
 **Login page sentence and the small line under the name:** these are screen text. Change them in
 `frontend/src/i18n/en.json`, `gu.json`, `hi.json` → `"login" → "quote"` and `"layout" → "tagline"`.
