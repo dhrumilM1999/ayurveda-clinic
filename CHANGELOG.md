@@ -2,6 +2,20 @@
 
 What changed in each step, in plain words.
 
+## Clinic v2 (2026-10-08)
+
+- **Patient IDs are plain numbers** (1, 2, 3 ...): no leading zeros, no year. Existing patients were renumbered in the
+  order they were registered. An optional prefix in Settings still works (AY -> AY44).
+- **One doctor:** Dr. Grishm Shingala (demo data and timings 9-1 and 5-8, closed Sunday). Command `use_single_doctor`
+  moves other doctors' records to him and switches them off.
+- **Billing switches** in Additional settings: **OPD bills** and **Pharmacy bills**, both ON by default. Off: the related
+  buttons, the OPD collection card and (if both are off) the Billing menu are hidden; nothing is deleted.
+- **Doctor's appointment list** (Check-up screen): day picker with previous/next day, search, filter chips with counts
+  (All, Waiting, With doctor, Booked, Done), New patient / Follow-up tag, Walk-in / Booked tag, waiting minutes, due amount.
+- **Online enquiry** (new, optional, Additional settings): a public form for the clinic website (`/enquiry`, three
+  languages, spam control, consent) and an **Online enquiry** screen for the front desk (status, notes, call, WhatsApp,
+  register patient). See `docs/ONLINE_ENQUIRY.md`.
+
 ## Print sizes: half-A4 (A5) fixed (2026-10-07)
 
 - A normal prescription (up to about 9 medicines) now stays on **one half-A4 (A5) page**. Before, the last medicines

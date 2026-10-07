@@ -1111,3 +1111,28 @@ export interface DaySummary {
   cash_in_hand: string;
   still_due: string;
 }
+
+export interface Enquiry {
+  id: string;
+  created_at: string;
+  name: string;
+  phone: string;
+  email: string;
+  concern: string;
+  message: string;
+  preferred_date: string | null;
+  preferred_time: 'any' | 'morning' | 'evening';
+  language: string;
+  source: 'website' | 'phone' | 'walk_in' | 'other';
+  consent_contact: boolean;
+  status: 'new' | 'contacted' | 'appointment' | 'not_interested' | 'closed';
+  status_label: string;
+  follow_up_on: string | null;
+  notes: string;
+  branch: string | null;
+  branch_name: string;
+  assigned_to: string | null;
+  assigned_to_name: string;
+  patient: string | null;
+  patient_uhid: string;
+}

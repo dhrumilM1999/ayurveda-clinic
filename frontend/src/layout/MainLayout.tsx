@@ -1,7 +1,7 @@
 // The frame around every screen: left menu, top bar with branch and language switchers.
 import { DownOutlined, EnvironmentOutlined, LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
-import { Alert, Avatar, Button, Dropdown, Layout, Menu, Segmented, Select } from 'antd';
-import { useCallback, useState } from 'react';
+import { Alert, Avatar, Badge, Button, Dropdown, Layout, Menu, Segmented, Select } from 'antd';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
@@ -39,6 +39,16 @@ export default function MainLayout() {
   useIdleLogout(me?.idle_timeout_minutes, onIdle);
 
   const multiBranch = !!me?.organization?.multi_branch;
+  // Number of new online enquiries (badge on the menu item)
+  const [newEnquiries, setNewEnquiries] = useState(0);
+  const showEnquiries = can('enquiries.view') && hasFeature('online_enquiry');
+  useEffect(() => {
+    if (!showEnquiries) return undefined;
+    const load = () => api.get<{ new: number }>('/enquiries/summary/').then(({ data }) => setNewEnquiries(data.new)).catch(() => undefined);
+    load();
+    const timer = window.setInterval(load, 60000);
+    return () => window.clearInterval(timer);
+  }, [showEnquiries]);
   const visibleItems = menuItems.filter(
     (item) => (!item.permission || can(item.permission)) && (!item.feature || features[item.feature] !== false)
       && (!item.anyFeature || item.anyFeature.some((code) => hasFeature(code)))
@@ -81,7 +91,8 @@ export default function MainLayout() {
           theme="dark"
           mode="inline"
           selectedKeys={selected ? [selected.key] : []}
-          items={visibleItems.map((item) => ({ key: item.key, icon: item.icon, label: t(item.labelKey) }))}
+          items={visibleItems.map((item) => ({ key: item.key, icon: item.icon, label: item.key === 'enquiries' && newEnquiries > 0
+            ? <span>{t(item.labelKey)} <Badge count={newEnquiries} size="small" /></span> : t(item.labelKey) }))}
           onClick={({ key }) => {
             const item = menuItems.find((m) => m.key === key);
             if (item) navigate(item.path);

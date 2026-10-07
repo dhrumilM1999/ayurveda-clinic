@@ -48,6 +48,8 @@ PERMISSIONS = {
     "therapy.view": "See therapy sessions",
     "therapy.manage": "Schedule and record therapy sessions",
     "reports.view": "See reports",
+    "enquiries.view": "See online enquiries (website, phone)",
+    "enquiries.manage": "Follow up, record and close enquiries",
     "ai.use": "Use AI helpers",
 }
 
@@ -85,6 +87,7 @@ DEFAULT_ROLES = {
             "patients.view", "patients.create", "patients.edit", "patients.vitals",
             "appointments.view", "appointments.manage",
             "billing.view", "billing.create", "billing.charge",
+            "enquiries.view", "enquiries.manage",
         ],
     },
     "therapist": {

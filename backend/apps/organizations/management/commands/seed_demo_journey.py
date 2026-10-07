@@ -97,6 +97,7 @@ class Command(BaseCommand):
         self.services = {s["name"]: s for s in self.admin.rows("/api/v1/services/", page_size=100)}
         self.stock_up()
         self.stock_up_homeopathy()
+        self.seed_enquiries()
         specs = PATIENTS[: options["only"]] if options["only"] else PATIENTS
         made = 0
         for index, spec in enumerate(specs):
@@ -153,6 +154,28 @@ class Command(BaseCommand):
         self.admin.post("/api/v1/purchases/", {"supplier": supplier["id"] if supplier else None, "invoice_no": "DEMO-STOCK-2",
                                                 "invoice_date": str(self.today - timedelta(days=20)), "items": items})
         self.stdout.write(f"Homeopathy stock bought: {len(items)} medicines x 20")
+
+    def seed_enquiries(self):
+        """Switch on "Online enquiry" and add a few FICTIONAL enquiries (website, phone) for the screen to show."""
+        from apps.enquiries.models import Enquiry
+        from apps.organizations.models import OrganizationFeature
+
+        OrganizationFeature.objects.update_or_create(organization=self.org, code="online_enquiry", defaults={"enabled": True})
+        if Enquiry.objects.filter(organization=self.org).exists():
+            return
+        now = timezone.now()
+        sample = [  # name, phone, concern, message, hours ago, status, source, time
+            ("Sneha Parikh", "9999900101", "Joint pain", "Knee pain for 6 months, difficult to climb stairs. Can I come this week?", 2, "new", "website", "morning"),
+            ("Vimal Desai", "9999900102", "Acidity / digestion", "Acidity every night. Is Panchakarma useful?", 5, "new", "website", "evening"),
+            ("Rina Mehta", "9999900103", "Women's health", "Irregular periods since 3 months.", 20, "contacted", "website", "any"),
+            ("Kalpesh Joshi", "9999900104", "Skin problem", "Itching and dark patches on both legs.", 30, "new", "phone", "any"),
+            ("Dhara Shah", "9999900105", "General check-up", "Want a full Ayurvedic check-up and diet advice.", 52, "closed", "website", "morning"),
+        ]
+        for name, phone, concern, message, hours, status, source, when in sample:
+            e = Enquiry.objects.create(organization=self.org, name=name, phone=phone, concern=concern, message=message, status=status,
+                                       source=source, preferred_time=when, consent_contact=True, language="en")
+            Enquiry.objects.filter(pk=e.pk).update(created_at=now - timedelta(hours=hours))
+        self.stdout.write("Online enquiries: 5 sample enquiries added")
 
     # ------------------------------------------------------------------ one patient
     def walk(self, index, spec):

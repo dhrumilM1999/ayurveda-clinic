@@ -49,6 +49,8 @@ ADDITIONAL_FEATURES = {
     "pharmacy_stock_alerts": {"group": "pharmacy", "label": "Stock alerts (low, out, expiry)", "default": False},
     "pharmacy_stock_ledger": {"group": "pharmacy", "label": "Stock ledger screen", "default": False},
     "pharmacy_stock_check": {"group": "pharmacy", "label": "Physical stock check", "default": False},
+    # Website: people who ask for an appointment on the clinic website (public form /enquiry) - off by default
+    "online_enquiry": {"group": "enquiries", "label": "Online enquiry from the clinic website", "default": False},
     "medicines_homeopathy": {"group": "medicines", "label": "Homeopathy medicines", "default": False},
     "medicine_extra_details": {"group": "pharmacy", "label": "Extra product details", "default": False},
     # Medicine labels (printed for medicines given by the clinic / pharmacy). Medicine name, dosage, days and

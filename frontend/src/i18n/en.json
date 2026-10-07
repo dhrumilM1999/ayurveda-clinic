@@ -70,7 +70,8 @@
     "pharmacy": "Pharmacy",
     "additional": "Additional settings",
     "fees": "Fees & services",
-    "billing": "Billing"
+    "billing": "Billing",
+    "enquiries": "Online enquiry"
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",
@@ -357,7 +358,9 @@
     "reports_view": "See reports",
     "ai_use": "Use AI helpers",
     "billing_charge": "Add consultation, services and charges to a patient's OPD bill",
-    "billing_manage": "Edit consultation fees and the services & charges list"
+    "billing_manage": "Edit consultation fees and the services & charges list",
+    "enquiries.view": "See online enquiries (website, phone)",
+    "enquiries.manage": "Follow up, record and close enquiries"
   },
   "patients": {
     "title": "Patients",
@@ -1330,7 +1333,8 @@
       "medicines": "Medicines",
       "billing": "Billing",
       "stock": "Medicine stock",
-      "labels": "Medicine labels"
+      "labels": "Medicine labels",
+      "enquiries": "Online enquiry"
     },
     "features": {
       "opd_billing": {
@@ -1464,6 +1468,10 @@
       "label_clinic": {
         "label": "Label: clinic / pharmacy name",
         "help": ""
+      },
+      "online_enquiry": {
+        "label": "Online enquiry from the clinic website",
+        "help": "Shows a public form (/enquiry) for your website and an Online enquiry screen where the front desk follows up. Off: the form is closed and the screen is hidden."
       }
     },
     "choices": {
@@ -1608,6 +1616,76 @@
       "certificate": "Certificate",
       "follow_up_card": "Follow-up card",
       "prakriti_report": "Prakriti report"
+    }
+  },
+  "enquiry": {
+    "title": "Ask for an appointment",
+    "subtitle": "Tell us a little about yourself and our team at {{clinic}} will call you.",
+    "name": "Your name",
+    "phone": "Mobile number",
+    "phoneInvalid": "Enter a 10-digit mobile number",
+    "email": "Email (optional)",
+    "emailInvalid": "Enter a valid email",
+    "branch": "Which branch",
+    "concern": "What is the problem about?",
+    "message": "Anything else we should know?",
+    "messageHelp": "Please do not write private medical reports here.",
+    "preferredDate": "Preferred date",
+    "preferredTime": "Preferred time",
+    "time": {
+      "any": "Any time",
+      "morning": "Morning",
+      "evening": "Evening"
+    },
+    "consent": "I agree that {{clinic}} may call or message me about this enquiry.",
+    "consentRequired": "Please agree so that we can contact you.",
+    "send": "Send enquiry",
+    "privacy": "We use your details only to contact you about this enquiry.",
+    "failed": "Could not send. Please try again.",
+    "thanksTitle": "Thank you!",
+    "thanksHelp": "We have received your enquiry. Our team will contact you soon.",
+    "callUs": "Or call us: {{phone}}",
+    "closedTitle": "Online enquiries are closed",
+    "closedHelp": "Please call the clinic to book an appointment.",
+    "pageTitle": "Online enquiry",
+    "pageSubtitle": "People who asked for an appointment on the website, by phone or at the desk.",
+    "websiteTitle": "Link for your website",
+    "websiteHelp": "Put this link on the clinic website, or show the form inside the page with the embed code.",
+    "copyLink": "Copy link",
+    "copyEmbed": "Copy embed code",
+    "openForm": "Open the form",
+    "copied": "Copied",
+    "search": "Search name, mobile, problem",
+    "addPhone": "Add phone enquiry",
+    "empty": "No enquiries here.",
+    "call": "Call",
+    "register": "Register patient",
+    "notes": "Notes",
+    "followUpOn": "Call again on",
+    "patientTag": "Patient {{uhid}}",
+    "waText": "Namaste {{name}}, thank you for your enquiry. When would you like to visit the clinic?",
+    "status": {
+      "open": "Open",
+      "new": "New",
+      "contacted": "Contacted",
+      "appointment": "Appointment booked",
+      "not_interested": "Not interested",
+      "closed": "Closed",
+      "all": "All"
+    },
+    "source": {
+      "website": "Website",
+      "phone": "Phone",
+      "walk_in": "Walk-in",
+      "other": "Other"
+    },
+    "col": {
+      "received": "Received",
+      "who": "Who",
+      "about": "About",
+      "wants": "Wants to come",
+      "status": "Status",
+      "source": "Source"
     }
   }
 }
