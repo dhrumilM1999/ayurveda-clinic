@@ -2,6 +2,17 @@
 
 What changed in each step, in plain words.
 
+## Ayurveda case sheet prescription - like our own pad (2026-10-07)
+
+- New **Prescription design** (Settings -> Branch details): **Ayurveda case sheet (A4)**, one A4 page laid out like the
+  clinic's printed pad: clinic name / logo and the line under it, doctor with qualification and reg. no., clinic phone,
+  green timings bar with the holiday note, Name / Age-Sex / Date / Wt, लक्षण and निदान, the अग्नि ... स्रोतस lines
+  (filled from the check-up when answered, otherwise blank for writing), Rx with Morning-Noon-Night boxes, advice,
+  next visit, QR code, signature, shloka, services band and address.
+- The clinic's details from its pad were filled in (name, subtitle, address, phone, timings, Sunday closed, services,
+  shloka). Change them any time in Settings.
+- With **Print on our pre-printed pad** switched on, the top and bottom are left blank for the pad's own printing.
+
 ## Detailed prescription, pre-printed pad, clinic logo (2026-10-06)
 
 - **Detailed prescription** (Check-up -> Print): the whole check-up on paper - vitals, allergies, known conditions,

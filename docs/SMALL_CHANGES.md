@@ -68,6 +68,15 @@ Check: in VS Code's terminal run `cd frontend` then `npm run check:i18n`. It tel
   `backend/apps/documents/words.py` (SAFE TO EDIT). Its look is the "detailed" part of
   `backend/templates/documents/prescription.html` (SAFE TO EDIT).
 
+## Ayurveda case sheet prescription (one A4 page)
+
+- Switch it on: Settings -> Branch details -> **Prescription design** -> Ayurveda case sheet (A4). Fill in the line
+  under the clinic name, the holiday note, the services band (separate with |) and the shloka. The timings come from
+  "Footer line", the phone and address from the same card, the doctor from Staff -> the doctor.
+- The left lines (अग्नि, कोष्ठ ... स्रोतस) and the headings are in `CASE_SHEET_LINES` / `CASE_SHEET_WORDS` at the end of
+  `backend/apps/documents/words.py` (SAFE TO EDIT): change the words, the order, or add a line.
+- Colours and sizes: `backend/templates/documents/prescription_ayurveda.html` (SAFE TO EDIT, lines starting --green / --red).
+
 ## Medicine labels: fields, format, wording
 
 - **Additional settings -> Medicine labels**: switch labels on, choose the default format (Compact / Standard /

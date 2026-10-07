@@ -117,7 +117,7 @@ Colours are the two lines starting with --green and --red below. Keep everything
     </div>
     <div class="row">
       <div class="ids grow">{{ w.patient_id }} {{ patient.uhid }}{% if token %} · {{ w.token }} #{{ token }}{% endif %}{% if number %} · {{ w.rx_no }} {{ number }}{% endif %}</div>
-      <div class="field"><b>Wt.</b><span class="line">{{ weight }}</span></div>
+      <div class="field"><b>Wt.</b><span class="line">{% if weight %}{{ weight }}{% else %}&nbsp;{% endif %}</span></div>
     </div>
   </div>
 
