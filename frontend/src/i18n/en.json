@@ -835,6 +835,7 @@
     "editTitle": "Edit: {{name}}",
     "classicalHelp": "Official name from the Ayurvedic Formulary / Pharmacopoeia of India, with its reference.",
     "proprietaryHelp": "A company's brand. Link it to its classical equivalent if there is one.",
+    "homeopathyHelp": "Homeopathy remedies in a potency (30C, 200C, Q ...). Check the list with your homeopath or pharmacist.",
     "officialName": "Official name",
     "brandName": "Brand name",
     "nameGu": "Name in Gujarati",
@@ -869,7 +870,8 @@
     "kinds": {
       "all": "All",
       "classical": "Classical",
-      "proprietary": "Patent & Proprietary"
+      "proprietary": "Patent & Proprietary",
+      "homeopathy": "Homeopathy"
     },
     "flagShort": {
       "schedule_e1": "E1",
@@ -1307,11 +1309,16 @@
     "needs": "Needs: {{name}}",
     "groups": {
       "pharmacy": "Pharmacy and stock",
+      "medicines": "Medicines",
       "billing": "Billing",
       "stock": "Medicine stock",
       "labels": "Medicine labels"
     },
     "features": {
+      "medicines_homeopathy": {
+        "label": "Homeopathy medicines",
+        "help": "Shows homeopathy remedies, mother tinctures and biochemic salts in the Medicines list and on the prescription screen. Off: they are hidden (nothing is deleted)."
+      },
       "pharmacy_billing": {
         "label": "Pharmacy bills, payments and printing",
         "help": "Dispensing makes a GST bill; take cash / UPI / card payments, print bills, UPI QR code, Bills tab with day closing. Off: medicines are only given, no bill."

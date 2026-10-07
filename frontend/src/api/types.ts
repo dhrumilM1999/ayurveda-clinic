@@ -560,7 +560,7 @@ export interface VisitListItem {
 }
 
 // --- Medicines and prescriptions (Step 5) ---
-export type MedicineKind = 'classical' | 'proprietary';
+export type MedicineKind = 'classical' | 'proprietary' | 'homeopathy';
 export type MedicineFlag = 'schedule_e1' | 'contains_metals' | 'pregnancy_caution' | 'child_caution';
 
 export interface Medicine {
