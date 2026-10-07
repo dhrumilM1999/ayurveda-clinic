@@ -79,7 +79,7 @@ No real SMS is sent yet. You can find the code in two places:
 1. Log in as `reception1` → **Patients**: 5 sample patients are listed (mobile numbers masked).
 2. **Register patient**: type mobile `9811000002`. "Existing patients" warns that this is Sunita Shah.
    Change the number, fill the name, age and gender, tick a condition, add an allergy, then **Register patient**.
-3. The new patient gets an ID like `AY26-000006`. A red allergy box shows at the top.
+3. The new patient gets the next plain number as ID, like `45`. A red allergy box shows at the top.
 4. **Vitals** tab → **Record vitals** (BMI is calculated). **Consent** tab → withdraw SMS consent.
 5. **Medical history** tab: the receptionist sees "Only doctors can see…". Log in as `doctor1` to see everything.
 6. Log in as `admin` → open the patient → **Activity** tab: every view and change is listed.

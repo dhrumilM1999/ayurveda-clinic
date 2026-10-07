@@ -157,7 +157,7 @@ Dropdown values are kept in the database, not in code.
 
 ## Change the patient ID prefix
 
-**Settings** → "Patient ID prefix" (for example `AY` → `AY26-000001`). New patients get the new prefix;
+**Settings** → "Patient ID prefix" (optional: empty gives plain numbers like `44`; `AY` gives `AY44`). New patients get the new prefix;
 old IDs never change.
 
 ## Change the consent wording

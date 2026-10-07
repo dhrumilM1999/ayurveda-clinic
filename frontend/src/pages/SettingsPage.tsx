@@ -85,7 +85,7 @@ export default function SettingsPage() {
                 <Form.Item name="logo_on_bills" label={t('settings.logoOnBills')} valuePropName="checked"><Switch /></Form.Item>
               </Space>
               <Form.Item name="uhid_prefix" label={t('settings.uhidPrefix')} extra={t('settings.uhidPrefixHelp')}
-                rules={[{ required: true, message: t('common.required') }, { pattern: /^[A-Za-z0-9]{1,6}$/, message: t('settings.uhidPrefixInvalid') }]}>
+                rules={[{ pattern: /^[A-Za-z0-9]{0,6}$/, message: t('settings.uhidPrefixInvalid') }]}>
                 <Input maxLength={6} style={{ textTransform: 'uppercase', width: 140 }} />
               </Form.Item>
               {me?.user.is_org_admin && (
