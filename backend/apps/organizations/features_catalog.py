@@ -47,6 +47,7 @@ ADDITIONAL_FEATURES = {
     "pharmacy_stock_alerts": {"group": "pharmacy", "label": "Stock alerts (low, out, expiry)", "default": False},
     "pharmacy_stock_ledger": {"group": "pharmacy", "label": "Stock ledger screen", "default": False},
     "pharmacy_stock_check": {"group": "pharmacy", "label": "Physical stock check", "default": False},
+    "medicines_homeopathy": {"group": "medicines", "label": "Homeopathy medicines", "default": False},
     "medicine_extra_details": {"group": "pharmacy", "label": "Extra product details", "default": False},
     # Medicine labels (printed for medicines given by the clinic / pharmacy). Medicine name, dosage, days and
     # instructions are always printed; these switches add the optional fields.
