@@ -84,12 +84,12 @@ class Command(BaseCommand):
             raise CommandError("No clinic yet. Run seed_demo first.")
         self.branch = self.org.main_branch()
         users = {u.username: u for u in User.objects.filter(organization=self.org)}
-        for needed in ("admin", "reception1", "doctor1", "doctor2", "pharmacist1"):
+        for needed in ("admin", "reception1", "doctor1", "pharmacist1"):
             if needed not in users:
                 raise CommandError(f"The sample user {needed} is missing. Run seed_demo first.")
         self.desk = Api(users["reception1"], self.branch)
-        self.docs = [Api(users["doctor1"], self.branch), Api(users["doctor2"], self.branch)]
-        self.doctor_users = [users["doctor1"], users["doctor2"]]
+        self.docs = [Api(users["doctor1"], self.branch)]
+        self.doctor_users = [users["doctor1"]]
         self.pharmacy = Api(users["pharmacist1"], self.branch)
         self.admin = Api(users["admin"], self.branch)
         self.today = timezone.localdate()
@@ -170,12 +170,12 @@ class Command(BaseCommand):
             from apps.appointments.models import Appointment
 
             if when == "today_booked" and not Appointment.objects.filter(patient=existing).exists():
-                doctor = self.doctor_users[index % 2]
+                doctor = self.doctor_users[0]
                 self.book({"id": str(existing.id)}, doctor, when, index, CASES[case_key]["diagnosis"][1].split(" (")[0])
                 return True
             return False
         case = CASES[case_key]
-        doctor_api, doctor = self.docs[index % 2], self.doctor_users[index % 2]
+        doctor_api, doctor = self.docs[0], self.doctor_users[0]
         title = "master" if age < 12 else "baby" if age < 3 else ("mr" if gender == "male" else "mrs")
         payload = {
             "first_name": first, "middle_name": father, "last_name": last, "gender": gender, "age": age, "mobile": mobile,
