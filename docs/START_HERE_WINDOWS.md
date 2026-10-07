@@ -15,6 +15,24 @@ This guide shows how to install, start, stop and log in to the clinic software o
 > files. If you like, move the folder to a simple place such as `C:\Projects\ayurveda-clinic`
 > (stop the app first).
 
+## More demo data: 36 made-up patients, and the homeopathy medicines
+
+Two commands add realistic (but FICTIONAL) data so every screen has something to show. Run them once; running them again
+adds nothing twice.
+
+1. **Medicines** (about 130 generic Ayurvedic and 818 homeopathy medicines):
+   `docker compose exec backend python manage.py add_medicine_catalog --switch-on`
+   The homeopathy medicines show in **Medicines** and on the prescription screen only while
+   **Additional settings -> Homeopathy medicines** is on.
+2. **Patients** (36 made-up people with Gujarati names, mobile numbers 99999 000xx):
+   `docker compose exec backend python manage.py seed_demo_journey`
+   Each one is registered at the desk, examined by a doctor, billed and dispensed through the real screens' API.
+   13 are "today" (booked, waiting, with the doctor, waiting for the bill, waiting at the pharmacy, finished) and 23 were
+   seen in the last two months, so the reports and patient history look real. The cases are in
+   `backend/apps/organizations/management/commands/demo_journey_data.py` (SAFE TO EDIT).
+
+All names, numbers and medicines are samples. Never use real patient data in demos.
+
 ## 2. Start the software
 
 Double-click **`start.bat`** in the project folder.

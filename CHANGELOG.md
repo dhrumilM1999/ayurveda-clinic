@@ -10,6 +10,15 @@ What changed in each step, in plain words.
   half-A4 (one page, same layout). Other sizes still print on A4.
 - New tests keep these sizes from breaking again (`apps/documents/tests/test_print_sizes.py`).
 
+## More demo data (2026-10-07)
+
+- **Medicine catalog:** about 130 more generic Ayurvedic medicines and 818 homeopathy medicines (remedies in potencies
+  such as 30C / 200C / 1M, mother tinctures, the 12 biochemic salts, ointments). New medicine kind **Homeopathy**, shown
+  only when **Additional settings -> Homeopathy medicines** is on (off by default). Command: `add_medicine_catalog`.
+- **Demo patients:** `seed_demo_journey` creates 36 fictional patients and walks each through registration, the
+  check-up, prescription, OPD bill, payment and pharmacy sale, so the dashboard, queue, reports and history have data.
+- All entries are samples for a pharmacist / doctor to verify; no real patient data.
+
 ## Branding follows the clinic (2026-10-07)
 
 - The clinic's **own name and logo** (Settings -> Clinic details) now show in the left menu, on the login screen
