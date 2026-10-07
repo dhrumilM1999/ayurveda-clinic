@@ -46,7 +46,7 @@ export default function PharmacyPage() {
           <div className="cell-sub">{t('pharmacy.subtitle')}</div>
         </div>
       </div>
-      <Tabs className="page-tabs" activeKey={tab} onChange={(key) => setParams({ tab: key })} destroyInactiveTabPane items={tabs} />
+      <Tabs className="page-tabs" activeKey={tab} onChange={(key) => setParams({ tab: key })} destroyOnHidden items={tabs} />
     </>
   );
 }
