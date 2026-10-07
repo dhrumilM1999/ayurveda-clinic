@@ -1,0 +1,103 @@
+1
+00:00:00,650 --> 00:00:01,935
+Namaste Doctor.
+
+2
+00:00:01,935 --> 00:00:05,277
+Meet your new Ayurveda clinic software.
+
+3
+00:00:05,277 --> 00:00:10,590
+Simple to use, rooted in tradition, and built for your clinic.
+
+4
+00:00:14,360 --> 00:00:17,692
+Everything your clinic needs, in one place.
+
+5
+00:00:17,692 --> 00:00:23,425
+Patients, appointments, check-up, prescriptions, billing and pharmacy, all
+
+6
+00:00:23,425 --> 00:00:24,200
+connected.
+
+7
+00:00:27,500 --> 00:00:29,615
+Follow one patient's journey.
+
+8
+00:00:29,615 --> 00:00:34,938
+Appointment, registration, Ayurvedic assessment, diagnosis, prescription,
+
+9
+00:00:34,938 --> 00:00:40,700
+billing, and finally the follow-up, which brings the patient back to the start.
+
+10
+00:00:40,700 --> 00:00:44,200
+Nothing is missed, and nothing is written twice.
+
+11
+00:00:50,930 --> 00:00:52,261
+Made for Ayurveda.
+
+12
+00:00:52,261 --> 00:00:58,103
+Record the eight-fold examination, find the Prakriti with Vata, Pitta and Kapha
+
+13
+00:00:58,103 --> 00:01:03,871
+scores, and prescribe with automatic safety warnings for metals, pregnancy and
+
+14
+00:01:03,871 --> 00:01:04,610
+allergies.
+
+15
+00:01:10,430 --> 00:01:15,544
+One click to a clean G S T bill, with a U P I Q R code for payment.
+
+16
+00:01:15,544 --> 00:01:21,422
+The pharmacy gives medicines from the doctor's prescription, and tracks stock
+
+17
+00:01:21,422 --> 00:01:22,720
+and expiry dates.
+
+18
+00:01:28,820 --> 00:01:32,381
+And the dashboard shows your clinic's day at a glance:
+
+19
+00:01:32,381 --> 00:01:36,140
+patients seen, patients waiting, and the money collected.
+
+20
+00:01:38,760 --> 00:01:41,667
+Use it in Gujarati, Hindi or English.
+
+21
+00:01:41,667 --> 00:01:43,867
+Patient privacy comes first:
+
+22
+00:01:43,867 --> 00:01:49,839
+consent is recorded, phone numbers are masked, medical history is encrypted,
+
+23
+00:01:49,839 --> 00:01:51,960
+and every access is logged.
+
+24
+00:01:59,480 --> 00:02:02,397
+Simple, Ayurvedic, and secure.
+
+25
+00:02:02,397 --> 00:02:07,260
+Panchakarma plans and diet charts are coming next.
+
+26
+00:02:07,260 --> 00:02:09,010
+Thank you, Doctor.

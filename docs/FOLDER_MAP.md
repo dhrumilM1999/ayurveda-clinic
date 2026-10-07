@@ -15,7 +15,7 @@
 | `.env.example` | Template for `.env` with safe practice values | ASK FIRST |
 | `docker-compose.yml` | Describes the 4 containers | ASK FIRST |
 | `start-share.bat` / `docker-compose.share.yml` | Share mode: open the app from a phone on the same Wi-Fi | ASK FIRST |
-| `demo-video/` | Demo videos (kept on the PC only, not in Git) and their English / Gujarati / Hindi captions | SAFE TO EDIT |
+| `demo-video/` | Demo videos and their English / Gujarati / Hindi captions (`.srt`). Only the short animated intro video is in Git; the long full demos stay on the PC | SAFE TO EDIT |
 | `.gitattributes`, `.gitignore`, `.htaccess` | Technical housekeeping | ASK FIRST |
 | `docs/` | These guide files | SAFE TO EDIT |
 
