@@ -36,7 +36,8 @@ class BranchSerializer(serializers.ModelSerializer):
         fields = [
             "id", "name", "code", "address", "city", "state", "pincode",
             "phone", "email", "gstin", "drug_licence_no", "upi_vpa", "letterhead_footer",
-            "print_on_pad", "pad_top_mm", "pad_bottom_mm", "is_active", "created_at", "updated_at",
+            "print_on_pad", "pad_top_mm", "pad_bottom_mm", "prescription_design", "print_subtitle", "print_closed_note",
+            "print_services", "print_quote", "is_active", "created_at", "updated_at",
         ]
         read_only_fields = ["id", "created_at", "updated_at"]
         extra_kwargs = {"pad_top_mm": {"min_value": 0, "max_value": 120}, "pad_bottom_mm": {"min_value": 0, "max_value": 80}}

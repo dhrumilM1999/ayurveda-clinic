@@ -121,3 +121,27 @@ DETAILED_WORDS = {
 def words_for(lang: str) -> dict:
     base = WORDS.get(lang) or WORDS["en"]
     return {**base, **(DETAILED_WORDS.get(lang) or DETAILED_WORDS["en"])}
+
+
+# SAFE TO EDIT: the lines on the left of the "Ayurveda case sheet" prescription design (Settings -> Branch details ->
+# Prescription design), printed exactly as written, in this order. On the right: the check-up answers that fill the
+# line (the first one filled in is used; "occupation" = the patient's occupation). A line with nothing filled in is
+# printed empty, for the doctor to write by hand. Add a line: ("Label", ["answer_key"]).
+CASE_SHEET_LINES = [
+    ("अग्नि", ["agni"]),
+    ("कोष्ठ", ["koshta"]),
+    ("साम / नीराम", ["sama_nirama", "ama"]),
+    ("मूत्र प्रवृत्ति", ["mutra", "urine_day"]),
+    ("पुरीष प्रवृत्ति", ["mala", "bowel_per_day"]),
+    ("आर्तव प्रवृत्ति", ["artava"]),
+    ("स्वेद प्रवृत्ति", ["sweda"]),
+    ("उद्गार", ["udgar"]),
+    ("निद्रा", ["sleep"]),
+    ("स्वप्न", ["svapna"]),
+    ("कार्यक्षेत्र", ["occupation"]),
+    ("दोष", ["vikriti"]),
+    ("दूष्य", ["dushya"]),
+    ("स्रोतस", ["srotas"]),
+]
+# Headings of the case sheet (printed as written)
+CASE_SHEET_WORDS = {"symptoms": "लक्षण", "diagnosis": "निदान", "advice": "पथ्य / सलाह", "next_visit": "पुनः दर्शन"}

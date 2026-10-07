@@ -70,6 +70,17 @@ class Branch(OrgScopedModel):
     print_on_pad = models.BooleanField("Print prescriptions on our pre-printed pad", default=False)
     pad_top_mm = models.PositiveSmallIntegerField("Blank space at the top (mm)", default=45)
     pad_bottom_mm = models.PositiveSmallIntegerField("Blank space at the bottom (mm)", default=20)
+    # Look of the prescription. "ayurveda_pad" = one A4 case sheet like a classic Ayurveda pad: logo and doctor at
+    # the top, timings bar, लक्षण / निदान, the Agni ... Srotas list on the left, Rx on the right, quote and services
+    # band and address at the bottom. The texts below are printed on it (Settings -> Branch details).
+    prescription_design = models.CharField(
+        max_length=20, default="standard",
+        choices=[("standard", "Standard"), ("ayurveda_pad", "Ayurveda case sheet (one A4 page)")],
+    )
+    print_subtitle = models.CharField("Line under the clinic name", max_length=200, blank=True)
+    print_closed_note = models.CharField("Holiday note in the timings bar", max_length=100, blank=True)
+    print_services = models.CharField("Services band at the bottom", max_length=200, blank=True)
+    print_quote = models.CharField("Quote / shloka at the bottom", max_length=300, blank=True)
     is_active = models.BooleanField(default=True)
 
     class Meta:

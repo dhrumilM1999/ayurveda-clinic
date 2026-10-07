@@ -26,7 +26,7 @@ from apps.prescriptions.models import Prescription
 from .models import Certificate, IssuedDocument
 from .serializers import CertificateSerializer
 from .services import (
-    SIZES, certificate_context, detailed_context, follow_up_context, issue, language_of, mark_printed, pad_for,
+    SIZES, case_sheet_context, certificate_context, detailed_context, follow_up_context, issue, language_of, mark_printed, pad_for,
     prakriti_context, prescription_context, render, verify_url, _qr,
 )
 from .words import words_for
@@ -107,6 +107,10 @@ class DocumentPdfView(APIView):
         context = make(lang)
         if detailed:
             context.update(detailed_context(record, lang))
+        elif kind == "prescription" and request.branch.prescription_design == "ayurveda_pad":
+            # "Ayurveda case sheet" design (Settings -> Branch details): always one A4 page
+            template, size = "prescription_ayurveda.html", "a4"
+            context.update(case_sheet_context(record, lang))
         content = render(template, size, {
             **context, "number": doc.number, "duplicate": duplicate, "qr": _qr(verify_url(doc)),
             "is_cancelled": doc.is_cancelled,

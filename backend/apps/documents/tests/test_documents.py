@@ -173,3 +173,30 @@ def test_certificate_create_print_cancel(doctor, branch_a, visit):
 def test_whatsapp_share_needs_consent(doctor, branch_a, rx):
     res = client_for(doctor, branch_a).post(f"/api/v1/documents/prescription/{rx.id}/whatsapp/")
     assert res.status_code == 200 and res.data["consent"] is False and res.data["link"] == ""
+
+
+@pytest.mark.django_db
+def test_ayurveda_case_sheet_design_is_one_a4_page(org_admin, doctor, branch_a, visit, rx):
+    from django.template.loader import render_to_string
+
+    from apps.documents.services import case_sheet_context, prescription_context
+
+    branch_a.prescription_design = "ayurveda_pad"
+    branch_a.print_subtitle = "Ayurveda & Panchakarma Hospital"
+    branch_a.print_closed_note = "Sunday closed"
+    branch_a.print_services = "Consulting | Panchakarma | Medicine"
+    branch_a.save()
+    visit.complaints = [{"label": "Cough", "duration": 3, "duration_unit": "months"}]
+    visit.save()
+    res = client_for(doctor, branch_a).get(f"/api/v1/documents/prescription/{rx.id}/", {"preview": "1", "size": "a5"})
+    assert res.status_code == 200
+    branch_a.refresh_from_db()
+    context = {**prescription_context(rx, "en"), **case_sheet_context(rx, "en"), "size": "a4"}
+    html = render_to_string("documents/prescription_ayurveda.html", context)
+    for text in ("Ayurveda &amp; Panchakarma Hospital", "Sunday closed", "Panchakarma", "अग्नि", "स्रोतस", "Cough",
+                 "3 months", "Triphala Churna"):
+        assert text in html
+    assert [label for label, _ in context["case_lines"]][:2] == ["अग्नि", "कोष्ठ"]
+    # On the pre-printed pad the top (logo, doctor) and bottom (services, address) are left blank
+    on_pad = render_to_string("documents/prescription_ayurveda.html", {**context, "pad": {"top": "60mm", "bottom": "40mm"}})
+    assert 'class="head"' not in on_pad and 'class="services"' not in on_pad and "Cough" in on_pad

@@ -174,24 +174,12 @@ def _in(label, lang: str) -> str:
 
 def _exam_rows(exam, lang: str) -> list[tuple[str, str]]:
     """The answers of one filled examination form as (question, answer) in the language, in the form's order."""
-    from apps.emr.services import fields_for_version
-
     values = exam.values or {}
     rows = []
-    for field in fields_for_version(exam.template, exam.template_version):
-        value = values.get(field["key"])
-        if value in (None, "", []):
-            continue
-        options = {o["value"]: _in(o["label"], lang) for o in field.get("options", [])}
-        if field["type"] == "choice":
-            text = options.get(value, str(value))
-        elif field["type"] == "multi":
-            text = ", ".join(options.get(v, str(v)) for v in value)
-        elif field["type"] == "number":
-            text = f"{value} {field.get('unit', '')}".strip()
-        else:
-            text = str(value)
-        rows.append((_in(field["label"], lang), text))
+    for field in fields_of(exam):
+        text = _answer_text(field, values.get(field["key"]), lang)
+        if text:
+            rows.append((_in(field["label"], lang), text))
     return rows
 
 
@@ -260,6 +248,61 @@ def detailed_context(prescription, lang: str) -> dict:
         "allergies": [a.allergen for a in patient.allergies.all()],
         "medications": [" ".join(filter(None, [m.name, m.dose, m.frequency])) for m in patient.medications.all()],
     }
+
+
+def case_sheet_context(prescription, lang: str) -> dict:
+    """
+    Extra parts of the "Ayurveda case sheet" design: the Agni ... Srotas lines (CASE_SHEET_LINES in words.py) filled
+    from the check-up's examination answers, weight, and the branch's printed texts.
+    """
+    from .words import CASE_SHEET_LINES, CASE_SHEET_WORDS
+
+    visit, patient = prescription.visit, prescription.patient
+    answers = {}
+    for exam in visit.exams.select_related("template").order_by("created_at"):
+        if exam.template.kind == "questionnaire":
+            continue
+        for field in fields_of(exam):
+            text = _answer_text(field, (exam.values or {}).get(field["key"]), lang)
+            if text and field["key"] not in answers:
+                answers[field["key"]] = text
+    if patient.occupation:
+        answers.setdefault("occupation", patient.occupation)
+    lines = [(label, next((answers[k] for k in keys if answers.get(k)), "")) for label, keys in CASE_SHEET_LINES]
+    vital = patient.vitals.filter(recorded_at__date=visit.visit_date).order_by("-recorded_at").first()
+    branch = prescription.branch
+    return {
+        "case_lines": lines, "cs": CASE_SHEET_WORDS, "allergies": [a.allergen for a in patient.allergies.all()],
+        "weight": f"{vital.weight_kg} kg" if vital and vital.weight_kg else "",
+        "complaint_lines": [
+            {"label": c["label"], "duration": f"{c['duration']} {DURATION_WORDS.get(c.get('duration_unit') or 'days', DURATION_WORDS['days'])[lang]}"
+             if c.get("duration") else ""}
+            for c in visit.complaints or [] if c.get("label")
+        ],
+        "subtitle": branch.print_subtitle, "closed_note": branch.print_closed_note,
+        "services": [s.strip() for s in branch.print_services.replace("|", "।").split("।") if s.strip()],
+        "quote": branch.print_quote,
+    }
+
+
+def fields_of(exam) -> list:
+    from apps.emr.services import fields_for_version
+
+    return fields_for_version(exam.template, exam.template_version)
+
+
+def _answer_text(field, value, lang: str) -> str:
+    """One examination answer as words in the language ('' when not filled in)."""
+    if value in (None, "", []):
+        return ""
+    options = {o["value"]: _in(o["label"], lang) for o in field.get("options", [])}
+    if field["type"] == "choice":
+        return options.get(value, str(value))
+    if field["type"] == "multi":
+        return ", ".join(options.get(v, str(v)) for v in value)
+    if field["type"] == "number":
+        return f"{value} {field.get('unit', '')}".strip()
+    return str(value)
 
 
 def follow_up_context(visit, lang: str) -> dict:

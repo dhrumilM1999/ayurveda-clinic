@@ -1,6 +1,6 @@
 // Details of the current branch that are printed on bills: address, phone, GSTIN, drug licence, UPI ID,
 // and the pre-printed prescription pad (blank space at the top / bottom of prescriptions).
-import { App, Button, Card, Col, Form, Input, InputNumber, Row, Switch } from 'antd';
+import { App, Button, Card, Col, Form, Input, InputNumber, Row, Segmented, Switch } from 'antd';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from '../api/client';
@@ -15,6 +15,7 @@ export function BranchDetailsCard() {
   const [saving, setSaving] = useState(false);
   const canEdit = can('branches.manage');
   const onPad: boolean = Form.useWatch('print_on_pad', form) ?? false;
+  const design: string = Form.useWatch('prescription_design', form) ?? 'standard';
 
   useEffect(() => {
     if (!branch) return;
@@ -57,6 +58,18 @@ export function BranchDetailsCard() {
           </Col>
         </Row>
         {/* Pre-printed prescription pad: the paper already has the logo, clinic, doctor and reg. no. at the top */}
+        <div className="section-title" style={{ marginTop: 4 }}>{t('settings.designTitle')}</div>
+        <Form.Item name="prescription_design" extra={t('settings.designHelp')} style={{ marginBottom: 8 }}>
+          <Segmented options={(['standard', 'ayurveda_pad'] as const).map((v) => ({ value: v, label: t(`settings.design.${v}`) }))} />
+        </Form.Item>
+        {design === 'ayurveda_pad' && (
+          <Row gutter={12}>
+            <Col xs={24} md={12}><Form.Item name="print_subtitle" label={t('settings.printSubtitle')}><Input maxLength={200} placeholder={t('settings.printSubtitlePlaceholder')} /></Form.Item></Col>
+            <Col xs={24} md={12}><Form.Item name="print_closed_note" label={t('settings.printClosed')}><Input maxLength={100} placeholder={t('settings.printClosedPlaceholder')} /></Form.Item></Col>
+            <Col span={24}><Form.Item name="print_services" label={t('settings.printServices')} extra={t('settings.printServicesHelp')}><Input maxLength={200} /></Form.Item></Col>
+            <Col span={24}><Form.Item name="print_quote" label={t('settings.printQuote')}><Input maxLength={300} /></Form.Item></Col>
+          </Row>
+        )}
         <div className="section-title" style={{ marginTop: 4 }}>{t('settings.padTitle')}</div>
         <Form.Item name="print_on_pad" valuePropName="checked" extra={t('settings.padHelp')} style={{ marginBottom: 8 }}>
           <Switch checkedChildren={t('settings.padOn')} unCheckedChildren={t('settings.padOff')} />

@@ -244,7 +244,20 @@
     "padOn": "Our pre-printed pad",
     "padOff": "Plain paper",
     "padTop": "Blank space at the top",
-    "padBottom": "Blank space at the bottom"
+    "padBottom": "Blank space at the bottom",
+    "designTitle": "Prescription design",
+    "designHelp": "Standard: the usual prescription. Ayurveda case sheet: one A4 page like a classic Ayurveda pad - clinic and doctor at the top, timings bar, लक्षण / निदान, Agni to Srotas on the left, Rx on the right, quote, services and address at the bottom. The timings come from \"Footer line\", the address and phone from above.",
+    "design": {
+      "standard": "Standard",
+      "ayurveda_pad": "Ayurveda case sheet (A4)"
+    },
+    "printSubtitle": "Line under the clinic name",
+    "printSubtitlePlaceholder": "e.g. Ayurveda & Panchakarma Hospital",
+    "printClosed": "Holiday note (right of the timings bar)",
+    "printClosedPlaceholder": "e.g. Sunday closed",
+    "printServices": "Services band at the bottom",
+    "printServicesHelp": "Separate with |   e.g. Consulting | Panchakarma | Medicine | Dietetics",
+    "printQuote": "Quote / shloka at the bottom"
   },
   "audit": {
     "title": "Audit log",
