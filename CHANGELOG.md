@@ -2,6 +2,14 @@
 
 What changed in each step, in plain words.
 
+## Print sizes: half-A4 (A5) fixed (2026-10-07)
+
+- A normal prescription (up to about 9 medicines) now stays on **one half-A4 (A5) page**. Before, the last medicines
+  went onto a second page because "1 tsp" and "15 days" wrapped onto two lines. The medicine table is tighter on A5/A6.
+- The **Ayurveda case sheet** used to print on a full A4 sheet even when half-A4 was chosen. Now it shrinks to fit
+  half-A4 (one page, same layout). Other sizes still print on A4.
+- New tests keep these sizes from breaking again (`apps/documents/tests/test_print_sizes.py`).
+
 ## Branding follows the clinic (2026-10-07)
 
 - The clinic's **own name and logo** (Settings -> Clinic details) now show in the left menu, on the login screen

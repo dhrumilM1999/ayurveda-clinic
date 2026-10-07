@@ -27,6 +27,21 @@
   .section.long { page-break-inside: auto; }
   .alert { color: #a3261b; font-weight: 600; }
   .pre { white-space: pre-line; }
+  td.nw { white-space: nowrap; }
+  {% if size != "a4" %}
+  /* Half-A4 (A5) and A6: tighter rows and boxes, so a normal prescription stays on ONE page */
+  td { padding: 0.7mm 0.8mm; }
+  th { padding: 0.7mm 0.8mm; }
+  .times { gap: 0.6mm; }
+  .time { min-width: 5.5mm; padding: 0.1mm; }
+  .rx { font-size: 1.4em; margin: 0; }
+  .patient { margin: 1mm 0; }
+  .section { margin-top: 1.5mm; }
+  .foot { margin-top: 3mm; }
+  .qr img { width: 15mm; height: 15mm; }
+  .sign { min-width: 35mm; }
+  .sign img { max-height: 11mm; }
+  {% endif %}
 {% endblock %}
 {% block content %}
 {% if detailed %}<div class="doc-title">{{ w.detailed_title }}</div>{% endif %}
@@ -90,7 +105,7 @@
 
 <div class="rx">&#8478;</div>
 <table>
-  <thead><tr><th>#</th><th>{{ w.medicine }}</th><th>{{ w.dose }}</th><th>{{ w.morning }} - {{ w.noon }} - {{ w.night }}</th><th>{{ w.days }}</th>{% if size != "a5" %}<th>{{ w.qty }}</th>{% endif %}</tr></thead>
+  <thead><tr><th>#</th><th>{{ w.medicine }}</th><th>{{ w.dose }}</th><th>{{ w.morning }} - {{ w.noon }} - {{ w.night }}</th><th>{{ w.days }}</th>{% if size == "a4" %}<th>{{ w.qty }}</th>{% endif %}</tr></thead>
   <tbody>
   {% for i in items %}
   <tr>
@@ -99,12 +114,12 @@
       <span class="med">{{ i.name }}</span>{% if i.strength %} {{ i.strength }}{% endif %}{% if i.form %} <span class="small muted">· {{ i.form }}</span>{% endif %}
       {% if i.timing or i.with_anupana %}<div class="small">{{ i.timing }}{% if i.timing and i.with_anupana %} · {% endif %}{{ i.with_anupana }}</div>{% endif %}
       {% if i.instructions %}<div class="small muted">{{ i.instructions }}</div>{% endif %}
-      {% if size == "a5" and i.quantity %}<div class="small muted">{{ w.qty }}: {{ i.quantity }}</div>{% endif %}
+      {% if size != "a4" and i.quantity %}<div class="small muted">{{ w.qty }}: {{ i.quantity }}</div>{% endif %}
     </td>
-    <td>{{ i.dose }}</td>
+    <td class="nw">{{ i.dose }}</td>
     <td>{% if i.times %}<div class="times">{% for n in i.times %}<div class="time"><b>{{ n }}</b></div>{% endfor %}</div>{% else %}{{ i.frequency }}{% endif %}</td>
-    <td>{{ i.duration }}</td>
-    {% if size != "a5" %}<td>{{ i.quantity }}</td>{% endif %}
+    <td class="nw">{{ i.duration }}</td>
+    {% if size == "a4" %}<td>{{ i.quantity }}</td>{% endif %}
   </tr>
   {% endfor %}
   </tbody>

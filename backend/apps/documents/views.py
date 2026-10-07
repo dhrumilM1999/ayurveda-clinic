@@ -108,9 +108,12 @@ class DocumentPdfView(APIView):
         if detailed:
             context.update(detailed_context(record, lang))
         elif kind == "prescription" and request.branch.prescription_design == "ayurveda_pad":
-            # "Ayurveda case sheet" design (Settings -> Branch details): always one A4 page
-            template, size = "prescription_ayurveda.html", "a4"
+            # "Ayurveda case sheet" design (Settings -> Branch details): one A4 page. On half-A4 (A5) paper the
+            # same sheet is shrunk to fit; any other size prints on A4.
+            template = "prescription_ayurveda.html"
+            size = "a5" if size == "a5" else "a4"
             context.update(case_sheet_context(record, lang))
+            context["sheet_scale"] = "0.70711" if size == "a5" else "1"
         content = render(template, size, {
             **context, "number": doc.number, "duplicate": duplicate, "qr": _qr(verify_url(doc)),
             "is_cancelled": doc.is_cancelled,
