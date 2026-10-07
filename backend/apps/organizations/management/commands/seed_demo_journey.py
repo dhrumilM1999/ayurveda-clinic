@@ -96,6 +96,7 @@ class Command(BaseCommand):
         self.rng = random.Random(2026)
         self.services = {s["name"]: s for s in self.admin.rows("/api/v1/services/", page_size=100)}
         self.stock_up()
+        self.stock_up_homeopathy()
         specs = PATIENTS[: options["only"]] if options["only"] else PATIENTS
         made = 0
         for index, spec in enumerate(specs):
@@ -129,6 +130,29 @@ class Command(BaseCommand):
         self.admin.post("/api/v1/purchases/", {"supplier": supplier["id"], "invoice_no": "DEMO-STOCK-1",
                                                 "invoice_date": str(self.today - timedelta(days=30)), "items": items})
         self.stdout.write(f"Stock bought: {len(items)} medicines x 40 packs")
+
+    def stock_up_homeopathy(self):
+        """Stock for the most used homeopathy remedies (once), so the pharmacy can give them."""
+        if any(p.get("invoice_no") == "DEMO-STOCK-2" for p in self.admin.rows("/api/v1/purchases/", page_size=100)):
+            return
+        from apps.medicines.homeopathy_catalog import COMMON
+
+        wanted = [f"{name} {potency}" for name in sorted(COMMON) for potency in ("30C", "200C")] + [
+            "Arnica Montana Q", "Calendula Officinalis Q", "Arnica Ointment", "Calendula Ointment",
+            "Natrum Muriaticum 6X (biochemic)", "Calcarea Phosphorica 6X (biochemic)", "Ferrum Phosphoricum 6X (biochemic)"]
+        medicines = list(Medicine.objects.filter(organization=self.org, name__in=wanted))
+        supplier = next((s for s in self.admin.rows("/api/v1/suppliers/", page_size=50) if "Ayur Distributors" in s["name"]), None)
+        items = []
+        for number, m in enumerate(medicines, start=1):
+            mrp = money(m.mrp or 80)
+            items.append({
+                "medicine": str(m.id), "batch_no": f"HM{number:03d}B", "mfg_date": str(self.today - timedelta(days=60)),
+                "expiry_date": str(self.today + timedelta(days=1000)), "quantity": 20, "free_quantity": 0,
+                "purchase_rate": str((mrp * Decimal("0.6")).quantize(Decimal("0.01"))), "gst_rate": 12,
+                "mrp": str(mrp), "selling_price": str(mrp)})
+        self.admin.post("/api/v1/purchases/", {"supplier": supplier["id"] if supplier else None, "invoice_no": "DEMO-STOCK-2",
+                                                "invoice_date": str(self.today - timedelta(days=20)), "items": items})
+        self.stdout.write(f"Homeopathy stock bought: {len(items)} medicines x 20")
 
     # ------------------------------------------------------------------ one patient
     def walk(self, index, spec):
