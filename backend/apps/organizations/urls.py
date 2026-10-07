@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 
 from .views import (
     AdditionalChoiceViewSet, AdditionalFeatureViewSet, BranchViewSet, CurrentOrganizationView, FeatureFlagViewSet,
-    OrganizationLogoView, RoomTypeViewSet, RoomViewSet,
+    OrganizationLogoView, PublicBrandingLogoView, PublicBrandingView, RoomTypeViewSet, RoomViewSet,
 )
 
 router = DefaultRouter()
@@ -15,6 +15,8 @@ router.register("additional-features", AdditionalFeatureViewSet, basename="addit
 router.register("additional-choices", AdditionalChoiceViewSet, basename="additional-choice")
 
 urlpatterns = [
+    path("branding/", PublicBrandingView.as_view(), name="public-branding"),
+    path("branding/logo/", PublicBrandingLogoView.as_view(), name="public-branding-logo"),
     path("organization/", CurrentOrganizationView.as_view(), name="current-organization"),
     path("organization/logo/", OrganizationLogoView.as_view(), name="organization-logo"),
 ] + router.urls
