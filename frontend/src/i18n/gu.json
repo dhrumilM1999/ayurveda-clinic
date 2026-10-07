@@ -772,7 +772,25 @@
       "before": "પહેલાં",
       "progress": "દરમિયાન",
       "after": "પછી"
-    }
+    },
+    "appointmentsTitle": "એપોઇન્ટમેન્ટ",
+    "previousDay": "આગલો દિવસ",
+    "nextDay": "પછીનો દિવસ",
+    "searchList": "નામ, ID, કારણ શોધો",
+    "noMatch": "કોઈ દર્દી મળ્યા નહીં.",
+    "newTag": "નવા દર્દી",
+    "followUpTag": "ફૉલો-અપ",
+    "waitingMin": "{{n}} મિનિટથી રાહ",
+    "dueTag": "બાકી {{amount}}",
+    "filter": {
+      "all": "બધા",
+      "waiting": "રાહ",
+      "withDoctor": "ડૉક્ટર પાસે",
+      "booked": "બુક",
+      "done": "પૂરા"
+    },
+    "walkInTag": "વૉક-ઇન",
+    "bookedTag": "બુક કરેલ"
   },
   "templatesAdmin": {
     "title": "તપાસ ટેમ્પ્લેટ",

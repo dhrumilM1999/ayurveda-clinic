@@ -772,7 +772,25 @@
       "before": "Before",
       "progress": "During",
       "after": "After"
-    }
+    },
+    "appointmentsTitle": "Appointments",
+    "previousDay": "Previous day",
+    "nextDay": "Next day",
+    "searchList": "Search name, ID, reason",
+    "noMatch": "No patient matches.",
+    "newTag": "New patient",
+    "followUpTag": "Follow-up",
+    "waitingMin": "Waiting {{n}} min",
+    "dueTag": "Due {{amount}}",
+    "filter": {
+      "all": "All",
+      "waiting": "Waiting",
+      "withDoctor": "With doctor",
+      "booked": "Booked",
+      "done": "Done"
+    },
+    "walkInTag": "Walk-in",
+    "bookedTag": "Booked"
   },
   "templatesAdmin": {
     "title": "Check-up templates",

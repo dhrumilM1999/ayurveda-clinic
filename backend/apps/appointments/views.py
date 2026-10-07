@@ -54,7 +54,16 @@ class AppointmentViewSet(AuditedModelViewSet):
             raise PermissionDenied("Appointments are switched off for this branch (Settings → Modules).")
 
     def get_queryset(self):
+        from django.db.models import Count, IntegerField, OuterRef, Subquery
+        from django.db.models.functions import Coalesce
+
+        from apps.emr.models import Visit
+
         qs = super().get_queryset()
+        # previous_visits: check-ups of this patient before the appointment day (new patient = 0, follow-up = more)
+        earlier = (Visit.objects.filter(patient=OuterRef("patient"), visit_date__lt=OuterRef("date"), is_deleted=False)
+                   .order_by().values("patient").annotate(n=Count("id")).values("n"))
+        qs = qs.annotate(previous_visits=Coalesce(Subquery(earlier, output_field=IntegerField()), 0))
         params = self.request.query_params
         if params.get("date_from"):
             qs = qs.filter(date__gte=parse_day(params["date_from"]))

@@ -392,6 +392,8 @@ export interface Appointment {
   notification?: PatientNotification;
   /** Short OPD bill status (staff who may see bills) */
   opd_bill?: OpdBillSummary | null;
+  /** Check-ups the patient had before this day: 0 = new patient, more = follow-up */
+  previous_visits?: number;
 }
 
 export interface Slot {

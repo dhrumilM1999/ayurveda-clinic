@@ -772,7 +772,25 @@
       "before": "पहले",
       "progress": "दौरान",
       "after": "बाद"
-    }
+    },
+    "appointmentsTitle": "अपॉइंटमेंट",
+    "previousDay": "पिछला दिन",
+    "nextDay": "अगला दिन",
+    "searchList": "नाम, ID, कारण खोजें",
+    "noMatch": "कोई मरीज़ नहीं मिला।",
+    "newTag": "नया मरीज़",
+    "followUpTag": "फ़ॉलो-अप",
+    "waitingMin": "{{n}} मिनट से इंतज़ार",
+    "dueTag": "बाकी {{amount}}",
+    "filter": {
+      "all": "सब",
+      "waiting": "इंतज़ार",
+      "withDoctor": "डॉक्टर के पास",
+      "booked": "बुक",
+      "done": "पूरे"
+    },
+    "walkInTag": "वॉक-इन",
+    "bookedTag": "बुक किया"
   },
   "templatesAdmin": {
     "title": "जाँच टेम्पलेट",
