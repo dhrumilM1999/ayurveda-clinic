@@ -2,6 +2,15 @@
 
 What changed in each step, in plain words.
 
+## Ayurveda case sheet: 7 medicines fit, English labels (2026-10-11)
+
+- Each medicine now takes two lines (name and dose, then Morning-Noon-Night boxes, days and how to take it), so up to
+  7 medicines with notes, advice and the next visit fit above the QR code and signature. Before, a busy prescription
+  could run under the signature or be cut off at the bottom of the page without any warning.
+- The headings and the check-up lines are now in English: Symptoms, Diagnosis, Advice / Pathya, Next visit, and
+  Agni ... Srotas. Change the words in `backend/apps/documents/words.py` (SAFE TO EDIT).
+- The Date underline no longer runs past the right edge of the page.
+
 ## Ayurveda case sheet prescription - like our own pad (2026-10-07)
 
 - New **Prescription design** (Settings -> Branch details): **Ayurveda case sheet (A4)**, one A4 page laid out like the

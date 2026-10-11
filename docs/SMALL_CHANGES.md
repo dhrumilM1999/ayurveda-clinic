@@ -73,8 +73,11 @@ Check: in VS Code's terminal run `cd frontend` then `npm run check:i18n`. It tel
 - Switch it on: Settings -> Branch details -> **Prescription design** -> Ayurveda case sheet (A4). Fill in the line
   under the clinic name, the holiday note, the services band (separate with |) and the shloka. The timings come from
   "Footer line", the phone and address from the same card, the doctor from Staff -> the doctor.
-- The left lines (अग्नि, कोष्ठ ... स्रोतस) and the headings are in `CASE_SHEET_LINES` / `CASE_SHEET_WORDS` at the end of
-  `backend/apps/documents/words.py` (SAFE TO EDIT): change the words, the order, or add a line.
+- The left lines (Agni, Koshta ... Srotas) and the headings (Symptoms, Diagnosis ...) are in `CASE_SHEET_LINES` /
+  `CASE_SHEET_WORDS` at the end of `backend/apps/documents/words.py` (SAFE TO EDIT): change the words, the order, or add
+  a line. If you rename "Dosha", change `CASE_SHEET_SPLIT_BEFORE` too (the short line drawn above it).
+- About 7 medicines (with notes and advice) fit on the page. The page never runs on to a second sheet, so anything
+  that does not fit is hidden: keep long instructions short.
 - Colours and sizes: `backend/templates/documents/prescription_ayurveda.html` (SAFE TO EDIT, lines starting --green / --red).
 
 ## Medicine labels: fields, format, wording
