@@ -2,6 +2,39 @@
 
 What changed in each step, in plain words.
 
+## Ayurveda case sheet: 7 medicines fit, English labels (2026-10-11)
+
+- Each medicine now takes two lines (name and dose, then Morning-Noon-Night boxes, days and how to take it), so up to
+  7 medicines with notes, advice and the next visit fit above the QR code and signature. Before, a busy prescription
+  could run under the signature or be cut off at the bottom of the page without any warning.
+- The headings and the check-up lines are now in English: Symptoms, Diagnosis, Advice / Pathya, Next visit, and
+  Agni ... Srotas. Change the words in `backend/apps/documents/words.py` (SAFE TO EDIT).
+- The Date underline no longer runs past the right edge of the page.
+
+## Ayurveda case sheet prescription - like our own pad (2026-10-07)
+
+- New **Prescription design** (Settings -> Branch details): **Ayurveda case sheet (A4)**, one A4 page laid out like the
+  clinic's printed pad: clinic name / logo and the line under it, doctor with qualification and reg. no., clinic phone,
+  green timings bar with the holiday note, Name / Age-Sex / Date / Wt, लक्षण and निदान, the अग्नि ... स्रोतस lines
+  (filled from the check-up when answered, otherwise blank for writing), Rx with Morning-Noon-Night boxes, advice,
+  next visit, QR code, signature, shloka, services band and address.
+- The clinic's details from its pad were filled in (name, subtitle, address, phone, timings, Sunday closed, services,
+  shloka). Change them any time in Settings.
+- With **Print on our pre-printed pad** switched on, the top and bottom are left blank for the pad's own printing.
+
+## Detailed prescription, pre-printed pad, clinic logo (2026-10-06)
+
+- **Detailed prescription** (Check-up -> Print): the whole check-up on paper - vitals, allergies, known conditions,
+  other medicines, complaints with how long, history notes, every examination form (Ashtavidha, Dashavidha, Agni...),
+  Prakriti result, diagnoses with codes - then the medicines, advice and next visit. A4 or A5, English / Gujarati /
+  Hindi, Download (PDF export) and Print. Same Rx number and QR code as the normal prescription. Only staff who may
+  see the full medical history can print it.
+- **Pre-printed pad** (Settings -> Branch details -> Prescription paper): when switched on, prescriptions print no
+  letterhead of their own and leave blank space at the top (default 45 mm) and bottom (20 mm) of every page for the
+  clinic's own printed pad. Measure the pad and change the mm.
+- **Clinic logo** (Settings -> Clinic details): upload / change / remove (PNG or JPG). Switches for where it
+  prints: prescriptions, certificates and reports, and bills and receipts (bills now show the logo too).
+
 ## Share mode and demo video captions (2026-10-06)
 
 - **`start-share.bat`**: double-click to open the clinic software from a phone or another laptop on the **same

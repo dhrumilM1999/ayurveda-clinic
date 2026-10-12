@@ -196,22 +196,26 @@ type DocKind = 'prescription' | 'follow-up-card' | 'prakriti' | 'certificate';
 
 /** A medical document (prescription, follow-up card, Prakriti report, certificate) on screen, in the patient's
  *  language (can be changed), with paper size, Download and Print. Reprints say DUPLICATE COPY. */
-export function DocumentModal({ kind, id, title, language, onClose }: {
+export function DocumentModal({ kind, id, title, language, detail, onClose }: {
   kind: DocKind;
   id: string;
   title: string;
   language?: string;
+  /** Prescription only: the detailed prescription (full check-up summary), A4 first */
+  detail?: boolean;
   onClose: () => void;
 }) {
   const { t } = useTranslation();
   const sizes: Record<DocKind, string[]> = {
-    prescription: ['a5', 'a4'], 'follow-up-card': ['a6', 'a5'], prakriti: ['a4', 'a5'], certificate: ['a4', 'a5'],
+    prescription: detail ? ['a4', 'a5'] : ['a5', 'a4'], 'follow-up-card': ['a6', 'a5'], prakriti: ['a4', 'a5'], certificate: ['a4', 'a5'],
   };
   return (
-    <PdfModal title={title} fileName={`${kind}`} initial={sizes[kind][0]} onClose={onClose}
+    <PdfModal title={title} fileName={detail ? 'prescription-detailed' : `${kind}`} initial={sizes[kind][0]} onClose={onClose}
       choices={sizes[kind].map((v) => ({ value: v, label: t(`print.size.${v}`) }))}
       choices2={(['en', 'gu', 'hi'] as const).map((v) => ({ value: v, label: t(`print.lang.${v}`) }))}
       initial2={language && ['en', 'gu', 'hi'].includes(language) ? language : 'en'}
-      fetchPdf={(size, forPrint, lang) => blobOf(`/documents/${kind}/${id}/`, { size, lang, ...(forPrint ? {} : { preview: 1 }) })} />
+      fetchPdf={(size, forPrint, lang) => blobOf(`/documents/${kind}/${id}/`, {
+        size, lang, ...(detail ? { detail: 1 } : {}), ...(forPrint ? {} : { preview: 1 }),
+      })} />
   );
 }

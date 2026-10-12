@@ -66,6 +66,15 @@ def _gst_summary(lines):
     return sorted(groups.values(), key=lambda g: g["rate"])
 
 
+def _logo(organization) -> str:
+    """The clinic logo for bills, when "Logo on bills" is on (Settings -> Clinic)."""
+    if not organization.logo_on_bills:
+        return ""
+    from apps.documents.services import _data_uri
+
+    return _data_uri(organization.logo)
+
+
 def render_pdf(*, invoice, size="a4", duplicate=False, credit_note=None) -> bytes:
     from weasyprint import HTML
 
@@ -77,7 +86,7 @@ def render_pdf(*, invoice, size="a4", duplicate=False, credit_note=None) -> byte
     html = render_to_string("documents/invoice.html", {
         "invoice": invoice, "lines": lines, "credit_note": credit_note,
         "credit_lines": list(credit_note.lines.all()) if credit_note else [],
-        "branch": invoice.branch, "organization": invoice.branch.organization,
+        "branch": invoice.branch, "organization": invoice.branch.organization, "logo": _logo(invoice.branch.organization),
         "patient": invoice.patient,
         "doctor": invoice.doctor or (invoice.prescription.doctor if invoice.prescription_id else None),
         "is_opd": invoice.series == "OP", "has_gst": any(line.gst_rate for line in lines),

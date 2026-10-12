@@ -36,6 +36,61 @@ class CurrentOrganizationView(APIView):
         return Response(serializer.data)
 
 
+class OrganizationLogoView(APIView):
+    """
+    The clinic logo printed on prescriptions, certificates, reports and bills (Settings -> Clinic).
+    GET = the image, POST (field "file": PNG or JPG, up to 2 MB) = upload / change, DELETE = remove.
+    """
+
+    permission_classes = [IsAuthenticated, BranchPermission]
+
+    def get(self, request):
+        from django.http import FileResponse
+
+        org = request.user.organization
+        if not org.logo:
+            raise NotFound("No logo uploaded.")
+        return FileResponse(org.logo.open("rb"))
+
+    def post(self, request):
+        if not user_has_perm(request.user, "settings.manage"):
+            self.permission_denied(request)
+        upload = request.FILES.get("file")
+        if upload is None:
+            raise ValidationError({"file": "Choose an image."})
+        if upload.size > 2 * 1024 * 1024:
+            raise ValidationError({"file": "The logo must be smaller than 2 MB."})
+        try:
+            from PIL import Image
+
+            image = Image.open(upload)
+            image.verify()
+            if image.format not in ("PNG", "JPEG"):
+                raise ValueError
+        except Exception:
+            raise ValidationError({"file": "Use a PNG or JPG image."})
+        upload.seek(0)
+        org = request.user.organization
+        if org.logo:
+            org.logo.delete(save=False)
+        org.logo.save(upload.name, upload, save=False)
+        org.updated_by = request.user
+        org.save(update_fields=["logo", "updated_by", "updated_at"])
+        log_action(request, "update", org, changes={"logo": "uploaded"})
+        return Response({"has_logo": True})
+
+    def delete(self, request):
+        if not user_has_perm(request.user, "settings.manage"):
+            self.permission_denied(request)
+        org = request.user.organization
+        if org.logo:
+            org.logo.delete(save=False)
+        org.logo = ""
+        org.save(update_fields=["logo", "updated_at"])
+        log_action(request, "update", org, changes={"logo": "removed"})
+        return Response({"has_logo": False})
+
+
 class BranchViewSet(AuditedModelViewSet):
     """Branches. Branches are never deleted — switch them off with is_active instead."""
 

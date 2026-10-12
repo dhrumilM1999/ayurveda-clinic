@@ -1,4 +1,5 @@
-// "Print" menu on the check-up screen: prescription, follow-up card, Prakriti report, certificate, and
+// "Print" menu on the check-up screen: prescription, detailed prescription (full check-up summary),
+// follow-up card, Prakriti report, certificate, and
 // WhatsApp share of the prescription. Unsaved changes are saved first, so the print-out is up to date.
 // Everything opens in a popup on the same screen.
 import { DownOutlined, PrinterOutlined } from '@ant-design/icons';
@@ -11,7 +12,7 @@ import type { AppointmentDoctor } from '../../api/types';
 import { useAuth } from '../../auth/AuthContext';
 import { DocumentModal } from '../../components/BillPreview';
 
-type Open = { kind: 'prescription' | 'follow-up-card' | 'prakriti' | 'certificate'; id: string; title: string } | null;
+type Open = { kind: 'prescription' | 'follow-up-card' | 'prakriti' | 'certificate'; id: string; title: string; detail?: boolean } | null;
 
 export function PrintMenu({ visitId, rxId, hasFollowUp, patientName, language, doctorId, diagnoses, beforePrint }: {
   visitId: string;
@@ -47,6 +48,7 @@ export function PrintMenu({ visitId, rxId, hasFollowUp, patientName, language, d
 
   const items = [
     { key: 'prescription', label: t('print.prescription'), disabled: !rxId },
+    ...(can('emr.view') ? [{ key: 'prescription-detailed', label: t('print.prescriptionDetailed'), disabled: !rxId }] : []),
     { key: 'follow-up-card', label: t('print.followUpCard'), disabled: !hasFollowUp },
     { key: 'prakriti', label: t('print.prakriti') },
     ...(can('emr.edit') ? [{ key: 'certificate', label: t('print.certificate') }] : []),
@@ -56,6 +58,9 @@ export function PrintMenu({ visitId, rxId, hasFollowUp, patientName, language, d
 
   const onClick = ({ key }: { key: string }) => {
     if (key === 'prescription' && rxId) show({ kind: 'prescription', id: rxId, title: t('print.prescriptionOf', { name: patientName }) });
+    if (key === 'prescription-detailed' && rxId) {
+      show({ kind: 'prescription', id: rxId, title: t('print.prescriptionDetailedOf', { name: patientName }), detail: true });
+    }
     if (key === 'follow-up-card') show({ kind: 'follow-up-card', id: visitId, title: t('print.followUpCard') });
     if (key === 'prakriti') show({ kind: 'prakriti', id: visitId, title: t('print.prakriti') });
     if (key === 'certificate') beforePrint().then((ok) => ok && setCertificate(true));
@@ -67,7 +72,7 @@ export function PrintMenu({ visitId, rxId, hasFollowUp, patientName, language, d
       <Dropdown trigger={['click']} menu={{ items, onClick }}>
         <Button size="small" icon={<PrinterOutlined />}>{t('print.menu')} <DownOutlined /></Button>
       </Dropdown>
-      {open && <DocumentModal kind={open.kind} id={open.id} title={open.title} language={language} onClose={() => setOpen(null)} />}
+      {open && <DocumentModal kind={open.kind} id={open.id} title={open.title} language={language} detail={open.detail} onClose={() => setOpen(null)} />}
       {certificate && (
         <CertificateModal visitId={visitId} doctorId={doctorId} diagnoses={diagnoses}
           onClose={(id) => { setCertificate(false); if (id) setOpen({ kind: 'certificate', id, title: t('print.certificate') }); }} />

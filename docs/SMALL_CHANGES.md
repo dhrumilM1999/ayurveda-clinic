@@ -58,6 +58,28 @@ Check: in VS Code's terminal run `cd frontend` then `npm run check:i18n`. It tel
 - The QR code link uses `PUBLIC_APP_URL` in `.env` (http://localhost:5173 on one PC; on the clinic network put
   the main PC's address, e.g. http://192.168.1.10:5173).
 
+## Clinic logo, pre-printed pad and the detailed prescription
+
+- **Logo**: Settings -> Clinic details -> Clinic logo -> Upload. Two switches say where it prints (documents, bills).
+- **Your own printed pad**: Settings -> Branch details -> Prescription paper -> switch on. Measure with a ruler how
+  much of the top of your pad is already printed (logo, clinic, doctor) and type that in "Blank space at the top";
+  same for the bottom. Print one prescription on the pad and adjust by a few mm if needed.
+- **Detailed prescription words** (headings like "Check-up summary and prescription"): `DETAILED_WORDS` in
+  `backend/apps/documents/words.py` (SAFE TO EDIT). Its look is the "detailed" part of
+  `backend/templates/documents/prescription.html` (SAFE TO EDIT).
+
+## Ayurveda case sheet prescription (one A4 page)
+
+- Switch it on: Settings -> Branch details -> **Prescription design** -> Ayurveda case sheet (A4). Fill in the line
+  under the clinic name, the holiday note, the services band (separate with |) and the shloka. The timings come from
+  "Footer line", the phone and address from the same card, the doctor from Staff -> the doctor.
+- The left lines (Agni, Koshta ... Srotas) and the headings (Symptoms, Diagnosis ...) are in `CASE_SHEET_LINES` /
+  `CASE_SHEET_WORDS` at the end of `backend/apps/documents/words.py` (SAFE TO EDIT): change the words, the order, or add
+  a line. If you rename "Dosha", change `CASE_SHEET_SPLIT_BEFORE` too (the short line drawn above it).
+- About 7 medicines (with notes and advice) fit on the page. The page never runs on to a second sheet, so anything
+  that does not fit is hidden: keep long instructions short.
+- Colours and sizes: `backend/templates/documents/prescription_ayurveda.html` (SAFE TO EDIT, lines starting --green / --red).
+
 ## Medicine labels: fields, format, wording
 
 - **Additional settings -> Medicine labels**: switch labels on, choose the default format (Compact / Standard /
