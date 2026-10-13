@@ -15,7 +15,7 @@ import { LabelsButton } from '../../components/BillPreview';
 import { PatientCell } from '../appointments/shared';
 import { money } from '../medicines/shared';
 import { UpiPayment } from './BillsTab';
-import { DispenseStatusTag, PrintButton, ScanInput, expiryText, qty } from './common';
+import { DispenseStatusTag, PrintButton, ScanInput, expiryText, lineFromScan, qty } from './common';
 
 const REFRESH_SECONDS = 30;
 
@@ -117,6 +117,8 @@ function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClos
   const barcode = hasFeature('pharmacy_barcode');
   const racks = hasFeature('pharmacy_racks');
   const [detail, setDetail] = useState<DispenseDetail | null>(null);
+  // Medicines scanned at the counter that are not on the prescription (go on the same bill)
+  const [extras, setExtras] = useState<DispenseLine[]>([]);
   const [choices, setChoices] = useState<Record<string, Choice>>({});
   const [payMode, setPayMode] = useState<PaymentMode | 'later'>('cash');
   const [payAmount, setPayAmount] = useState<number | null>(null);
@@ -149,19 +151,32 @@ function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClos
       : price * (c.quantity || 0);
     return Math.round(gross * (100 - (c.discount || 0))) / 100;
   };
-  const selected = detail?.lines.filter((l) => choices[l.id]?.give && choices[l.id]?.batch) ?? [];
+  const lines = useMemo(() => [...(detail?.lines ?? []), ...extras], [detail, extras]);
+  const selected = lines.filter((l) => choices[l.id]?.give && choices[l.id]?.batch);
   const total = Math.round(selected.reduce((s, l) => s + lineAmount(l), 0));
   const allDiscount = (value: number) =>
     setChoices((c) => Object.fromEntries(Object.entries(c).map(([k, v]) => [k, { ...v, discount: value }])));
 
-  // Barcode: pick the matching line and batch, or add one more pack
+  // Barcode: pick the matching line and batch, or add one more pack.
+  // A medicine not on the prescription is added as an extra line on the same bill (never Schedule E1).
   const onScan = async (code: string) => {
     if (!detail) return;
     try {
       const { data } = await api.get<ScanResult>('/stock/scan/', { params: { code } });
-      const line = detail.lines.find((l) => l.medicine === data.medicine);
+      const line = lines.find((l) => l.medicine === data.medicine);
       if (!line) {
-        message.warning(t('pharmacy.scanNotInRx', { name: data.name }));
+        if (data.schedule_e1) {
+          message.error(t('pharmacy.e1NeedsRx', { name: data.name }));
+          return;
+        }
+        if (!data.batches.length) {
+          message.warning(t('pharmacy.outOfStock'));
+          return;
+        }
+        const extra = lineFromScan(data);
+        setExtras((e) => [...e, extra]);
+        setChoices((c) => ({ ...c, [extra.id]: { give: true, batch: data.scanned_batch ?? data.batches[0]!.id, quantity: 1, loose: false, units: 0, discount: 0 } }));
+        message.success(t('pharmacy.addedExtra', { name: data.name }));
         return;
       }
       const batch = data.scanned_batch && line.batches.some((b) => b.id === data.scanned_batch) ? data.scanned_batch : line.batches[0]?.id;
@@ -184,7 +199,7 @@ function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClos
         items: selected.map((l) => {
           const c = choices[l.id]!;
           return {
-            prescription_item: l.id, batch: c.batch, discount_percent: discounts ? c.discount || 0 : 0,
+            prescription_item: l.extra ? null : l.id, batch: c.batch, discount_percent: discounts ? c.discount || 0 : 0,
             ...(looseSale && c.loose ? { loose_units: c.units } : { quantity: c.quantity }),
           };
         }),
@@ -304,7 +319,7 @@ function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClos
             rowKey="id"
             size="small"
             pagination={false}
-            dataSource={detail.lines}
+            dataSource={lines}
             scroll={{ x: 980 }}
             columns={[
               {
@@ -320,7 +335,9 @@ function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClos
                   <div style={{ lineHeight: 1.35 }}>
                     <b>{l.medicine_name}</b> <span className="cell-sub">{l.pack_size}</span>
                     {racks && l.location && <Tag icon={<EnvironmentOutlined />} color="geekblue" className="tag-tight">{l.location}</Tag>}
-                    <div className="cell-sub">{rxText(l)}</div>
+                    {l.extra
+                      ? <div><Tag color="purple" className="tag-tight" style={{ marginInlineStart: 0 }}>{t('pharmacy.notOnRx')}</Tag></div>
+                      : <div className="cell-sub">{rxText(l)}</div>}
                     {l.instructions && <div className="cell-sub">{l.instructions}</div>}
                     {l.given && <Tag color="green" className="tag-tight" style={{ marginInlineStart: 0 }}>{t('pharmacy.alreadyGiven', { n: qty(l.given) })}</Tag>}
                   </div>

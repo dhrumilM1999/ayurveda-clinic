@@ -12,6 +12,7 @@ from apps.accounts.permissions import BranchPermission
 from apps.appointments.serializers import patient_summary
 from apps.audit.services import log_action
 from apps.billing.services import invoice_for_dispense
+from apps.common.utils import mask_phone
 from apps.common.viewsets import AuditedModelViewSet
 from apps.medicines.models import Medicine
 from apps.organizations.services import is_feature_enabled
@@ -19,14 +20,14 @@ from apps.prescriptions.models import Prescription
 
 from .models import Dispense, Purchase, PurchaseReturn, Rack, StockBatch, StockVerification, StockVerificationItem, Supplier
 from .serializers import (
-    AdjustInput, BatchSerializer, CountInput, LocationInput, MovementSerializer, PurchaseInput, PurchaseReturnInput,
+    AdjustInput, BatchSerializer, CounterSaleInput, CountInput, LocationInput, MovementSerializer, PurchaseInput, PurchaseReturnInput,
     PurchaseReturnSerializer, PurchaseSerializer, RackSerializer, SaleReturnInput, SellInput, SupplierSerializer,
     VerificationItemSerializer, VerificationSerializer,
 )
 from .services import (
-    alert_counts, complete_verification, correct_stock, dispense_status, dispensed_quantities, ledger, locations_for,
-    receive_stock, return_to_supplier, scan, sell, set_location, set_reorder_level, start_verification, stock_summary,
-    suggested_batches, take_back,
+    WALK_IN, alert_counts, complete_verification, correct_stock, counter_sell, dispense_status, dispensed_quantities,
+    ledger, locations_for, receive_stock, return_to_supplier, scan, sell, set_location, set_reorder_level,
+    start_verification, stock_summary, suggested_batches, take_back,
 )
 
 
@@ -46,6 +47,16 @@ def _day(raw, default=None):
 
 def money(value):
     return str(value) if value is not None else None
+
+
+def _is_uuid(raw) -> bool:
+    import uuid
+
+    try:
+        uuid.UUID(str(raw))
+        return True
+    except ValueError:
+        return False
 
 
 class PharmacyMixin:
@@ -73,6 +84,15 @@ class PharmacyMixin:
     def need_feature(self, request, code):
         if not is_feature_enabled(request.branch, code):
             raise PermissionDenied(f"This feature is switched off ({code}). An admin can switch it on in Additional settings.")
+
+    def _line(self, request, line, item=None):
+        """One sale line from the screen, checking the extras it uses are switched on."""
+        if line.get("loose_units"):
+            self.need_feature(request, "pharmacy_loose_sale")
+        if line.get("discount_percent"):
+            self.need_feature(request, "pharmacy_discounts")
+        return {"prescription_item": item, "batch_id": line["batch"], "quantity": line.get("quantity"),
+                "loose_units": line.get("loose_units"), "discount_percent": line.get("discount_percent", 0)}
 
     def _medicine(self, request, medicine_id):
         medicine = Medicine.objects.filter(organization_id=request.user.organization_id, pk=medicine_id).first()
@@ -208,9 +228,10 @@ class StockViewSet(PharmacyMixin, viewsets.ViewSet):
     required_permissions = {
         "list": "pharmacy.view", "alerts": "pharmacy.view", "batches": "pharmacy.view", "scan": "pharmacy.view",
         "movements": "pharmacy.view", "adjust": "pharmacy.stock", "reorder_level": "pharmacy.stock",
-        "location": "pharmacy.stock",
+        "location": "pharmacy.stock", "labels": "pharmacy.view",
     }
-    required_features = {"alerts": "pharmacy_stock_alerts", "scan": "pharmacy_barcode", "location": "pharmacy_racks"}
+    required_features = {"alerts": "pharmacy_stock_alerts", "scan": "pharmacy_barcode", "location": "pharmacy_racks",
+                         "labels": "pharmacy_stock_labels"}
 
     def list(self, request):
         p = request.query_params
@@ -247,11 +268,46 @@ class StockViewSet(PharmacyMixin, viewsets.ViewSet):
         m = found["medicine"]
         location = locations_for(request.branch, [m.id]).get(m.id)
         return Response({
-            "medicine": str(m.id), "name": m.name, "pack_size": m.pack_size,
+            "medicine": str(m.id), "name": m.name, "pack_size": m.pack_size, "schedule_e1": m.schedule_e1,
+            "allow_loose": bool(m.allow_loose and m.units_per_pack), "units_per_pack": money(m.units_per_pack),
             "location": location.label if location else "",
             "scanned_batch": str(found["batch"].id) if found["batch"] else None,
             "batches": BatchSerializer(found["batches"], many=True).data,
         })
+
+    @action(detail=False, methods=["get"])
+    def labels(self, request):
+        """
+        Pharmacy stock labels as a PDF: ?items=<batch id>:<copies>,<batch id>:<copies>  ?layout=compact|standard
+        A batch without a barcode gets a clinic code first (so the label can be scanned at billing).
+        """
+        from apps.billing.views import pdf_response
+        from apps.organizations.services import organization_choices
+
+        from .stock_labels import build_stock_labels, render_stock_labels
+
+        wanted = []
+        for part in request.query_params.get("items", "").split(","):
+            batch_id, _, copies = part.partition(":")
+            if not batch_id:
+                continue
+            try:
+                count = int(copies or 1)
+            except ValueError:
+                raise ValidationError({"items": "Copies must be a number."})
+            batch = StockBatch.objects.filter(branch=request.branch, pk=batch_id).select_related("medicine").first() \
+                if _is_uuid(batch_id) else None
+            if batch is None:
+                raise NotFound("Batch not found.")
+            wanted.append((batch, max(0, count)))
+        if not wanted:
+            raise ValidationError({"items": "Choose at least one batch."})
+        layout = request.query_params.get("layout") or organization_choices(request.user.organization_id)["stock_label_format"]
+        data = build_stock_labels(request.branch, request.user, wanted, layout)
+        log_action(request, "print", object_type="pharmacy.stocklabel",
+                   object_repr=", ".join(f"{b.medicine.name} / {b.batch_no}" for b, _ in wanted)[:255],
+                   changes={"labels": len(data["labels"]), "layout": layout})
+        return pdf_response(render_stock_labels(data), "stock-labels.pdf", request.query_params.get("download") == "1")
 
     @action(detail=False, methods=["get"])
     def movements(self, request):
@@ -425,15 +481,15 @@ class DispensingViewSet(PharmacyMixin, viewsets.ViewSet):
         items = {i.id: i for i in rx.items.all()}
         lines = []
         for line in v["items"]:
-            item = items.get(line["prescription_item"])
-            if item is None:
-                raise ValidationError({"items": "A line does not belong to this prescription."})
-            if line.get("loose_units"):
-                self.need_feature(request, "pharmacy_loose_sale")
-            if line.get("discount_percent"):
-                self.need_feature(request, "pharmacy_discounts")
-            lines.append({"prescription_item": item, "batch_id": line["batch"], "quantity": line.get("quantity"),
-                          "loose_units": line.get("loose_units"), "discount_percent": line.get("discount_percent", 0)})
+            item = None
+            if line.get("prescription_item"):
+                item = items.get(line["prescription_item"])
+                if item is None:
+                    raise ValidationError({"items": "A line does not belong to this prescription."})
+            else:
+                # A medicine not on the prescription: only by scanning it (Barcodes and scanning)
+                self.need_feature(request, "pharmacy_barcode")
+            lines.append(self._line(request, line, item))
         # Without "Pharmacy bills" the medicines are only given (stock goes down), no bill is made
         make_bill = is_feature_enabled(request.branch, "pharmacy_billing")
         # "One combined bill" (Additional settings): medicines go on the visit's OPD bill
@@ -450,8 +506,30 @@ class DispensingViewSet(PharmacyMixin, viewsets.ViewSet):
                         status=http.HTTP_201_CREATED)
 
 
+class CounterSaleViewSet(PharmacyMixin, viewsets.ViewSet):
+    """POST /counter-sales/ - sell to a walk-in customer without a prescription (scan, bill, take payment)."""
+
+    required_permissions = {"create": "pharmacy.dispense"}
+    required_features = {"*": "pharmacy_counter_sale"}
+
+    def create(self, request):
+        self.need_feature(request, "pharmacy_billing")
+        data = CounterSaleInput(data=request.data)
+        data.is_valid(raise_exception=True)
+        v = data.validated_data
+        lines = [self._line(request, line) for line in v["items"]]
+        record, invoice = counter_sell(request.branch, request.user, lines, customer_name=v.get("customer_name", ""),
+                                       customer_phone=v.get("customer_phone", ""), notes=v.get("notes", ""),
+                                       payment=v.get("payment"))
+        log_action(request, "create", invoice, changes={"counter_sale": True, "lines": len(lines),
+                                                         "total": str(invoice.total_amount)})
+        return Response({"dispense": str(record.id), "invoice": str(invoice.id), "number": invoice.number,
+                         "total_amount": str(invoice.total_amount), "invoice_status": invoice.status},
+                        status=http.HTTP_201_CREATED)
+
+
 class SaleViewSet(PharmacyMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
-    """Sales (dispensed prescriptions) of this branch, and sales returns."""
+    """Sales of this branch (prescription sales and counter sales), and sales returns."""
 
     required_permissions = {"list": "pharmacy.view", "retrieve": "pharmacy.view", "take_back": "pharmacy.dispense"}
     required_features = {"take_back": "pharmacy_sales_returns"}
@@ -465,12 +543,16 @@ class SaleViewSet(PharmacyMixin, mixins.ListModelMixin, mixins.RetrieveModelMixi
         if p.get("q", "").strip():
             q = p["q"].strip()
             qs = qs.filter(Q(invoice__number__icontains=q) | Q(patient__first_name__icontains=q)
-                           | Q(patient__last_name__icontains=q) | Q(patient__uhid__icontains=q))
+                           | Q(patient__last_name__icontains=q) | Q(patient__uhid__icontains=q)
+                           | Q(customer_name__icontains=q))
         return qs
 
     def _row(self, d, with_items=False):
         invoice = invoice_for_dispense(d)
-        row = {"id": str(d.id), "patient_detail": patient_summary(d.patient), "created_at": d.created_at,
+        row = {"id": str(d.id), "patient_detail": patient_summary(d.patient) if d.patient_id else None,
+               "counter_sale": d.prescription_id is None,
+               "customer_name": d.customer_name or (WALK_IN if d.prescription_id is None else ""),
+               "customer_phone": mask_phone(d.customer_phone), "created_at": d.created_at,
                "total_amount": str(d.total_amount), "by": d.created_by.full_name if d.created_by_id else "",
                "invoice": str(invoice.id) if invoice else None, "number": invoice.number if invoice else "",
                "invoice_status": invoice.status if invoice else ""}

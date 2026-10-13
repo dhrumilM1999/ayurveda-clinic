@@ -54,8 +54,10 @@
 | `backend/apps/appointments/messages_catalog.py` | **SMS/WhatsApp text** for booking, change, cancel, token (EN/GU/HI) | **SAFE TO EDIT** |
 | `backend/apps/*/migrations/` | Database change history. **Never edit old files here.** | ASK FIRST |
 | `backend/apps/*/tests/`, `backend/conftest.py` | Automated tests | ASK FIRST |
-| `backend/templates/documents/` | Print/PDF templates. `invoice.html` = OPD / pharmacy bill and credit note, `medicine_label.html` = medicine labels | **SAFE TO EDIT** |
-| `backend/apps/pharmacy/labels.py` | Medicine labels: which fields, sizes (`FORMATS`), words in GU/HI (`WORDS`) | ASK FIRST |
+| `backend/templates/documents/` | Print/PDF templates. `invoice.html` = OPD / pharmacy bill and credit note, `medicine_label.html` = patient medicine labels, `stock_label.html` = pharmacy stock labels (barcode) | **SAFE TO EDIT** |
+| `backend/apps/pharmacy/labels.py` | Patient medicine labels: which fields, sizes (`FORMATS`), words in GU/HI (`WORDS`) | ASK FIRST |
+| `backend/apps/pharmacy/stock_labels.py` | Pharmacy stock labels: sizes (`FORMATS`), barcode, most labels at once (`MAX_LABELS`) | ASK FIRST |
+| `frontend/src/pages/pharmacy/CounterSaleTab.tsx` | Counter sale screen (walk-in customers, scan and bill) | ASK FIRST |
 
 ## frontend/ (React, TypeScript)
 

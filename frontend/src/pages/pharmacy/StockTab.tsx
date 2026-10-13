@@ -14,6 +14,7 @@ import { money } from '../medicines/shared';
 import { LedgerDrawer } from './LedgerTab';
 import { PurchaseModal } from './PurchaseModal';
 import { ScanInput, expiryText, qty } from './common';
+import { StockLabelsButton } from './StockLabels';
 
 type Show = 'all' | 'low' | 'out' | 'expiring' | 'expired';
 
@@ -227,10 +228,12 @@ function BatchList({ row, canStock, onChanged }: { row: StockRow; canStock: bool
   const [correcting, setCorrecting] = useState<StockBatch | null>(null);
   const [returning, setReturning] = useState<StockBatch | null>(null);
 
-  useEffect(() => {
+  const loadBatches = useCallback(() => {
     api.get<StockBatch[]>('/stock/batches/', { params: { medicine: row.medicine, in_stock: 1 } })
       .then(({ data }) => setBatches(data)).catch(() => setBatches([]));
   }, [row.medicine]);
+  useEffect(() => { loadBatches(); }, [loadBatches]);
+  const stockLabels = hasFeature('pharmacy_stock_labels');
 
   if (!batches) return <Spin size="small" />;
   const today = dayjs().format('YYYY-MM-DD');
@@ -244,7 +247,7 @@ function BatchList({ row, canStock, onChanged }: { row: StockRow; canStock: bool
         className="inner-table"
         locale={{ emptyText: t('pharmacy.noBatches') }}
         columns={[
-          ...(batchesOn ? [{ title: t('pharmacy.batch'), dataIndex: 'batch_no', render: (b: string, x: StockBatch) => <><span className="mono">{b}</span>{barcode && x.barcode && <div className="cell-sub mono">{x.barcode}</div>}</> }] : []),
+          ...(batchesOn ? [{ title: t('pharmacy.batch'), dataIndex: 'batch_no', render: (b: string, x: StockBatch) => <><span className="mono">{b}</span>{(barcode || stockLabels) && x.barcode && <div className="cell-sub mono">{x.barcode}</div>}</> }] : []),
           ...(details && expiryOn ? [{ title: t('pharmacy.mfg'), dataIndex: 'mfg_date', render: expiryText }] : []),
           ...(expiryOn ? [{
             title: t('pharmacy.expiry'), dataIndex: 'expiry_date',
@@ -257,9 +260,11 @@ function BatchList({ row, canStock, onChanged }: { row: StockRow; canStock: bool
           ...(suppliersOn ? [{ title: t('pharmacy.supplier'), dataIndex: 'supplier_name', render: (v: string) => v || '—' }] : []),
           { title: t('pharmacy.available'), dataIndex: 'quantity', align: 'right' as const, render: (v: string) => <b className="num">{qty(v)}</b> },
           {
-            title: '', key: 'actions', width: 190, align: 'right' as const,
+            title: '', key: 'actions', width: stockLabels ? 280 : 190, align: 'right' as const,
             render: (_: unknown, b: StockBatch) => canStock ? (
               <Space size={4}>
+                {/* The labels may give the batch its barcode: reload to show it */}
+                <StockLabelsButton batch={b} onPrinted={loadBatches} />
                 <Button size="small" onClick={() => setCorrecting(b)}>{t('pharmacy.correct')}</Button>
                 {supplierReturns && <Button size="small" onClick={() => setReturning(b)}>{t('pharmacy.returnToSupplier')}</Button>}
               </Space>
