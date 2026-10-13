@@ -28,6 +28,7 @@ import SettingsPage from './pages/SettingsPage';
 import AdditionalSettingsPage from './pages/AdditionalSettingsPage';
 import FeesServicesPage from './pages/FeesServicesPage';
 import BillingPage from './pages/billing/BillingPage';
+import ReportsPage from './pages/ReportsPage';
 import VerifyPage from './pages/VerifyPage';
 import EnquiriesPage from './pages/enquiry/EnquiriesPage';
 import EnquiryFormPage from './pages/enquiry/EnquiryFormPage';
@@ -75,6 +76,7 @@ export default function App() {
               <Route path="billing" element={<RequirePermission code="billing.view"><BillingPage /></RequirePermission>} />
               <Route path="pharmacy" element={<RequirePermission code="pharmacy.view"><PharmacyPage /></RequirePermission>} />
               <Route path="enquiries" element={<RequirePermission code="enquiries.view"><EnquiriesPage /></RequirePermission>} />
+              <Route path="reports" element={<RequirePermission code="reports.view"><ReportsPage /></RequirePermission>} />
               <Route path="queue" element={<RequirePermission code="appointments.view"><QueuePage /></RequirePermission>} />
               <Route path="branches" element={<RequirePermission code="branches.view"><BranchesPage /></RequirePermission>} />
               <Route path="rooms" element={<RequirePermission code="rooms.view"><RoomsPage /></RequirePermission>} />

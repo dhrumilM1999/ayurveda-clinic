@@ -46,7 +46,7 @@
 | `backend/apps/pharmacy/` | Stock by batch, racks, purchases, returns, stock checks, dispensing, stock ledger | ASK FIRST |
 | `backend/apps/billing/` | Bills (invoices), payments, credit notes, bill numbers, PDF printing, UPI link; `opd.py` = OPD bill rules (fees, new case / follow-up) | ASK FIRST |
 | `backend/apps/billing/sample_services.py` | The SAMPLE services & charges for a new clinic | **SAFE TO EDIT** |
-| `backend/apps/reports/` | Dashboard numbers in OPD words (`/dashboard/today/`) | ASK FIRST |
+| `backend/apps/reports/` | Dashboard numbers in OPD words (`/dashboard/today/`); `reports.py` = the Reports figures, `exports.py` = Excel / PDF download | ASK FIRST |
 | `backend/apps/documents/` | Print-outs (prescription, certificate, follow-up card, Prakriti report), QR "genuine?" check, WhatsApp share | ASK FIRST |
 | `backend/apps/documents/words.py` | Words on print-outs in EN/GU/HI and the Prakriti guidance | **SAFE TO EDIT** |
 | `backend/apps/prescriptions/safety.py` | **Prescription safety rules** (fixed rules, not AI) | ASK FIRST |
@@ -76,6 +76,7 @@
 | `frontend/src/pages/VerifyPage.tsx` | Public "Is this document genuine?" page (QR code) | ASK FIRST |
 | `frontend/src/pages/billing/` | Billing screen and the OPD bill popup | ASK FIRST |
 | `frontend/src/pages/FeesServicesPage.tsx` | Fees & services screen | ASK FIRST |
+| `frontend/src/pages/ReportsPage.tsx` | Reports screen. The `REPORTS` list at the top says which permission each report needs and which totals show as big numbers | ASK FIRST |
 | `frontend/src/components/BillPreview.tsx` | PDF popup for bills and medicine labels (paper / format, print, download) | ASK FIRST |
 | `frontend/src/utils/dosage.ts` | Quick dosage (222 -> 2-2-2), quantity working-out, the quick day choices (`DAY_CHOICES`) | **SAFE TO EDIT** (`DAY_CHOICES`) |
 | `frontend/src/pages/consult/DaysBar.tsx` | Medicine days / follow-up days bar on the check-up screen | ASK FIRST |
