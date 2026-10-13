@@ -194,9 +194,9 @@ export default function ReportsPage() {
       <Table<Row>
         className="report-table"
         size="small"
-        rowKey={(_, i) => String(i)}
+        rowKey="__key"
         loading={loading}
-        dataSource={data?.code === code ? data.rows : []}
+        dataSource={data?.code === code ? data.rows.map((r, i) => ({ ...r, __key: String(i) })) : []}
         columns={columns}
         scroll={{ x: true }}
         pagination={{ pageSize: 50, hideOnSinglePage: true, showSizeChanger: false }}
