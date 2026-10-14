@@ -7,7 +7,7 @@ import io
 from decimal import Decimal, InvalidOperation
 
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Case, IntegerField, Q, Value, When
 from rest_framework.exceptions import ValidationError
 
 from apps.common.models import MasterValue
@@ -30,6 +30,17 @@ NUMBER_FIELDS = ["gst_rate", "mrp", "selling_price", "units_per_pack"]
 
 
 # --- Search ---------------------------------------------------------------------
+def search_rank(text: str):
+    """0 = a name starts with the text, 1 = a name/synonym contains it as a whole word start, 2 = anything else."""
+    first = text.split()[0] if text.split() else text
+    return Case(
+        When(Q(name__istartswith=first) | Q(name_gu__istartswith=first) | Q(name_hi__istartswith=first), then=Value(0)),
+        When(Q(synonyms__istartswith=first) | Q(synonyms__icontains=f", {first}") | Q(synonyms__icontains=f" {first}")
+             | Q(name__icontains=f" {first}"), then=Value(1)),
+        default=Value(2), output_field=IntegerField(),
+    )
+
+
 def search_filter(text: str) -> Q:
     """Find by name in any language, synonyms, composition or manufacturer."""
     q = Q()

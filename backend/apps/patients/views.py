@@ -1,5 +1,6 @@
 import re
 
+from django.core.cache import cache
 from django.db.models import Count, Q
 from django.http import FileResponse
 from django.utils import timezone
@@ -90,14 +91,20 @@ class PatientViewSet(AuditedModelViewSet):
             return Q(mobile__contains=digits) | Q(alternate_mobile__contains=digits) | Q(uhid__icontains=search)
         condition = Q(uhid__icontains=search)
         words = Q()
-        for word in search.split():
-            words &= Q(first_name__icontains=word) | Q(middle_name__icontains=word) | Q(last_name__icontains=word)
+        for word in search.split():  # every word must match somewhere: a name part, the patient ID or the mobile
+            part = Q(first_name__icontains=word) | Q(middle_name__icontains=word) | Q(last_name__icontains=word) | Q(uhid__icontains=word)
+            word_digits = re.sub(r"\D", "", word)
+            if len(word_digits) >= 3 and len(word_digits) == len(word):
+                part |= Q(mobile__contains=word_digits) | Q(alternate_mobile__contains=word_digits)
+            words &= part
         return condition | words
 
     def list(self, request, *args, **kwargs):
         response = super().list(request, *args, **kwargs)
         search = request.query_params.get("q", "").strip()
-        if search:
+        # The search box searches while typing: write at most one audit line per user per 5 seconds
+        throttle = f"patient-search-log:{request.user.pk}"
+        if search and cache.add(throttle, 1, timeout=5):
             log_action(request, "view", object_type="patients.search", object_repr=f"Search: {search}"[:255],
                        changes={"search": search, "results": response.data.get("count")})
         return response
