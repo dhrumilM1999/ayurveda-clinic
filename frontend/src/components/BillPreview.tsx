@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
+import { startPaper, usePaperDefaults } from '../utils/paperDefaults';
 
 type Kind = 'invoices' | 'credit-notes';
 type Choice = { value: string; label: string };
@@ -121,15 +122,20 @@ async function blobOf(path: string, params: Record<string, unknown>): Promise<Bl
   return data;
 }
 
-export function BillPreviewModal({ id, kind = 'invoices', title, onClose }: {
+export function BillPreviewModal({ id, kind = 'invoices', series = 'OP', title, onClose }: {
   id: string;
   kind?: Kind;
+  /** OP = OPD bill, PH = pharmacy bill: each can have its own paper in Settings -> PDF settings */
+  series?: 'OP' | 'PH';
   title?: string;
   onClose: () => void;
 }) {
   const { t } = useTranslation();
+  const defaults = usePaperDefaults();
+  if (!defaults) return null;
+  const docType = kind === 'credit-notes' ? 'credit_note' : series === 'PH' ? 'pharmacy_bill' : 'opd_bill';
   return (
-    <PdfModal title={title ?? t('billing.preview')} fileName={title ?? 'bill'} initial="a4" onClose={onClose}
+    <PdfModal title={title ?? t('billing.preview')} fileName={title ?? 'bill'} initial={startPaper(defaults, docType, ['a4', 'a5', '80mm', '58mm'], 'a4')} onClose={onClose}
       choices={[
         { value: 'a4', label: t('billing.paper.a4') },
         { value: 'a5', label: t('billing.paper.a5') },
@@ -141,9 +147,10 @@ export function BillPreviewModal({ id, kind = 'invoices', title, onClose }: {
 }
 
 /** "View / print" button: opens the bill preview popup. */
-export function PrintButton({ id, kind = 'invoices', size = 'small', type, label, title }: {
+export function PrintButton({ id, kind = 'invoices', series = 'PH', size = 'small', type, label, title }: {
   id: string;
   kind?: Kind;
+  series?: 'OP' | 'PH';
   size?: 'small' | 'middle';
   type?: 'primary' | 'default';
   label?: string;
@@ -154,7 +161,7 @@ export function PrintButton({ id, kind = 'invoices', size = 'small', type, label
   return (
     <>
       <Button size={size} type={type} icon={<PrinterOutlined />} onClick={() => setOpen(true)}>{label ?? t('billing.viewPrint')}</Button>
-      {open && <BillPreviewModal id={id} kind={kind} title={title} onClose={() => setOpen(false)} />}
+      {open && <BillPreviewModal id={id} kind={kind} series={series} title={title} onClose={() => setOpen(false)} />}
     </>
   );
 }
@@ -193,6 +200,10 @@ export function LabelsButton({ dispense, prescription, size = 'small' }: {
 }
 
 type DocKind = 'prescription' | 'follow-up-card' | 'prakriti' | 'certificate' | 'therapy-plan';
+// the name of each document in Settings -> PDF settings
+const DOC_TYPE: Record<DocKind, string> = {
+  prescription: 'prescription', 'follow-up-card': 'follow_up_card', prakriti: 'prakriti_report', certificate: 'certificate', 'therapy-plan': 'therapy_plan',
+};
 
 /** A medical document (prescription, follow-up card, Prakriti report, certificate) on screen, in the patient's
  *  language (can be changed), with paper size, Download and Print. Reprints say DUPLICATE COPY. */
@@ -206,11 +217,14 @@ export function DocumentModal({ kind, id, title, language, detail, onClose }: {
   onClose: () => void;
 }) {
   const { t } = useTranslation();
+  const defaults = usePaperDefaults();
+  if (!defaults) return null;
   const sizes: Record<DocKind, string[]> = {
     prescription: detail ? ['a4', 'a5'] : ['a5', 'a4'], 'follow-up-card': ['a6', 'a5'], prakriti: ['a4', 'a5'], certificate: ['a4', 'a5'], 'therapy-plan': ['a4', 'a5'],
   };
   return (
-    <PdfModal title={title} fileName={detail ? 'prescription-detailed' : `${kind}`} initial={sizes[kind][0]} onClose={onClose}
+    <PdfModal title={title} fileName={detail ? 'prescription-detailed' : `${kind}`} onClose={onClose}
+      initial={detail ? sizes[kind][0] : startPaper(defaults, DOC_TYPE[kind], sizes[kind], sizes[kind][0])}
       choices={sizes[kind].map((v) => ({ value: v, label: t(`print.size.${v}`) }))}
       choices2={(['en', 'gu', 'hi'] as const).map((v) => ({ value: v, label: t(`print.lang.${v}`) }))}
       initial2={language && ['en', 'gu', 'hi'].includes(language) ? language : 'en'}

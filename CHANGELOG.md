@@ -2,6 +2,23 @@
 
 What changed in each step, in plain words.
 
+## PDF settings: one screen for how every print-out looks (2026-10-15)
+
+- **New screen "PDF settings"** (left menu, for the admin). Change colour, text size, paper, margin, the letterhead,
+  an extra top / bottom line, signature box, QR code, DUPLICATE COPY, language and doctor registration number for all
+  documents at once (General tab) or for one document only (Prescription, Follow-up card, Prakriti report,
+  Certificate, Therapy plan, OPD bill, Pharmacy bill, Credit note, Medicine label, Stock label, Reports). On bills you
+  can also hide the HSN / batch / GST columns and add terms and conditions and a thank-you line.
+- **Live preview** on the right: the real PDF made by the server with your changes before you save. It uses your newest
+  real record (this is written to the audit log) or a clearly fictional sample. Switch paper, language and "show as
+  reprint". **Save** applies it to real print-outs; **Back to default** removes your changes in the open tab.
+- With more than one branch you can set "All branches" or "Only this branch". The branch wins.
+- The print windows now open with the paper you chose for that document.
+- Nothing changes until you edit something: the starting values are the old look. The Ayurveda case sheet stays one
+  fixed A4 page (it follows colour, logo, signature, QR and DUPLICATE, not text size or margin).
+- Database: one new small table (`documents_printsetting`) that stores only the things you changed.
+  Old tables are untouched. See `docs/SMALL_CHANGES.md` -> "Change how all PDFs look".
+
 ## Ayurveda case sheet: 7 medicines fit, English labels (2026-10-11)
 
 - Each medicine now takes two lines (name and dose, then Morning-Noon-Night boxes, days and how to take it), so up to

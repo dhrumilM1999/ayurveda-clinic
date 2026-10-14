@@ -74,7 +74,8 @@
     "billing": "Billing",
     "enquiries": "Online enquiry",
     "reports": "Reports",
-    "therapy": "Panchakarma"
+    "therapy": "Panchakarma",
+    "pdfSettings": "PDF settings"
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",
@@ -1924,5 +1925,131 @@
       "empty": "No therapies yet. Add the starting list (Abhyanga, Shirodhara, Virechana ...) and change it as you like."
     },
     "off": "Panchakarma and therapy is switched off for this branch. Switch it on in Settings, Modules."
+  },
+  "pdfSettings": {
+    "title": "PDF settings",
+    "subtitle": "How every print-out looks: prescription, bills, certificates, labels and reports. See the change on the right before you save.",
+    "general": "General (all documents)",
+    "generalNote": "These settings are used by every document. A document can change them in its own tab.",
+    "docNote": "Only what you change here is different for {{doc}}. Everything else follows the General tab.",
+    "scopeOrg": "All branches",
+    "scopeBranch": "Only {{branch}}",
+    "reset": "Back to default",
+    "resetAsk": "Remove the changes in this tab and go back to the default look?",
+    "unsaved": "You have changes that are not saved yet. The preview shows them; press Save to use them on real print-outs.",
+    "discardAsk": "You have unsaved changes. Discard them?",
+    "previewFailed": "Could not make the preview.",
+    "presets": "Colours",
+    "usualMargin": "Usual margin",
+    "sameAsGeneral": "Same as General",
+    "useGeneral": "Use General",
+    "backToDefault": "Back to default",
+    "fewOptions": "This print-out has only a few options. Its size and look are fixed by the label printer.",
+    "caseSheetNote": "The Ayurveda case sheet (Settings -> Branch details) is one fixed A4 page: it follows the colour, logo, signature, QR and DUPLICATE settings, but not the text size, margin or extra header line.",
+    "paperSaved": "Saved paper",
+    "langAuto": "Auto",
+    "asReprint": "Show as reprint",
+    "sourceReal": "Preview of your latest real record",
+    "sourceSample": "Preview of a sample (no record yet)",
+    "previewOf": "showing {{doc}}",
+    "papers": {
+      "a4": "A4",
+      "a5": "A5",
+      "a6": "A6",
+      "80mm": "Thermal 80 mm",
+      "58mm": "Thermal 58 mm"
+    },
+    "languages": {
+      "patient": "Patient's language",
+      "en": "English",
+      "gu": "Gujarati",
+      "hi": "Hindi"
+    },
+    "groups": {
+      "look": "Paper and look",
+      "letterhead": "Top and bottom",
+      "sign": "Signature and checks",
+      "language": "Language",
+      "bills": "Bills"
+    },
+    "docs": {
+      "prescription": "Prescription",
+      "follow_up_card": "Follow-up card",
+      "prakriti_report": "Prakriti report",
+      "certificate": "Certificate",
+      "therapy_plan": "Therapy plan",
+      "opd_bill": "OPD bill",
+      "pharmacy_bill": "Pharmacy bill",
+      "credit_note": "Credit note",
+      "medicine_label": "Medicine label",
+      "stock_label": "Stock label",
+      "report": "Reports"
+    },
+    "keys": {
+      "paper": {
+        "label": "Paper size",
+        "help": "The paper this document opens with. You can still change it in the print window."
+      },
+      "font_scale": {
+        "label": "Text size",
+        "help": "100% is the usual size. Larger text may need a bigger paper."
+      },
+      "accent_color": {
+        "label": "Colour",
+        "help": "Clinic name, headings and lines."
+      },
+      "show_logo": {
+        "label": "Show logo",
+        "help": "Also needs the logo to be switched on in Settings -> Clinic."
+      },
+      "show_letterhead": {
+        "label": "Show clinic name and address",
+        "help": "Switch off if you print on your own letterhead paper."
+      },
+      "header_text": {
+        "label": "Extra line at the top",
+        "help": "For example your registration line or slogan."
+      },
+      "footer_text": {
+        "label": "Extra line at the bottom",
+        "help": "For example timings or \"Get well soon\"."
+      },
+      "show_signature": {
+        "label": "Show signature box",
+        "help": "The doctor's signature (or the bill's signatory) at the bottom."
+      },
+      "show_qr": {
+        "label": "Show QR code",
+        "help": "Documents: \"is this genuine?\" code. Bills: UPI \"scan to pay\" code."
+      },
+      "show_doctor_reg": {
+        "label": "Show doctor's registration number",
+        "help": "Printed under the doctor's name."
+      },
+      "show_duplicate_watermark": {
+        "label": "Write DUPLICATE COPY on reprints",
+        "help": "Switch off to print the same page again without the word."
+      },
+      "language": {
+        "label": "Language",
+        "help": "The patient's own language, or one fixed language for every print-out."
+      },
+      "margin_mm": {
+        "label": "Margin",
+        "help": "Empty space around the page. Empty = the usual margin of the paper."
+      },
+      "show_gst_columns": {
+        "label": "Show HSN, batch, discount and GST columns",
+        "help": "Switch off for a simpler bill. The GST totals stay."
+      },
+      "terms_text": {
+        "label": "Terms and conditions",
+        "help": "Printed at the bottom of the bill."
+      },
+      "thank_you_text": {
+        "label": "Thank-you line",
+        "help": "Replaces the usual line under the bill."
+      }
+    }
   }
 }
