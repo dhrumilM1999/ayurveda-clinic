@@ -45,11 +45,11 @@ def reorder(branch, date_from=None, date_to=None):
             "name": medicine.name, "usable": r["usable"], "level": level,
             "suggested": max(level * REORDER_TARGET - r["usable"], Decimal("1")),
             "supplier": last.supplier.name if last and last.supplier_id else "",
-            "rate": last.purchase_rate if last and last.purchase_rate is not None else ZERO,
+            "last_rate": last.purchase_rate if last and last.purchase_rate is not None else ZERO,
         })
     columns = [col("name", "Medicine"), col("usable", "In stock", "number"), col("level", "Reorder level", "number"),
                col("suggested", "Suggested to buy", "number"), col("supplier", "Last supplier"),
-               col("rate", "Last buying price", "money")]
+               col("last_rate", "Last buying price", "money")]
     return {"columns": columns, "rows": rows, "totals": None}
 
 
@@ -109,10 +109,10 @@ def non_moving(branch, date_from=None, date_to=None):
             continue
         cost = sum((b.quantity * (b.purchase_rate or ZERO) for b in
                     StockBatch.objects.filter(branch=branch, medicine=r["medicine"], quantity__gt=0)), ZERO)
-        rows.append({"name": r["medicine"].name, "available": r["available"], "cost": rupees(cost)})
-    rows.sort(key=lambda x: -x["cost"])
+        rows.append({"name": r["medicine"].name, "available": r["available"], "stock_value": rupees(cost)})
+    rows.sort(key=lambda x: -x["stock_value"])
     columns = [col("name", "Medicine"), col("available", "In stock", "number"),
-               col("cost", f"Stock value (buying price), not sold for {SLOW_DAYS} days", "money")]
+               col("stock_value", "Stock value (buying price)", "money")]
     return {"columns": columns, "rows": rows, "totals": _totals(rows, columns, "name") if rows else None}
 
 

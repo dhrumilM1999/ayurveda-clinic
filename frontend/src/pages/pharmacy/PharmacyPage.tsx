@@ -1,6 +1,6 @@
 // Pharmacy: dispense, stock by batch, purchases, suppliers - always.
 // Extra tabs follow the switches in Additional settings: counter sale, sales & returns, bills, stock check,
-// stock ledger, racks.
+// stock ledger, reports, racks.
 import { Tabs, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
@@ -10,6 +10,7 @@ import { CounterSaleTab } from './CounterSaleTab';
 import { DispenseTab } from './DispenseTab';
 import { LedgerTab } from './LedgerTab';
 import { PurchasesTab } from './PurchasesTab';
+import { ReportsTab } from './ReportsTab';
 import { SalesTab } from './SalesTab';
 import { SetupTab } from './SetupTab';
 import { StockCheckTab } from './StockCheckTab';
@@ -31,6 +32,7 @@ export default function PharmacyPage() {
     { key: 'purchases', label: t('pharmacy.tabs.purchases'), children: <PurchasesTab /> },
     ...(hasFeature('pharmacy_stock_check') ? [{ key: 'check', label: t('pharmacy.tabs.check'), children: <StockCheckTab /> }] : []),
     ...(hasFeature('pharmacy_stock_ledger') ? [{ key: 'ledger', label: t('pharmacy.tabs.ledger'), children: <LedgerTab /> }] : []),
+    ...(hasFeature('pharmacy_reports') ? [{ key: 'reports', label: t('pharmacy.tabs.reports'), children: <ReportsTab /> }] : []),
     // Racks & suppliers tab: whichever of the two is switched on (Additional settings)
     ...(hasFeature('pharmacy_racks') || hasFeature('pharmacy_suppliers') ? [{
       key: 'setup',

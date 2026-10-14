@@ -288,6 +288,15 @@ and medical history (*Pregnant* / *Breastfeeding*). The doctor always decides. T
 On the check-up -> **Rx** -> **Save as template**, choose the diagnosis. Next time, **Apply template**
 lists the matching ones first (★).
 
+## Pharmacy reports and held bills
+
+- Switch on: Settings -> Additional settings -> "Pharmacy reports" (Reports tab) and "Hold a counter bill".
+- *What to buy* suggests enough to reach **twice** the reorder level. To change it, edit `REORDER_TARGET` in
+  `backend/apps/pharmacy/reports.py` (ASK FIRST file, but this one number is safe). "Slow" means not sold for `SLOW_DAYS` (90).
+- Report and column names: `frontend/src/i18n/{en,gu,hi}.json`, section `pharmacyReports`.
+- The daily, margin and GST reports show money, so they need the "see bills" permission as well as pharmacy access.
+- Held bills live only in the browser of that computer; clearing browser data removes them. Stock is not reserved.
+
 ## Pharmacy: "expiring soon" and low stock
 
 - "Expiring soon" = within 90 days. To change it, edit `EXPIRY_WARNING_DAYS` at the top of

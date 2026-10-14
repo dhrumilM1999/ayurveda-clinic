@@ -5,10 +5,10 @@
 // Shows when "Counter sale" and "Pharmacy bills" are on (Additional settings).
 import { CheckCircleFilled, DeleteOutlined, EnvironmentOutlined, PlusOutlined } from '@ant-design/icons';
 import {
-  Alert, App, Button, Empty, Input, InputNumber, Modal, Result, Segmented, Select, Space, Table, Tag,
+  Alert, App, Button, Dropdown, Empty, Input, InputNumber, Modal, Result, Segmented, Select, Space, Table, Tag,
 } from 'antd';
 import dayjs from 'dayjs';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from '../../api/client';
 import type { DispenseLine, Medicine, PaymentMode, ScanResult, StockBatch } from '../../api/types';
@@ -18,7 +18,17 @@ import { UpiPayment } from './BillsTab';
 import { MedicinePicker, PrintButton, ScanInput, expiryText, lineFromScan, qty } from './common';
 
 type Choice = { batch: string; quantity: number; loose: boolean; units: number; discount: number };
+type Held = { id: string; at: string; customer: string; phone: string; lines: DispenseLine[]; choices: Record<string, Choice> };
 type Done = { invoice: string; number: string; total_amount: string; invoice_status: string };
+
+// Held bills stay in this browser only (nothing is saved on the server and stock is not reserved).
+const HELD_KEY = 'counter-held-bills';
+const readHeld = (): Held[] => {
+  try { return JSON.parse(localStorage.getItem(HELD_KEY) ?? '[]') as Held[]; } catch { return []; }
+};
+const writeHeld = (list: Held[]) => {
+  try { localStorage.setItem(HELD_KEY, JSON.stringify(list)); } catch { /* browser storage is off: holding just does not stick */ }
+};
 
 export function CounterSaleTab() {
   const { t } = useTranslation();
@@ -38,10 +48,24 @@ export function CounterSaleTab() {
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState<Done | null>(null);
   const [pickerKey, setPickerKey] = useState(0);
+  const holding = hasFeature('pharmacy_hold_bills');
+  const [held, setHeld] = useState<Held[]>([]);
+  useEffect(() => { if (holding) setHeld(readHeld()); }, [holding]);
+  const saveHeld = (list: Held[]) => { setHeld(list); writeHeld(list); };
 
   const reset = () => {
     setLines([]); setChoices({}); setCustomer(''); setPhone(''); setPayMode('cash'); setPayAmount(null); setPayRef('');
     setDone(null);
+  };
+  const hold = () => {
+    saveHeld([...held, { id: String(Date.now()), at: dayjs().format('HH:mm'), customer, phone, lines, choices }]);
+    reset();
+    message.success(t('counter.heldSaved'));
+  };
+  const resume = (h: Held) => {
+    setLines(h.lines); setChoices(h.choices); setCustomer(h.customer); setPhone(h.phone);
+    saveHeld(held.filter((x) => x.id !== h.id));
+    message.success(t('counter.resumed'));
   };
   const set = (id: string, patch: Partial<Choice>) => setChoices((c) => ({ ...c, [id]: { ...c[id]!, ...patch } }));
   const batchOf = (l: DispenseLine) => l.batches.find((b) => b.id === choices[l.id]?.batch);
@@ -158,6 +182,24 @@ export function CounterSaleTab() {
           </div>
         </Space>
         <Space wrap size={8}>
+          {holding && (
+            <Dropdown trigger={['click']} disabled={!held.length && !lines.length}
+              menu={{
+                items: held.length ? held.map((h) => ({
+                  key: h.id,
+                  label: (
+                    <Space>
+                      <span onClick={() => resume(h)}>
+                        {h.at} · {h.customer || t('counter.walkIn')} · {h.lines.length}
+                      </span>
+                      <a onClick={(e) => { e.stopPropagation(); saveHeld(held.filter((x) => x.id !== h.id)); }}>{t('counter.discard')}</a>
+                    </Space>
+                  ),
+                })) : [{ key: 'none', label: t('counter.heldNone'), disabled: true }],
+              }}>
+              <Button>{t('counter.held')} ({held.length})</Button>
+            </Dropdown>
+          )}
           <Input placeholder={t('counter.customerName')} value={customer} maxLength={200} style={{ width: 200 }}
             onChange={(e) => setCustomer(e.target.value)} />
           <Input placeholder={t('counter.customerPhone')} value={phone} maxLength={10} style={{ width: 150 }} inputMode="numeric"
@@ -266,6 +308,7 @@ export function CounterSaleTab() {
           </div>
           <Space>
             <span className="total-text">{t('pharmacy.total')}: <b className="num">{money(total)}</b></span>
+            {holding && <Button onClick={hold}>{t('counter.hold')}</Button>}
             <Button onClick={reset}>{t('counter.clear')}</Button>
             <Button type="primary" icon={<PlusOutlined />} loading={saving} disabled={!phoneOk} onClick={confirmSave}>
               {t('counter.makeBill', { count: lines.length })}
