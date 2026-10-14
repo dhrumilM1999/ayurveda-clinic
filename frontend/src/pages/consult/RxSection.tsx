@@ -5,10 +5,11 @@
 // until the doctor types their own.
 import { CloseOutlined, ExclamationCircleFilled, SaveOutlined, WarningFilled } from '@ant-design/icons';
 import { App, AutoComplete, Button, Empty, Form, Input, InputNumber, Modal, Select, Space, Spin, Tag, Tooltip } from 'antd';
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from '../../api/client';
+import { useLiveLookup } from '../../components/LiveSearch';
 import { useMasterLabel, useMasters } from '../../api/masters';
 import type { Diagnosis, Medicine, Page, Prescription, PrescriptionTemplate, RxLine, RxWarning } from '../../api/types';
 import { autoQuantity, quickDosage } from '../../utils/dosage';
@@ -73,12 +74,13 @@ export function RxSection({ rx, onChange, warnings, diagnoses, readOnly, daysBar
 }) {
   const { t } = useTranslation();
   const { message } = App.useApp();
-  const [options, setOptions] = useState<Medicine[]>([]);
-  const [searching, setSearching] = useState(false);
   const [search, setSearch] = useState('');
+  const { options, loading: searching, search: lookup, loadNow } = useLiveLookup<Medicine>(
+    async (text, signal) => (await api.get<Page<Medicine>>('/medicines/', { params: { for_rx: 1, q: text || undefined, page_size: 20 }, signal })).data.results,
+    { minChars: 1, allowEmpty: true },
+  );
   const [templates, setTemplates] = useState<PrescriptionTemplate[]>([]);
   const [saveOpen, setSaveOpen] = useState(false);
-  const timer = useRef<number>();
 
   const loadTemplates = () => {
     api.get<PrescriptionTemplate[]>('/prescription-templates/').then(({ data }) => setTemplates(data)).catch(() => setTemplates([]));
@@ -87,18 +89,8 @@ export function RxSection({ rx, onChange, warnings, diagnoses, readOnly, daysBar
 
   const doSearch = (text: string) => {
     setSearch(text);
-    window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(async () => {
-      setSearching(true);
-      try {
-        const { data } = await api.get<Page<Medicine>>('/medicines/', { params: { for_rx: 1, q: text.trim() || undefined, page_size: 20 } });
-        setOptions(data.results);
-      } finally {
-        setSearching(false);
-      }
-    }, 250);
+    lookup(text);
   };
-  useEffect(() => () => window.clearTimeout(timer.current), []);
 
   const items = rx.items;
   const setItems = (next: RxLine[]) => onChange({ items: next });
@@ -201,7 +193,7 @@ export function RxSection({ rx, onChange, warnings, diagnoses, readOnly, daysBar
           filterOption={false}
           searchValue={search}
           onSearch={doSearch}
-          onFocus={() => !options.length && doSearch('')}
+          onFocus={() => !options.length && loadNow('')}
           onChange={addMedicine}
           options={searchOptions}
           notFoundContent={searching ? <Spin size="small" /> : t('rx.noMedicine')}

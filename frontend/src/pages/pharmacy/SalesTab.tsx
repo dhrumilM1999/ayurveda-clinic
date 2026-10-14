@@ -12,6 +12,7 @@ import { PatientCell } from '../appointments/shared';
 import { money } from '../medicines/shared';
 import { InvoiceDrawer } from './BillsTab';
 import { InvoiceStatusTag, PrintButton, qty } from './common';
+import { LiveSearch, useLatestRequest } from '../../components/LiveSearch';
 
 export function SalesTab() {
   const { t } = useTranslation();
@@ -19,32 +20,35 @@ export function SalesTab() {
   const billing = hasFeature('pharmacy_billing');
   const returns = hasFeature('pharmacy_sales_returns');
   const [day, setDay] = useState<Dayjs | null>(dayjs());
-  const [search, setSearch] = useState('');
   const [query, setQuery] = useState('');
   const [rows, setRows] = useState<SaleRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [returning, setReturning] = useState<string | null>(null);
   const [bill, setBill] = useState<string | null>(null);
 
+  const next = useLatestRequest();
   const load = useCallback(async () => {
+    const signal = next();
     setLoading(true);
     try {
       const { data } = await api.get<Page<SaleRow>>('/sales/', {
+        signal,
         params: { page_size: 200, q: query || undefined, date: query || !day ? undefined : day.format('YYYY-MM-DD') },
       });
-      setRows(data.results);
+      if (!signal.aborted) setRows(data.results);
+    } catch (err) {
+      if (!signal.aborted) throw err;
     } finally {
-      setLoading(false);
+      if (!signal.aborted) setLoading(false);
     }
-  }, [day, query]);
+  }, [day, query, next]);
   useEffect(() => { load(); }, [load]);
 
   return (
     <>
       <div className="filter-bar">
         <DatePicker value={day} onChange={setDay} format="ddd, DD-MM-YYYY" style={{ width: 170 }} placeholder={t('billing.anyDate')} />
-        <Input.Search allowClear placeholder={t('billing.searchPlaceholder')} value={search} style={{ width: 260 }}
-          onChange={(e) => { setSearch(e.target.value); if (!e.target.value) setQuery(''); }} onSearch={(v) => setQuery(v.trim())} />
+        <LiveSearch placeholder={t('billing.searchPlaceholder')} width={260} onSearch={setQuery} />
         <span className="cell-sub">{t('pharmacy.salesHelp')}</span>
       </div>
       <Table<SaleRow>

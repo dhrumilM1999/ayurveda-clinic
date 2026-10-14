@@ -1,6 +1,6 @@
 // Appointments of one day in the current branch: book, walk-in, check in, reschedule, cancel.
 import { LeftOutlined, PlusOutlined, ReloadOutlined, RightOutlined, UserAddOutlined } from '@ant-design/icons';
-import { Button, DatePicker, Input, Segmented, Select, Space, Table, Typography } from 'antd';
+import { Button, DatePicker, Segmented, Select, Space, Table, Typography } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +13,7 @@ import { OpdBillButton } from '../billing/OpdBillModal';
 import { AppointmentActions } from './AppointmentActions';
 import { BookAppointmentModal } from './BookAppointmentModal';
 import { PatientCell, StatusTag, fmtTime } from './shared';
+import { LiveSearch } from '../../components/LiveSearch';
 
 type Filter = 'all' | 'booked' | 'waiting' | 'done' | 'cancelled';
 
@@ -30,7 +31,6 @@ export default function AppointmentsPage() {
   const [day, setDay] = useState<Dayjs>(dayjs());
   const [doctor, setDoctor] = useState<string>();
   const [filter, setFilter] = useState<Filter>('all');
-  const [search, setSearch] = useState('');
   const [query, setQuery] = useState('');
   const [doctors, setDoctors] = useState<AppointmentDoctor[]>([]);
   const [booking, setBooking] = useState<'booked' | 'walk_in' | null>(null);
@@ -95,14 +95,7 @@ export default function AppointmentsPage() {
           style={{ minWidth: 200 }}
           options={doctors.map((d) => ({ value: d.id, label: d.full_name }))}
         />
-        <Input.Search
-          allowClear
-          placeholder={t('appointments.searchPlaceholder')}
-          value={search}
-          onChange={(e) => { setSearch(e.target.value); if (!e.target.value) setQuery(''); }}
-          onSearch={(v) => setQuery(v.trim())}
-          style={{ width: 240 }}
-        />
+        <LiveSearch placeholder={t('appointments.searchPlaceholder')} onSearch={setQuery} loading={loading} width={240} />
         <Button icon={<ReloadOutlined />} onClick={reload} aria-label={t('appointments.refresh')} />
       </div>
 

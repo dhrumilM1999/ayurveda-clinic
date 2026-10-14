@@ -1,6 +1,6 @@
 // Patient list with search (by name, mobile number or patient ID). Phone numbers are masked.
-import { AlertOutlined, CrownOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
-import { Button, Input, Segmented, Space, Table, Tag, Tooltip, Typography } from 'antd';
+import { AlertOutlined, CrownOutlined, PlusOutlined } from '@ant-design/icons';
+import { Button, Segmented, Space, Table, Tag, Tooltip, Typography } from 'antd';
 import dayjs from 'dayjs';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -10,6 +10,7 @@ import type { PatientListItem } from '../../api/types';
 import { useList } from '../../api/useList';
 import { useAuth } from '../../auth/AuthContext';
 import { PatientPhoto } from '../../components/PatientPhoto';
+import { LiveSearch } from '../../components/LiveSearch';
 
 export function genderAge(t: (key: string) => string, gender: string, age: number | null) {
   const g = t(`patients.genderShort.${gender}`);
@@ -43,13 +44,11 @@ export default function PatientsPage() {
       </div>
 
       <div className="filter-bar">
-        <Input.Search
-          allowClear
-          prefix={<SearchOutlined style={{ opacity: 0.45 }} />}
+        <LiveSearch
           placeholder={t('patients.searchPlaceholder')}
-          onSearch={(value) => setSearch(value.trim())}
+          onSearch={setSearch}
+          loading={loading}
           style={{ maxWidth: 520, flex: 1 }}
-          enterButton={t('common.search')}
         />
         <Segmented
           value={gender}

@@ -1,6 +1,6 @@
 // The medicine list: classical medicines and patent & proprietary brands, with this branch's price.
 import { EditOutlined, HistoryOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
-import { App, Button, Input, Segmented, Space, Switch, Table, Tag, Tooltip, Typography } from 'antd';
+import { App, Button, Segmented, Space, Switch, Table, Tag, Tooltip, Typography } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from '../../api/client';
@@ -13,6 +13,7 @@ import { ImportModal } from './ImportModal';
 import { MedicineFormModal } from './MedicineFormModal';
 import { VersionsDrawer } from './VersionsDrawer';
 import { FLAGS, MedicineFlags, money, useMedicineName } from './shared';
+import { LiveSearch } from '../../components/LiveSearch';
 
 export default function MedicinesPage() {
   const { t } = useTranslation();
@@ -22,7 +23,6 @@ export default function MedicinesPage() {
   const masterLabel = useMasterLabel();
   const medicineName = useMedicineName();
   const manage = can('medicines.manage');
-  const [search, setSearch] = useState('');
   const [query, setQuery] = useState('');
   const [kind, setKind] = useState<'all' | MedicineKind>('all');
   const [form, setForm] = useState<string>();
@@ -59,14 +59,7 @@ export default function MedicinesPage() {
       </div>
 
       <div className="filter-bar">
-        <Input.Search
-          allowClear
-          placeholder={t('medicines.searchPlaceholder')}
-          value={search}
-          onChange={(e) => { setSearch(e.target.value); if (!e.target.value) setQuery(''); }}
-          onSearch={(v) => setQuery(v.trim())}
-          style={{ width: 280 }}
-        />
+        <LiveSearch placeholder={t('medicines.searchPlaceholder')} onSearch={setQuery} loading={loading} width={280} />
         <Segmented
           value={kind}
           onChange={(v) => setKind(v as typeof kind)}

@@ -1,6 +1,7 @@
 // Loads a list from the API (with page numbers) for tables.
 import { App } from 'antd';
-import { useCallback, useEffect, useState } from 'react';
+import { isCancel } from 'axios';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from './client';
 import type { Page } from './types';
@@ -15,12 +16,20 @@ export function useList<T>(url: string, params: Record<string, unknown> = {}, in
   const [loading, setLoading] = useState(false);
   const paramsKey = JSON.stringify(params);
 
+  // Only the newest request may update the table (older, slower answers are cancelled and ignored)
+  const abort = useRef<AbortController>();
+
   const reload = useCallback(async () => {
+    abort.current?.abort();
+    const controller = new AbortController();
+    abort.current = controller;
     setLoading(true);
     try {
       const { data } = await api.get<Page<T> | T[]>(url, {
         params: { ...JSON.parse(paramsKey), page, page_size: pageSize },
+        signal: controller.signal,
       });
+      if (controller.signal.aborted) return;
       if (Array.isArray(data)) {
         setRows(data);
         setTotal(data.length);
@@ -29,15 +38,17 @@ export function useList<T>(url: string, params: Record<string, unknown> = {}, in
         setTotal(data.count);
       }
     } catch (err) {
+      if (controller.signal.aborted || isCancel(err)) return;
       message.error(errorMessage(err, t('common.loadFailed')));
     } finally {
-      setLoading(false);
+      if (abort.current === controller) setLoading(false);
     }
   }, [url, paramsKey, page, pageSize, message, t]);
 
   useEffect(() => {
     reload();
   }, [reload]);
+  useEffect(() => () => abort.current?.abort(), []);
 
   // Go back to page 1 when filters change
   useEffect(() => {

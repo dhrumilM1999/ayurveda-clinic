@@ -7,6 +7,7 @@ import { api, errorMessage } from '../api/client';
 import type { Branch } from '../api/types';
 import { useList } from '../api/useList';
 import { useAuth } from '../auth/AuthContext';
+import { LiveSearch } from '../components/LiveSearch';
 
 export default function BranchesPage() {
   const { t } = useTranslation();
@@ -45,7 +46,7 @@ export default function BranchesPage() {
       <div className="page-toolbar">
         <Typography.Title level={3} style={{ margin: 0 }}>{t('branches.title')}</Typography.Title>
         <div style={{ display: 'flex', gap: 8 }}>
-          <Input.Search placeholder={t('common.search')} allowClear onSearch={setSearch} style={{ width: 220 }} />
+          <LiveSearch placeholder={t('common.search')} onSearch={setSearch} loading={loading} width={220} />
           {canManage && <Button type="primary" icon={<PlusOutlined />} onClick={() => open()}>{t('branches.add')}</Button>}
         </div>
       </div>

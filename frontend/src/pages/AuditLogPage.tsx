@@ -1,10 +1,11 @@
 // Audit log: who did what and when. Read-only.
-import { DatePicker, Input, Select, Space, Table, Tag, Typography } from 'antd';
+import { DatePicker, Select, Space, Table, Tag, Typography } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { AuditLogEntry } from '../api/types';
 import { useList } from '../api/useList';
+import { LiveSearch } from '../components/LiveSearch';
 
 const ACTIONS = [
   'view', 'create', 'update', 'delete', 'print', 'export', 'share',
@@ -36,7 +37,7 @@ export default function AuditLogPage() {
           <Select allowClear placeholder={t('audit.action')} style={{ width: 180 }} value={action} onChange={setAction}
             options={ACTIONS.map((a) => ({ value: a, label: t(`auditActions.${a}`) }))} />
           <DatePicker.RangePicker value={range} onChange={(v) => setRange(v)} format="DD-MM-YYYY" />
-          <Input.Search placeholder={t('common.search')} allowClear onSearch={setSearch} style={{ width: 200 }} />
+          <LiveSearch placeholder={t('common.search')} onSearch={setSearch} loading={loading} width={200} />
         </Space>
       </div>
       <Typography.Paragraph type="secondary">{t('audit.help')}</Typography.Paragraph>

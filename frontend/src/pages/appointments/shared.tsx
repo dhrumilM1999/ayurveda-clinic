@@ -2,9 +2,10 @@
 import { CheckCircleFilled, MessageOutlined, WhatsAppOutlined } from '@ant-design/icons';
 import { Alert, Button, Empty, Select, Space, Spin, Tag, Typography } from 'antd';
 import dayjs from 'dayjs';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api/client';
+import { useLiveLookup } from '../../components/LiveSearch';
 import type { AppointmentPatient, AppointmentStatus, Page, PatientListItem, PatientNotification, Slot } from '../../api/types';
 
 /** "14:30:00" -> "2:30 PM" */
@@ -78,43 +79,30 @@ export function PatientPicker({ value, onChange, initial }: {
   initial?: { id: string; label: string };
 }) {
   const { t } = useTranslation();
-  const [options, setOptions] = useState<{ value: string; label: ReactNode }[]>(
-    initial ? [{ value: initial.id, label: initial.label }] : [],
+  const initialOptions: { value: string; label: ReactNode }[] = initial ? [{ value: initial.id, label: initial.label }] : [];
+  const [typed, setTyped] = useState(false);
+  const toOption = (p: PatientListItem) => ({
+    value: p.id,
+    label: (
+      <span>
+        <b>{p.full_name}</b> <span className="cell-sub">· {p.uhid} · {p.mobile_masked}</span>
+      </span>
+    ),
+  });
+  const { options: found, loading: searching, search } = useLiveLookup<PatientListItem>(
+    async (text, signal) => (await api.get<Page<PatientListItem>>('/patients/', { params: { q: text, page_size: 15 }, signal })).data.results,
+    { minChars: 2 },
   );
-  const [searching, setSearching] = useState(false);
-  const timer = useRef<number>();
-
-  useEffect(() => () => window.clearTimeout(timer.current), []);
-
-  const search = (text: string) => {
-    window.clearTimeout(timer.current);
-    if (text.trim().length < 2) return;
-    timer.current = window.setTimeout(async () => {
-      setSearching(true);
-      try {
-        const { data } = await api.get<Page<PatientListItem>>('/patients/', { params: { q: text.trim(), page_size: 15 } });
-        setOptions(data.results.map((p) => ({
-          value: p.id,
-          label: (
-            <span>
-              <b>{p.full_name}</b> <span className="cell-sub">· {p.uhid} · {p.mobile_masked}</span>
-            </span>
-          ),
-        })));
-      } finally {
-        setSearching(false);
-      }
-    }, 300);
-  };
+  const shown = typed ? found.map(toOption) : initialOptions;
 
   return (
     <Select
       showSearch
       value={value}
       onChange={onChange}
-      onSearch={search}
+      onSearch={(text) => { if (text.trim().length >= 2) setTyped(true); search(text); }}
       filterOption={false}
-      options={options}
+      options={shown}
       placeholder={t('appointments.searchPatient')}
       notFoundContent={searching ? <Spin size="small" /> : t('appointments.typeToSearch')}
       disabled={!!initial}

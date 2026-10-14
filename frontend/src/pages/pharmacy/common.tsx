@@ -2,8 +2,9 @@
 import { BarcodeOutlined } from '@ant-design/icons';
 import { Input, Select, Spin, Tag } from 'antd';
 import dayjs from 'dayjs';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLiveLookup } from '../../components/LiveSearch';
 import { api } from '../../api/client';
 import type { DispenseLine, DispenseStatus, InvoiceStatus, Medicine, Page, ScanResult } from '../../api/types';
 
@@ -81,25 +82,13 @@ export function MedicinePicker({ value, label, onPick, size = 'small', placehold
   placeholder?: string;
 }) {
   const { t } = useTranslation();
-  const [options, setOptions] = useState<Medicine[]>([]);
-  const [busy, setBusy] = useState(false);
-  const timer = useRef<number>();
-  useEffect(() => () => window.clearTimeout(timer.current), []);
-  const search = (text: string) => {
-    window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(async () => {
-      setBusy(true);
-      try {
-        const { data } = await api.get<Page<Medicine>>('/medicines/', { params: { q: text || undefined, page_size: 20 } });
-        setOptions(data.results);
-      } finally {
-        setBusy(false);
-      }
-    }, 250);
-  };
+  const { options, loading: busy, search, loadNow } = useLiveLookup<Medicine>(
+    async (text, signal) => (await api.get<Page<Medicine>>('/medicines/', { params: { q: text || undefined, page_size: 20 }, signal })).data.results,
+    { minChars: 1, allowEmpty: true },
+  );
   return (
     <Select size={size} showSearch filterOption={false} style={{ width: '100%' }} value={value}
-      placeholder={placeholder ?? t('rx.searchMedicine')} onSearch={search} onFocus={() => !options.length && search('')}
+      placeholder={placeholder ?? t('rx.searchMedicine')} onSearch={search} onFocus={() => !options.length && loadNow('')}
       notFoundContent={busy ? <Spin size="small" /> : t('rx.noMedicine')}
       options={[
         ...(value && !options.some((m) => m.id === value) ? [{ value, label }] : []),

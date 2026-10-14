@@ -12,6 +12,7 @@ import type { CreditNoteRecord, DaySummary, InvoiceRecord, InvoiceStatus, Page, 
 import { useAuth } from '../../auth/AuthContext';
 import { money } from '../medicines/shared';
 import { InvoiceStatusTag, PrintButton, expiryText, qty } from './common';
+import { LiveSearch, useLatestRequest } from '../../components/LiveSearch';
 
 /** QR code to pay what is still due by UPI (needs the branch's UPI ID in Settings). */
 export function UpiPayment({ invoiceId }: { invoiceId: string }) {
@@ -71,25 +72,29 @@ export function BillsTab({ series: fixed = 'PH', seriesFilter = false, version: 
   const [series, setSeries] = useState<Series>(fixed);
   const [day, setDay] = useState<Dayjs>(dayjs());
   const [status, setStatus] = useState<'all' | InvoiceStatus>('all');
-  const [search, setSearch] = useState('');
   const [query, setQuery] = useState('');
   const [rows, setRows] = useState<InvoiceRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState<string | null>(null);
   const [version, setVersion] = useState(0);
 
+  const next = useLatestRequest();
   const load = useCallback(async () => {
+    const signal = next();
     setLoading(true);
     try {
       const { data } = await api.get<Page<InvoiceRecord>>('/invoices/', {
+        signal,
         params: { series: series === 'all' ? undefined : series, page_size: 200, ...(query ? { q: query } : { date: day.format('YYYY-MM-DD') }),
           ...(status === 'all' ? {} : { status }) },
       });
-      setRows(data.results);
+      if (!signal.aborted) setRows(data.results);
+    } catch (err) {
+      if (!signal.aborted) throw err;
     } finally {
-      setLoading(false);
+      if (!signal.aborted) setLoading(false);
     }
-  }, [day, status, query, series]);
+  }, [day, status, query, series, next]);
   useEffect(() => { load(); }, [load, version, outside]);
 
   return (
@@ -112,8 +117,7 @@ export function BillsTab({ series: fixed = 'PH', seriesFilter = false, version: 
           options={(['all', 'unpaid', 'partly_paid', 'paid', 'cancelled'] as const).map((k) => ({
             value: k, label: k === 'all' ? t('appointments.filters.all') : t(`billing.status.${k}`),
           }))} />
-        <Input.Search allowClear placeholder={t('billing.searchPlaceholder')} value={search} style={{ width: 240 }}
-          onChange={(e) => { setSearch(e.target.value); if (!e.target.value) setQuery(''); }} onSearch={(v) => setQuery(v.trim())} />
+        <LiveSearch placeholder={t('billing.searchPlaceholder')} width={240} onSearch={setQuery} />
         <Button icon={<ReloadOutlined />} onClick={() => setVersion((v) => v + 1)} aria-label={t('appointments.refresh')} />
       </div>
       {!query && <SummaryCards key={`${day.format()}-${version}-${outside}`} day={day} series={series === 'all' ? undefined : series} />}

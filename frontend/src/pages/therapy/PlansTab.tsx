@@ -12,6 +12,7 @@ import { useAuth } from '../../auth/AuthContext';
 import { DocumentModal } from '../../components/BillPreview';
 import { PatientCell, PatientPicker } from '../appointments/shared';
 import { PlanStatusTag, STAGES, StageTag, useTherapyName } from './common';
+import { LiveSearch } from '../../components/LiveSearch';
 
 const STATUS_FILTERS = ['planned', 'active', 'completed', 'cancelled'] as const;
 
@@ -28,7 +29,7 @@ export default function PlansTab({ therapies }: { therapies: TherapyType[] }) {
   return (
     <>
       <Space wrap style={{ marginBottom: 12 }}>
-        <Input.Search allowClear placeholder={t('common.search')} style={{ width: 240 }} onSearch={setSearch} />
+        <LiveSearch placeholder={t('common.search')} width={240} onSearch={setSearch} loading={loading} />
         <Select allowClear style={{ width: 170 }} placeholder={t('common.status')} value={status} onChange={setStatus}
           options={STATUS_FILTERS.map((s) => ({ value: s, label: t(`therapy.planStatus.${s}`) }))} />
         {canManage && <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreating(true)}>{t('therapy.plan.new')}</Button>}

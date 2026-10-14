@@ -15,6 +15,7 @@ import { LedgerDrawer } from './LedgerTab';
 import { PurchaseModal } from './PurchaseModal';
 import { ScanInput, expiryText, qty } from './common';
 import { StockLabelsButton } from './StockLabels';
+import { LiveSearch, useLatestRequest } from '../../components/LiveSearch';
 
 type Show = 'all' | 'low' | 'out' | 'expiring' | 'expired';
 
@@ -52,7 +53,6 @@ export function StockTab() {
   const [show, setShow] = useState<Show>((params.get('show') as Show) || 'all');
   const [rack, setRack] = useState<string>();
   const [racks, setRacks] = useState<Rack[]>([]);
-  const [search, setSearch] = useState('');
   const [query, setQuery] = useState('');
   const [rows, setRows] = useState<StockRow[]>([]);
   const [loading, setLoading] = useState(false);
@@ -70,17 +70,19 @@ export function StockTab() {
   const shown: Show = alerts ? show : 'all';
   const rackFilter = useRacks ? rack : undefined;
 
+  const next = useLatestRequest();
   const load = useCallback(async () => {
+    const signal = next();
     setLoading(true);
     try {
-      const { data } = await api.get<StockRow[]>('/stock/', { params: { show: shown, q: query || undefined, rack: rackFilter } });
-      setRows(data);
+      const { data } = await api.get<StockRow[]>('/stock/', { params: { show: shown, q: query || undefined, rack: rackFilter }, signal });
+      if (!signal.aborted) setRows(data);
     } catch (err) {
-      message.error(errorMessage(err, t('common.loadFailed')));
+      if (!signal.aborted) message.error(errorMessage(err, t('common.loadFailed')));
     } finally {
-      setLoading(false);
+      if (!signal.aborted) setLoading(false);
     }
-  }, [shown, query, rackFilter, message, t]);
+  }, [shown, query, rackFilter, message, t, next]);
   useEffect(() => { load(); }, [load, version]);
 
   const changed = () => setVersion((v) => v + 1);
@@ -100,7 +102,6 @@ export function StockTab() {
       const { data } = await api.get<ScanResult>('/stock/scan/', { params: { code } });
       setShow('all');
       setRack(undefined);
-      setSearch(data.name);
       setQuery(data.name);
       setExpanded([data.medicine]);
       if (data.location) message.info(t('pharmacy.foundAt', { name: data.name, location: data.location }));
@@ -114,8 +115,7 @@ export function StockTab() {
       {alerts && <AlertTiles key={version} active={show} onPick={setShow} />}
       <div className="filter-bar">
         {barcode && <ScanInput onScan={onScan} />}
-        <Input.Search allowClear placeholder={t('pharmacy.stockSearch')} value={search} style={{ width: 240 }}
-          onChange={(e) => { setSearch(e.target.value); if (!e.target.value) setQuery(''); }} onSearch={(v) => setQuery(v.trim())} />
+        <LiveSearch value={query} placeholder={t('pharmacy.stockSearch')} width={240} onSearch={setQuery} />
         {useRacks && (
           <Select allowClear placeholder={t('pharmacy.allRacks')} value={rack} onChange={setRack} style={{ width: 150 }}
             options={racks.map((r) => ({ value: r.id, label: `${r.code}${r.name ? ` · ${r.name}` : ''}` }))} />
