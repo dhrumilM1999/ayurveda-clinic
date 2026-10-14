@@ -7,6 +7,23 @@ If it doesn't, press **F5**. If something breaks, undo your change (Ctrl+Z, save
 
 ---
 
+## How search works / how to add a search box
+
+All search boxes show results while you type. They all use one shared file: `frontend/src/components/LiveSearch.tsx`
+(**SAFE TO EDIT**: `SEARCH_DELAY_MS` = how long to wait after typing, 300 = 0.3 second).
+
+- **List screens (tables):** use `<LiveSearch placeholder={t('your.text')} onSearch={setQuery} />`, and send `query` to the
+  list (for example `useList('/things/', { q: query || undefined })`). The page goes back to page 1 by itself, and an
+  older slow answer can never replace a newer one.
+- **Drop-down pickers (patient, medicine):** use `useLiveLookup(fetcher, { minChars: 2 })` from the same file with a
+  Select that has `showSearch filterOption={false}`. Patient lookups wait for 2 letters so the list is not huge.
+- **Your own loading code:** call `const next = useLatestRequest()`, then `const signal = next()` at the start of each load
+  and pass `{ signal }` to `api.get`.
+- **Server side:** patients are searched in `backend/apps/patients/views.py` (`_search_filter`: every word must match a
+  name part, patient ID or mobile digits); medicines in `backend/apps/medicines/services.py` (`search_filter`, and
+  `search_rank` puts names starting with the typed text first). To search one more field, add one more `Q(field__icontains=word)`.
+- Searching for a patient is written to the audit log at most once every 5 seconds per user.
+
 ## Change the clinic name, colours, fonts or logo
 
 Open `frontend/src/config/clinic.ts`:
