@@ -36,7 +36,7 @@ def test_detailed_prescription_has_the_full_checkup(doctor, pharmacist, branch_a
     from django.template.loader import render_to_string
 
     from apps.audit.models import AuditLog
-    from apps.documents.services import detailed_context, prescription_context
+    from apps.documents.services import detailed_context, page_context, prescription_context
 
     visit.history_notes = "Pain since monsoon, worse in the morning"
     visit.complaints = [{"label": "Knee pain", "duration": 2, "duration_unit": "weeks", "severity": "moderate"}]
@@ -52,8 +52,7 @@ def test_detailed_prescription_has_the_full_checkup(doctor, pharmacist, branch_a
     assert pharmacy.get(url, {"detail": "1", "preview": "1"}).status_code == 403
     assert pharmacy.get(url, {"preview": "1"}).status_code == 200
     html = render_to_string("documents/prescription.html", {
-        **prescription_context(rx, "en"), **detailed_context(rx, "en"), "size": "a4", "page_width": "210mm",
-        "page_height": "297mm", "page_margin": "12mm"})
+        **prescription_context(rx, "en"), **detailed_context(rx, "en"), **page_context("a4")})
     for text in ("Check-up summary and prescription", "Pain since monsoon", "Knee pain", "for 2 weeks",
                  "Sandhivata", "SM-1", "Triphala Churna"):
         assert text in html
@@ -63,7 +62,7 @@ def test_detailed_prescription_has_the_full_checkup(doctor, pharmacist, branch_a
 def test_pre_printed_pad_leaves_space_and_skips_letterhead(org_admin, branch_a, rx):
     from django.template.loader import render_to_string
 
-    from apps.documents.services import pad_for, prescription_context
+    from apps.documents.services import pad_for, page_context, prescription_context
 
     client = client_for(org_admin, branch_a)
     res = client.patch(f"/api/v1/branches/{branch_a.id}/", {"print_on_pad": True, "pad_top_mm": 50, "pad_bottom_mm": 25},
@@ -73,8 +72,7 @@ def test_pre_printed_pad_leaves_space_and_skips_letterhead(org_admin, branch_a, 
     branch_a.refresh_from_db()
     assert pad_for(branch_a, "a5") == {"top": "50mm", "bottom": "25mm"}
     assert pad_for(branch_a, "a6") is None  # follow-up cards are never on the pad
-    context = {**prescription_context(rx, "en"), "size": "a5", "page_width": "148mm", "page_height": "210mm",
-               "page_margin": "8mm"}
+    context = {**prescription_context(rx, "en"), **page_context("a5")}
     on_pad = render_to_string("documents/prescription.html", {**context, "pad": pad_for(branch_a, "a5")})
     normal = render_to_string("documents/prescription.html", context)
     assert "margin: 50mm 8mm 25mm" in on_pad and 'class="head"' not in on_pad
@@ -179,7 +177,7 @@ def test_whatsapp_share_needs_consent(doctor, branch_a, rx):
 def test_ayurveda_case_sheet_design_is_one_a4_page(org_admin, doctor, branch_a, visit, rx):
     from django.template.loader import render_to_string
 
-    from apps.documents.services import case_sheet_context, prescription_context
+    from apps.documents.services import case_sheet_context, page_context, prescription_context
 
     branch_a.prescription_design = "ayurveda_pad"
     branch_a.print_subtitle = "Ayurveda & Panchakarma Hospital"
@@ -191,7 +189,7 @@ def test_ayurveda_case_sheet_design_is_one_a4_page(org_admin, doctor, branch_a, 
     res = client_for(doctor, branch_a).get(f"/api/v1/documents/prescription/{rx.id}/", {"preview": "1", "size": "a5"})
     assert res.status_code == 200
     branch_a.refresh_from_db()
-    context = {**prescription_context(rx, "en"), **case_sheet_context(rx, "en"), "size": "a4"}
+    context = {**prescription_context(rx, "en"), **case_sheet_context(rx, "en"), **page_context("a4")}
     html = render_to_string("documents/prescription_ayurveda.html", context)
     for text in ("Ayurveda &amp; Panchakarma Hospital", "Sunday closed", "Panchakarma", "Agni", "Srotas", "Symptoms",
                  "Cough", "3 months", "Triphala Churna"):
@@ -213,7 +211,7 @@ def test_ayurveda_case_sheet_fits_seven_medicines_on_one_page(doctor, branch_a, 
     from PIL import Image
     from weasyprint import HTML
 
-    from apps.documents.services import case_sheet_context, prescription_context
+    from apps.documents.services import case_sheet_context, page_context, prescription_context
 
     # Everything the branch can print at the top and bottom, so the space left for medicines is the smallest
     branch_a.print_subtitle, branch_a.print_closed_note = "Ayurveda & Panchakarma Hospital", "Sunday closed"
@@ -227,7 +225,7 @@ def test_ayurveda_case_sheet_fits_seven_medicines_on_one_page(doctor, branch_a, 
     lines = [{"medicine": None, "medicine_name": f"Mahamanjishthadi Kwath Ashwagandha Ghan Vati No. {n}", "dose": "1", "frequency": "1-0-1",
               "duration": 15, "instructions": "Not on an empty stomach, with warm water after food"} for n in range(1, 8)]
     rx = save_prescription(visit, lines, "Take medicines regularly.\nWalk 15 minutes after meals.", doctor)
-    context = {**prescription_context(rx, "gu"), **case_sheet_context(rx, "gu"), "size": "a4"}
+    context = {**prescription_context(rx, "gu"), **case_sheet_context(rx, "gu"), **page_context("a4")}
     # A square logo takes the most height at the top (up to 26 mm)
     square_logo = BytesIO()
     Image.new("RGB", (300, 300), "orange").save(square_logo, "PNG")

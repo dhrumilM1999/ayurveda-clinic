@@ -2,9 +2,9 @@
 {% comment %}SAFE TO EDIT: the printed therapy plan given to the patient: therapies, booked sessions and what to do before and after.
 The fixed words (headings) are in backend/apps/documents/words.py. The "what to do" lines come from each therapy (Therapies screen).{% endcomment %}
 {% block style %}
-  h3 { margin: 4mm 0 1.5mm; font-size: 1.05em; color: #1f5c46; }
+  h3 { margin: 4mm 0 1.5mm; font-size: 1.05em; color: {{ ps.accent_color|default:"#1f5c46" }}; }
   .stage { font-size: 0.85em; color: #5c5c5c; }
-  .note { margin-top: 4mm; padding: 2mm 3mm; background: #f4f7f5; border-left: 0.8mm solid #1f5c46; font-size: 0.9em; }
+  .note { margin-top: 4mm; padding: 2mm 3mm; background: #f4f7f5; border-left: 0.8mm solid {{ ps.accent_color|default:"#1f5c46" }}; font-size: 0.9em; }
   ul.instr { margin: 1mm 0 0; padding-left: 5mm; }
 {% endblock %}
 {% block content %}

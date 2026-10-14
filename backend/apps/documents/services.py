@@ -13,6 +13,7 @@ from django.utils import timezone
 from apps.common.services import translated_master
 
 from .models import IssuedDocument
+from .print_settings import page_settings
 from .words import PRAKRITI_GUIDANCE, words_for
 
 SIZES = {  # width, height, margin
@@ -27,8 +28,10 @@ DURATION_WORDS = {
 }
 
 
-def language_of(patient, asked: str | None = None) -> str:
-    lang = asked or getattr(patient, "preferred_language", "en")
+def language_of(patient, asked: str | None = None, ps: dict | None = None) -> str:
+    """The language of a print-out: the one asked for, else the one fixed in PDF settings, else the patient's."""
+    fixed = ps["language"] if ps and ps.get("language") != "patient" else None
+    lang = asked or fixed or getattr(patient, "preferred_language", "en")
     return lang if lang in ("en", "gu", "hi") else "en"
 
 
@@ -101,14 +104,21 @@ def letterhead(branch, doctor) -> dict:
     }
 
 
-def render(template: str, size: str, context: dict) -> bytes:
+def page_context(size: str, ps: dict | None = None, doc_type: str = "prescription") -> dict:
+    """What every template needs about the page: paper, margin and the PDF settings (ps)."""
+    ps = ps or page_settings(None, doc_type, size)
+    width, height, _ = SIZES.get(size, SIZES["a4"])
+    return {"size": size, "page_width": width, "page_height": height, "page_margin": ps["margin"], "ps": ps}
+
+
+def render_html(template: str, size: str, context: dict, ps: dict | None = None) -> str:
+    return render_to_string(f"documents/{template}", {**context, **page_context(size, ps)})
+
+
+def render(template: str, size: str, context: dict, ps: dict | None = None) -> bytes:
     from weasyprint import HTML
 
-    width, height, margin = SIZES.get(size, SIZES["a4"])
-    html = render_to_string(f"documents/{template}", {
-        **context, "size": size, "page_width": width, "page_height": height, "page_margin": margin,
-    })
-    return HTML(string=html).write_pdf()
+    return HTML(string=render_html(template, size, context, ps)).write_pdf()
 
 
 def _patient(patient, w) -> dict:

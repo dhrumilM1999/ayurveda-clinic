@@ -137,11 +137,15 @@ def build_labels(*, prescription, dispense=None, item_ids=None):
     }
 
 
-def render_labels(data, label_format: str) -> bytes:
+def render_labels(data, label_format: str, ps=None) -> bytes:
+    """ps: the PDF settings (Settings -> PDF settings): the accent colour of the label."""
     from weasyprint import HTML
 
+    from apps.documents.print_settings import page_settings
+
     width, height = FORMATS[label_format]
-    html = render_to_string("documents/medicine_label.html", {**data, "format": label_format, "width": width, "height": height})
+    ps = ps or page_settings(data["branch"], "medicine_label")
+    html = render_to_string("documents/medicine_label.html", {**data, "format": label_format, "width": width, "height": height, "ps": ps})
     return HTML(string=html).write_pdf()
 
 

@@ -22,7 +22,7 @@ Keep everything inside {{ }} and {% %}.
   .code { text-align: center; }
   .code img { display: block; margin: 0 auto; max-width: 100%; }
   .code .digits { font-family: "Noto Sans Mono", monospace; font-size: 0.95em; letter-spacing: 0.3mm; }
-  .clinic { font-size: 0.85em; color: #333; }
+  .clinic { font-size: 0.85em; color: {% if ps.accent_color and ps.accent_color != "#1f5c46" %}{{ ps.accent_color }}{% else %}#333{% endif %}; }
 </style>
 </head>
 <body>

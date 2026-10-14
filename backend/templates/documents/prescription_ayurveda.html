@@ -14,7 +14,7 @@ Colours are the two lines starting with --green and --red below. Keep everything
 <head>
 <meta charset="utf-8">
 <style>
-  :root { --green: #1e7a3c; --red: #c8371f; --ink: #1b1b1b; --muted: #555; }
+  :root { --green: {% if ps.accent_color and ps.accent_color != "#1f5c46" %}{{ ps.accent_color }}{% else %}#1e7a3c{% endif %}; --red: #c8371f; --ink: #1b1b1b; --muted: #555; }
   @page { size: {{ page_width }} {{ page_height }}; margin: {% if pad %}{{ pad.top }} 0 {{ pad.bottom }}{% else %}0{% endif %}; }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: "Noto Sans", "Noto Sans Gujarati", "Noto Sans Devanagari", sans-serif; color: var(--ink); font-size: 9.5pt; }
@@ -91,20 +91,20 @@ Colours are the two lines starting with --green and --red below. Keep everything
 </style>
 </head>
 <body>
-{% if duplicate %}<div class="watermark">{{ w.duplicate }}</div>{% endif %}
+{% if duplicate and ps.show_duplicate_watermark %}<div class="watermark">{{ w.duplicate }}</div>{% endif %}
 {% if is_cancelled %}<div class="watermark">{{ w.cancelled }}</div>{% endif %}
 <div class="sheet-wrap"><div class="page">
-  {% if not pad %}
+  {% if not pad and ps.show_letterhead %}
   <div class="head">
     <div class="brand">
-      {% if logo %}<img src="{{ logo }}" alt="">{% else %}<div class="clinic">{{ organization.name }}</div>{% endif %}
+      {% if logo and ps.show_logo %}<img src="{{ logo }}" alt="">{% else %}<div class="clinic">{{ organization.name }}</div>{% endif %}
       {% if subtitle %}<div class="subtitle">{{ subtitle }}</div>{% endif %}
     </div>
     {% if doctor %}
     <div class="doctor">
       <div class="name">{{ doctor.name }}</div>
       {% if doctor.qualification %}<div class="small">{{ doctor.qualification }}</div>{% endif %}
-      {% if doctor.registration_number %}<div class="small">Registration No. {{ doctor.registration_number }}</div>{% endif %}
+      {% if doctor.registration_number and ps.show_doctor_reg %}<div class="small">Registration No. {{ doctor.registration_number }}</div>{% endif %}
       {% if branch.phone %}<div class="phone">Mo. {{ branch.phone }}</div>{% endif %}
     </div>
     {% endif %}
@@ -171,8 +171,8 @@ Colours are the two lines starting with --green and --red below. Keep everything
       {% if follow_up_date %}<div class="after"><b>{{ cs.next_visit }}: {{ follow_up_date|date:"d-m-Y" }}</b>{% if follow_up_notes %} · {{ follow_up_notes }}{% endif %}</div>{% endif %}
       <div class="spacer"></div>
       <div class="sign-row">
-        <div class="qr">{% if qr %}<img src="{{ qr }}" alt="">{{ w.verify }}{% endif %}</div>
-        {% if doctor %}
+        <div class="qr">{% if qr and ps.show_qr %}<img src="{{ qr }}" alt="">{{ w.verify }}{% endif %}</div>
+        {% if doctor and ps.show_signature %}
         <div class="sign">
           {% if doctor.signature %}<img src="{{ doctor.signature }}" alt="">{% else %}<div style="height: 10mm"></div>{% endif %}
           <div class="line2">{{ doctor.name }}</div>
@@ -186,6 +186,7 @@ Colours are the two lines starting with --green and --red below. Keep everything
   {% if quote %}<div class="quote">{{ quote }}</div>{% endif %}
   {% if services %}<div class="services">{% for s in services %}<span>{{ s }}</span>{% endfor %}</div>{% endif %}
   {% if address %}<div class="address">{{ address }}</div>{% endif %}
+  {% if ps.footer_text %}<div class="quote" style="color: var(--muted); font-weight: 400">{{ ps.footer_text }}</div>{% endif %}
   {% endif %}
 </div></div>
 </body>

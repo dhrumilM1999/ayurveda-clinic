@@ -12,10 +12,11 @@ from rest_framework.response import Response
 
 from apps.accounts.permissions import BranchPermission
 from apps.audit.services import log_action
+from apps.documents.print_settings import page_settings
 
 from .models import CreditNote, Invoice, InvoiceLine
 from .payments import upi_link_for
-from .pdf import SIZES, render_pdf
+from .pdf import SIZES, doc_type_of, render_pdf
 from .serializers import CancelInput, CreditNoteSerializer, InvoiceListSerializer, InvoiceSerializer, PaymentInput
 from .services import create_credit_note, day_summary, record_payment
 
@@ -121,11 +122,13 @@ class InvoiceViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.
         ?preview=1 shows the bill on screen only: it is not counted as a print (logged as a view).
         """
         invoice = self.get_object()
-        size = request.query_params.get("size", "a4")
+        # The paper: the one asked for, else the one chosen in Settings -> PDF settings
+        ps = page_settings(request.branch, doc_type_of(invoice), request.query_params.get("size") or None)
+        size = ps["paper"]
         if size not in SIZES:
             raise ValidationError({"size": "Choose a4, a5, 80mm or 58mm."})
         duplicate = invoice.print_count > 0
-        content = render_pdf(invoice=invoice, size=size, duplicate=duplicate)
+        content = render_pdf(invoice=invoice, size=size, duplicate=duplicate, ps=ps)
         if request.query_params.get("preview") == "1":
             log_action(request, "view", invoice, changes={"size": size, "preview": True,
                                                           "patient": str(invoice.patient_id or "")})
@@ -171,9 +174,10 @@ class CreditNoteViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewse
     @action(detail=True, methods=["get"])
     def pdf(self, request, pk=None):
         note = self.get_object()
-        size = request.query_params.get("size", "a4")
+        ps = page_settings(request.branch, "credit_note", request.query_params.get("size") or None)
+        size = ps["paper"]
         if size not in SIZES:
             raise ValidationError({"size": "Choose a4, a5, 80mm or 58mm."})
-        content = render_pdf(invoice=note.invoice, credit_note=note, size=size)
+        content = render_pdf(invoice=note.invoice, credit_note=note, size=size, ps=ps)
         log_action(request, "print", note, changes={"size": size})
         return pdf_response(content, f"{note.number.replace('/', '-')}.pdf", request.query_params.get("download") == "1")

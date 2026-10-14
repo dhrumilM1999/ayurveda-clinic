@@ -13,11 +13,11 @@ Keep everything inside {{ }} and {% %}.
 <style>
   @page { size: {{ page_width }} {{ page_height }}; margin: {% if pad %}{{ pad.top }} {{ page_margin }} {{ pad.bottom }}{% else %}{{ page_margin }}{% endif %}; }
   * { box-sizing: border-box; }
-  body { margin: 0; font-family: "Noto Sans", "Noto Sans Gujarati", "Noto Sans Devanagari", sans-serif; font-size: {% if size == "a6" %}8pt{% elif size == "a5" %}9pt{% else %}10pt{% endif %}; color: #1d1d1d; }
-  .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 4mm; border-bottom: 0.6mm solid #1f5c46; padding-bottom: 2mm; }
+  body { margin: 0; font-family: "Noto Sans", "Noto Sans Gujarati", "Noto Sans Devanagari", sans-serif; font-size: {{ ps.base_pt|default:"10" }}pt; color: #1d1d1d; }
+  .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 4mm; border-bottom: 0.6mm solid {{ ps.accent_color|default:"#1f5c46" }}; padding-bottom: 2mm; }
   .brand { display: flex; gap: 3mm; align-items: center; }
   .brand img { max-height: 16mm; max-width: 30mm; }
-  .org { font-size: 1.6em; font-weight: 700; color: #1f5c46; line-height: 1.1; }
+  .org { font-size: 1.6em; font-weight: 700; color: {{ ps.accent_color|default:"#1f5c46" }}; line-height: 1.1; }
   .muted { color: #5c5c5c; }
   .small { font-size: 0.85em; }
   .doctor { text-align: right; }
@@ -26,7 +26,7 @@ Keep everything inside {{ }} and {% %}.
   .watermark { position: fixed; top: 40%; left: 0; right: 0; text-align: center; font-size: 36pt; color: rgba(192, 57, 43, 0.15); transform: rotate(-25deg); font-weight: 700; }
   .cancelled { color: rgba(192, 57, 43, 0.22); }
   table { width: 100%; border-collapse: collapse; }
-  th { background: #eef3f0; text-align: left; font-size: 0.85em; padding: 1mm 1.2mm; }
+  th { background: {{ ps.accent_soft|default:"#eef3f0" }}; text-align: left; font-size: 0.85em; padding: 1mm 1.2mm; }
   td { padding: 1.2mm; border-bottom: 0.2mm solid #e2e2e2; vertical-align: top; }
   .foot { margin-top: 6mm; display: flex; justify-content: space-between; align-items: flex-end; gap: 4mm; }
   .qr { text-align: center; font-size: 0.75em; color: #5c5c5c; }
@@ -39,13 +39,13 @@ Keep everything inside {{ }} and {% %}.
 </style>
 </head>
 <body>
-{% if duplicate %}<div class="watermark">{{ w.duplicate }}</div>{% endif %}
+{% if duplicate and ps.show_duplicate_watermark %}<div class="watermark">{{ w.duplicate }}</div>{% endif %}
 {% if is_cancelled %}<div class="watermark cancelled">{{ w.cancelled }}</div>{% endif %}
 
-{% if not pad %}{# On the pre-printed pad the paper already has the letterhead (Settings -> Branch details) #}
+{% if not pad and ps.show_letterhead %}{# On the pre-printed pad the paper already has the letterhead (Settings -> Branch details) #}
 <div class="head">
   <div class="brand">
-    {% if logo %}<img src="{{ logo }}" alt="">{% endif %}
+    {% if logo and ps.show_logo %}<img src="{{ logo }}" alt="">{% endif %}
     <div>
       <div class="org">{{ organization.name }}</div>
       <div class="small">{{ branch.name }}</div>
@@ -57,17 +57,18 @@ Keep everything inside {{ }} and {% %}.
   <div class="doctor small">
     <b>{{ doctor.name }}</b>
     {% if doctor.qualification %}<div>{{ doctor.qualification }}</div>{% endif %}
-    {% if doctor.registration_number %}<div class="muted">{{ w.reg_no }} {{ doctor.registration_number }}</div>{% endif %}
+    {% if doctor.registration_number and ps.show_doctor_reg %}<div class="muted">{{ w.reg_no }} {{ doctor.registration_number }}</div>{% endif %}
   </div>
   {% endif %}
 </div>
 {% endif %}
+{% if ps.header_text %}<div class="small muted" style="margin-top: 1.5mm; text-align: center">{{ ps.header_text }}</div>{% endif %}
 
 {% block content %}{% endblock %}
 
 <div class="foot">
-  <div class="qr">{% if qr %}<img src="{{ qr }}" alt=""><div>{{ w.verify }}</div>{% if number %}<div>{{ number }}</div>{% endif %}{% endif %}</div>
-  {% if doctor %}
+  <div class="qr">{% if qr and ps.show_qr %}<img src="{{ qr }}" alt=""><div>{{ w.verify }}</div>{% if number %}<div>{{ number }}</div>{% endif %}{% endif %}</div>
+  {% if doctor and ps.show_signature %}
   <div class="sign">
     {% if doctor.signature %}<img src="{{ doctor.signature }}" alt="">{% else %}<div style="height: 12mm"></div>{% endif %}
     <div class="line small">{{ doctor.name }}<br><span class="muted">{{ w.doctor_sign }}</span></div>
@@ -75,5 +76,6 @@ Keep everything inside {{ }} and {% %}.
   {% endif %}
 </div>
 {% if branch.letterhead_footer and not pad %}<div class="footer-line">{{ branch.letterhead_footer }}</div>{% endif %}
+{% if ps.footer_text %}<div class="footer-line">{{ ps.footer_text }}</div>{% endif %}
 </body>
 </html>

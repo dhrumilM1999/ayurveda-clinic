@@ -10,17 +10,17 @@ Keep everything inside {{ }} and {% %}.
 <style>
   @page { size: {{ page_size }}; margin: 10mm; @bottom-right { content: "Page " counter(page) " of " counter(pages); font-size: 8pt; color: #777; } }
   * { box-sizing: border-box; }
-  body { margin: 0; font-family: "Noto Sans", "Noto Sans Gujarati", "Noto Sans Devanagari", sans-serif; font-size: 9pt; color: #1d1d1d; }
-  .head { border-bottom: 0.6mm solid #1f5c46; padding-bottom: 2mm; margin-bottom: 3mm; display: flex; justify-content: space-between; align-items: flex-end; }
-  .org { font-size: 14pt; font-weight: 700; color: #1f5c46; }
+  body { margin: 0; font-family: "Noto Sans", "Noto Sans Gujarati", "Noto Sans Devanagari", sans-serif; font-size: {{ ps.base_pt|default:"9" }}pt; color: #1d1d1d; }
+  .head { border-bottom: 0.6mm solid {{ ps.accent_color|default:"#1f5c46" }}; padding-bottom: 2mm; margin-bottom: 3mm; display: flex; justify-content: space-between; align-items: flex-end; }
+  .org { font-size: 14pt; font-weight: 700; color: {{ ps.accent_color|default:"#1f5c46" }}; }
   .title { font-size: 12pt; font-weight: 700; margin-top: 1mm; }
   .muted { color: #5c5c5c; font-size: 8pt; }
   table { width: 100%; border-collapse: collapse; }
   thead { display: table-header-group; }
-  th { background: #eef3f0; text-align: left; font-size: 8pt; padding: 1.2mm; }
+  th { background: {{ ps.accent_soft|default:"#eef3f0" }}; text-align: left; font-size: 8pt; padding: 1.2mm; }
   td { padding: 1.1mm 1.2mm; border-bottom: 0.2mm solid #e2e2e2; }
   .num { text-align: right; white-space: nowrap; }
-  tr.total td { font-weight: 700; border-top: 0.4mm solid #1f5c46; border-bottom: none; }
+  tr.total td { font-weight: 700; border-top: 0.4mm solid {{ ps.accent_color|default:"#1f5c46" }}; border-bottom: none; }
   .empty { text-align: center; color: #777; padding: 8mm; }
   .notes { margin-top: 4mm; font-size: 8pt; color: #5c5c5c; }
 </style>
@@ -30,6 +30,7 @@ Keep everything inside {{ }} and {% %}.
   <div>
     <div class="org">{{ organization.name }}</div>
     <div class="title">{{ title }}</div>
+    {% if ps.header_text %}<div class="muted">{{ ps.header_text }}</div>{% endif %}
     <div class="muted">{{ subtitle }}</div>
   </div>
   <div class="muted">Printed {{ printed_at }}</div>
@@ -49,5 +50,6 @@ Keep everything inside {{ }} and {% %}.
   </tbody>
 </table>
 {% if notes %}<div class="notes">{{ notes }}</div>{% endif %}
+{% if ps.footer_text %}<div class="notes">{{ ps.footer_text }}</div>{% endif %}
 </body>
 </html>
