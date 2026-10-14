@@ -17,7 +17,8 @@ import { FLAGS, MedicineFlags, money, useMedicineName } from './shared';
 export default function MedicinesPage() {
   const { t } = useTranslation();
   const { message } = App.useApp();
-  const { can } = useAuth();
+  const { can, hasFeature } = useAuth();
+  const homeopathy = hasFeature('medicines_homeopathy'); // optional extra: Additional settings
   const masterLabel = useMasterLabel();
   const medicineName = useMedicineName();
   const manage = can('medicines.manage');
@@ -73,6 +74,7 @@ export default function MedicinesPage() {
             { value: 'all', label: t('medicines.kinds.all') },
             { value: 'classical', label: t('medicines.kinds.classical') },
             { value: 'proprietary', label: t('medicines.kinds.proprietary') },
+            ...(homeopathy ? [{ value: 'homeopathy', label: t('medicines.kinds.homeopathy') }] : []),
           ]}
         />
         <MasterSelect category="dosage_form" placeholder={t('medicines.allForms')} value={form} onChange={setForm} style={{ width: 200 }} />
@@ -94,7 +96,7 @@ export default function MedicinesPage() {
                 <Typography.Text strong>{medicineName(m)}</Typography.Text>
                 {m.is_sample && <Tag color="orange" className="tag-tight">{t('medicines.sample')}</Tag>}
                 <div className="cell-sub">
-                  {[m.kind === 'proprietary' ? m.manufacturer : m.reference, m.pack_size].filter(Boolean).join(' · ')}
+                  {[m.kind === 'proprietary' ? m.manufacturer : m.kind === 'homeopathy' ? m.strength : m.reference, m.pack_size].filter(Boolean).join(' · ')}
                   {m.classical_equivalent_name && ` · = ${m.classical_equivalent_name}`}
                 </div>
               </div>

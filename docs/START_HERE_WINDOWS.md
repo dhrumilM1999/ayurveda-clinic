@@ -15,6 +15,24 @@ This guide shows how to install, start, stop and log in to the clinic software o
 > files. If you like, move the folder to a simple place such as `C:\Projects\ayurveda-clinic`
 > (stop the app first).
 
+## More demo data: 36 made-up patients, and the homeopathy medicines
+
+Two commands add realistic (but FICTIONAL) data so every screen has something to show. Run them once; running them again
+adds nothing twice.
+
+1. **Medicines** (about 130 generic Ayurvedic and 818 homeopathy medicines):
+   `docker compose exec backend python manage.py add_medicine_catalog --switch-on`
+   The homeopathy medicines show in **Medicines** and on the prescription screen only while
+   **Additional settings -> Homeopathy medicines** is on.
+2. **Patients** (36 made-up people with Gujarati names, mobile numbers 99999 000xx):
+   `docker compose exec backend python manage.py seed_demo_journey`
+   Each one is registered at the desk, examined by a doctor, billed and dispensed through the real screens' API.
+   13 are "today" (booked, waiting, with the doctor, waiting for the bill, waiting at the pharmacy, finished) and 23 were
+   seen in the last two months, so the reports and patient history look real. The cases are in
+   `backend/apps/organizations/management/commands/demo_journey_data.py` (SAFE TO EDIT).
+
+All names, numbers and medicines are samples. Never use real patient data in demos.
+
 ## 2. Start the software
 
 Double-click **`start.bat`** in the project folder.
@@ -61,7 +79,7 @@ No real SMS is sent yet. You can find the code in two places:
 1. Log in as `reception1` → **Patients**: 5 sample patients are listed (mobile numbers masked).
 2. **Register patient**: type mobile `9811000002`. "Existing patients" warns that this is Sunita Shah.
    Change the number, fill the name, age and gender, tick a condition, add an allergy, then **Register patient**.
-3. The new patient gets an ID like `AY26-000006`. A red allergy box shows at the top.
+3. The new patient gets the next plain number as ID, like `45`. A red allergy box shows at the top.
 4. **Vitals** tab → **Record vitals** (BMI is calculated). **Consent** tab → withdraw SMS consent.
 5. **Medical history** tab: the receptionist sees "Only doctors can see…". Log in as `doctor1` to see everything.
 6. Log in as `admin` → open the patient → **Activity** tab: every view and change is listed.
@@ -150,8 +168,22 @@ No real SMS is sent yet. You can find the code in two places:
    Qty is filled (e.g. 60 tablets).
 4. In M-N-N type `222` -> it becomes `2-2-2` and the Qty changes.
 5. Change **Follow-up after** to 15, then click **180 days**: medicines get 180 days, follow-up stays 15.
-6. As `admin`: **Additional settings -> Medicine labels** -> switch on, choose the format. Back on the
-   prescription click **Labels**: switch Compact / Standard / Detailed and Print.
+6. (Optional) As `admin`: **Additional settings -> Patient medicine labels** -> switch on, choose the format.
+   Back on the prescription click **Labels**: switch Compact / Standard / Detailed and Print.
+
+### Stock labels and counter sale check
+
+1. As `admin`: **Additional settings** -> switch on **Barcodes and scanning**, **Pharmacy bills**,
+   **Pharmacy stock labels** and **Counter sale**.
+2. **Pharmacy -> Stock** -> click **+** on a medicine -> **Labels** on a batch -> how many (one per pack) ->
+   **Show labels** -> Print. The batch now shows its barcode number.
+3. **Pharmacy -> Counter sale**: click in "Scan the barcode" and scan a label (a USB barcode scanner types the
+   number and presses Enter; you can also type the number and press Enter). Scan again = one more pack.
+   Or search a medicine by name. Add a customer name (optional) -> Cash / UPI / Card / Pay later -> **Make bill**.
+4. Try a Schedule E1 medicine (e.g. Arogyavardhini Vati): it is refused - it needs a prescription.
+5. **To dispense** -> open a prescription -> scan a medicine that is not on it: it is added to the same bill
+   ("Not on prescription").
+6. **Sales & returns** shows the counter sale with a purple "Counter sale" tag; **Return** works as usual.
 
 ### Step 6 check (OPD billing)
 
@@ -185,6 +217,22 @@ No real SMS is sent yet. You can find the code in two places:
 7. **Sales & returns -> Return**: tick the medicine, Sellable or Damaged -> a credit note is made.
 8. **Stock check -> Start stock check**: type what you count -> **Complete check**: differences are corrected.
 9. **Stock ledger**: pick a medicine to see every + and - with the balance. The **Dashboard** shows stock alerts.
+
+### Step 8 check (reports)
+
+1. Log in as `admin` -> **Reports** (left menu).
+2. **Collection**: this month's money by Cash / UPI / Card, refunds and net, day by day. Click **Month-wise** for one
+   row per month. Click the dates -> choose **Last month** or **This financial year**.
+3. **Income by doctor**: consultation, services, medicines, billed, received and still due for each doctor.
+4. **New vs repeat patients**: new cases (first check-up ever) and follow-ups.
+5. **Missed follow-ups**: patients whose follow-up date has passed and who have not come back (phones are masked;
+   click the name to open the patient).
+6. **GST summary**: taxable value and GST per HSN / SAC code and rate, minus credit notes (check with your CA).
+7. Click **Excel** or **PDF** to download what is on screen. **Audit log** shows "Exported" for each download.
+8. With more than one branch, a branch choice appears: this branch, another branch or **All branches**, and an
+   extra report **Income by branch**.
+9. Who sees Reports: Admin and Doctor at the start. To give a receptionist Reports, **Roles** -> Receptionist ->
+   tick "See reports". Money reports also need "See bills"; Missed follow-ups needs "See patients".
 
 ## 5. Other addresses
 

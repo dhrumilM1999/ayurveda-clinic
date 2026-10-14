@@ -188,3 +188,17 @@ def test_day_summary_by_kind_of_bill(branch_a, receptionist, appointment):
     assert client.get("/api/v1/invoices/summary/", {"series": "OP"}).data["received"]["cash"] == "300.00"
     assert client.get("/api/v1/invoices/summary/", {"series": "PH"}).data["received"]["cash"] == "0.00"
     assert client.get("/api/v1/invoices/summary/").data["invoice_count"] == 1
+
+
+@pytest.mark.django_db
+def test_opd_bills_can_be_switched_off(org, branch_a, receptionist, doctor, patient, appointment, fee):
+    client = client_for(receptionist, branch_a)
+    url = f"/api/v1/opd-bills/suggest/?appointment={appointment.id}"
+    assert client.get(url).status_code == 200  # on by default
+    set_additional_features(org, on=False, codes=["opd_billing"])
+    off = client.get(url)
+    assert off.status_code == 403 and "switched off" in str(off.data)
+    assert client.post("/api/v1/opd-bills/charge/", {"appointment": str(appointment.id), "lines": [
+        {"kind": "consultation", "description": "OPD", "quantity": 1, "unit_price": "300"}]}, format="json").status_code == 403
+    set_additional_features(org, on=True, codes=["opd_billing"])
+    assert client.get(url).status_code == 200

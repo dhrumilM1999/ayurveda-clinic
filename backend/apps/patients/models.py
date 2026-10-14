@@ -35,7 +35,7 @@ GENDER_CHOICES = [("male", "Male"), ("female", "Female"), ("other", "Other")]
 
 
 class UhidSequence(models.Model):
-    """Running number for patient IDs, one counter per organization per year."""
+    """Running number for patient IDs: one counter per organization (year is always 0; older versions kept one per year)."""
 
     organization = models.ForeignKey("organizations.Organization", on_delete=models.PROTECT, related_name="+")
     year = models.PositiveSmallIntegerField()

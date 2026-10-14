@@ -1,5 +1,6 @@
 {% comment %}
-SAFE TO EDIT: the "Ayurveda case sheet" prescription design - ONE A4 page, like a classic Ayurveda pad.
+SAFE TO EDIT: the "Ayurveda case sheet" prescription design - ONE A4 page, like a classic Ayurveda pad
+(on half-A4 / A5 paper the same sheet is shrunk to fit).
 Choose it in Settings -> Branch details -> Prescription design.
 - Top: logo (Settings -> Clinic details) or the clinic name, the line under it, the doctor (Staff -> the doctor:
   name, qualification, reg. no.) and the clinic phone; green bar with the timings (Footer line) and the holiday note.
@@ -14,10 +15,14 @@ Colours are the two lines starting with --green and --red below. Keep everything
 <meta charset="utf-8">
 <style>
   :root { --green: #1e7a3c; --red: #c8371f; --ink: #1b1b1b; --muted: #555; }
-  @page { size: 210mm 297mm; margin: {% if pad %}{{ pad.top }} 0 {{ pad.bottom }}{% else %}0{% endif %}; }
+  @page { size: {{ page_width }} {{ page_height }}; margin: {% if pad %}{{ pad.top }} 0 {{ pad.bottom }}{% else %}0{% endif %}; }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: "Noto Sans", "Noto Sans Gujarati", "Noto Sans Devanagari", sans-serif; color: var(--ink); font-size: 9.5pt; }
-  .page { height: {% if pad %}calc(297mm - {{ pad.top }} - {{ pad.bottom }}){% else %}297mm{% endif %}; display: flex; flex-direction: column; overflow: hidden; }
+  /* On half-A4 (A5) paper the A4 sheet is shrunk to fit (sheet_scale is 0.7071 then, otherwise 1):
+     the sheet is laid out at A4 size inside a clipped box and scaled down. */
+  .sheet-wrap { width: {{ page_width }}; height: calc({{ page_height }}{% if pad %} - {{ pad.top }} - {{ pad.bottom }}{% endif %}); overflow: hidden; }
+  .page { width: calc({{ page_width }} / {{ sheet_scale|default:"1" }}); transform: scale({{ sheet_scale|default:"1" }}); transform-origin: 0 0;
+          height: calc(({{ page_height }}{% if pad %} - {{ pad.top }} - {{ pad.bottom }}{% endif %}) / {{ sheet_scale|default:"1" }}); display: flex; flex-direction: column; overflow: hidden; }
 
   /* Top: logo + doctor */
   .head { display: flex; justify-content: space-between; align-items: flex-start; padding: 7mm 10mm 3mm; border-bottom: 0.5mm solid var(--green); }
@@ -88,7 +93,7 @@ Colours are the two lines starting with --green and --red below. Keep everything
 <body>
 {% if duplicate %}<div class="watermark">{{ w.duplicate }}</div>{% endif %}
 {% if is_cancelled %}<div class="watermark">{{ w.cancelled }}</div>{% endif %}
-<div class="page">
+<div class="sheet-wrap"><div class="page">
   {% if not pad %}
   <div class="head">
     <div class="brand">
@@ -182,6 +187,6 @@ Colours are the two lines starting with --green and --red below. Keep everything
   {% if services %}<div class="services">{% for s in services %}<span>{{ s }}</span>{% endfor %}</div>{% endif %}
   {% if address %}<div class="address">{{ address }}</div>{% endif %}
   {% endif %}
-</div>
+</div></div>
 </body>
 </html>

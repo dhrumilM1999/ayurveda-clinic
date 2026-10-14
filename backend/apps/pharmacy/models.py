@@ -168,10 +168,19 @@ class PurchaseReturnItem(OrgScopedModel):
 
 # --- Sales (dispensing) ----------------------------------------------------------------------
 class Dispense(BranchScopedModel):
-    """Medicines given to a patient against a prescription. A bill (billing.Invoice) is made for it."""
+    """
+    Medicines sold from the pharmacy. A bill (billing.Invoice) is made for it.
+    - Prescription sale: against a doctor's prescription (prescription and patient are set). Extra medicines
+      scanned at the counter are lines without a prescription line.
+    - Counter sale: no prescription, no registered patient; only an optional customer name and phone.
+    """
 
-    prescription = models.ForeignKey("prescriptions.Prescription", on_delete=models.PROTECT, related_name="dispenses")
-    patient = models.ForeignKey("patients.Patient", on_delete=models.PROTECT, related_name="dispenses")
+    prescription = models.ForeignKey("prescriptions.Prescription", null=True, blank=True, on_delete=models.PROTECT,
+                                     related_name="dispenses")
+    patient = models.ForeignKey("patients.Patient", null=True, blank=True, on_delete=models.PROTECT,
+                                related_name="dispenses")
+    customer_name = models.CharField(max_length=200, blank=True)  # counter sale only
+    customer_phone = models.CharField(max_length=15, blank=True)  # counter sale only
     total_amount = models.DecimalField(default=0, **MONEY)
     notes = models.CharField(max_length=300, blank=True)
 
@@ -197,7 +206,7 @@ class SaleReturn(BranchScopedModel):
     """Medicines brought back by the patient. Stock goes up; a credit note is made on the bill."""
 
     dispense = models.ForeignKey(Dispense, on_delete=models.PROTECT, related_name="returns")
-    patient = models.ForeignKey("patients.Patient", on_delete=models.PROTECT, related_name="+")
+    patient = models.ForeignKey("patients.Patient", null=True, blank=True, on_delete=models.PROTECT, related_name="+")
     reason = models.CharField(max_length=200)
     total_amount = models.DecimalField(default=0, **MONEY)
 

@@ -238,8 +238,9 @@ export function OpdBillButton({ appointmentId, bill, onChanged }: {
   onChanged: () => void;
 }) {
   const { t } = useTranslation();
-  const { can } = useAuth();
+  const { can, hasFeature } = useAuth();
   const [open, setOpen] = useState(false);
+  if (!hasFeature('opd_billing')) return null; // Additional settings -> OPD bills
   if (!can('billing.charge') && !can('billing.create') && !can('billing.view')) return null;
   const due = bill ? Number(bill.balance) : 0;
   const label = !bill ? t('opd.chip.none') : due > 0 ? t('opd.chip.due', { amount: money(due) }) : t('opd.chip.paid');

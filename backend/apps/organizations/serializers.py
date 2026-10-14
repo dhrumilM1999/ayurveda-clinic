@@ -25,7 +25,7 @@ class OrganizationSerializer(serializers.ModelSerializer):
 
     def validate_uhid_prefix(self, value):
         value = value.strip().upper()
-        if not value.isalnum():
+        if value and not value.isalnum():
             raise serializers.ValidationError("Use only letters and numbers, e.g. AY.")
         return value
 

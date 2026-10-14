@@ -69,6 +69,8 @@ INSTALLED_APPS = [
     "apps.pharmacy",
     "apps.billing",
     "apps.reports",
+    "apps.enquiries",
+    "apps.therapy",
     "apps.documents",
 ]
 
@@ -186,12 +188,17 @@ REST_FRAMEWORK = {
         "otp": env("THROTTLE_OTP", "10/min"),
         "anon": "100/min",
         "verify": env("THROTTLE_VERIFY", "30/min"),
+        "enquiry": env("THROTTLE_ENQUIRY", "10/hour"),
     },
 }
 
 # Address of the app that patients reach when they scan the QR code on a print-out (the "is this genuine?"
 # page). On one PC this is http://localhost:5173; on the clinic network use the PC's address, later the website.
 PUBLIC_APP_URL = env("PUBLIC_APP_URL", "http://localhost:5173").rstrip("/")
+
+# Websites (comma separated, e.g. https://www.myclinic.in) that may send the online enquiry form from the browser.
+# Empty = only the app's own /enquiry page (and an iframe of it) works. See docs/ONLINE_ENQUIRY.md.
+ENQUIRY_ALLOWED_ORIGINS = [o.rstrip("/") for o in env_list("ENQUIRY_ALLOWED_ORIGINS", "")]
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=env_int("JWT_ACCESS_MINUTES", 15)),

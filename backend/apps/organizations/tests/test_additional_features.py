@@ -17,8 +17,8 @@ def test_additional_features_are_off_by_default(org, org_admin, branch_a):
     assert response.status_code == 200
     basics = {"pharmacy_batch_tracking", "pharmacy_expiry_tracking", "pharmacy_purchase_price",
               "pharmacy_selling_price", "pharmacy_suppliers"}
-    # Extras are off; the stock basics (how the pharmacy always worked) are on
-    assert {r["code"] for r in response.data if r["enabled"]} == basics
+    # Extras are off; the stock basics (how the pharmacy always worked) and the two kinds of bill are on
+    assert {r["code"] for r in response.data if r["enabled"]} == basics | {"opd_billing", "pharmacy_billing"}
     assert not is_feature_enabled(branch_a, "pharmacy_racks")
 
 
@@ -34,15 +34,16 @@ def test_org_admin_switches_a_feature_for_the_whole_organization(org, org_admin,
 
 @pytest.mark.django_db
 def test_other_organizations_are_not_affected(org, org_admin, branch_a):
-    client_for(org_admin, branch_a).patch(f"{URL}pharmacy_billing/", {"enabled": True}, format="json")
+    client_for(org_admin, branch_a).patch(f"{URL}pharmacy_racks/", {"enabled": True}, format="json")
     other = Organization.objects.create(name="Other clinic")
-    assert organization_features(org.id)["pharmacy_billing"] is True
-    assert organization_features(other.id)["pharmacy_billing"] is False
+    assert organization_features(org.id)["pharmacy_racks"] is True
+    assert organization_features(other.id)["pharmacy_racks"] is False
 
 
 @pytest.mark.django_db
 def test_feature_needing_another_stays_off_until_that_one_is_on(org, org_admin, branch_a):
     client = client_for(org_admin, branch_a)
+    client.patch(f"{URL}pharmacy_billing/", {"enabled": False}, format="json")  # bills are on by default
     response = client.patch(f"{URL}pharmacy_discounts/", {"enabled": True}, format="json")
     row = _row(response, "pharmacy_discounts")
     assert row["switched_on"] is True and row["enabled"] is False and row["requires"] == "pharmacy_billing"

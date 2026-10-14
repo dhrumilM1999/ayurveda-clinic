@@ -13,23 +13,20 @@ from .models import ConsentPurpose, PatientConsent, UhidSequence
 
 def next_uhid(organization) -> str:
     """
-    Next patient ID, e.g. AY26-000001. One running number per organization per calendar year.
+    Next patient ID: a plain running number (1, 2, 3 ... no leading zeros, no year), one counter per organization.
+    The clinic may add a few letters in front in Settings (Patient ID prefix), e.g. "AY" gives AY44; empty gives 44.
     Done inside a database lock, so two receptionists can never get the same number.
     """
-    year = timezone.localdate().year
     for _ in range(3):
         try:
             with transaction.atomic():
-                seq, _ = UhidSequence.objects.select_for_update().get_or_create(
-                    organization=organization, year=year,
-                )
+                seq, _ = UhidSequence.objects.select_for_update().get_or_create(organization=organization, year=0)
                 seq.last_number += 1
                 seq.save(update_fields=["last_number"])
                 break
         except IntegrityError:
-            continue  # another request created this year's counter at the same moment; try again
-    prefix = (organization.uhid_prefix or "AY").upper()
-    return f"{prefix}{year % 100:02d}-{seq.last_number:06d}"
+            continue  # another request created the counter at the same moment; try again
+    return f"{(organization.uhid_prefix or '').upper()}{seq.last_number}"
 
 
 def ensure_consent_purposes(organization) -> int:

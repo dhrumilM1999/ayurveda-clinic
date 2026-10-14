@@ -26,8 +26,8 @@ class Organization(BaseModel):
     logo_on_bills = models.BooleanField("Logo on bills and receipts", default=True)
     default_language = models.CharField(max_length=5, choices=LANGUAGE_CHOICES, default="en")
     uhid_prefix = models.CharField(
-        "Patient ID prefix", max_length=6, default="AY",
-        help_text="Start of every patient ID, e.g. AY -> AY26-000001",
+        "Patient ID prefix", max_length=6, default="", blank=True,
+        help_text="Optional letters before the patient number, e.g. AY -> AY44. Empty -> 44",
     )
     # Off = the app shows only the main (first) branch: no branch picker, no Branches menu.
     # Data stays branch-wise, so switching it on later needs no data change.

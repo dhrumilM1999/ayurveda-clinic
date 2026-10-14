@@ -28,8 +28,11 @@ Pick colours at https://htmlcolorcodes.com and copy the `#xxxxxx` code.
 titles use *Fraunces*. They are stored inside the project, so they work without internet. To use a
 different font, ask Claude Code (the font has to be added to the project first).
 
-**Logo:** replace `frontend/public/logo.svg` with your logo. To use a PNG instead, put
-`logo.png` in `frontend/public/` and set `logoPath: '/logo.png'`.
+**Clinic name and logo (every clinic gets its own):** go to **Settings -> Clinic details**, change the clinic name
+and **upload the logo** (PNG or JPG, up to 2 MB; a logo on a transparent or white background, wider than tall, looks best).
+The name and logo then show by themselves in the left menu, on the login screen, on the waiting-room TV screen and in
+the browser tab. No code change is needed, so a second clinic just uploads its own logo.
+Until a clinic uploads a logo, the small default leaf (`frontend/public/logo.svg`) and the name are shown.
 
 **Login page sentence and the small line under the name:** these are screen text. Change them in
 `frontend/src/i18n/en.json`, `gu.json`, `hi.json` → `"login" → "quote"` and `"layout" → "tagline"`.
@@ -81,8 +84,21 @@ Check: in VS Code's terminal run `cd frontend` then `npm run check:i18n`. It tel
 - Colours and sizes: `backend/templates/documents/prescription_ayurveda.html` (SAFE TO EDIT, lines starting --green / --red).
 
 ## Medicine labels: fields, format, wording
+## Pharmacy stock labels (barcode) and counter sale
 
-- **Additional settings -> Medicine labels**: switch labels on, choose the default format (Compact / Standard /
+- **Additional settings -> Pharmacy stock labels**: switch on (needs "Barcodes and scanning") and pick the size
+  (small 50 x 25 mm or large 75 x 50 mm). Print from **Pharmacy -> Stock** -> open a medicine -> **Labels** on a batch.
+- What is printed: medicine, strength, pack, MRP (and "Our" price if lower), GST %, batch, expiry, barcode.
+  Batch / expiry / price follow the Medicine stock switches. No patient details.
+- Look of the label: `backend/templates/documents/stock_label.html` (SAFE TO EDIT). Do not make the barcode smaller.
+- A batch with no barcode gets a clinic code (12 digits starting with 29) the first time. If the maker's barcode
+  was typed or scanned at purchase, that one is printed instead.
+- **Counter sale** (Additional settings -> Pharmacy and stock -> Counter sale): a tab for walk-in customers.
+  Schedule E1 medicines are never sold without a prescription (fixed rule in `backend/apps/pharmacy/services.py`).
+
+## Patient medicine labels: fields, format, wording
+
+- **Additional settings -> Patient medicine labels**: switch labels on, choose the default format (Compact / Standard /
   Detailed) and switch each optional field on or off (price, batch, expiry, QR code...). Medicine name, dose,
   days and instructions are always printed.
 - Label wording, colours and font sizes: `backend/templates/documents/medicine_label.html` (SAFE TO EDIT).
@@ -118,7 +134,13 @@ Print templates live in `backend/templates/documents/`. They are HTML files (lik
 - Keep everything inside `{{ ... }}` and `{% ... %}` as it is - those put in the real data.
 - The clinic name, address, GSTIN, drug licence and UPI ID come from **Settings -> Branch details**, not from the file.
 - Save the file, then print a bill again to see the change (no restart needed).
-- More templates (prescription, certificates...) come in Step 7.
+- **Reports PDF**: `report.html` (colours, font size, margins, the "Nothing in these dates." text).
+
+## Who can see Reports
+
+**Roles** -> pick a role -> tick **See reports**. Each report also needs the permission for its data:
+money reports (Collection, Income, GST) need **See bills**, New vs repeat needs **See appointments and queue**,
+Missed follow-ups needs **See patients**. At the start Admin and Doctor have Reports; Receptionist does not.
 
 ## Add a role or change what a role can do
 
@@ -157,7 +179,7 @@ Dropdown values are kept in the database, not in code.
 
 ## Change the patient ID prefix
 
-**Settings** → "Patient ID prefix" (for example `AY` → `AY26-000001`). New patients get the new prefix;
+**Settings** → "Patient ID prefix" (optional: empty gives plain numbers like `44`; `AY` gives `AY44`). New patients get the new prefix;
 old IDs never change.
 
 ## Change the consent wording

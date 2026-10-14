@@ -108,6 +108,13 @@ export default function PatientFormPage() {
         restoreDraft(); // after the consent defaults, so saved consent choices win
       });
       form.setFieldsValue({ gender: undefined, preferred_language: 'gu', country_code: '+91', state: 'Gujarat', country: 'India', allergies: [], medications: [] });
+      // Opened from an online enquiry (Register patient): name and mobile are already filled
+      const asked = new URLSearchParams(window.location.search);
+      if (asked.get('name')) {
+        const parts = asked.get('name')!.trim().split(/\s+/);
+        form.setFieldsValue({ first_name: parts[0], last_name: parts.length > 1 ? parts[parts.length - 1] : undefined,
+          middle_name: parts.length > 2 ? parts.slice(1, -1).join(' ') : undefined, mobile: asked.get('mobile') || undefined });
+      }
       return;
     }
     setLoading(true);
@@ -210,6 +217,8 @@ export default function PatientFormPage() {
       } else {
         message.success(t('common.saved'));
       }
+      const fromEnquiry = new URLSearchParams(window.location.search).get('enquiry');
+      if (!isEdit && fromEnquiry) await api.patch(`/enquiries/${fromEnquiry}/`, { patient: data.id }).catch(() => undefined);
       clearDraft(draftKey);
       navigate(`/patients/${data.id}`);
     } catch (err) {

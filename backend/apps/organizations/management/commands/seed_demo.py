@@ -41,8 +41,7 @@ ROOMS = [("Consultation Room 1", "Consultation"), ("Consultation Room 2", "Consu
 # username, full name, phone, is_doctor, is_org_admin, role code in the main branch
 USERS = [
     ("admin", "Clinic Owner", "9800000001", False, True, None),
-    ("doctor1", "Dr. Asha Mehta", "9800000002", True, False, "doctor"),
-    ("doctor2", "Dr. Ravi Patel", "9800000003", True, False, "doctor"),
+    ("doctor1", "Dr. Grishm Shingala", "9800000002", True, False, "doctor"),
     ("reception1", "Nita Shah", "9800000004", False, False, "receptionist"),
     ("therapist1", "Kiran Joshi", "9800000005", False, False, "therapist"),
     ("pharmacist1", "Meena Desai", "9800000006", False, False, "pharmacist"),
@@ -59,9 +58,9 @@ SAMPLE_PATIENTS = [
 
 # doctor username, weekdays (0 = Monday ... 5 = Saturday), start, end
 SCHEDULES = [
-    ("doctor1", [0, 1, 2, 3, 4, 5], time(10, 0), time(13, 0)),
-    ("doctor1", [0, 1, 2, 3, 4], time(17, 0), time(20, 0)),
-    ("doctor2", [0, 1, 2, 3, 4, 5], time(10, 0), time(14, 0)),
+    # The clinic has one doctor. Morning 9 to 1 and evening 5 to 8, closed on Sunday.
+    ("doctor1", [0, 1, 2, 3, 4, 5], time(9, 0), time(13, 0)),
+    ("doctor1", [0, 1, 2, 3, 4, 5], time(17, 0), time(20, 0)),
 ]
 
 
@@ -115,7 +114,8 @@ class Command(BaseCommand):
                 organization=org, is_doctor=is_doctor, is_org_admin=is_org_admin,
                 # The owner account may also open the Django admin site.
                 is_staff=is_org_admin, is_superuser=is_org_admin,
-                qualification="BAMS" if is_doctor else "",
+                qualification="BAMS (GAU) Ayurved Physician & Diet Consultant" if is_doctor else "",
+                registration_number="GB-26175" if is_doctor else "",
             )
             users[username] = user
             if role_code:

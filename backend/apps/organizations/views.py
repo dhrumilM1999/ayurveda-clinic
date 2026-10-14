@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 from rest_framework.exceptions import NotFound, ValidationError
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -34,6 +34,49 @@ class CurrentOrganizationView(APIView):
         serializer.save(updated_by=request.user)
         log_action(request, "update", org, changes={"fields": sorted(serializer.validated_data)})
         return Response(serializer.data)
+
+
+class PublicBrandingView(APIView):
+    """
+    The clinic's name and logo for the login screen (nobody is logged in yet).
+    Only public things are returned: name, short name, whether a logo exists, and a version number
+    (it changes when the logo or name changes, so the browser fetches the new picture).
+    Today the software serves one clinic, so this is the first organization.
+    For several clinics on one server later, this is the place to pick the clinic from the web address.
+    """
+
+    permission_classes = [AllowAny]
+    authentication_classes: list = []
+
+    @staticmethod
+    def clinic():
+        return Organization.objects.filter(is_deleted=False).order_by("created_at").first()
+
+    def get(self, request):
+        org = self.clinic()
+        if org is None:
+            return Response({"name": "", "short_name": "", "has_logo": False, "version": 0})
+        return Response({
+            "name": org.name, "short_name": org.short_name, "has_logo": bool(org.logo),
+            "version": int(org.updated_at.timestamp()),
+        })
+
+
+class PublicBrandingLogoView(APIView):
+    """The clinic logo picture for the login screen (the logo is printed on public bills anyway)."""
+
+    permission_classes = [AllowAny]
+    authentication_classes: list = []
+
+    def get(self, request):
+        from django.http import FileResponse
+
+        org = PublicBrandingView.clinic()
+        if org is None or not org.logo:
+            raise NotFound("No logo uploaded.")
+        response = FileResponse(org.logo.open("rb"))
+        response["Cache-Control"] = "public, max-age=300"
+        return response
 
 
 class OrganizationLogoView(APIView):
