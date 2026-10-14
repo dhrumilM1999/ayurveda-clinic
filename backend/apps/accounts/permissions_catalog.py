@@ -88,6 +88,7 @@ DEFAULT_ROLES = {
             "appointments.view", "appointments.manage",
             "billing.view", "billing.create", "billing.charge",
             "enquiries.view", "enquiries.manage",
+            "therapy.view", "therapy.manage",
         ],
     },
     "therapist": {

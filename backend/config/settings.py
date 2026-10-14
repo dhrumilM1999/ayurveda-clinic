@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     "apps.billing",
     "apps.reports",
     "apps.enquiries",
+    "apps.therapy",
     "apps.documents",
 ]
 
