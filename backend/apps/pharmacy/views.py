@@ -9,6 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from apps.accounts.permissions import BranchPermission
+from apps.accounts.services import user_has_perm
 from apps.appointments.serializers import patient_summary
 from apps.audit.services import log_action
 from apps.billing.services import invoice_for_dispense
@@ -19,6 +20,7 @@ from apps.organizations.services import is_feature_enabled
 from apps.prescriptions.models import Prescription
 
 from .models import Dispense, Purchase, PurchaseReturn, Rack, StockBatch, StockVerification, StockVerificationItem, Supplier
+from . import reports as pharmacy_reports
 from .serializers import (
     AdjustInput, BatchSerializer, CounterSaleInput, CountInput, LocationInput, MovementSerializer, PurchaseInput, PurchaseReturnInput,
     PurchaseReturnSerializer, PurchaseSerializer, RackSerializer, SaleReturnInput, SellInput, SupplierSerializer,
@@ -591,3 +593,32 @@ class SaleViewSet(PharmacyMixin, mixins.ListModelMixin, mixins.RetrieveModelMixi
         return Response({"id": str(record.id), "total_amount": str(record.total_amount),
                          "credit_note": str(note.id) if note else None, "credit_note_number": note.number if note else "",
                          "refund_amount": str(note.refund_amount) if note else "0"}, status=http.HTTP_201_CREATED)
+
+
+class PharmacyReportViewSet(PharmacyMixin, viewsets.ViewSet):
+    """GET /pharmacy-reports/<code>/?date_from=&date_to= - small reports for this branch (see reports.py)."""
+
+    required_permissions = {"list": "pharmacy.view", "retrieve": "pharmacy.view"}
+    required_features = {"*": "pharmacy_reports"}
+    money_reports = {"daily", "margin", "gst"}  # these show sales money: billing.view is needed as well
+
+    def list(self, request):
+        return Response([{"code": code, "title": r["title"], "dates": r["dates"],
+                          "money": code in self.money_reports} for code, r in pharmacy_reports.REPORTS.items()
+                         if code not in self.money_reports or user_has_perm(request.user, "billing.view", request.branch)])
+
+    def retrieve(self, request, pk=None):
+        report = pharmacy_reports.REPORTS.get(pk)
+        if report is None:
+            raise NotFound("Unknown report.")
+        if pk in self.money_reports and not user_has_perm(request.user, "billing.view", request.branch):
+            raise PermissionDenied("You cannot see sales money.")
+        today = timezone.localdate()
+        date_from = _day(request.query_params.get("date_from"), today.replace(day=1))
+        date_to = _day(request.query_params.get("date_to"), today)
+        if date_to < date_from or (date_to - date_from).days > 366:
+            raise ValidationError({"date_to": "Choose dates within one year, the end after the start."})
+        data = report["build"](request.branch, date_from, date_to)
+        log_action(request, "view", object_type="pharmacy.report", changes={"report": pk})
+        return Response({"code": pk, "title": report["title"], "date_from": date_from, "date_to": date_to,
+                         "columns": data["columns"], "rows": data["rows"], "totals": data["totals"]})
