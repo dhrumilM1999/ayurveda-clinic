@@ -1021,7 +1021,8 @@
       "check": "Stock check",
       "ledger": "Stock ledger",
       "setup": "Racks & suppliers",
-      "counter": "Counter sale"
+      "counter": "Counter sale",
+      "reports": "Pharmacy reports"
     },
     "status": {
       "pending": "To give",
@@ -1490,6 +1491,14 @@
       "pharmacy_counter_sale": {
         "label": "Counter sale (without a prescription)",
         "help": "A Counter sale tab: scan or search medicines, bill a walk-in customer and take payment. Schedule E1 medicines are never sold here. Needs \"Pharmacy bills\"."
+      },
+      "pharmacy_reports": {
+        "label": "Pharmacy reports",
+        "help": "A Reports tab: what to buy, daily report, top selling, slow medicines, margin and GST of pharmacy bills."
+      },
+      "pharmacy_hold_bills": {
+        "label": "Hold a counter bill",
+        "help": "On the Counter sale tab, put a bill on hold and finish it later (kept in this browser only)."
       }
     },
     "choices": {
@@ -1739,7 +1748,14 @@
     "clear": "Clear",
     "makeBill": "Make bill ({{count}})",
     "phoneInvalid": "Mobile number must be 10 digits (or leave it empty).",
-    "next": "Next customer"
+    "next": "Next customer",
+    "hold": "Hold",
+    "held": "Held bills",
+    "resume": "Resume",
+    "heldNone": "No held bills",
+    "heldSaved": "Bill put on hold",
+    "resumed": "Bill resumed",
+    "discard": "Remove"
   },
   "reports": {
     "title": "Reports",
@@ -1924,5 +1940,54 @@
       "empty": "No therapies yet. Add the starting list (Abhyanga, Shirodhara, Virechana ...) and change it as you like."
     },
     "off": "Panchakarma and therapy is switched off for this branch. Switch it on in Settings, Modules."
+  },
+  "pharmacyReports": {
+    "choose": "Report",
+    "dates": "Dates",
+    "empty": "Nothing to show for this report.",
+    "offNote": "Not sold for the last 90 days.",
+    "reorderNote": "Medicines at or below their reorder level. The suggested quantity brings stock up to twice the level.",
+    "marginNote": "Sales without GST minus buying price. Medicines with no buying price are left out.",
+    "gstNote": "Pharmacy bills only, after returns. Please check the figures with your CA.",
+    "titles": {
+      "reorder": "What to buy (reorder list)",
+      "daily": "Daily pharmacy report",
+      "top_selling": "Top selling medicines",
+      "non_moving": "Slow / non-moving medicines",
+      "margin": "Margin (profit)",
+      "gst": "GST of pharmacy bills"
+    },
+    "cols": {
+      "name": "Medicine",
+      "usable": "In stock",
+      "level": "Reorder level",
+      "suggested": "Suggested to buy",
+      "supplier": "Last supplier",
+      "last_rate": "Last buying price",
+      "date": "Date",
+      "bills": "Bills",
+      "gross": "Before discount",
+      "discount": "Discount",
+      "billed": "Billed",
+      "returns": "Returns (credit notes)",
+      "net": "Net sales",
+      "cash": "Cash received",
+      "upi": "UPI received",
+      "card": "Card received",
+      "purchases": "Purchases",
+      "qty": "Packs sold",
+      "value": "Sales value",
+      "available": "In stock",
+      "stock_value": "Stock value (buying price)",
+      "sales": "Sales (without GST)",
+      "cost": "Buying price",
+      "margin": "Margin",
+      "code": "HSN code",
+      "rate": "GST rate",
+      "taxable": "Taxable value (after returns)",
+      "cgst": "CGST",
+      "sgst": "SGST",
+      "tax": "Total GST"
+    }
   }
 }

@@ -57,6 +57,8 @@
 | `backend/templates/documents/` | Print/PDF templates. `invoice.html` = OPD / pharmacy bill and credit note, `medicine_label.html` = patient medicine labels, `stock_label.html` = pharmacy stock labels (barcode) | **SAFE TO EDIT** |
 | `backend/apps/pharmacy/labels.py` | Patient medicine labels: which fields, sizes (`FORMATS`), words in GU/HI (`WORDS`) | ASK FIRST |
 | `backend/apps/pharmacy/stock_labels.py` | Pharmacy stock labels: sizes (`FORMATS`), barcode, most labels at once (`MAX_LABELS`) | ASK FIRST |
+| `backend/apps/pharmacy/reports.py` | Pharmacy reports (what to buy, daily, top selling, slow, margin, GST). `REORDER_TARGET` and `SLOW_DAYS` at the top can be changed | ASK FIRST |
+| `frontend/src/pages/pharmacy/ReportsTab.tsx` | The Reports tab of the pharmacy | ASK FIRST |
 | `frontend/src/pages/pharmacy/CounterSaleTab.tsx` | Counter sale screen (walk-in customers, scan and bill) | ASK FIRST |
 
 ## frontend/ (React, TypeScript)

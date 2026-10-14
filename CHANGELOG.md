@@ -2,6 +2,17 @@
 
 What changed in each step, in plain words.
 
+## Pharmacy reports and held bills (2026-10-15)
+
+- Compared our pharmacy with Healthray Pharmacy (see `docs/PHARMACY_HEALTHRAY_COMPARE.md`). We already had most small-clinic
+  features (alerts, reorder level, batches and expiry, counter sale, returns, ledger, stock check), so only the gaps were built.
+- New **Reports** tab in the Pharmacy: *What to buy* (medicines at or below their reorder level, with a suggested quantity),
+  *Daily pharmacy report* (bills, discount, returns, cash / UPI / card received, purchases), *Top selling*, *Slow / non-moving*,
+  *Margin* and *GST of pharmacy bills*. Switch: Additional settings -> "Pharmacy reports" (off by default).
+- Counter sale: **Hold** a bill and resume it later (kept in this browser only). Switch: "Hold a counter bill" (off by default).
+- No database change. Not built on purpose: supplier dues / purchase payments (needs new fields - owner to decide),
+  multi-store transfer, insurance, purchase orders.
+
 ## Ayurveda case sheet: 7 medicines fit, English labels (2026-10-11)
 
 - Each medicine now takes two lines (name and dose, then Morning-Noon-Night boxes, days and how to take it), so up to
