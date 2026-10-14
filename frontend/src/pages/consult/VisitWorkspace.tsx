@@ -18,6 +18,7 @@ import type {
 } from '../../api/types';
 import { useAuth } from '../../auth/AuthContext';
 import { OpdBillModal } from '../billing/OpdBillModal';
+import { PlanTherapyButton } from '../therapy/PlanTherapyButton';
 import { PrintMenu } from './PrintMenu';
 import { genderAge } from '../patients/PatientsPage';
 import { VitalsTab } from '../patients/tabs/VitalsTab';
@@ -425,6 +426,7 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
               <PrintMenu visitId={visit.id} rxId={rx.id} hasFollowUp={!!draft.follow_up_date} patientName={p.full_name}
                 language={patient?.preferred_language} doctorId={visit.doctor} diagnoses={draft.diagnoses.map((d) => d.label)}
                 beforePrint={() => save()} />
+              <PlanTherapyButton patientId={p.id} patientName={p.full_name} visitId={visit.id} />
               {(can('billing.charge') || can('billing.create')) && (
                 <Tooltip title={t('consult.billHelp')}>
                   {hasFeature('opd_billing') && <Button size="small" onClick={() => setBillOpen(true)}>₹ {t('opd.visitBill')}</Button>}

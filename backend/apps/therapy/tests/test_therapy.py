@@ -145,3 +145,31 @@ def test_cancel_plan_frees_sessions_and_branch_isolation(on, org, roles, branch_
 @pytest.mark.django_db
 def test_pharmacist_cannot_see_therapy(on, org, roles, branch_a, pharmacist):
     assert client_for(pharmacist, branch_a).get("/api/v1/therapy-plans/").status_code == 403
+
+
+@pytest.mark.django_db
+def test_therapy_plan_prints_as_pdf_in_the_patient_language(on, org, roles, branch_a, doctor, therapist, room, patient, abhyanga):
+    c = client_for(doctor, branch_a)
+    plan = make_plan(c, patient, abhyanga, sessions=2, consent_taken=True)
+    c.post(f"/api/v1/therapy-plans/{plan['id']}/schedule/", {"item": plan["items"][0]["id"], "dates": [str(DAY)],
+                                                            "start_time": "10:00", "therapist": str(therapist.id)}, format="json")
+    for lang in ("en", "gu", "hi"):
+        res = c.get(f"/api/v1/documents/therapy-plan/{plan['id']}/?lang={lang}&preview=1")
+        assert res.status_code == 200 and res["Content-Type"] == "application/pdf" and res.content[:4] == b"%PDF", lang
+    assert client_for(therapist, branch_a).get(f"/api/v1/documents/therapy-plan/{plan['id']}/?preview=1").status_code == 200
+
+
+@pytest.mark.django_db
+def test_plan_can_be_linked_to_the_check_up_of_the_same_patient_only(on, org, roles, branch_a, doctor, patient, abhyanga):
+    from apps.emr.models import Visit
+
+    other = Patient.objects.create(organization=org, uhid="10", first_name="Anil", last_name="Mehta", gender="male", mobile="9876500010")
+    visit = Visit.objects.create(organization=org, branch=branch_a, patient=patient, doctor=doctor, visit_date=date.today())
+    c = client_for(doctor, branch_a)
+    item = [{"therapy": str(abhyanga.id), "stage": "purva", "sessions_planned": 2}]
+    ok = c.post("/api/v1/therapy-plans/", {"patient": str(patient.id), "visit": str(visit.id), "title": "A", "start_date": str(DAY),
+                                           "items": item}, format="json")
+    assert ok.status_code == 201 and str(ok.data["visit"]) == str(visit.id)
+    bad = c.post("/api/v1/therapy-plans/", {"patient": str(other.id), "visit": str(visit.id), "title": "B", "start_date": str(DAY),
+                                            "items": item}, format="json")
+    assert bad.status_code == 400 and "another patient" in str(bad.data)

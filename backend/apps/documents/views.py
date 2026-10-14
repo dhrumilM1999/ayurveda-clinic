@@ -1,7 +1,7 @@
 """
 Print-outs as PDF, certificates, WhatsApp share of a prescription, and the public "is this genuine?" check.
 
-GET /documents/<kind>/<id>/   kind: prescription (id = prescription), follow-up-card / prakriti (id = visit),
+GET /documents/<kind>/<id>/   kind: prescription (id = prescription), follow-up-card / prakriti (id = visit), therapy-plan (id = plan),
                               certificate (id = certificate).  ?size=a4|a5|a6  ?lang=en|gu|hi
                               ?preview=1 (on screen, not counted)  ?download=1
                               ?detail=1 (prescription only: the detailed prescription with the full check-up)
@@ -27,16 +27,17 @@ from .models import Certificate, IssuedDocument
 from .serializers import CertificateSerializer
 from .services import (
     SIZES, case_sheet_context, certificate_context, detailed_context, follow_up_context, issue, language_of, mark_printed, pad_for,
-    prakriti_context, prescription_context, render, verify_url, _qr,
+    prakriti_context, prescription_context, therapy_plan_context, render, verify_url, _qr,
 )
 from .words import words_for
 
-DEFAULT_SIZE = {"prescription": "a5", "follow-up-card": "a6", "prakriti": "a4", "certificate": "a4"}
+DEFAULT_SIZE = {"prescription": "a5", "follow-up-card": "a6", "prakriti": "a4", "certificate": "a4", "therapy-plan": "a4"}
 PERMISSIONS = {  # any one of these codes
     "prescription": ("prescriptions.view",),
     "follow-up-card": ("emr.view", "appointments.view"),
     "prakriti": ("emr.view",),
     "certificate": ("emr.view",),
+    "therapy-plan": ("therapy.view",),
 }
 
 
@@ -79,6 +80,14 @@ def _load(kind, request, pk):
         doc = issue("certificate", cert.id, branch=branch, patient=cert.patient, doctor=cert.doctor,
                     issued_on=cert.issued_on, number=cert.number)
         return cert, doc, "certificate.html", lambda lang: certificate_context(cert, lang), cert.patient
+    if kind == "therapy-plan":
+        from apps.therapy.models import TherapyPlan
+
+        plan = TherapyPlan.objects.filter(branch=branch, pk=pk).select_related("patient", "doctor", "branch__organization").first()
+        if plan is None:
+            raise NotFound("Therapy plan not found.")
+        doc = issue("therapy_plan", plan.id, branch=branch, patient=plan.patient, doctor=plan.doctor, issued_on=plan.start_date)
+        return plan, doc, "therapy_plan.html", lambda lang: therapy_plan_context(plan, lang), plan.patient
     raise NotFound("Unknown document.")
 
 

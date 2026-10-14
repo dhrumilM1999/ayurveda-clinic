@@ -312,6 +312,14 @@ def follow_up_context(visit, lang: str) -> dict:
             **letterhead(visit.branch, visit.doctor)}
 
 
+def therapy_plan_context(plan, lang: str) -> dict:
+    from apps.therapy.services import plan_print_data
+
+    w = words_for(lang)
+    return {"w": w, "lang": lang, "patient": _patient(plan.patient, w), "date": plan.start_date, "plan": plan,
+            **plan_print_data(plan, lang), **letterhead(plan.branch, plan.doctor)}
+
+
 def prakriti_context(visit, exam, lang: str) -> dict:
     w = words_for(lang)
     result = exam.result or {}

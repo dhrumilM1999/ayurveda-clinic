@@ -139,6 +139,11 @@ class TherapyPlanSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Patient not found.")
         return patient
 
+    def validate_visit(self, visit):
+        if visit is not None and visit.organization_id != self.context["request"].user.organization_id:
+            raise serializers.ValidationError("Check-up not found.")
+        return visit
+
     def validate_items(self, items):
         if not items:
             raise serializers.ValidationError("Add at least one therapy.")
@@ -151,6 +156,9 @@ class TherapyPlanSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if self.instance is None and "items" not in attrs:
             raise serializers.ValidationError({"items": "Add at least one therapy."})
+        visit, patient = attrs.get("visit"), attrs.get("patient")
+        if visit is not None and patient is not None and visit.patient_id != patient.id:
+            raise serializers.ValidationError({"visit": "This check-up belongs to another patient."})
         return attrs
 
     @transaction.atomic

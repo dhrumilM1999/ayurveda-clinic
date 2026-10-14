@@ -25,6 +25,7 @@ WORDS = {
         "prakriti_report": "Prakriti (body constitution) report", "prakriti_type": "Prakriti",
         "assessed_on": "Assessed on", "answered": "questions answered", "guidance": "General guidance",
         "vata": "Vata", "pitta": "Pitta", "kapha": "Kapha", "sama": "Sama (balanced)",
+        "therapy_plan": "Therapy plan", "plan_name": "Plan", "therapy": "Therapy", "sessions": "Sessions", "time": "Time", "therapist": "Therapist", "room": "Room", "schedule": "Booked sessions", "no_sessions_yet": "Sessions will be booked soon.", "before_after": "Before and after the therapy", "agreed_on": "Patient agreed on", "stage_purva": "Preparation (Purvakarma)", "stage_pradhana": "Main procedure (Pradhanakarma)", "stage_paschat": "After-care (Paschatkarma)", "stage_other": "Other therapy", "plan_note": "Please come on time, wear loose clothes and tell us about any fever, cold or new problem.",
     },
     "gu": {
         "prescription": "પ્રિસ્ક્રિપ્શન", "patient": "દર્દી", "age": "ઉંમર", "years": "વર્ષ", "date": "તારીખ",
@@ -45,6 +46,7 @@ WORDS = {
         "prakriti_report": "પ્રકૃતિ (શરીર પ્રકૃતિ) રિપોર્ટ", "prakriti_type": "પ્રકૃતિ",
         "assessed_on": "તપાસ તારીખ", "answered": "પ્રશ્નોના જવાબ", "guidance": "સામાન્ય માર્ગદર્શન",
         "vata": "વાત", "pitta": "પિત્ત", "kapha": "કફ", "sama": "સમ (સંતુલિત)",
+        "therapy_plan": "થેરાપી પ્લાન", "plan_name": "પ્લાન", "therapy": "થેરાપી", "sessions": "સેશન", "time": "સમય", "therapist": "થેરાપિસ્ટ", "room": "રૂમ", "schedule": "બુક થયેલા સેશન", "no_sessions_yet": "સેશન જલ્દી બુક થશે.", "before_after": "થેરાપી પહેલાં અને પછી", "agreed_on": "દર્દીની સંમતિ તારીખ", "stage_purva": "તૈયારી (પૂર્વકર્મ)", "stage_pradhana": "મુખ્ય પ્રક્રિયા (પ્રધાનકર્મ)", "stage_paschat": "પછીની કાળજી (પશ્ચાત્કર્મ)", "stage_other": "અન્ય થેરાપી", "plan_note": "કૃપા કરી સમયસર આવો, ઢીલાં કપડાં પહેરો અને તાવ, શરદી કે નવી તકલીફ હોય તો જણાવો.",
     },
     "hi": {
         "prescription": "प्रिस्क्रिप्शन", "patient": "मरीज़", "age": "उम्र", "years": "वर्ष", "date": "तारीख़",
@@ -65,6 +67,7 @@ WORDS = {
         "prakriti_report": "प्रकृति (शरीर प्रकृति) रिपोर्ट", "prakriti_type": "प्रकृति",
         "assessed_on": "जाँच तारीख़", "answered": "प्रश्नों के उत्तर", "guidance": "सामान्य मार्गदर्शन",
         "vata": "वात", "pitta": "पित्त", "kapha": "कफ", "sama": "सम (संतुलित)",
+        "therapy_plan": "थेरेपी प्लान", "plan_name": "प्लान", "therapy": "थेरेपी", "sessions": "सेशन", "time": "समय", "therapist": "थेरेपिस्ट", "room": "कमरा", "schedule": "बुक किए गए सेशन", "no_sessions_yet": "सेशन जल्दी बुक होंगे।", "before_after": "थेरेपी से पहले और बाद में", "agreed_on": "मरीज़ की सहमति की तारीख़", "stage_purva": "तैयारी (पूर्वकर्म)", "stage_pradhana": "मुख्य प्रक्रिया (प्रधानकर्म)", "stage_paschat": "बाद की देखभाल (पश्चातकर्म)", "stage_other": "अन्य थेरेपी", "plan_note": "कृपया समय पर आएँ, ढीले कपड़े पहनें और बुखार, सर्दी या कोई नई तकलीफ़ हो तो बताएँ।",
     },
 }
 

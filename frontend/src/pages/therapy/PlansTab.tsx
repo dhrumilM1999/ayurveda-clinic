@@ -1,6 +1,6 @@
 // Therapy plans: what the doctor advised for a patient (e.g. a Virechana course), how many sessions of each
 // therapy, and booking the sessions with a therapist and a room. SAFE TO EDIT: the words are in src/i18n/*.json under "therapy".
-import { CalendarOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { CalendarOutlined, MinusCircleOutlined, PlusOutlined, PrinterOutlined } from '@ant-design/icons';
 import { App, Button, Checkbox, DatePicker, Descriptions, Drawer, Form, Input, InputNumber, Modal, Popconfirm, Progress, Select, Space, Table, TimePicker, Typography } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { useCallback, useEffect, useState } from 'react';
@@ -9,6 +9,7 @@ import { api, errorMessage } from '../../api/client';
 import type { TherapyOptions, TherapyPlan, TherapyPlanItem, TherapyType } from '../../api/types';
 import { useList } from '../../api/useList';
 import { useAuth } from '../../auth/AuthContext';
+import { DocumentModal } from '../../components/BillPreview';
 import { PatientCell, PatientPicker } from '../appointments/shared';
 import { PlanStatusTag, STAGES, StageTag, useTherapyName } from './common';
 
@@ -60,8 +61,11 @@ export default function PlansTab({ therapies }: { therapies: TherapyType[] }) {
 }
 
 /** New plan: patient, name, start date, the therapies and how many sessions of each. */
-function PlanForm({ open, therapies, onClose, onSaved }: {
+export function PlanForm({ open, therapies, onClose, onSaved, patient, visit }: {
   open: boolean; therapies: TherapyType[]; onClose: () => void; onSaved: (plan: TherapyPlan) => void;
+  /** Patient already known (from the check-up screen) */
+  patient?: { id: string; label: string };
+  visit?: string;
 }) {
   const { t } = useTranslation();
   const { message } = App.useApp();
@@ -70,8 +74,8 @@ function PlanForm({ open, therapies, onClose, onSaved }: {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (open) form.setFieldsValue({ patient: undefined, title: '', start_date: dayjs(), items: [{}], consent_taken: false, notes: '' });
-  }, [open, form]);
+    if (open) form.setFieldsValue({ patient: patient?.id, title: '', start_date: dayjs(), items: [{}], consent_taken: false, notes: '' });
+  }, [open, form, patient?.id]);
 
   const options = therapies.filter((x) => x.is_active).map((x) => ({ value: x.id, label: name(x) }));
   const onTherapyChange = (index: number, id: string) => {
@@ -89,7 +93,7 @@ function PlanForm({ open, therapies, onClose, onSaved }: {
     try {
       const { data } = await api.post<TherapyPlan>('/therapy-plans/', {
         patient: v.patient, title: v.title, start_date: (v.start_date as Dayjs).format('YYYY-MM-DD'),
-        notes: v.notes || '', consent_taken: !!v.consent_taken, items,
+        notes: v.notes || '', consent_taken: !!v.consent_taken, items, ...(visit ? { visit } : {}),
       });
       message.success(t('common.saved'));
       onSaved(data);
@@ -105,7 +109,7 @@ function PlanForm({ open, therapies, onClose, onSaved }: {
       okText={t('common.save')}>
       <Form form={form} layout="vertical">
         <Form.Item name="patient" label={t('therapy.plan.patient')} rules={[{ required: true, message: t('common.required') }]}>
-          <PatientPicker />
+          <PatientPicker initial={patient} />
         </Form.Item>
         <Space align="start" wrap style={{ width: '100%' }}>
           <Form.Item name="title" label={t('therapy.plan.title')} rules={[{ required: true, message: t('common.required') }]} style={{ minWidth: 340 }}>
@@ -154,6 +158,7 @@ function PlanDrawer({ id, therapies, onClose, onChanged, canManage }: {
   const name = useTherapyName();
   const [plan, setPlan] = useState<TherapyPlan | null>(null);
   const [booking, setBooking] = useState<TherapyPlanItem | null>(null);
+  const [printing, setPrinting] = useState(false);
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -176,9 +181,14 @@ function PlanDrawer({ id, therapies, onClose, onChanged, canManage }: {
   const closed = !plan || plan.status === 'completed' || plan.status === 'cancelled';
   return (
     <Drawer open={!!id} onClose={onClose} width={640} title={plan?.title ?? t('therapy.plan.edit')} destroyOnHidden
-      extra={plan && canManage && plan.status !== 'cancelled' && plan.status !== 'completed' ? (
-        <Popconfirm title={t('therapy.plan.cancelAsk')} onConfirm={cancelPlan}><Button danger>{t('therapy.plan.cancelPlan')}</Button></Popconfirm>
-      ) : null}>
+      extra={plan && (
+        <Space>
+          <Button icon={<PrinterOutlined />} onClick={() => setPrinting(true)}>{t('therapy.plan.print')}</Button>
+          {canManage && plan.status !== 'cancelled' && plan.status !== 'completed' && (
+            <Popconfirm title={t('therapy.plan.cancelAsk')} onConfirm={cancelPlan}><Button danger>{t('therapy.plan.cancelPlan')}</Button></Popconfirm>
+          )}
+        </Space>
+      )}>
       {plan && (
         <>
           <Descriptions size="small" column={1} style={{ marginBottom: 12 }}>
@@ -208,6 +218,9 @@ function PlanDrawer({ id, therapies, onClose, onChanged, canManage }: {
               },
             ]}
           />
+          {printing && (
+            <DocumentModal kind="therapy-plan" id={plan.id} title={plan.title} language={undefined} onClose={() => setPrinting(false)} />
+          )}
           <BookModal plan={plan} item={booking} therapies={therapies} onClose={() => setBooking(null)}
             onBooked={() => { setBooking(null); load(); onChanged(); }} />
         </>

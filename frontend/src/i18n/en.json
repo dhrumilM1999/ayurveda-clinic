@@ -1889,7 +1889,10 @@
       "cancelAsk": "Cancel this plan? Booked sessions are cancelled; done sessions stay.",
       "booked": "{{booked}} of {{total}} booked, {{done}} done",
       "needItem": "Add at least one therapy.",
-      "doctor": "Doctor"
+      "doctor": "Doctor",
+      "print": "Print plan",
+      "planTherapy": "Plan therapy",
+      "planned": "Therapy plan saved. Book its sessions in Panchakarma, Therapy plans."
     },
     "book": {
       "title": "Book sessions: {{name}}",

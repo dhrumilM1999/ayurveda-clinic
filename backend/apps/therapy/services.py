@@ -12,7 +12,7 @@ from rest_framework.exceptions import ValidationError
 
 from apps.accounts.models import User
 
-from .catalog import THERAPIES
+from .catalog import INSTRUCTIONS, THERAPIES
 from .models import BUSY_STATUSES, TherapySession, TherapyType
 
 
@@ -73,7 +73,8 @@ def load_sample_therapies(organization) -> int:
         if name in existing:
             continue
         TherapyType.objects.create(organization=organization, name=name, name_gu=gu, name_hi=hi, stage=stage,
-                                   duration_minutes=minutes, default_material=material, sort_order=order, is_sample=True)
+                                   duration_minutes=minutes, default_material=material, sort_order=order, is_sample=True,
+                                   instructions=INSTRUCTIONS.get(name, ""))
         added += 1
     return added
 
@@ -89,3 +90,22 @@ def refresh_plan_status(plan):
     if new != plan.status:
         plan.status = new
         plan.save(update_fields=["status", "updated_at"])
+
+
+def plan_print_data(plan, lang: str) -> dict:
+    """Plain data for the printed therapy plan: therapies (in the patient's language), booked sessions."""
+
+    def pick(t):
+        return (getattr(t, f"name_{lang}", "") if lang in ("gu", "hi") else "") or t.name
+
+    items = []
+    for item in plan.items.select_related("therapy").all():
+        items.append({"name": pick(item.therapy), "stage": item.stage, "sessions": item.sessions_planned,
+                      "instructions": item.therapy.instructions, "notes": item.notes})
+    sessions = [
+        {"date": s.date, "start": s.start_time, "end": s.end_time, "therapy": pick(s.therapy),
+         "therapist": s.therapist.full_name if s.therapist else "", "room": s.room.name if s.room else ""}
+        for s in plan.sessions.exclude(status__in=["cancelled", "missed"]).select_related("therapy", "therapist", "room")
+        .order_by("date", "start_time")
+    ]
+    return {"items": items, "sessions": sessions, "has_instructions": any(i["instructions"] for i in items)}
