@@ -21,7 +21,8 @@
     "loadFailed": "Could not load data. Please try again.",
     "noAccessTitle": "No access",
     "noAccessText": "You don't have permission to open this screen in this branch.",
-    "notFound": "This page does not exist."
+    "notFound": "This page does not exist.",
+    "delete": "Delete"
   },
   "login": {
     "username": "Username",
@@ -70,7 +71,10 @@
     "pharmacy": "Pharmacy",
     "additional": "Additional settings",
     "fees": "Fees & services",
-    "billing": "Billing"
+    "billing": "Billing",
+    "enquiries": "Online enquiry",
+    "reports": "Reports",
+    "therapy": "Panchakarma"
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",
@@ -219,7 +223,7 @@
     "features": "Modules in {{branch}}",
     "featuresHelp": "Switch modules on or off for this branch only. Useful to try a new feature in one branch first.",
     "uhidPrefix": "Patient ID prefix",
-    "uhidPrefixHelp": "Letters at the start of every patient ID, e.g. AY → AY26-000001",
+    "uhidPrefixHelp": "Optional letters before the patient number. Empty gives plain numbers: 44. With AY: AY44",
     "uhidPrefixInvalid": "Use 1 to 6 letters or numbers",
     "multiBranch": "Use more than one branch",
     "multiBranchHelp": "Off: the software works with your main branch only (no branch picker). Turn on when you open a second branch. No data is lost either way.",
@@ -357,7 +361,9 @@
     "reports_view": "See reports",
     "ai_use": "Use AI helpers",
     "billing_charge": "Add consultation, services and charges to a patient's OPD bill",
-    "billing_manage": "Edit consultation fees and the services & charges list"
+    "billing_manage": "Edit consultation fees and the services & charges list",
+    "enquiries.view": "See online enquiries (website, phone)",
+    "enquiries.manage": "Follow up, record and close enquiries"
   },
   "patients": {
     "title": "Patients",
@@ -772,7 +778,25 @@
       "before": "Before",
       "progress": "During",
       "after": "After"
-    }
+    },
+    "appointmentsTitle": "Appointments",
+    "previousDay": "Previous day",
+    "nextDay": "Next day",
+    "searchList": "Search name, ID, reason",
+    "noMatch": "No patient matches.",
+    "newTag": "New patient",
+    "followUpTag": "Follow-up",
+    "waitingMin": "Waiting {{n}} min",
+    "dueTag": "Due {{amount}}",
+    "filter": {
+      "all": "All",
+      "waiting": "Waiting",
+      "withDoctor": "With doctor",
+      "booked": "Booked",
+      "done": "Done"
+    },
+    "walkInTag": "Walk-in",
+    "bookedTag": "Booked"
   },
   "templatesAdmin": {
     "title": "Check-up templates",
@@ -835,6 +859,7 @@
     "editTitle": "Edit: {{name}}",
     "classicalHelp": "Official name from the Ayurvedic Formulary / Pharmacopoeia of India, with its reference.",
     "proprietaryHelp": "A company's brand. Link it to its classical equivalent if there is one.",
+    "homeopathyHelp": "Homeopathy remedies in a potency (30C, 200C, Q ...). Check the list with your homeopath or pharmacist.",
     "officialName": "Official name",
     "brandName": "Brand name",
     "nameGu": "Name in Gujarati",
@@ -869,7 +894,8 @@
     "kinds": {
       "all": "All",
       "classical": "Classical",
-      "proprietary": "Patent & Proprietary"
+      "proprietary": "Patent & Proprietary",
+      "homeopathy": "Homeopathy"
     },
     "flagShort": {
       "schedule_e1": "E1",
@@ -994,7 +1020,8 @@
       "bills": "Bills",
       "check": "Stock check",
       "ledger": "Stock ledger",
-      "setup": "Racks & suppliers"
+      "setup": "Racks & suppliers",
+      "counter": "Counter sale"
     },
     "status": {
       "pending": "To give",
@@ -1190,7 +1217,7 @@
     "returnDoneNoBill": "Returned. Stock updated.",
     "returnToSupplier": "Return to supplier",
     "returnToSupplierTitle": "Return to supplier: {{name}} / {{batch}}",
-    "salesHelp": "Medicines given against prescriptions. Use Return when a patient brings medicines back.",
+    "salesHelp": "Prescription sales and counter sales. Use Return when a customer brings medicines back.",
     "saveCounts": "Save counts",
     "scanNotInRx": "{{name}} is not in this prescription",
     "scanPlaceholder": "Scan barcode or type batch no.",
@@ -1215,7 +1242,12 @@
     "type": "Type",
     "units": "Units",
     "giveToOpd_one": "Give {{count}} medicine & add to OPD bill",
-    "giveToOpd_other": "Give {{count}} medicines & add to OPD bill"
+    "giveToOpd_other": "Give {{count}} medicines & add to OPD bill",
+    "counterSale": "Counter sale",
+    "e1NeedsRx": "{{name}} is a Schedule E1 medicine: sell it only against a doctor's prescription.",
+    "addedExtra": "{{name}} added (not on the prescription).",
+    "notOnRx": "Not on prescription",
+    "outOfStockName": "{{name}}: no stock that can be sold."
   },
   "billing": {
     "status": {
@@ -1307,11 +1339,22 @@
     "needs": "Needs: {{name}}",
     "groups": {
       "pharmacy": "Pharmacy and stock",
+      "medicines": "Medicines",
       "billing": "Billing",
       "stock": "Medicine stock",
-      "labels": "Medicine labels"
+      "labels": "Patient medicine labels",
+      "stock_labels": "Pharmacy stock labels",
+      "enquiries": "Online enquiry"
     },
     "features": {
+      "opd_billing": {
+        "label": "OPD bills (consultation and services)",
+        "help": "Make OPD bills for consultation fees and services (Agnikarma, Abhyanga ...), take payments, print. On by default. Off: the OPD bill buttons and the OPD collection card are hidden (nothing saved is deleted)."
+      },
+      "medicines_homeopathy": {
+        "label": "Homeopathy medicines",
+        "help": "Shows homeopathy remedies, mother tinctures and biochemic salts in the Medicines list and on the prescription screen. Off: they are hidden (nothing is deleted)."
+      },
       "pharmacy_billing": {
         "label": "Pharmacy bills, payments and printing",
         "help": "Dispensing makes a GST bill; take cash / UPI / card payments, print bills, UPI QR code, Bills tab with day closing. Off: medicines are only given, no bill."
@@ -1389,7 +1432,7 @@
         "help": "Supplier list and the supplier on purchases."
       },
       "medicine_labels": {
-        "label": "Medicine labels",
+        "label": "Patient medicine labels",
         "help": "Print a small label for each medicine given (from the pharmacy or the prescription). Medicine name, dose, days and instructions are always printed."
       },
       "label_patient": {
@@ -1435,6 +1478,18 @@
       "label_clinic": {
         "label": "Label: clinic / pharmacy name",
         "help": ""
+      },
+      "online_enquiry": {
+        "label": "Online enquiry from the clinic website",
+        "help": "Shows a public form (/enquiry) for your website and an Online enquiry screen where the front desk follows up. Off: the form is closed and the screen is hidden."
+      },
+      "pharmacy_stock_labels": {
+        "label": "Pharmacy stock labels (barcode)",
+        "help": "Labels for medicine packs on the shelf: medicine, pack, MRP, GST, batch, expiry and a barcode. No patient details. Print them from Stock (Labels button on a batch). Needs \"Barcodes and scanning\"."
+      },
+      "pharmacy_counter_sale": {
+        "label": "Counter sale (without a prescription)",
+        "help": "A Counter sale tab: scan or search medicines, bill a walk-in customer and take payment. Schedule E1 medicines are never sold here. Needs \"Pharmacy bills\"."
       }
     },
     "choices": {
@@ -1445,6 +1500,14 @@
           "compact": "Compact",
           "standard": "Standard",
           "detailed": "Detailed"
+        }
+      },
+      "stock_label_format": {
+        "label": "Stock label size",
+        "help": "Small 50 × 25 mm or large 75 × 50 mm (adds the clinic name and HSN). You can change it in the print popup too.",
+        "options": {
+          "compact": "Small 50 × 25 mm",
+          "standard": "Large 75 × 50 mm"
         }
       }
     }
@@ -1580,5 +1643,286 @@
       "follow_up_card": "Follow-up card",
       "prakriti_report": "Prakriti report"
     }
+  },
+  "enquiry": {
+    "title": "Ask for an appointment",
+    "subtitle": "Tell us a little about yourself and our team at {{clinic}} will call you.",
+    "name": "Your name",
+    "phone": "Mobile number",
+    "phoneInvalid": "Enter a 10-digit mobile number",
+    "email": "Email (optional)",
+    "emailInvalid": "Enter a valid email",
+    "branch": "Which branch",
+    "concern": "What is the problem about?",
+    "message": "Anything else we should know?",
+    "messageHelp": "Please do not write private medical reports here.",
+    "preferredDate": "Preferred date",
+    "preferredTime": "Preferred time",
+    "time": {
+      "any": "Any time",
+      "morning": "Morning",
+      "evening": "Evening"
+    },
+    "consent": "I agree that {{clinic}} may call or message me about this enquiry.",
+    "consentRequired": "Please agree so that we can contact you.",
+    "send": "Send enquiry",
+    "privacy": "We use your details only to contact you about this enquiry.",
+    "failed": "Could not send. Please try again.",
+    "thanksTitle": "Thank you!",
+    "thanksHelp": "We have received your enquiry. Our team will contact you soon.",
+    "callUs": "Or call us: {{phone}}",
+    "closedTitle": "Online enquiries are closed",
+    "closedHelp": "Please call the clinic to book an appointment.",
+    "pageTitle": "Online enquiry",
+    "pageSubtitle": "People who asked for an appointment on the website, by phone or at the desk.",
+    "websiteTitle": "Link for your website",
+    "websiteHelp": "Put this link on the clinic website, or show the form inside the page with the embed code.",
+    "copyLink": "Copy link",
+    "copyEmbed": "Copy embed code",
+    "openForm": "Open the form",
+    "copied": "Copied",
+    "search": "Search name, mobile, problem",
+    "addPhone": "Add phone enquiry",
+    "empty": "No enquiries here.",
+    "call": "Call",
+    "register": "Register patient",
+    "notes": "Notes",
+    "followUpOn": "Call again on",
+    "patientTag": "Patient {{uhid}}",
+    "waText": "Namaste {{name}}, thank you for your enquiry. When would you like to visit the clinic?",
+    "status": {
+      "open": "Open",
+      "new": "New",
+      "contacted": "Contacted",
+      "appointment": "Appointment booked",
+      "not_interested": "Not interested",
+      "closed": "Closed",
+      "all": "All"
+    },
+    "source": {
+      "website": "Website",
+      "phone": "Phone",
+      "walk_in": "Walk-in",
+      "other": "Other"
+    },
+    "col": {
+      "received": "Received",
+      "who": "Who",
+      "about": "About",
+      "wants": "Wants to come",
+      "status": "Status",
+      "source": "Source"
+    }
+  },
+  "stockLabels": {
+    "button": "Labels",
+    "title": "Stock labels: {{name}}",
+    "show": "Show labels",
+    "help": "One label for each pack: medicine, pack, MRP, GST, batch, expiry and a barcode. Scanning it at billing adds this batch.",
+    "howMany": "How many labels?",
+    "size": {
+      "compact": "Small 50 × 25 mm",
+      "standard": "Large 75 × 50 mm"
+    }
+  },
+  "counter": {
+    "title": "Counter sale",
+    "scanPlaceholder": "Scan the barcode on the label",
+    "searchPlaceholder": "Or search a medicine by name",
+    "customerName": "Customer name (optional)",
+    "customerPhone": "Mobile (optional)",
+    "help": "For a customer without a prescription. Scan the same pack again to add one more. Schedule E1 medicines need a prescription.",
+    "empty": "Scan a stock label or search a medicine to start.",
+    "price": "Price",
+    "confirmSell": "Sell {{count}} medicine(s) to {{name}}.",
+    "walkIn": "a walk-in customer",
+    "clear": "Clear",
+    "makeBill": "Make bill ({{count}})",
+    "phoneInvalid": "Mobile number must be 10 digits (or leave it empty).",
+    "next": "Next customer"
+  },
+  "reports": {
+    "title": "Reports",
+    "subtitle": "Money, doctors, patients and GST for any dates. Download as Excel or PDF.",
+    "nothingAllowed": "You may not see any report in this branch. An admin can allow it on the Roles screen.",
+    "excel": "Excel",
+    "pdf": "PDF",
+    "empty": "Nothing in these dates.",
+    "total": "Total",
+    "currentBranch": "This branch ({{name}})",
+    "allBranches": "All branches",
+    "missedCount": "Missed follow-ups",
+    "kinds": {
+      "collection": "Collection",
+      "by_doctor": "Income by doctor",
+      "by_branch": "Income by branch",
+      "patients": "New vs repeat patients",
+      "follow_ups": "Missed follow-ups",
+      "gst": "GST summary"
+    },
+    "help": {
+      "collection": "Money received each day or month: cash, UPI and card, minus refunds. Same figures as the day closing.",
+      "by_doctor": "Bills of each doctor: consultation, services and medicines; billed, received and still due. Pharmacy bills count for the doctor who wrote the prescription.",
+      "by_branch": "The same figures for each branch, to compare them.",
+      "patients": "Patients seen: new cases (first check-up ever with the clinic) and follow-ups (seen before).",
+      "follow_ups": "The follow-up date has passed and the patient has not come back. Call or message them.",
+      "gst": "Taxable value and GST for each HSN / SAC code and rate, minus credit notes. Confirm with your CA before filing."
+    },
+    "range": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "thisMonth": "This month",
+      "lastMonth": "Last month",
+      "thisYear": "This financial year"
+    },
+    "group": {
+      "day": "Day-wise",
+      "month": "Month-wise"
+    },
+    "cols": {
+      "date": "Date",
+      "month": "Month",
+      "doctor": "Doctor",
+      "branch": "Branch",
+      "bills": "Bills",
+      "cash": "Cash",
+      "upi": "UPI",
+      "card": "Card",
+      "received": "Received",
+      "refunds": "Refunds",
+      "net": "Net collection",
+      "consultation": "Consultation",
+      "services": "Services & therapy",
+      "medicines": "Medicines",
+      "round_off": "Round off",
+      "billed": "Billed (after returns)",
+      "due": "Still due",
+      "visits": "Check-ups",
+      "patients": "Patients",
+      "new": "New cases",
+      "repeat": "Follow-ups (repeat)",
+      "repeat_percent": "Repeat %",
+      "patient": "Patient",
+      "uhid": "UHID",
+      "phone": "Phone",
+      "last_visit": "Last check-up",
+      "follow_up": "Follow-up was due",
+      "days_late": "Days late",
+      "code": "HSN / SAC",
+      "rate": "GST rate",
+      "taxable": "Taxable value",
+      "cgst": "CGST",
+      "sgst": "SGST",
+      "credit_taxable": "Credit notes: taxable",
+      "credit_tax": "Credit notes: GST",
+      "net_taxable": "Net taxable",
+      "net_tax": "Net GST"
+    }
+  },
+  "therapy": {
+    "title": "Panchakarma and therapy",
+    "subtitle": "Therapy plans, the sessions of the day, therapists and rooms",
+    "tabs": {
+      "sessions": "Sessions",
+      "plans": "Therapy plans",
+      "list": "Therapies"
+    },
+    "stage": {
+      "purva": "Purvakarma (preparation)",
+      "pradhana": "Pradhanakarma (main procedure)",
+      "paschat": "Paschatkarma (after-care)",
+      "other": "Other therapy"
+    },
+    "status": {
+      "scheduled": "Booked",
+      "in_progress": "In progress",
+      "done": "Done",
+      "missed": "Did not come",
+      "cancelled": "Cancelled"
+    },
+    "planStatus": {
+      "planned": "Planned",
+      "active": "Running",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "day": "Day",
+    "allTherapists": "All therapists",
+    "allRooms": "All rooms",
+    "noSessions": "No sessions on this day.",
+    "noPlans": "No therapy plans yet.",
+    "anyone": "Not decided",
+    "noRoom": "No room",
+    "start": "Start",
+    "finish": "Record and finish",
+    "missed": "Did not come",
+    "cancel": "Cancel session",
+    "cancelAsk": "Cancel this session?",
+    "sessionNo": "Session {{n}} of {{total}}",
+    "record": {
+      "title": "Record the session",
+      "material": "Oil / material used",
+      "quantity": "Quantity (ml)",
+      "response": "How did the patient feel?",
+      "notes": "Notes",
+      "save": "Save and mark done",
+      "help": "Written for the doctor to read at the next visit."
+    },
+    "plan": {
+      "new": "New therapy plan",
+      "edit": "Therapy plan",
+      "title": "Plan name",
+      "titlePlaceholder": "e.g. Virechana course, Knee Basti 7 days",
+      "patient": "Patient",
+      "startDate": "Start date",
+      "items": "Therapies in this plan",
+      "addTherapy": "Add therapy",
+      "therapy": "Therapy",
+      "sessionsPlanned": "Sessions",
+      "consent": "The patient agrees to these procedures",
+      "consentOn": "Agreed on {{date}}",
+      "notes": "Doctor's notes for the therapist",
+      "book": "Book sessions",
+      "progress": "{{done}} of {{total}} sessions done",
+      "estimate": "Estimated price: {{amount}}",
+      "cancelPlan": "Cancel plan",
+      "cancelAsk": "Cancel this plan? Booked sessions are cancelled; done sessions stay.",
+      "booked": "{{booked}} of {{total}} booked, {{done}} done",
+      "needItem": "Add at least one therapy.",
+      "doctor": "Doctor",
+      "print": "Print plan",
+      "planTherapy": "Plan therapy",
+      "planned": "Therapy plan saved. Book its sessions in Panchakarma, Therapy plans."
+    },
+    "book": {
+      "title": "Book sessions: {{name}}",
+      "dates": "Days",
+      "datesHelp": "Pick every day this therapy should be done.",
+      "time": "Start time",
+      "therapist": "Therapist",
+      "room": "Room",
+      "save": "Book",
+      "left": "{{n}} more session(s) can be booked.",
+      "none": "All sessions are booked.",
+      "done": "{{n}} session(s) booked."
+    },
+    "list": {
+      "add": "Add therapy",
+      "edit": "Edit therapy",
+      "name": "Name (English)",
+      "nameGu": "Name (Gujarati)",
+      "nameHi": "Name (Hindi)",
+      "stage": "Stage",
+      "minutes": "Minutes",
+      "material": "Usual oil / material",
+      "instructions": "What the patient should do before and after",
+      "service": "Price from Services & charges",
+      "noService": "No price yet",
+      "active": "In use",
+      "loadSample": "Add the starting list",
+      "loadedN": "{{n}} therapies added.",
+      "empty": "No therapies yet. Add the starting list (Abhyanga, Shirodhara, Virechana ...) and change it as you like."
+    },
+    "off": "Panchakarma and therapy is switched off for this branch. Switch it on in Settings, Modules."
   }
 }

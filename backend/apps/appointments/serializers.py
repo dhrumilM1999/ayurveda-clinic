@@ -44,6 +44,8 @@ class OpdBillFieldMixin:
 
 
 class AppointmentSerializer(OpdBillFieldMixin, serializers.ModelSerializer):
+    # How many check-ups the patient had before this day (0 = new patient, more = follow-up)
+    previous_visits = serializers.IntegerField(read_only=True, default=0)
     patient_detail = serializers.SerializerMethodField()
     # Short OPD bill status (only for staff who may see or make bills)
     opd_bill = serializers.SerializerMethodField()
@@ -56,7 +58,7 @@ class AppointmentSerializer(OpdBillFieldMixin, serializers.ModelSerializer):
             "id", "patient", "patient_detail", "doctor", "doctor_name", "branch", "branch_name",
             "date", "start_time", "end_time", "kind", "status", "token_number", "reason", "notes",
             "checked_in_at", "consultation_started_at", "completed_at", "cancelled_at", "cancel_reason",
-            "reschedule_count", "created_at", "opd_bill",
+            "reschedule_count", "created_at", "opd_bill", "previous_visits",
         ]
         read_only_fields = [
             "id", "branch", "end_time", "status", "token_number", "checked_in_at",

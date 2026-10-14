@@ -1,8 +1,9 @@
 """
 The medicine list (master), shared by all branches. ASK FIRST before changing these models.
 
-- Two kinds: CLASSICAL (official name from the Ayurvedic Formulary / Pharmacopoeia of India, with reference)
+- Kinds: CLASSICAL (official name from the Ayurvedic Formulary / Pharmacopoeia of India, with reference)
   and PROPRIETARY (patent & proprietary brand, with manufacturer). A brand can point to its classical equivalent.
+  HOMEOPATHY (optional extra): remedies in a potency (30C, 200C, Q ...), biochemic salts and ointments.
 - Synonyms (Sanskrit, English, Hindi, Gujarati names) make searching easy.
 - Every change is kept in MedicineVersion, so old prescriptions keep exactly what was prescribed.
 - Each branch can change the price and switch a medicine off (BranchMedicine).
@@ -14,7 +15,8 @@ from django.db.models import Q
 
 from apps.common.models import BranchScopedModel, OrgScopedModel
 
-KIND_CHOICES = [("classical", "Classical"), ("proprietary", "Patent & Proprietary")]
+# "homeopathy" is an optional extra: shown only when "Homeopathy medicines" is on in Additional settings
+KIND_CHOICES = [("classical", "Classical"), ("proprietary", "Patent & Proprietary"), ("homeopathy", "Homeopathy")]
 
 
 class Medicine(OrgScopedModel):

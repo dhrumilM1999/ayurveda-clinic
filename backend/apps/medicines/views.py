@@ -7,6 +7,7 @@ from rest_framework.response import Response
 
 from apps.audit.services import log_action
 from apps.common.viewsets import AuditedModelViewSet, snapshot as audit_snapshot
+from apps.organizations.services import is_feature_enabled
 
 from .models import BranchMedicine, Medicine
 from .serializers import BranchSettingsSerializer, MedicineSerializer, MedicineVersionSerializer
@@ -16,7 +17,7 @@ from .services import import_medicines, import_template_csv, read_rows, save_med
 class MedicineViewSet(AuditedModelViewSet):
     """
     The medicine list (shared by all branches). Each branch sees its own price and on/off switch.
-    ?q=   search any name / synonym / composition      ?kind=classical|proprietary
+    ?q=   search any name / synonym / composition      ?kind=classical|proprietary|homeopathy
     ?for_rx=1  only medicines in use in this branch (for the prescription screen)
     """
 
@@ -42,6 +43,8 @@ class MedicineViewSet(AuditedModelViewSet):
         params = self.request.query_params
         if params.get("q", "").strip():
             qs = qs.filter(search_filter(params["q"].strip()))
+        if not is_feature_enabled(self.request.branch, "medicines_homeopathy"):
+            qs = qs.exclude(kind="homeopathy")  # optional extra: Additional settings -> Homeopathy medicines
         if params.get("for_rx") == "1":
             off = BranchMedicine.objects.filter(branch=self.request.branch, is_active=False).values("medicine_id")
             qs = qs.filter(is_active=True).exclude(id__in=off)

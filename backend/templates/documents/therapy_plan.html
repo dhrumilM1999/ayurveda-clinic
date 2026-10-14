@@ -1,0 +1,46 @@
+{% extends "documents/_doc_base.html" %}
+{% comment %}SAFE TO EDIT: the printed therapy plan given to the patient: therapies, booked sessions and what to do before and after.
+The fixed words (headings) are in backend/apps/documents/words.py. The "what to do" lines come from each therapy (Therapies screen).{% endcomment %}
+{% block style %}
+  h3 { margin: 4mm 0 1.5mm; font-size: 1.05em; color: #1f5c46; }
+  .stage { font-size: 0.85em; color: #5c5c5c; }
+  .note { margin-top: 4mm; padding: 2mm 3mm; background: #f4f7f5; border-left: 0.8mm solid #1f5c46; font-size: 0.9em; }
+  ul.instr { margin: 1mm 0 0; padding-left: 5mm; }
+{% endblock %}
+{% block content %}
+<div class="title">{{ w.therapy_plan }}</div>
+<div><b>{{ patient.name }}</b> <span class="small muted">{{ w.patient_id }} {{ patient.uhid }}{% if patient.age %} · {{ patient.age }} {{ w.years }}{% endif %}</span></div>
+<div class="small"><b>{{ w.plan_name }}:</b> {{ plan.title }} · {{ w.date }} {{ date|date:"d-m-Y" }}
+  {% if plan.consent_taken and plan.consent_on %}· {{ w.agreed_on }} {{ plan.consent_on|date:"d-m-Y" }}{% endif %}</div>
+
+<h3>{{ w.therapy }}</h3>
+<table>
+  <tr><th>{{ w.therapy }}</th><th>{{ w.sessions }}</th></tr>
+  {% for item in items %}
+  <tr>
+    <td><b>{{ item.name }}</b><div class="stage">{% if item.stage == "purva" %}{{ w.stage_purva }}{% elif item.stage == "pradhana" %}{{ w.stage_pradhana }}{% elif item.stage == "paschat" %}{{ w.stage_paschat }}{% else %}{{ w.stage_other }}{% endif %}</div>
+      {% if item.notes %}<div class="small">{{ item.notes }}</div>{% endif %}</td>
+    <td>{{ item.sessions }}</td>
+  </tr>
+  {% endfor %}
+</table>
+
+<h3>{{ w.schedule }}</h3>
+{% if sessions %}
+<table>
+  <tr><th>{{ w.date }}</th><th>{{ w.time }}</th><th>{{ w.therapy }}</th><th>{{ w.therapist }}</th><th>{{ w.room }}</th></tr>
+  {% for s in sessions %}
+  <tr><td>{{ s.date|date:"d-m-Y" }}</td><td>{{ s.start|time:"H:i" }}-{{ s.end|time:"H:i" }}</td><td>{{ s.therapy }}</td><td>{{ s.therapist }}</td><td>{{ s.room }}</td></tr>
+  {% endfor %}
+</table>
+{% else %}
+<div class="small muted">{{ w.no_sessions_yet }}</div>
+{% endif %}
+
+{% if has_instructions %}<h3>{{ w.before_after }}</h3>{% endif %}
+{% for item in items %}{% if item.instructions %}
+<div class="small"><b>{{ item.name }}</b>: {{ item.instructions|linebreaksbr }}</div>
+{% endif %}{% endfor %}
+
+<div class="note">{{ w.plan_note }}</div>
+{% endblock %}

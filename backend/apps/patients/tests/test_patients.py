@@ -26,15 +26,14 @@ def register(client, **extra):
 
 # --- Patient ID ----------------------------------------------------------------
 @pytest.mark.django_db
-def test_uhid_is_year_plus_running_number(receptionist, branch_a, org):
+def test_uhid_is_a_plain_running_number(receptionist, branch_a, org):
     client = client_for(receptionist, branch_a)
     first = register(client).data["uhid"]
     second = register(client, mobile="9876500000").data["uhid"]
-    assert first == f"AY{YY:02d}-000001"
-    assert second == f"AY{YY:02d}-000002"
+    assert first == "1" and second == "2"  # no leading zeros, no year
     org.uhid_prefix = "SV"
     org.save()
-    assert register(client, mobile="9876500001").data["uhid"] == f"SV{YY:02d}-000003"
+    assert register(client, mobile="9876500001").data["uhid"] == "SV3"  # optional letters in front
 
 
 @pytest.mark.django_db
@@ -144,7 +143,7 @@ def test_list_masks_phone_and_search_is_audited(receptionist, branch_a):
 
     assert [r["first_name"] for r in client.get(URL, {"q": "ramesh pat"}).data["results"]] == ["Ramesh"]
     assert [r["first_name"] for r in client.get(URL, {"q": "45621"}).data["results"]] == ["Ramesh"]
-    assert [r["first_name"] for r in client.get(URL, {"q": f"AY{YY:02d}-000002"}).data["results"]] == ["Sita"]
+    assert [r["first_name"] for r in client.get(URL, {"q": "Sita"}).data["results"]] == ["Sita"]
     assert AuditLog.objects.filter(action="view", object_type="patients.search").count() == 3
 
 
