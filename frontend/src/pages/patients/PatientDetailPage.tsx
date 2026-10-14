@@ -99,7 +99,7 @@ export default function PatientDetailPage() {
       </Card>
 
       <Card>
-        <Tabs items={tabs} destroyInactiveTabPane />
+        <Tabs items={tabs} destroyOnHidden />
       </Card>
     </>
   );

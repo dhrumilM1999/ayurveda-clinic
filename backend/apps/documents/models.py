@@ -20,6 +20,7 @@ DOCUMENT_KINDS = [
     ("certificate", "Certificate"),
     ("follow_up_card", "Follow-up card"),
     ("prakriti_report", "Prakriti report"),
+    ("therapy_plan", "Therapy plan"),
 ]
 CERTIFICATE_KINDS = [
     ("medical", "Medical certificate (rest advised)"),

@@ -10,6 +10,55 @@ What changed in each step, in plain words.
 - The headings and the check-up lines are now in English: Symptoms, Diagnosis, Advice / Pathya, Next visit, and
   Agni ... Srotas. Change the words in `backend/apps/documents/words.py` (SAFE TO EDIT).
 - The Date underline no longer runs past the right edge of the page.
+## Panchakarma and therapy (2026-10-15)
+
+- **New module** (Settings, Modules, switch on "Panchakarma and therapy"): a list of therapies (27 starting ones in
+  English, Gujarati and Hindi), patient therapy plans with the number of sessions of each therapy, booking sessions
+  with a therapist and a room (never double booked), and the therapist's record of each session (oil, quantity, how
+  the patient felt). Receptionists can book; therapists see only what they need. See `docs/PANCHAKARMA.md`.
+- Merged earlier branches into one: pharmacy stock labels and counter sale, and the Reports screen.
+
+## Clinic v2 (2026-10-08)
+
+- **Patient IDs are plain numbers** (1, 2, 3 ...): no leading zeros, no year. Existing patients were renumbered in the
+  order they were registered. An optional prefix in Settings still works (AY -> AY44).
+- **One doctor:** Dr. Grishm Shingala (demo data and timings 9-1 and 5-8, closed Sunday). Command `use_single_doctor`
+  moves other doctors' records to him and switches them off.
+- **Billing switches** in Additional settings: **OPD bills** and **Pharmacy bills**, both ON by default. Off: the related
+  buttons, the OPD collection card and (if both are off) the Billing menu are hidden; nothing is deleted.
+- **Doctor's appointment list** (Check-up screen): day picker with previous/next day, search, filter chips with counts
+  (All, Waiting, With doctor, Booked, Done), New patient / Follow-up tag, Walk-in / Booked tag, waiting minutes, due amount.
+- **Online enquiry** (new, optional, Additional settings): a public form for the clinic website (`/enquiry`, three
+  languages, spam control, consent) and an **Online enquiry** screen for the front desk (status, notes, call, WhatsApp,
+  register patient). See `docs/ONLINE_ENQUIRY.md`.
+
+## Print sizes: half-A4 (A5) fixed (2026-10-07)
+
+- A normal prescription (up to about 9 medicines) now stays on **one half-A4 (A5) page**. Before, the last medicines
+  went onto a second page because "1 tsp" and "15 days" wrapped onto two lines. The medicine table is tighter on A5/A6.
+- The **Ayurveda case sheet** used to print on a full A4 sheet even when half-A4 was chosen. Now it shrinks to fit
+  half-A4 (one page, same layout). Other sizes still print on A4.
+- New tests keep these sizes from breaking again (`apps/documents/tests/test_print_sizes.py`).
+
+## More demo data (2026-10-07)
+
+- **Medicine catalog:** about 130 more generic Ayurvedic medicines and 818 homeopathy medicines (remedies in potencies
+  such as 30C / 200C / 1M, mother tinctures, the 12 biochemic salts, ointments). New medicine kind **Homeopathy**, shown
+  only when **Additional settings -> Homeopathy medicines** is on (off by default). Command: `add_medicine_catalog`.
+- **Demo patients:** `seed_demo_journey` creates 36 fictional patients and walks each through registration, the
+  check-up, prescription, OPD bill, payment and pharmacy sale, so the dashboard, queue, reports and history have data.
+- All entries are samples for a pharmacist / doctor to verify; no real patient data.
+
+## Branding follows the clinic (2026-10-07)
+
+- The clinic's **own name and logo** (Settings -> Clinic details) now show in the left menu, on the login screen
+  (also on a phone), on the waiting-room TV screen, on the bill-verify page and in the browser tab. Nothing about a
+  clinic is written in the code any more, so each clinic has its own look.
+- A wide logo sits on a white plate so it stays readable on the dark green. Without a logo, the default leaf and the
+  clinic name are shown as before.
+- New public pages for the login screen (they show only the clinic name and logo): `/api/v1/branding/` and
+  `/api/v1/branding/logo/`.
+- Changing the name or logo in Settings updates every screen at once.
 
 ## Ayurveda case sheet prescription - like our own pad (2026-10-07)
 
@@ -34,6 +83,42 @@ What changed in each step, in plain words.
   clinic's own printed pad. Measure the pad and change the mm.
 - **Clinic logo** (Settings -> Clinic details): upload / change / remove (PNG or JPG). Switches for where it
   prints: prescriptions, certificates and reports, and bills and receipts (bills now show the logo too).
+## Pharmacy stock labels, scan to bill, counter sale (2026-10-06)
+
+- **Pharmacy stock labels** (Additional settings, new switch): labels for medicine packs on the shelf - medicine,
+  strength, pack, MRP, GST %, batch, expiry and a **barcode**. No patient details. Small 50 x 25 mm or large
+  75 x 50 mm. Print from Stock -> a batch -> **Labels** (one per pack). A batch without a barcode gets a clinic code.
+- **Scan to bill**: scanning a label at the pharmacy adds that exact batch with its price and GST.
+  - In a prescription sale, a scanned medicine that is not on the prescription is added to the same bill.
+  - New **Counter sale** tab (new switch) for walk-in customers without a prescription: scan or search, optional
+    name and mobile, cash / UPI / card / pay later, bill and print. Shows in Sales with a "Counter sale" tag;
+    returns work as usual.
+- **Schedule E1** medicines are never sold without a doctor's prescription (fixed rule).
+- The old labels are now called **Patient medicine labels** and are switched off for this clinic (switch them on
+  again in Additional settings if wanted). Nothing was deleted.
+- Database: a sale may now have no prescription (counter sale); customer name and mobile were added.
+  Existing sales are unchanged.
+- New package: `python-barcode` (draws the barcodes).
+## Step 8: Reports (2026-10-06)
+
+- New **Reports** screen (left menu) with six reports, for any dates (quick choices: Today, Yesterday, This month,
+  Last month, This financial year):
+  - **Collection**: money received by Cash / UPI / Card, refunds and net, day-wise or month-wise. Same figures as
+    the daily closing.
+  - **Income by doctor**: consultation, services & therapy, medicines, round off, billed (after returns), received
+    and still due. Pharmacy bills count for the doctor who wrote the prescription.
+  - **Income by branch**: the same per branch (shows only with more than one branch).
+  - **New vs repeat patients**: check-ups, patients, new cases, follow-ups and repeat %, day-wise or month-wise.
+  - **Missed follow-ups**: follow-up date passed and the patient has not come back (any branch). Phones masked.
+  - **GST summary**: per HSN / SAC code and GST rate: taxable value, CGST, SGST, minus credit notes. Check with your CA.
+- **Excel** and **PDF** download of every report. Every download (and every look at Missed follow-ups) is in the
+  audit log.
+- **Branch choice**: this branch, another branch you work in, or All branches.
+- **Permissions**: "See reports" plus the data's own permission (bills / appointments / patients) in each branch.
+  Admin and Doctor have Reports at the start; give it to others on the Roles screen.
+- The **Dashboard** already shows today's patients, collection and queue (built in Steps 3 and 6).
+- Not done yet: Excel / PDF headings are in English only; very large reports in the background (later, Step 16);
+  stock and expiry reports are on the Pharmacy screen.
 
 ## Share mode and demo video captions (2026-10-06)
 

@@ -28,7 +28,11 @@ import SettingsPage from './pages/SettingsPage';
 import AdditionalSettingsPage from './pages/AdditionalSettingsPage';
 import FeesServicesPage from './pages/FeesServicesPage';
 import BillingPage from './pages/billing/BillingPage';
+import ReportsPage from './pages/ReportsPage';
 import VerifyPage from './pages/VerifyPage';
+import EnquiriesPage from './pages/enquiry/EnquiriesPage';
+import TherapyPage from './pages/therapy/TherapyPage';
+import EnquiryFormPage from './pages/enquiry/EnquiryFormPage';
 import StaffPage from './pages/StaffPage';
 import TemplatesPage from './pages/TemplatesPage';
 import { antTheme, applyCssVariables } from './theme';
@@ -50,11 +54,14 @@ export default function App() {
           <Routes>
             {/* Public: the QR code on print-outs opens this without logging in */}
             <Route path="verify/:token" element={<VerifyPage />} />
+            {/* Public: the clinic website links to this enquiry form (or shows it in an iframe) */}
+            <Route path="enquiry" element={<EnquiryFormPage />} />
             <Route path="*" element={<LoginPage />} />
           </Routes>
         ) : (
           <Routes>
             <Route path="verify/:token" element={<VerifyPage />} />
+            <Route path="enquiry" element={<EnquiryFormPage />} />
             {/* TV screen for the waiting room: full screen, without the menu */}
             <Route path="queue/display" element={<RequirePermission code="appointments.view"><QueueDisplayPage /></RequirePermission>} />
             <Route element={<MainLayout />}>
@@ -69,6 +76,9 @@ export default function App() {
               <Route path="medicines" element={<RequirePermission code="medicines.view"><MedicinesPage /></RequirePermission>} />
               <Route path="billing" element={<RequirePermission code="billing.view"><BillingPage /></RequirePermission>} />
               <Route path="pharmacy" element={<RequirePermission code="pharmacy.view"><PharmacyPage /></RequirePermission>} />
+              <Route path="enquiries" element={<RequirePermission code="enquiries.view"><EnquiriesPage /></RequirePermission>} />
+              <Route path="therapy" element={<RequirePermission code="therapy.view"><TherapyPage /></RequirePermission>} />
+              <Route path="reports" element={<RequirePermission code="reports.view"><ReportsPage /></RequirePermission>} />
               <Route path="queue" element={<RequirePermission code="appointments.view"><QueuePage /></RequirePermission>} />
               <Route path="branches" element={<RequirePermission code="branches.view"><BranchesPage /></RequirePermission>} />
               <Route path="rooms" element={<RequirePermission code="rooms.view"><RoomsPage /></RequirePermission>} />

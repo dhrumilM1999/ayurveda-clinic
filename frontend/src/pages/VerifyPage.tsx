@@ -7,7 +7,7 @@ import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { clinicConfig } from '../config/clinic';
+import { useBranding } from '../branding/BrandingContext';
 
 type Check = {
   valid: boolean; cancelled?: boolean; kind?: string; number?: string; issued_on?: string;
@@ -16,6 +16,7 @@ type Check = {
 
 export default function VerifyPage() {
   const { t } = useTranslation();
+  const { appName } = useBranding();
   const { token } = useParams();
   const [check, setCheck] = useState<Check | null>(null);
 
@@ -29,7 +30,7 @@ export default function VerifyPage() {
   const found = !!check.number || !!check.issued_on;
   return (
     <div className="verify-page">
-      <div className="verify-brand">{clinicConfig.appName}</div>
+      <div className="verify-brand">{appName}</div>
       <Card className="verify-card">
         <Result
           icon={check.valid ? <CheckCircleFilled style={{ color: 'var(--clinic-primary)' }} />

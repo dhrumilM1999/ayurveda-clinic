@@ -6,7 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 import { LeafArt } from '../components/LeafArt';
-import { clinicConfig } from '../config/clinic';
+import { BrandLogo } from '../branding/BrandLogo';
+import { useBranding } from '../branding/BrandingContext';
 import { LANGUAGES, setLanguage } from '../i18n';
 
 interface OtpStep {
@@ -17,6 +18,7 @@ interface OtpStep {
 
 export default function LoginPage() {
   const { t, i18n } = useTranslation();
+  const { appName, logoUrl } = useBranding();
   const { completeLogin, logoutReason } = useAuth();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -57,8 +59,8 @@ export default function LoginPage() {
     <div className="login-page">
       <section className="login-art" style={{ color: '#fff' }}>
         <div className="login-art-brand">
-          <img src={clinicConfig.logoPath} alt="" />
-          {clinicConfig.appName}
+          <BrandLogo variant="login" />
+          {!logoUrl && appName}
         </div>
         <div className="login-art-quote">{t('login.quote')}</div>
         <div className="login-art-foot">{t('login.footer')}</div>
@@ -68,8 +70,8 @@ export default function LoginPage() {
       <section className="login-form-side">
         <div className="login-form">
           <div className="login-mobile-brand">
-            <img src={clinicConfig.logoPath} alt="" width={36} height={36} />
-            {clinicConfig.appName}
+            <BrandLogo variant="mobile" />
+            {!logoUrl && appName}
           </div>
 
           {!otpStep ? (

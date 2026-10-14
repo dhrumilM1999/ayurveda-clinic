@@ -5,10 +5,12 @@ import { App, Button, Space, Upload } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from '../api/client';
+import { useBranding } from '../branding/BrandingContext';
 
 export function LogoUpload({ hasLogo, disabled }: { hasLogo: boolean; disabled?: boolean }) {
   const { t } = useTranslation();
   const { message } = App.useApp();
+  const { refresh: refreshBranding } = useBranding();
   const [has, setHas] = useState(hasLogo);
   const [url, setUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -33,6 +35,7 @@ export function LogoUpload({ hasLogo, disabled }: { hasLogo: boolean; disabled?:
       await api.post('/organization/logo/', body);
       setHas(true);
       await loadPreview();
+      await refreshBranding(); // menu, login screen and browser tab show the new logo at once
       message.success(t('settings.logoSaved'));
     } catch (err) {
       message.error(errorMessage(err, t('common.saveFailed')));
@@ -47,6 +50,7 @@ export function LogoUpload({ hasLogo, disabled }: { hasLogo: boolean; disabled?:
       await api.delete('/organization/logo/');
       setHas(false);
       setUrl(null);
+      await refreshBranding();
     } catch (err) {
       message.error(errorMessage(err, t('common.saveFailed')));
     } finally {

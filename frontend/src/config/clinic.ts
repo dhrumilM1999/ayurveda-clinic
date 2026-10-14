@@ -3,11 +3,12 @@
 // Colours are written like '#1f5c45' (pick any colour at https://htmlcolorcodes.com).
 
 export const clinicConfig = {
-  // Name shown in the menu and on the login page
+  // Default name, used only until a clinic name is saved in Settings -> Clinic details
+  // (the saved clinic name and logo are shown in the menu and on the login page).
   appName: 'Ayurveda Clinic',
   // (The small line under the name and the sentence on the login page are screen text:
   //  change them in src/i18n/*.json -> "layout.tagline" and "login.quote".)
-  // Logo file inside frontend/public/
+  // Default logo (inside frontend/public/), used only until the clinic uploads its own logo in Settings
   logoPath: '/logo.svg',
   // Language when someone opens the app for the first time: 'en', 'gu' or 'hi'
   defaultLanguage: 'en' as 'en' | 'gu' | 'hi',

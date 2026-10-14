@@ -192,7 +192,7 @@ export function LabelsButton({ dispense, prescription, size = 'small' }: {
   );
 }
 
-type DocKind = 'prescription' | 'follow-up-card' | 'prakriti' | 'certificate';
+type DocKind = 'prescription' | 'follow-up-card' | 'prakriti' | 'certificate' | 'therapy-plan';
 
 /** A medical document (prescription, follow-up card, Prakriti report, certificate) on screen, in the patient's
  *  language (can be changed), with paper size, Download and Print. Reprints say DUPLICATE COPY. */
@@ -207,7 +207,7 @@ export function DocumentModal({ kind, id, title, language, detail, onClose }: {
 }) {
   const { t } = useTranslation();
   const sizes: Record<DocKind, string[]> = {
-    prescription: detail ? ['a4', 'a5'] : ['a5', 'a4'], 'follow-up-card': ['a6', 'a5'], prakriti: ['a4', 'a5'], certificate: ['a4', 'a5'],
+    prescription: detail ? ['a4', 'a5'] : ['a5', 'a4'], 'follow-up-card': ['a6', 'a5'], prakriti: ['a4', 'a5'], certificate: ['a4', 'a5'], 'therapy-plan': ['a4', 'a5'],
   };
   return (
     <PdfModal title={title} fileName={detail ? 'prescription-detailed' : `${kind}`} initial={sizes[kind][0]} onClose={onClose}

@@ -183,7 +183,7 @@ def import_medicines(organization, rows: list[dict], user, dry_run: bool) -> dic
                 result["errors"].append({"row": number, "message": "Name is missing."})
                 continue
             kind_text = row.get("kind", "classical").lower()
-            kind = "proprietary" if kind_text.startswith(("p", "brand")) else "classical"
+            kind = "proprietary" if kind_text.startswith(("p", "brand")) else "homeopathy" if kind_text.startswith("h") else "classical"
             try:
                 medicine = existing.get((kind, name.lower()))
                 is_new = medicine is None
