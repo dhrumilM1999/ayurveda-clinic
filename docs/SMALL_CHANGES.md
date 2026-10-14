@@ -321,3 +321,14 @@ Open **PDF settings** in the left menu (needs the "settings.manage" permission, 
 Add a new option (for a programmer): add it to `DEFAULTS` and to the document's `keys` in
 `backend/apps/documents/print_settings.py`, use `ps.<name>` in the template in `backend/templates/documents/`, and add
 its words under `pdfSettings.keys` in `frontend/src/i18n/*.json`.
+
+## Auto-translate names into Gujarati and Hindi (Translate button)
+
+Next to the English / Gujarati / Hindi boxes (medicine, service, therapy, check-up template, and each question or
+answer of a template) there is a **Translate** button. Type the English name first, press it, and Gujarati and Hindi
+are filled in. It is only a suggestion: read it and fix any word before you save.
+- It uses **Ollama** on your Windows PC (free, nothing leaves the PC). Install Ollama, run `ollama pull gemma2:9b`, keep it
+  running. If it is not running the button says "AI is offline" and you can type by hand.
+- To use another model, put `OLLAMA_MODEL=<name>` in `.env` and restart (`stop.bat`, `start.bat`).
+- The instruction given to the AI is `backend/templates/ai/translate_v1.txt` (SAFE TO EDIT, e.g. to add rules for how
+  Ayurveda words should be written).

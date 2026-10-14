@@ -48,6 +48,8 @@
 | `backend/apps/billing/sample_services.py` | The SAMPLE services & charges for a new clinic | **SAFE TO EDIT** |
 | `backend/apps/reports/` | Dashboard numbers in OPD words (`/dashboard/today/`); `reports.py` = the Reports figures, `exports.py` = Excel / PDF download | ASK FIRST |
 | `backend/apps/documents/` | Print-outs (prescription, certificate, follow-up card, Prakriti report), QR "genuine?" check, WhatsApp share | ASK FIRST |
+| `backend/templates/ai/translate_v1.txt` | The instruction for the Translate button (Ollama) | **SAFE TO EDIT** |
+| `backend/apps/common/translate.py` | Sends the English name to Ollama and returns Gujarati + Hindi | ASK FIRST |
 | `backend/apps/documents/print_settings.py` | PDF settings: the list of options, their starting values (`DEFAULTS`), which document has which option (`DOC_TYPES`) and the merge order (all branches -> branch -> one document) | **SAFE TO EDIT** the lists, ASK FIRST the merge code |
 | `backend/apps/documents/print_preview.py` | The live preview of PDF settings and the fictional sample documents | ASK FIRST |
 | `backend/apps/documents/words.py` | Words on print-outs in EN/GU/HI and the Prakriti guidance | **SAFE TO EDIT** |

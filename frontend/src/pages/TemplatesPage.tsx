@@ -8,6 +8,7 @@ import { api, errorMessage } from '../api/client';
 import type { ExamField, ExamTemplate, Lang3 } from '../api/types';
 import { clearTemplatesCache } from './consult/VisitWorkspace';
 import { useLang3, useTemplateName } from './consult/shared';
+import { TranslateButton } from '../components/TranslateButton';
 
 type Kind = ExamTemplate['kind'];
 const DOSHAS = ['vata', 'pitta', 'kapha'] as const;
@@ -157,13 +158,14 @@ function TemplateEditor({ template, kind, onClose }: { template: ExamTemplate | 
   };
 
   const LabelInputs = ({ value, onChange, placeholder }: { value: Lang3; onChange: (v: Lang3) => void; placeholder: string }) => (
-    <Row gutter={6}>
+    <Row gutter={6} align="middle">
       {(['en', 'gu', 'hi'] as const).map((l) => (
         <Col span={8} key={l}>
           <Input size="small" addonBefore={l.toUpperCase()} value={value[l]} placeholder={l === 'en' ? placeholder : undefined}
             onChange={(e) => onChange({ ...value, [l]: e.target.value })} />
         </Col>
       ))}
+      <Col flex="none"><TranslateButton iconOnly english={value.en} existing={{ gu: value.gu, hi: value.hi }} onResult={(r) => onChange({ ...value, gu: r.gu, hi: r.hi })} /></Col>
     </Row>
   );
 
@@ -175,6 +177,9 @@ function TemplateEditor({ template, kind, onClose }: { template: ExamTemplate | 
       {template && <div className="cell-sub" style={{ marginBottom: 8 }}>{t('templatesAdmin.versionHelp', { v: template.version })}</div>}
       <div className="section-title" style={{ marginTop: 0 }}>{t('templatesAdmin.name')}</div>
       <Row gutter={6}>
+        <Col span={24} style={{ marginBottom: 4 }}>
+          <TranslateButton english={names.name} existing={{ gu: names.name_gu, hi: names.name_hi }} onResult={(r) => setNames({ ...names, name_gu: r.gu, name_hi: r.hi })} />
+        </Col>
         <Col span={8}><Input size="small" addonBefore="EN" value={names.name} onChange={(e) => setNames({ ...names, name: e.target.value })} /></Col>
         <Col span={8}><Input size="small" addonBefore="GU" value={names.name_gu} onChange={(e) => setNames({ ...names, name_gu: e.target.value })} /></Col>
         <Col span={8}><Input size="small" addonBefore="HI" value={names.name_hi} onChange={(e) => setNames({ ...names, name_hi: e.target.value })} /></Col>

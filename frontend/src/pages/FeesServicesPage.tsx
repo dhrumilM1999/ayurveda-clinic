@@ -10,6 +10,7 @@ import { useAuth } from '../auth/AuthContext';
 import { useMasterLabel } from '../api/masters';
 import { MasterSelect } from '../components/MasterSelect';
 import { money } from './medicines/shared';
+import { TranslateButton } from '../components/TranslateButton';
 
 export default function FeesServicesPage() {
   const { t } = useTranslation();
@@ -245,6 +246,10 @@ function ServiceModal({ service, onClose }: { service: ServiceCharge | null; onC
         <Row gutter={12}>
           <Col xs={24} md={14}><Form.Item name="name" label={t('fees.serviceName')} rules={required}><Input maxLength={150} placeholder="Agnikarma" /></Form.Item></Col>
           <Col xs={24} md={10}><Form.Item name="category" label={t('fees.category')}><MasterSelect category="service_category" /></Form.Item></Col>
+          <Col span={24}><Form.Item noStyle shouldUpdate>{() => (
+  <TranslateButton english={form.getFieldValue('name') ?? ''} existing={{ gu: form.getFieldValue('name_gu'), hi: form.getFieldValue('name_hi') }}
+    onResult={(r) => form.setFieldsValue({ name_gu: r.gu, name_hi: r.hi })} />
+)}</Form.Item></Col>
           <Col xs={24} md={12}><Form.Item name="name_gu" label={t('medicines.nameGu')}><Input maxLength={150} /></Form.Item></Col>
           <Col xs={24} md={12}><Form.Item name="name_hi" label={t('medicines.nameHi')}><Input maxLength={150} /></Form.Item></Col>
           <Col xs={12} md={6}><Form.Item name="price" label={t('fees.price')} rules={required}><InputNumber min={0} precision={2} prefix="₹" style={{ width: '100%' }} /></Form.Item></Col>

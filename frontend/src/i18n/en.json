@@ -2051,5 +2051,14 @@
         "help": "Replaces the usual line under the bill."
       }
     }
+  },
+  "translate": {
+    "button": "Translate",
+    "hint": "Fill Gujarati and Hindi from the English text (a suggestion: please check it)",
+    "writeEnglish": "Write the English text first.",
+    "done": "Translated. Please check the words.",
+    "offline": "AI is offline (start Ollama on this PC). You can type Gujarati and Hindi by hand.",
+    "failed": "Could not translate.",
+    "replaceAsk": "Replace the Gujarati and Hindi with a new translation?"
   }
 }

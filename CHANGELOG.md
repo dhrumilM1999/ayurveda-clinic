@@ -2,6 +2,13 @@
 
 What changed in each step, in plain words.
 
+## Translate button: English -> Gujarati and Hindi (2026-10-15)
+
+- A **Translate** button next to the English / Gujarati / Hindi boxes of medicines, services, therapies and check-up
+  templates (name, description, every question and answer). It fills Gujarati and Hindi as a suggestion you can edit.
+- Free and private: it uses Ollama on your PC. Without Ollama it says "AI is offline" and nothing else breaks.
+  Setup in `docs/SMALL_CHANGES.md`. No database change, no new package.
+
 ## PDF settings: one screen for how every print-out looks (2026-10-15)
 
 - **New screen "PDF settings"** (left menu, for the admin). Change colour, text size, paper, margin, the letterhead,
