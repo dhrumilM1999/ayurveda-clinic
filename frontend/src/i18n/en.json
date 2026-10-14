@@ -73,7 +73,8 @@
     "fees": "Fees & services",
     "billing": "Billing",
     "enquiries": "Online enquiry",
-    "reports": "Reports"
+    "reports": "Reports",
+    "therapy": "Panchakarma"
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",
@@ -1817,5 +1818,108 @@
       "net_taxable": "Net taxable",
       "net_tax": "Net GST"
     }
+  },
+  "therapy": {
+    "title": "Panchakarma and therapy",
+    "subtitle": "Therapy plans, the sessions of the day, therapists and rooms",
+    "tabs": {
+      "sessions": "Sessions",
+      "plans": "Therapy plans",
+      "list": "Therapies"
+    },
+    "stage": {
+      "purva": "Purvakarma (preparation)",
+      "pradhana": "Pradhanakarma (main procedure)",
+      "paschat": "Paschatkarma (after-care)",
+      "other": "Other therapy"
+    },
+    "status": {
+      "scheduled": "Booked",
+      "in_progress": "In progress",
+      "done": "Done",
+      "missed": "Did not come",
+      "cancelled": "Cancelled"
+    },
+    "planStatus": {
+      "planned": "Planned",
+      "active": "Running",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "day": "Day",
+    "allTherapists": "All therapists",
+    "allRooms": "All rooms",
+    "noSessions": "No sessions on this day.",
+    "noPlans": "No therapy plans yet.",
+    "anyone": "Not decided",
+    "noRoom": "No room",
+    "start": "Start",
+    "finish": "Record and finish",
+    "missed": "Did not come",
+    "cancel": "Cancel session",
+    "cancelAsk": "Cancel this session?",
+    "sessionNo": "Session {{n}} of {{total}}",
+    "record": {
+      "title": "Record the session",
+      "material": "Oil / material used",
+      "quantity": "Quantity (ml)",
+      "response": "How did the patient feel?",
+      "notes": "Notes",
+      "save": "Save and mark done",
+      "help": "Written for the doctor to read at the next visit."
+    },
+    "plan": {
+      "new": "New therapy plan",
+      "edit": "Therapy plan",
+      "title": "Plan name",
+      "titlePlaceholder": "e.g. Virechana course, Knee Basti 7 days",
+      "patient": "Patient",
+      "startDate": "Start date",
+      "items": "Therapies in this plan",
+      "addTherapy": "Add therapy",
+      "therapy": "Therapy",
+      "sessionsPlanned": "Sessions",
+      "consent": "The patient agrees to these procedures",
+      "consentOn": "Agreed on {{date}}",
+      "notes": "Doctor's notes for the therapist",
+      "book": "Book sessions",
+      "progress": "{{done}} of {{total}} sessions done",
+      "estimate": "Estimated price: {{amount}}",
+      "cancelPlan": "Cancel plan",
+      "cancelAsk": "Cancel this plan? Booked sessions are cancelled; done sessions stay.",
+      "booked": "{{booked}} of {{total}} booked, {{done}} done",
+      "needItem": "Add at least one therapy.",
+      "doctor": "Doctor"
+    },
+    "book": {
+      "title": "Book sessions: {{name}}",
+      "dates": "Days",
+      "datesHelp": "Pick every day this therapy should be done.",
+      "time": "Start time",
+      "therapist": "Therapist",
+      "room": "Room",
+      "save": "Book",
+      "left": "{{n}} more session(s) can be booked.",
+      "none": "All sessions are booked.",
+      "done": "{{n}} session(s) booked."
+    },
+    "list": {
+      "add": "Add therapy",
+      "edit": "Edit therapy",
+      "name": "Name (English)",
+      "nameGu": "Name (Gujarati)",
+      "nameHi": "Name (Hindi)",
+      "stage": "Stage",
+      "minutes": "Minutes",
+      "material": "Usual oil / material",
+      "instructions": "What the patient should do before and after",
+      "service": "Price from Services & charges",
+      "noService": "No price yet",
+      "active": "In use",
+      "loadSample": "Add the starting list",
+      "loadedN": "{{n}} therapies added.",
+      "empty": "No therapies yet. Add the starting list (Abhyanga, Shirodhara, Virechana ...) and change it as you like."
+    },
+    "off": "Panchakarma and therapy is switched off for this branch. Switch it on in Settings, Modules."
   }
 }

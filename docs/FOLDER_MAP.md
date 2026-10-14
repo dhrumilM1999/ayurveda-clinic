@@ -93,3 +93,6 @@
 | `frontend/package.json` | List of JavaScript packages | ASK FIRST |
 | `frontend/vite.config.ts` | Development server settings | ASK FIRST |
 | `frontend/scripts/check-translations.mjs` | Checks the 3 language files match | ASK FIRST |
+| `backend/apps/therapy/catalog.py` | Starting list of therapies (name, Gujarati, Hindi, stage, minutes, oil) | SAFE TO EDIT |
+| `backend/apps/therapy/services.py` | Therapy rules: no double booking, plan status | ASK FIRST |
+| `frontend/src/pages/therapy/` | Panchakarma screens (sessions, plans, therapies) | ASK FIRST |

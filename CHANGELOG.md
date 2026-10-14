@@ -2,6 +2,14 @@
 
 What changed in each step, in plain words.
 
+## Panchakarma and therapy (2026-10-15)
+
+- **New module** (Settings, Modules, switch on "Panchakarma and therapy"): a list of therapies (27 starting ones in
+  English, Gujarati and Hindi), patient therapy plans with the number of sessions of each therapy, booking sessions
+  with a therapist and a room (never double booked), and the therapist's record of each session (oil, quantity, how
+  the patient felt). Receptionists can book; therapists see only what they need. See `docs/PANCHAKARMA.md`.
+- Merged earlier branches into one: pharmacy stock labels and counter sale, and the Reports screen.
+
 ## Clinic v2 (2026-10-08)
 
 - **Patient IDs are plain numbers** (1, 2, 3 ...): no leading zeros, no year. Existing patients were renumbered in the

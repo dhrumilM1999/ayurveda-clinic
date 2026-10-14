@@ -1146,3 +1146,90 @@ export interface Enquiry {
   patient: string | null;
   patient_uhid: string;
 }
+
+// ---- Panchakarma and therapy ----
+export type TherapyStage = 'purva' | 'pradhana' | 'paschat' | 'other';
+export type TherapySessionStatus = 'scheduled' | 'in_progress' | 'done' | 'missed' | 'cancelled';
+export type TherapyPlanStatus = 'planned' | 'active' | 'completed' | 'cancelled';
+
+export interface TherapyType {
+  id: string;
+  name: string;
+  name_gu: string;
+  name_hi: string;
+  stage: TherapyStage;
+  duration_minutes: number;
+  default_material: string;
+  instructions: string;
+  service: string | null;
+  service_name: string | null;
+  price: string | null;
+  is_active: boolean;
+  sort_order: number;
+  is_sample: boolean;
+}
+
+export interface TherapyPlanItem {
+  id?: string;
+  therapy: string;
+  therapy_name?: string;
+  therapy_name_gu?: string;
+  therapy_name_hi?: string;
+  stage: TherapyStage;
+  sessions_planned: number;
+  sessions_booked?: number;
+  sessions_done?: number;
+  price?: string | null;
+  notes?: string;
+}
+
+export interface TherapyPlan {
+  id: string;
+  patient: string;
+  patient_detail: AppointmentPatient;
+  doctor: string | null;
+  doctor_name: string | null;
+  title: string;
+  start_date: string;
+  status: TherapyPlanStatus;
+  notes: string;
+  consent_taken: boolean;
+  consent_on: string | null;
+  items: TherapyPlanItem[];
+  sessions_planned: number;
+  sessions_done: number;
+  estimate: string;
+}
+
+export interface TherapySession {
+  id: string;
+  plan: string;
+  plan_title: string;
+  item: string;
+  patient: string;
+  patient_detail: AppointmentPatient;
+  therapy: string;
+  therapy_name: string;
+  therapy_name_gu: string;
+  therapy_name_hi: string;
+  stage: TherapyStage;
+  therapist: string | null;
+  therapist_name: string | null;
+  room: string | null;
+  room_name: string | null;
+  date: string;
+  start_time: string;
+  end_time: string;
+  status: TherapySessionStatus;
+  session_no: number | null;
+  sessions_planned: number;
+  material_used: string;
+  quantity_ml: number | null;
+  patient_response: string;
+  notes: string;
+}
+
+export interface TherapyOptions {
+  therapists: { id: string; name: string }[];
+  rooms: { id: string; name: string; capacity: number }[];
+}
