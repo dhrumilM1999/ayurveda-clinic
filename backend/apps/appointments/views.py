@@ -16,7 +16,7 @@ from apps.organizations.services import is_feature_enabled
 
 from .models import ACTIVE_STATUSES, Appointment
 from .serializers import AppointmentSerializer, CancelSerializer, QueueItemSerializer, RescheduleSerializer
-from .services import change_status, doctor_slots, event_for, notify_patient
+from .services import change_status, doctor_slots, event_for, notify_patient, undo_last_step
 
 SLOT_TAKEN = {"start_time": "This time was just booked by someone else. Please pick another time."}
 
@@ -123,6 +123,18 @@ class AppointmentViewSet(AuditedModelViewSet):
     @action(detail=True, methods=["post"], url_path="no-show")
     def no_show(self, request, pk=None):
         return self._response(self._change(request, "no_show"))
+
+    @action(detail=True, methods=["post"])
+    def undo(self, request, pk=None):
+        """Go back one step after a wrong click (check-in, start, done, did not come, cancel, a booking just made)."""
+        appointment = self.get_object()
+        try:
+            with transaction.atomic():
+                change = undo_last_step(appointment, request.user)
+        except IntegrityError:
+            raise ValidationError(SLOT_TAKEN)
+        log_action(request, "update", appointment, changes={"status": change})
+        return self._response(appointment)
 
     @action(detail=True, methods=["post"])
     def cancel(self, request, pk=None):

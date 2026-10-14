@@ -173,3 +173,29 @@ def test_plan_can_be_linked_to_the_check_up_of_the_same_patient_only(on, org, ro
     bad = c.post("/api/v1/therapy-plans/", {"patient": str(other.id), "visit": str(visit.id), "title": "B", "start_date": str(DAY),
                                             "items": item}, format="json")
     assert bad.status_code == 400 and "another patient" in str(bad.data)
+
+
+@pytest.mark.django_db
+def test_undo_a_therapy_session_step_by_step(on, org, roles, branch_a, doctor, therapist, patient, abhyanga):
+    from django.utils import timezone
+
+    c = client_for(doctor, branch_a)
+    plan = make_plan(c, patient, abhyanga, sessions=1)
+    sid = c.post(f"/api/v1/therapy-plans/{plan['id']}/schedule/", {"item": plan["items"][0]["id"], "dates": [str(date.today())],
+                                                                  "start_time": "10:00", "therapist": str(therapist.id)},
+                 format="json").data[0]["id"]
+    t = client_for(therapist, branch_a)
+    assert t.post(f"/api/v1/therapy-sessions/{sid}/start/").data["undo_to"] == "scheduled"
+    done = t.post(f"/api/v1/therapy-sessions/{sid}/complete/", {"material_used": "Oil", "quantity_ml": 100}, format="json")
+    assert done.data["status"] == "done" and done.data["undo_to"] == "in_progress"
+    assert c.get(f"/api/v1/therapy-plans/{plan['id']}/").data["status"] == "completed"
+    back = t.post(f"/api/v1/therapy-sessions/{sid}/undo/")
+    assert back.data["status"] == "in_progress" and back.data["quantity_ml"] == 100  # what was written is kept
+    assert c.get(f"/api/v1/therapy-plans/{plan['id']}/").data["status"] == "active"
+    assert t.post(f"/api/v1/therapy-sessions/{sid}/undo/").data["status"] == "scheduled"
+    # Did not come, then undo
+    assert t.post(f"/api/v1/therapy-sessions/{sid}/missed/").data["status"] == "missed"
+    assert t.post(f"/api/v1/therapy-sessions/{sid}/undo/").data["status"] == "scheduled"
+    # too late
+    TherapySession.objects.filter(pk=sid).update(updated_at=timezone.now() - timedelta(minutes=61))
+    assert t.post(f"/api/v1/therapy-sessions/{sid}/undo/").status_code == 400

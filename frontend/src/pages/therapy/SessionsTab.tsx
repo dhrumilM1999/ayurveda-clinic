@@ -1,7 +1,7 @@
 // The day's therapy sessions: who comes when, with which therapist and room. The therapist starts a session and records
 // the oil used and how the patient felt. SAFE TO EDIT: the words are in src/i18n/*.json under "therapy".
-import { CheckOutlined, CloseOutlined, LeftOutlined, PlayCircleOutlined, ReloadOutlined, RightOutlined, UserDeleteOutlined } from '@ant-design/icons';
-import { App, Button, DatePicker, Form, Input, InputNumber, Modal, Popconfirm, Select, Space, Table, Typography } from 'antd';
+import { CheckOutlined, CloseOutlined, LeftOutlined, PlayCircleOutlined, ReloadOutlined, RightOutlined, UndoOutlined, UserDeleteOutlined } from '@ant-design/icons';
+import { App, Button, DatePicker, Form, Input, InputNumber, Modal, Popconfirm, Select, Space, Table, Tooltip, Typography } from 'antd';
 import dayjs from 'dayjs';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -46,7 +46,7 @@ export default function SessionsTab() {
     api.get<TherapyOptions>('/therapy-sessions/options/').then(({ data }) => setOptions(data)).catch(() => undefined);
   }, []);
 
-  const act = async (row: TherapySession, what: 'start' | 'missed' | 'cancel') => {
+  const act = async (row: TherapySession, what: 'start' | 'missed' | 'cancel' | 'undo') => {
     try {
       await api.post(`/therapy-sessions/${row.id}/${what}/`);
       load();
@@ -112,13 +112,22 @@ export default function SessionsTab() {
           { title: t('common.status'), width: 130, render: (_, r) => <SessionStatusTag status={r.status} /> },
           {
             title: '', width: 330, align: 'right',
-            render: (_, r) => canManage && (r.status === 'scheduled' || r.status === 'in_progress') ? (
+            render: (_, r) => canManage && (r.status === 'scheduled' || r.status === 'in_progress' || r.undo_to) ? (
               <Space size={4} style={{ justifyContent: 'flex-end' }}>
+                {r.undo_to && (
+                  <Tooltip title={t('undo.to', { status: t(`therapy.status.${r.undo_to}`) })}>
+                    <Button size="small" icon={<UndoOutlined />} onClick={() => act(r, 'undo')}>{t('undo.button')}</Button>
+                  </Tooltip>
+                )}
                 {r.status === 'scheduled' && <Button size="small" icon={<PlayCircleOutlined />} onClick={() => act(r, 'start')}>{t('therapy.start')}</Button>}
-                <Button size="small" type="primary" icon={<CheckOutlined />} onClick={() => openRecord(r)}>{t('therapy.finish')}</Button>
-                <Popconfirm title={t('therapy.cancelAsk')} onConfirm={() => act(r, 'cancel')}>
-                  <Button size="small" icon={<CloseOutlined />} title={t('therapy.cancel')} />
-                </Popconfirm>
+                {(r.status === 'scheduled' || r.status === 'in_progress') && (
+                  <Button size="small" type="primary" icon={<CheckOutlined />} onClick={() => openRecord(r)}>{t('therapy.finish')}</Button>
+                )}
+                {(r.status === 'scheduled' || r.status === 'in_progress') && (
+                  <Popconfirm title={t('therapy.cancelAsk')} onConfirm={() => act(r, 'cancel')}>
+                    <Button size="small" icon={<CloseOutlined />} title={t('therapy.cancel')} />
+                  </Popconfirm>
+                )}
                 {r.status === 'scheduled' && (
                   <Button size="small" icon={<UserDeleteOutlined />} title={t('therapy.missed')} onClick={() => act(r, 'missed')} />
                 )}

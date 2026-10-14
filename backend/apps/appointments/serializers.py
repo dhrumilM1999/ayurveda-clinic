@@ -5,7 +5,7 @@ from apps.accounts.services import doctors_in_branch
 from apps.common.utils import mask_phone
 
 from .models import Appointment
-from .services import patient_has_active_appointment, slot_end
+from .services import patient_has_active_appointment, slot_end, undo_target
 
 
 def patient_summary(patient) -> dict:
@@ -47,6 +47,8 @@ class AppointmentSerializer(OpdBillFieldMixin, serializers.ModelSerializer):
     # How many check-ups the patient had before this day (0 = new patient, more = follow-up)
     previous_visits = serializers.IntegerField(read_only=True, default=0)
     patient_detail = serializers.SerializerMethodField()
+    # The status an "Undo" would go back to (empty = cannot be undone any more)
+    undo_to = serializers.SerializerMethodField()
     # Short OPD bill status (only for staff who may see or make bills)
     opd_bill = serializers.SerializerMethodField()
     doctor_name = serializers.CharField(source="doctor.full_name", read_only=True)
@@ -58,7 +60,7 @@ class AppointmentSerializer(OpdBillFieldMixin, serializers.ModelSerializer):
             "id", "patient", "patient_detail", "doctor", "doctor_name", "branch", "branch_name",
             "date", "start_time", "end_time", "kind", "status", "token_number", "reason", "notes",
             "checked_in_at", "consultation_started_at", "completed_at", "cancelled_at", "cancel_reason",
-            "reschedule_count", "created_at", "opd_bill", "previous_visits",
+            "reschedule_count", "created_at", "opd_bill", "previous_visits", "undo_to",
         ]
         read_only_fields = [
             "id", "branch", "end_time", "status", "token_number", "checked_in_at",
@@ -69,6 +71,9 @@ class AppointmentSerializer(OpdBillFieldMixin, serializers.ModelSerializer):
 
     def get_patient_detail(self, obj):
         return patient_summary(obj.patient)
+
+    def get_undo_to(self, obj):
+        return undo_target(obj) if obj.pk else None
 
 
     def validate_patient(self, value):

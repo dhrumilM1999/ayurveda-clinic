@@ -276,3 +276,53 @@ def test_appointments_are_never_deleted(receptionist, doctor, branch_a, schedule
     client = client_for(receptionist, branch_a)
     appt_id = book(client, patient, doctor).data["id"]
     assert client.delete(f"{URL}{appt_id}/").status_code == 405
+
+
+# --- Undo ---------------------------------------------------------------------------
+@pytest.mark.django_db
+def test_undo_walks_back_one_step_at_a_time(org, receptionist, doctor, branch_a, schedule, patient):
+    client = client_for(receptionist, branch_a)
+    appt = today_appointment(org, branch_a, patient, doctor)
+    assert client.get(f"{URL}{appt.id}/").data["undo_to"] == "cancelled"  # just booked: the booking can be undone
+    client.post(f"{URL}{appt.id}/check-in/")
+    assert client.get(f"{URL}{appt.id}/").data["undo_to"] == "booked"
+    client.post(f"{URL}{appt.id}/start/")
+    assert client.get(f"{URL}{appt.id}/").data["undo_to"] == "checked_in"
+    client.post(f"{URL}{appt.id}/complete/")
+    assert client.get(f"{URL}{appt.id}/").data["undo_to"] == "in_consultation"
+    for expected in ("in_consultation", "checked_in", "booked"):
+        res = client.post(f"{URL}{appt.id}/undo/")
+        assert res.status_code == 200 and res.data["status"] == expected
+    appt.refresh_from_db()
+    assert appt.checked_in_at is None and appt.consultation_started_at is None and appt.completed_at is None
+    assert AuditLog.objects.filter(object_id=str(appt.id), changes__status__undo=True).exists()
+
+
+@pytest.mark.django_db
+def test_undo_cancel_and_no_show_and_booking(org, receptionist, doctor, branch_a, schedule, patient):
+    client = client_for(receptionist, branch_a)
+    appt = today_appointment(org, branch_a, patient, doctor)
+    client.post(f"{URL}{appt.id}/cancel/", {"reason": "oops"}, format="json")
+    assert client.post(f"{URL}{appt.id}/undo/").data["status"] == "booked"
+    client.post(f"{URL}{appt.id}/no-show/")
+    assert client.post(f"{URL}{appt.id}/undo/").data["status"] == "booked"
+    # a booking made by mistake is removed (cancelled, not deleted) and needs no message to the patient
+    FakeSmsProvider.outbox.clear()
+    res = client.post(f"{URL}{appt.id}/undo/")
+    assert res.status_code == 200 and res.data["status"] == "cancelled" and FakeSmsProvider.outbox == []
+    assert Appointment.objects.filter(pk=appt.pk).exists()
+
+
+@pytest.mark.django_db
+def test_undo_has_limits(org, receptionist, doctor, branch_a, schedule, patient):
+    client = client_for(receptionist, branch_a)
+    appt = today_appointment(org, branch_a, patient, doctor)
+    client.post(f"{URL}{appt.id}/check-in/")
+    # too late
+    Appointment.objects.filter(pk=appt.pk).update(updated_at=timezone.now() - timedelta(minutes=61))
+    assert client.get(f"{URL}{appt.id}/").data["undo_to"] is None
+    assert client.post(f"{URL}{appt.id}/undo/").status_code == 400
+    # a walk-in has no earlier step
+    other = make_patient(org, mobile="9876500777", first="Asha")
+    walk = client.post(URL, {"patient": str(other.id), "doctor": str(doctor.id), "kind": "walk_in"}, format="json")
+    assert walk.status_code == 201 and walk.data["undo_to"] is None

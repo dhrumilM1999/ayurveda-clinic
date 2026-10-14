@@ -7,6 +7,8 @@ Therapy rules in one place (views call these; other modules should too):
 """
 from datetime import datetime, timedelta
 
+from django.utils import timezone
+
 from django.db.models import Q
 from rest_framework.exceptions import ValidationError
 
@@ -109,3 +111,45 @@ def plan_print_data(plan, lang: str) -> dict:
         .order_by("date", "start_time")
     ]
     return {"items": items, "sessions": sessions, "has_instructions": any(i["instructions"] for i in items)}
+
+
+# --- Undo (a wrong click on a session) ----------------------------------------------------
+UNDO_MINUTES = 60  # an undo is possible for this long after the last change
+
+
+def undo_target(session):
+    """The status a session would go back to (None = cannot be undone any more)."""
+    if timezone.now() - session.updated_at > timedelta(minutes=UNDO_MINUTES):
+        return None
+    if session.status == "in_progress":
+        return "scheduled"
+    if session.status == "done":
+        return "in_progress" if session.started_at else "scheduled"
+    if session.status in ("missed", "cancelled"):
+        if session.plan.status == "cancelled" or session.date < timezone.localdate():
+            return None
+        return "scheduled"
+    return None
+
+
+def undo_last_step(session, user) -> dict:
+    """Go one step back. What the therapist already wrote (oil, quantity, response) is kept."""
+    target = undo_target(session)
+    if target is None:
+        raise ValidationError({"detail": "This can no longer be undone."})
+    old = session.status
+    if target in ("scheduled", "in_progress"):
+        check_free(session.branch, session.date, session.start_time, session.end_time, session.therapist, session.room,
+                   exclude_id=session.pk)
+    session.status = target
+    session.updated_by = user
+    fields = ["status", "updated_by", "updated_at"]
+    if old == "done":
+        session.completed_at = None
+        fields.append("completed_at")
+    if target == "scheduled" and session.started_at:
+        session.started_at = None
+        fields.append("started_at")
+    session.save(update_fields=fields)
+    refresh_plan_status(session.plan)
+    return {"from": old, "to": target, "undo": True}

@@ -1924,5 +1924,12 @@
       "empty": "No therapies yet. Add the starting list (Abhyanga, Shirodhara, Virechana ...) and change it as you like."
     },
     "off": "Panchakarma and therapy is switched off for this branch. Switch it on in Settings, Modules."
+  },
+  "undo": {
+    "button": "Undo",
+    "to": "Undo: back to “{{status}}”",
+    "booking": "Undo this booking",
+    "confirmBooking": "Remove this booking made by mistake? The patient is not sent a message.",
+    "done": "Undone"
   }
 }

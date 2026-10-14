@@ -5,7 +5,7 @@ from rest_framework import serializers
 from apps.appointments.serializers import patient_summary
 
 from .models import TherapyPlan, TherapyPlanItem, TherapySession, TherapyType
-from .services import check_free
+from .services import check_free, undo_target
 
 
 class TherapyTypeSerializer(serializers.ModelSerializer):
@@ -35,17 +35,21 @@ class TherapySessionSerializer(serializers.ModelSerializer):
     room_name = serializers.CharField(source="room.name", read_only=True, default=None)
     session_no = serializers.SerializerMethodField()
     sessions_planned = serializers.IntegerField(source="item.sessions_planned", read_only=True)
+    undo_to = serializers.SerializerMethodField()
 
     class Meta:
         model = TherapySession
         fields = ["id", "plan", "plan_title", "item", "patient", "patient_detail", "therapy", "therapy_name",
                   "therapy_name_gu", "therapy_name_hi", "stage", "therapist", "therapist_name", "room", "room_name",
                   "date", "start_time", "end_time", "status", "session_no", "sessions_planned", "material_used",
-                  "quantity_ml", "patient_response", "notes", "started_at", "completed_at"]
+                  "quantity_ml", "patient_response", "notes", "started_at", "completed_at", "undo_to"]
         read_only_fields = ["plan", "item", "patient", "therapy", "started_at", "completed_at"]
 
     def get_patient_detail(self, obj):
         return patient_summary(obj.patient)
+
+    def get_undo_to(self, obj):
+        return undo_target(obj)
 
     def get_session_no(self, obj):
         """1st, 2nd ... session of this therapy in the plan (by date)."""

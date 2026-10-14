@@ -2,6 +2,17 @@
 
 What changed in each step, in plain words.
 
+## Undo for small mistakes (2026-10-15)
+
+- A small **Undo** (back-arrow) button for wrong clicks: on the **Appointments** row it goes back one step (Waiting
+  to Booked, With doctor to Waiting, Done back, Did not come, Cancelled back to Booked); a booking made by mistake can
+  be removed from the row menu ("Undo this booking", no message goes to the patient). On the **Panchakarma sessions**
+  list it takes a session back (Done to In progress, In progress to Booked, Did not come / Cancelled to Booked); what
+  the therapist already wrote is kept.
+- Limits (so nothing odd happens later): within **60 minutes** of the last change, never after the check-up is finished
+  (re-open the check-up instead), and a walk-in has no earlier step (cancel it). Nothing is deleted, every undo is in
+  the audit log. Bills are not touched.
+
 ## Panchakarma and therapy (2026-10-15)
 
 - **New module** (Settings, Modules, switch on "Panchakarma and therapy"): a list of therapies (27 starting ones in

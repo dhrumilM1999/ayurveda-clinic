@@ -163,3 +163,59 @@ def notify_patient(appointment: Appointment, event: str, send_sms_now: bool = Tr
         send_sms(patient.mobile, text, organization=appointment.organization, purpose=purpose)
     link = prepare_whatsapp(patient.mobile, text, organization=appointment.organization, purpose=purpose)
     return {"consent": True, "sms_sent": send_sms_now, "whatsapp_link": link, "message": text}
+
+
+# --- Undo (a small mistake: wrong button) ------------------------------------------------
+UNDO_MINUTES = 60  # an undo is possible for this long after the last change
+
+
+def undo_target(appointment: Appointment) -> str | None:
+    """
+    The status the appointment would go back to, or None if it cannot be undone (too late, or it already
+    led to something else such as a finished check-up). A booking that was just made goes to "cancelled"
+    (removed from the list); nothing is ever deleted.
+    """
+    if timezone.now() - appointment.updated_at > timedelta(minutes=UNDO_MINUTES):
+        return None
+    status = appointment.status
+    if status == "checked_in":
+        return "booked" if appointment.kind == "booked" else None  # a walk-in has no earlier step: cancel it instead
+    if status == "in_consultation":
+        return "checked_in"
+    if status == "completed":
+        visit = getattr(appointment, "visit", None)
+        if visit is not None and visit.status == "completed":
+            return None  # re-open the check-up instead
+        return "in_consultation" if appointment.consultation_started_at else "checked_in"
+    if status == "no_show":
+        return "booked"
+    if status == "cancelled":
+        return "booked" if appointment.date >= timezone.localdate() else None
+    if status == "booked":
+        recent = timezone.now() - appointment.created_at <= timedelta(minutes=UNDO_MINUTES)
+        return "cancelled" if recent and appointment.kind == "booked" and not hasattr(appointment, "visit") else None
+    return None
+
+
+def undo_last_step(appointment: Appointment, user) -> dict:
+    """Go one step back. Returns {"from", "to"} for the audit log."""
+    target = undo_target(appointment)
+    if target is None:
+        raise ValidationError({"detail": "This can no longer be undone."})
+    old = appointment.status
+    fields = ["status", "updated_by", "updated_at"]
+    appointment.status = target
+    appointment.updated_by = user
+    for status, stamp in (("checked_in", "checked_in_at"), ("in_consultation", "consultation_started_at"),
+                          ("completed", "completed_at"), ("cancelled", "cancelled_at")):
+        if old == status and target != status and getattr(appointment, stamp):
+            setattr(appointment, stamp, None)
+            fields.append(stamp)
+    if old == "cancelled" or target == "cancelled":
+        appointment.cancel_reason = "Booked by mistake (undone)" if target == "cancelled" else ""
+        fields.append("cancel_reason")
+        if target == "cancelled":
+            appointment.cancelled_at = timezone.now()
+            fields.append("cancelled_at")
+    appointment.save(update_fields=sorted(set(fields)))
+    return {"from": old, "to": target, "undo": True}

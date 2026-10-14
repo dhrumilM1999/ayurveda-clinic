@@ -11,7 +11,7 @@ from apps.organizations.services import is_feature_enabled
 
 from .models import TherapyPlan, TherapyPlanItem, TherapySession, TherapyType
 from .serializers import ScheduleSerializer, TherapyPlanSerializer, TherapySessionSerializer, TherapyTypeSerializer
-from .services import check_free, end_for, load_sample_therapies, refresh_plan_status, therapists_in_branch
+from .services import check_free, end_for, load_sample_therapies, refresh_plan_status, therapists_in_branch, undo_last_step
 
 FEATURE = "panchakarma"
 
@@ -137,7 +137,7 @@ class TherapySessionViewSet(ModuleSwitch, AuditedModelViewSet):
     ordering_fields = ["date", "start_time"]
     pagination_class = None
     required_permissions = {"start": "therapy.manage", "complete": "therapy.manage", "missed": "therapy.manage",
-                            "cancel": "therapy.manage", "options": "therapy.view"}
+                            "cancel": "therapy.manage", "undo": "therapy.manage", "options": "therapy.view"}
 
     def create(self, request, *args, **kwargs):
         raise ValidationError({"detail": "Book sessions from the plan (POST /therapy-plans/<id>/schedule/)."})
@@ -186,6 +186,13 @@ class TherapySessionViewSet(ModuleSwitch, AuditedModelViewSet):
     @action(detail=True, methods=["post"])
     def cancel(self, request, pk=None):
         return self._set(request, "cancelled")
+
+    @action(detail=True, methods=["post"])
+    def undo(self, request, pk=None):
+        session = self.get_object()
+        change = undo_last_step(session, request.user)
+        log_action(request, "update", session, changes={"status": change})
+        return Response(self.get_serializer(session).data)
 
     @action(detail=False, methods=["get"])
     def options(self, request):

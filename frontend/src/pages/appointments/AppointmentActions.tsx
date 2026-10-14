@@ -1,7 +1,7 @@
 // The buttons on one appointment row: the next step (Check in / Start / Done) and a "more" menu
 // (Reschedule, Cancel, Did not come, WhatsApp). Used on the Appointments screen and the patient file.
-import { MoreOutlined } from '@ant-design/icons';
-import { App, Button, DatePicker, Dropdown, Form, Input, Modal, Space } from 'antd';
+import { MoreOutlined, UndoOutlined } from '@ant-design/icons';
+import { App, Button, DatePicker, Dropdown, Form, Input, Modal, Space, Tooltip } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -47,6 +47,23 @@ export function AppointmentActions({ appointment: a, onChanged }: { appointment:
     }
   };
 
+  // Undo the last step after a wrong click (check-in, start, done, did not come, cancel, a booking made by mistake)
+  const undo = async () => {
+    setBusy(true);
+    try {
+      await api.post(`/appointments/${a.id}/undo/`);
+      message.success(t('undo.done'));
+      onChanged();
+    } catch (err) {
+      message.error(errorMessage(err, t('common.saveFailed')));
+    } finally {
+      setBusy(false);
+    }
+  };
+  const undoLabel = a.undo_to
+    ? a.status === 'booked' ? t('undo.booking') : t('undo.to', { status: t(`appointments.status.${a.undo_to}`) })
+    : '';
+
   const closeNotice = () => {
     if (notice?.thenBill) setBillOpen(true);
     setNotice(null);
@@ -89,6 +106,7 @@ export function AppointmentActions({ appointment: a, onChanged }: { appointment:
     ...(canCheckup ? [{ key: 'checkup', label: t('consult.openCheckup') }] : []),
     ...(canBill && !['cancelled', 'no_show'].includes(a.status) ? [{ key: 'bill', label: t('opd.titlePlain') }] : []),
     ...(a.status === 'booked' ? [{ key: 'reschedule', label: t('appointments.reschedule') }] : []),
+    ...(a.undo_to && a.status === 'booked' ? [{ key: 'undo-booking', label: undoLabel }] : []),
     ...(a.status === 'checked_in' ? [{ key: 'complete', label: t('appointments.complete') }] : []),
     ...(a.status === 'booked' && !dayjs(a.date).isAfter(dayjs(), 'day') ? [{ key: 'no-show', label: t('appointments.markNoShow') }] : []),
     { key: 'whatsapp', label: t('appointments.whatsapp') },
@@ -99,6 +117,9 @@ export function AppointmentActions({ appointment: a, onChanged }: { appointment:
     if (key === 'checkup') openCheckup();
     else if (key === 'bill') setBillOpen(true);
     else if (key === 'reschedule') setRescheduleOpen(true);
+    else if (key === 'undo-booking') {
+      modal.confirm({ title: t('undo.confirmBooking'), okText: t('common.yes'), cancelText: t('common.no'), onOk: undo });
+    }
     else if (key === 'cancel') setCancelOpen(true);
     else if (key === 'whatsapp') whatsapp();
     else if (key === 'no-show') {
@@ -116,6 +137,11 @@ export function AppointmentActions({ appointment: a, onChanged }: { appointment:
           <Button size="small" type={main.step === 'check-in' ? 'primary' : 'default'} loading={busy} onClick={() => run(main!.step)}>
             {main.label}
           </Button>
+        )}
+        {a.undo_to && a.status !== 'booked' && (
+          <Tooltip title={undoLabel}>
+            <Button size="small" type="text" icon={<UndoOutlined />} loading={busy} onClick={undo} aria-label={undoLabel} />
+          </Tooltip>
         )}
         <Dropdown trigger={['click']} menu={{ items: menu, onClick: onMenu }}>
           <Button size="small" type="text" icon={<MoreOutlined />} aria-label={t('appointments.more')} />

@@ -394,6 +394,8 @@ export interface Appointment {
   opd_bill?: OpdBillSummary | null;
   /** Check-ups the patient had before this day: 0 = new patient, more = follow-up */
   previous_visits?: number;
+  /** Status an Undo would go back to (empty = cannot be undone) */
+  undo_to?: AppointmentStatus | null;
 }
 
 export interface Slot {
@@ -1227,6 +1229,7 @@ export interface TherapySession {
   quantity_ml: number | null;
   patient_response: string;
   notes: string;
+  undo_to: TherapySessionStatus | null;
 }
 
 export interface TherapyOptions {
