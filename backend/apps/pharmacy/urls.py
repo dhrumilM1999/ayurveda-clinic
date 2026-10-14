@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 from .labels import MedicineLabelView
 
 from .views import (
-    CounterSaleViewSet, DispensingViewSet, PurchaseReturnViewSet, PurchaseViewSet, RackViewSet, SaleViewSet,
+    CounterSaleViewSet, DispensingViewSet, PharmacyReportViewSet, PurchaseReturnViewSet, PurchaseViewSet, RackViewSet, SaleViewSet,
     StockViewSet, SupplierViewSet, VerificationViewSet,
 )
 
@@ -17,6 +17,7 @@ router.register("stock", StockViewSet, basename="stock")
 router.register("stock-checks", VerificationViewSet, basename="stock-check")
 router.register("dispensing", DispensingViewSet, basename="dispensing")
 router.register("sales", SaleViewSet, basename="sale")
+router.register("pharmacy-reports", PharmacyReportViewSet, basename="pharmacy-report")
 router.register("counter-sales", CounterSaleViewSet, basename="counter-sale")
 
 urlpatterns = [path("medicine-labels/", MedicineLabelView.as_view(), name="medicine-labels")] + router.urls
