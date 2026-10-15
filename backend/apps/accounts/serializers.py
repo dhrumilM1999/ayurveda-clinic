@@ -122,6 +122,20 @@ class StaffSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("This username is already taken.")
         return value
 
+    def _guard_lockout(self, attrs):
+        """Nobody may lock the clinic out of its own software by a wrong click."""
+        instance = self.instance
+        if instance is not None:
+            switching_off = attrs.get("is_active") is False
+            demoting = attrs.get("is_org_admin") is False and instance.is_org_admin
+            actor = self.context["request"].user
+            if instance.pk == actor.pk and (switching_off or demoting):
+                raise serializers.ValidationError("You cannot switch off or reduce your own account. Ask another admin.")
+            if instance.is_org_admin and (switching_off or demoting):
+                others = User.objects.filter(organization_id=instance.organization_id, is_org_admin=True, is_active=True)                     .exclude(pk=instance.pk)
+                if not others.exists():
+                    raise serializers.ValidationError("This is the last organization admin. Make someone else an admin first.")
+
     def validate_branch_roles(self, value):
         org_id = self.context["request"].user.organization_id
         seen = set()
@@ -135,6 +149,7 @@ class StaffSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         actor = self.context["request"].user
+        self._guard_lockout(attrs)
         if self.instance is None and not attrs.get("password"):
             raise serializers.ValidationError({"password": "A password is required for a new user."})
         if attrs.get("password"):
