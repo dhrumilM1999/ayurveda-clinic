@@ -42,8 +42,20 @@ def line_amounts(unit_price, quantity, discount_percent, gst_rate) -> dict:
     Price includes GST. Example: 2 x ₹112 with 12% GST, no discount -> total 224.00,
     taxable 200.00, CGST 12.00, SGST 12.00.
     """
-    unit_price, quantity = Decimal(unit_price), Decimal(quantity)
-    discount_percent, gst_rate = Decimal(discount_percent or 0), Decimal(gst_rate or 0)
+    try:
+        unit_price, quantity = Decimal(unit_price), Decimal(quantity)
+        discount_percent, gst_rate = Decimal(discount_percent or 0), Decimal(gst_rate or 0)
+    except Exception:
+        raise ValidationError({"lines": "Price, quantity, discount and GST must be numbers."})
+    # A mistake in a bill line must never become a negative or free-looking bill
+    if quantity <= 0:
+        raise ValidationError({"quantity": "Quantity must be more than zero."})
+    if unit_price < 0:
+        raise ValidationError({"unit_price": "Price cannot be negative."})
+    if not (0 <= discount_percent <= 100):
+        raise ValidationError({"discount_percent": "Discount must be between 0 and 100 percent."})
+    if not (0 <= gst_rate <= 100):
+        raise ValidationError({"gst_rate": "GST must be between 0 and 100 percent."})
     gross = rupees(unit_price * quantity)
     discount = rupees(gross * discount_percent / 100)
     total = gross - discount

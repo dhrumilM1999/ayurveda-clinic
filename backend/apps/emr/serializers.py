@@ -95,6 +95,13 @@ class VisitSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(f"At most {MAX_ITEMS} items.")
         return value
 
+    def validate_follow_up_date(self, value):
+        """A follow-up date before the day of the check-up is a typing mistake (wrong year or month)."""
+        instance = getattr(self, "instance", None)
+        if value and instance is not None and value != instance.follow_up_date and value < instance.visit_date:
+            raise serializers.ValidationError("The follow-up date cannot be before the day of this check-up.")
+        return value
+
     def validate_complaints(self, value):
         cleaned = []
         for item in self._list(value, "Complaints"):

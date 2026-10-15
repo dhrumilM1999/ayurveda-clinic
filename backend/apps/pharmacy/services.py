@@ -310,6 +310,15 @@ def sell(prescription, branch, user, lines: list[dict], *, notes="", payment=Non
         raise ValidationError({"detail": "The doctor has not completed this prescription yet."})
     if not lines:
         raise ValidationError({"items": "Choose at least one medicine to give."})
+    # A second click (or a second person) on "Give" must not give the same medicine again: lock the prescription
+    # so two clicks at the same moment queue up, then refuse medicines that were already given.
+    type(prescription).objects.select_for_update().filter(pk=prescription.pk).first()
+    given = dispensed_quantities(prescription)
+    for line in lines:
+        item = line.get("prescription_item")
+        if item is not None and given.get(item.id):
+            raise ValidationError({"items": f"{item.medicine_name} was already given for this prescription. "
+                                            "If more is needed, return it first or use a counter sale."})
     record = Dispense.objects.create(
         organization_id=branch.organization_id, branch=branch, prescription=prescription,
         patient_id=prescription.patient_id, notes=notes[:300], created_by=user, updated_by=user,
