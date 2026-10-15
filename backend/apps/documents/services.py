@@ -255,7 +255,7 @@ def case_sheet_context(prescription, lang: str) -> dict:
     Extra parts of the "Ayurveda case sheet" design: the Agni ... Srotas lines (CASE_SHEET_LINES in words.py) filled
     from the check-up's examination answers, weight, and the branch's printed texts.
     """
-    from .words import CASE_SHEET_LINES, CASE_SHEET_WORDS
+    from .words import CASE_SHEET_LINES, CASE_SHEET_SPLIT_BEFORE, CASE_SHEET_WORDS
 
     visit, patient = prescription.visit, prescription.patient
     answers = {}
@@ -272,7 +272,7 @@ def case_sheet_context(prescription, lang: str) -> dict:
     vital = patient.vitals.filter(recorded_at__date=visit.visit_date).order_by("-recorded_at").first()
     branch = prescription.branch
     return {
-        "case_lines": lines, "cs": CASE_SHEET_WORDS, "allergies": [a.allergen for a in patient.allergies.all()],
+        "case_lines": lines, "split_before": CASE_SHEET_SPLIT_BEFORE, "cs": CASE_SHEET_WORDS, "allergies": [a.allergen for a in patient.allergies.all()],
         "weight": f"{vital.weight_kg} kg" if vital and vital.weight_kg else "",
         "complaint_lines": [
             {"label": c["label"], "duration": f"{c['duration']} {DURATION_WORDS.get(c.get('duration_unit') or 'days', DURATION_WORDS['days'])[lang]}"

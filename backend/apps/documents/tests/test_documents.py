@@ -193,10 +193,61 @@ def test_ayurveda_case_sheet_design_is_one_a4_page(org_admin, doctor, branch_a, 
     branch_a.refresh_from_db()
     context = {**prescription_context(rx, "en"), **case_sheet_context(rx, "en"), "size": "a4"}
     html = render_to_string("documents/prescription_ayurveda.html", context)
-    for text in ("Ayurveda &amp; Panchakarma Hospital", "Sunday closed", "Panchakarma", "अग्नि", "स्रोतस", "Cough",
-                 "3 months", "Triphala Churna"):
+    for text in ("Ayurveda &amp; Panchakarma Hospital", "Sunday closed", "Panchakarma", "Agni", "Srotas", "Symptoms",
+                 "Cough", "3 months", "Triphala Churna"):
         assert text in html
-    assert [label for label, _ in context["case_lines"]][:2] == ["अग्नि", "कोष्ठ"]
+    assert [label for label, _ in context["case_lines"]][:2] == ["Agni", "Koshta"]
     # On the pre-printed pad the top (logo, doctor) and bottom (services, address) are left blank
     on_pad = render_to_string("documents/prescription_ayurveda.html", {**context, "pad": {"top": "60mm", "bottom": "40mm"}})
     assert 'class="head"' not in on_pad and 'class="services"' not in on_pad and "Cough" in on_pad
+
+
+@pytest.mark.django_db
+def test_ayurveda_case_sheet_fits_seven_medicines_on_one_page(doctor, branch_a, visit):
+    """A busy prescription (7 medicines, notes, advice, next visit) must fit above the QR code and signature.
+    The page hides anything that does not fit, so this checks the laid-out PDF, not just the HTML."""
+    import base64
+    from io import BytesIO
+
+    from django.template.loader import render_to_string
+    from PIL import Image
+    from weasyprint import HTML
+
+    from apps.documents.services import case_sheet_context, prescription_context
+
+    # Everything the branch can print at the top and bottom, so the space left for medicines is the smallest
+    branch_a.print_subtitle, branch_a.print_closed_note = "Ayurveda & Panchakarma Hospital", "Sunday closed"
+    branch_a.letterhead_footer, branch_a.print_quote = "Time: 10 to 1 & 5 to 8", "आरोग्यं परमं भाग्यं"
+    branch_a.print_services, branch_a.address = "Consulting | Panchakarma | Medicine", "12, Shanti Complex, C.G. Road"
+    branch_a.save()
+    visit.complaints = [{"label": f"Complaint {n}", "duration": 2, "duration_unit": "weeks"} for n in range(5)]
+    visit.advice_notes = "No curd at night. Less fried food."
+    visit.follow_up_notes = "Bring reports"
+    visit.save()
+    lines = [{"medicine": None, "medicine_name": f"Mahamanjishthadi Kwath Ashwagandha Ghan Vati No. {n}", "dose": "1", "frequency": "1-0-1",
+              "duration": 15, "instructions": "Not on an empty stomach, with warm water after food"} for n in range(1, 8)]
+    rx = save_prescription(visit, lines, "Take medicines regularly.\nWalk 15 minutes after meals.", doctor)
+    context = {**prescription_context(rx, "gu"), **case_sheet_context(rx, "gu"), "size": "a4"}
+    # A square logo takes the most height at the top (up to 26 mm)
+    square_logo = BytesIO()
+    Image.new("RGB", (300, 300), "orange").save(square_logo, "PNG")
+    context["logo"] = "data:image/png;base64," + base64.b64encode(square_logo.getvalue()).decode()
+    document = HTML(string=render_to_string("documents/prescription_ayurveda.html", context)).render()
+    assert len(document.pages) == 1
+
+    # Walk the laid-out boxes (WeasyPrint's layout tree) and compare positions on the page
+    content_bottom, sign_top = 0, None
+
+    def walk(box):
+        nonlocal content_bottom, sign_top
+        element = getattr(box, "element", None)
+        css_class = element.get("class") if element is not None else None
+        if css_class in ("med", "after"):
+            content_bottom = max(content_bottom, box.position_y + box.margin_height())
+        if css_class == "sign-row" and sign_top is None:
+            sign_top = box.position_y
+        for child in getattr(box, "children", []):
+            walk(child)
+
+    walk(document.pages[0]._page_box)
+    assert sign_top is not None and content_bottom <= sign_top

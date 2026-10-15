@@ -11,7 +11,7 @@ from apps.organizations.services import is_feature_enabled
 
 from .models import BranchMedicine, Medicine
 from .serializers import BranchSettingsSerializer, MedicineSerializer, MedicineVersionSerializer
-from .services import import_medicines, import_template_csv, read_rows, save_medicine, search_filter, set_branch_settings
+from .services import import_medicines, import_template_csv, read_rows, save_medicine, search_filter, search_rank, set_branch_settings
 
 
 class MedicineViewSet(AuditedModelViewSet):
@@ -41,14 +41,18 @@ class MedicineViewSet(AuditedModelViewSet):
     def get_queryset(self):
         qs = super().get_queryset()
         params = self.request.query_params
-        if params.get("q", "").strip():
-            qs = qs.filter(search_filter(params["q"].strip()))
+        text = params.get("q", "").strip()
+        ranked = False
+        if text:
+            qs = qs.filter(search_filter(text))
+            qs = qs.annotate(match_rank=search_rank(text))  # names that START with the typed text come first
+            ranked = True
         if not is_feature_enabled(self.request.branch, "medicines_homeopathy"):
             qs = qs.exclude(kind="homeopathy")  # optional extra: Additional settings -> Homeopathy medicines
         if params.get("for_rx") == "1":
             off = BranchMedicine.objects.filter(branch=self.request.branch, is_active=False).values("medicine_id")
             qs = qs.filter(is_active=True).exclude(id__in=off)
-        return qs.order_by("name")
+        return qs.order_by("match_rank", "name") if ranked else qs.order_by("name")
 
     def get_serializer_context(self):
         context = super().get_serializer_context()

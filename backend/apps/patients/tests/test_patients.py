@@ -1,6 +1,7 @@
 from datetime import date
 
 import pytest
+from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import connection
 from django.utils import timezone
@@ -141,10 +142,29 @@ def test_list_masks_phone_and_search_is_audited(receptionist, branch_a):
     assert {r["mobile_masked"] for r in rows} == {"98XXXXXX21", "98XXXXXX00"}
     assert "mobile" not in rows[0]
 
+    cache.clear()  # searches while typing are logged at most once per 5 seconds
     assert [r["first_name"] for r in client.get(URL, {"q": "ramesh pat"}).data["results"]] == ["Ramesh"]
+    cache.clear()
     assert [r["first_name"] for r in client.get(URL, {"q": "45621"}).data["results"]] == ["Ramesh"]
+    cache.clear()
     assert [r["first_name"] for r in client.get(URL, {"q": "Sita"}).data["results"]] == ["Sita"]
     assert AuditLog.objects.filter(action="view", object_type="patients.search").count() == 3
+
+
+@pytest.mark.django_db
+def test_search_while_typing(receptionist, branch_a):
+    """Name parts in any order, partial name, patient ID and mobile digits all find the patient; audit is not flooded."""
+    client = client_for(receptionist, branch_a)
+    register(client, first_name="Bhavin", last_name="Patel", mobile="9812345621")
+    register(client, first_name="Sita", last_name="Shah", mobile="9800000000")
+    names = lambda q: [r["first_name"] for r in client.get(URL, {"q": q}).data["results"]]
+    cache.clear()
+    assert names("bha") == ["Bhavin"]
+    assert names("patel bhavin") == ["Bhavin"]
+    assert names("bhavin 456") == ["Bhavin"]  # name word + part of the mobile number
+    uhid = client.get(URL, {"q": "Sita"}).data["results"][0]["uhid"]
+    assert names(uhid[-4:]) == ["Sita"]
+    assert AuditLog.objects.filter(action="view", object_type="patients.search").count() == 1  # throttled
 
 
 @pytest.mark.django_db

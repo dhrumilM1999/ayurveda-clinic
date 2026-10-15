@@ -1,6 +1,6 @@
 // Purchase invoices (stock in). Extras (Additional settings): opening stock, returns to suppliers.
 import { PlusOutlined } from '@ant-design/icons';
-import { Button, Input, Segmented, Space, Table, Tag } from 'antd';
+import { Button, Segmented, Space, Table, Tag } from 'antd';
 import dayjs from 'dayjs';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -10,13 +10,13 @@ import { useAuth } from '../../auth/AuthContext';
 import { money } from '../medicines/shared';
 import { expiryText, qty } from './common';
 import { PurchaseModal } from './PurchaseModal';
+import { LiveSearch } from '../../components/LiveSearch';
 
 export function PurchasesTab() {
   const { t } = useTranslation();
   const { can, hasFeature } = useAuth();
   const [chosen, setView] = useState<'purchases' | 'opening' | 'returns'>('purchases');
   const [open, setOpen] = useState<'purchase' | 'opening' | null>(null);
-  const [search, setSearch] = useState('');
   const [query, setQuery] = useState('');
 
   const views = [
@@ -31,8 +31,7 @@ export function PurchasesTab() {
       <div className="filter-bar">
         {views.length > 1 && <Segmented value={view} onChange={(v) => setView(v as typeof view)} options={views} />}
         {view !== 'returns' && (
-          <Input.Search allowClear placeholder={t('pharmacy.purchaseSearch')} value={search} style={{ width: 260 }}
-            onChange={(e) => { setSearch(e.target.value); if (!e.target.value) setQuery(''); }} onSearch={(v) => setQuery(v.trim())} />
+          <LiveSearch placeholder={t('pharmacy.purchaseSearch')} width={260} onSearch={setQuery} />
         )}
         <span style={{ flex: 1 }} />
         {can('pharmacy.stock') && view !== 'returns' && (

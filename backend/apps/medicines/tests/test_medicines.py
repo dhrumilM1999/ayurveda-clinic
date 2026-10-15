@@ -39,6 +39,15 @@ def test_search_by_synonym_and_gujarati(pharmacist, branch_a, samples):
 
 
 @pytest.mark.django_db
+def test_search_puts_names_that_start_with_the_text_first(pharmacist, branch_a, samples):
+    client = client_for(pharmacist, branch_a)
+    names = [m["name"] for m in client.get(URL, {"q": "tri"}).data["results"]]
+    assert names and names[0].lower().startswith("tri")
+    ranks = [n.lower().startswith("tri") for n in names]
+    assert ranks == sorted(ranks, reverse=True)  # all the "starts with" names come before the others
+
+
+@pytest.mark.django_db
 def test_create_edit_keeps_versions(org, pharmacist, branch_a, roles):
     client = client_for(pharmacist, branch_a)
     res = client.post(URL, {"kind": "classical", "name": "Test Churna", "dosage_form": master(org, "dosage_form", "churna"),

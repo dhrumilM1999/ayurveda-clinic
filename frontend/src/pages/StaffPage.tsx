@@ -10,6 +10,7 @@ import { useList } from '../api/useList';
 import { useAuth } from '../auth/AuthContext';
 import { SignatureUpload } from '../components/SignatureUpload';
 import { LANGUAGES } from '../i18n';
+import { LiveSearch } from '../components/LiveSearch';
 
 export default function StaffPage() {
   const { t } = useTranslation();
@@ -74,7 +75,7 @@ export default function StaffPage() {
       <div className="page-toolbar">
         <Typography.Title level={3} style={{ margin: 0 }}>{t('staff.title')}</Typography.Title>
         <Space>
-          <Input.Search placeholder={t('common.search')} allowClear onSearch={setSearch} style={{ width: 220 }} />
+          <LiveSearch placeholder={t('common.search')} onSearch={setSearch} loading={loading} width={220} />
           {canManage && <Button type="primary" icon={<PlusOutlined />} onClick={() => open()}>{t('staff.add')}</Button>}
         </Space>
       </div>

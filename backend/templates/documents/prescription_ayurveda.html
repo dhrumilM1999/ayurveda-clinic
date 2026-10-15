@@ -4,7 +4,7 @@ SAFE TO EDIT: the "Ayurveda case sheet" prescription design - ONE A4 page, like 
 Choose it in Settings -> Branch details -> Prescription design.
 - Top: logo (Settings -> Clinic details) or the clinic name, the line under it, the doctor (Staff -> the doctor:
   name, qualification, reg. no.) and the clinic phone; green bar with the timings (Footer line) and the holiday note.
-- Middle: patient, लक्षण (complaints) and निदान (diagnosis); on the left the Agni ... Srotas lines (list in
+- Middle: patient, symptoms and diagnosis; on the left the Agni ... Srotas lines (list in
   backend/apps/documents/words.py -> CASE_SHEET_LINES), on the right the medicines, advice and next visit.
 - Bottom: quote / shloka, services band and the address.
 - "Print on our pre-printed pad" on: the top and bottom are left blank for the pad's own printing.
@@ -37,16 +37,16 @@ Colours are the two lines starting with --green and --red below. Keep everything
 
   /* Patient */
   .patient { padding: 4mm 10mm 1mm; }
-  .row { display: flex; gap: 6mm; align-items: baseline; margin-bottom: 1.6mm; }
-  .field { display: flex; gap: 1.5mm; align-items: baseline; }
-  .field b { font-weight: 700; white-space: nowrap; }
-  .line { border-bottom: 0.25mm solid #777; padding: 0 1.5mm 0.3mm; min-width: 20mm; white-space: nowrap; }
-  .grow { flex: 1; }
+  .row { display: flex; gap: 5mm; align-items: baseline; margin-bottom: 1.6mm; }
+  .field { display: flex; align-items: baseline; }
+  .field b { font-weight: 700; white-space: nowrap; margin-right: 2mm; }  /* margin, not gap: WeasyPrint leaves gap out of the width */
+  .line { border-bottom: 0.25mm solid #777; padding: 0 0 0.3mm; min-width: 20mm; white-space: nowrap; }
+  .grow { flex: 1; min-width: 0; }
   .grow .line { flex: 1; }
   .ids { font-size: 7.5pt; color: var(--muted); }
 
   /* Symptoms / diagnosis */
-  .top { display: flex; gap: 6mm; padding: 1mm 10mm 2mm; min-height: 38mm; border-bottom: 0.4mm solid var(--green); }
+  .top { display: flex; gap: 6mm; padding: 1mm 10mm 2mm; min-height: 32mm; border-bottom: 0.4mm solid var(--green); }
   .top .col-a { flex: 3; }
   .top .col-b { flex: 2; }
   .h { font-weight: 700; font-size: 10.5pt; margin-bottom: 1mm; }
@@ -61,21 +61,21 @@ Colours are the two lines starting with --green and --red below. Keep everything
   .lines .item b { white-space: nowrap; font-weight: 700; }
   .lines .item span { flex: 1; border-bottom: 0.2mm dotted #999; font-size: 8.8pt; padding-bottom: 0.3mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .lines .split { border-top: 0.35mm solid #333; margin: 1.2mm 0 0.6mm; width: 40mm; }
-  .rx { flex: 1; display: block; min-width: 0; padding-bottom: 26mm; }
+  /* padding-bottom keeps the medicines clear of the QR code and signature at the bottom */
+  .rx { flex: 1; display: block; min-width: 0; padding-bottom: 21mm; }
   .rx > * { flex-shrink: 0; }
-  .rx-sign { font-size: 20pt; font-weight: 700; color: var(--green); line-height: 1; margin-bottom: 1.5mm; }
-  .med { display: flex; gap: 2mm; padding: 1.2mm 0; border-bottom: 0.15mm solid #e2e2e2; {% if items|length > 8 %}font-size: 8.5pt;{% endif %} }
+  .rx-sign { font-size: 18pt; font-weight: 700; color: var(--green); line-height: 1; margin-bottom: 0.5mm; }
+  .med { display: flex; gap: 2mm; padding: 0.9mm 0; border-bottom: 0.15mm solid #e2e2e2; {% if items|length > 5 %}font-size: 8.8pt;{% endif %} }
   .med .n { width: 5mm; color: var(--muted); }
   .med .body { flex: 1; min-width: 0; }
   .med .name { font-weight: 700; }
-  .med .how { font-size: 8.5pt; color: #333; }
   .times { display: inline; margin-right: 1.5mm; }
-  .meta { margin-top: 0.6mm; font-size: 9pt; }
+  .meta { margin-top: 0.3mm; font-size: 8.5pt; color: #333; }
   .times i { display: inline-block; font-style: normal; border: 0.2mm solid #444; border-radius: 0.8mm; min-width: 5.5mm; text-align: center; font-weight: 700; font-size: 8.5pt; margin-right: 0.8mm; }
-  .after { margin-top: 2.5mm; }
+  .after { margin-top: 1.5mm; }
   .after .h { font-size: 9.5pt; margin-bottom: 0.5mm; color: var(--green); }
   .spacer { flex: 1; }
-  .sign-row { position: absolute; left: 83mm; right: 10mm; bottom: 2mm; display: flex; justify-content: space-between; align-items: flex-end; gap: 4mm; }
+  .sign-row { position: absolute; left: 83mm; right: 10mm; bottom: 1mm; display: flex; justify-content: space-between; align-items: flex-end; gap: 4mm; }
   .qr { text-align: center; font-size: 6.5pt; color: var(--muted); }
   .qr img { width: 16mm; height: 16mm; display: block; margin: 0 auto; }
   .sign { text-align: center; min-width: 45mm; font-size: 8.5pt; }
@@ -144,7 +144,7 @@ Colours are the two lines starting with --green and --red below. Keep everything
   <div class="main">
     <div class="lines">
       {% for label, value in case_lines %}
-      {% if label == "दोष" %}<div class="split"></div>{% endif %}
+      {% if label == split_before %}<div class="split"></div>{% endif %}
       <div class="item"><b>{{ label }}</b> - <span>{{ value }}</span></div>
       {% endfor %}
     </div>
@@ -155,10 +155,9 @@ Colours are the two lines starting with --green and --red below. Keep everything
         <div class="n">{{ forloop.counter }}.</div>
         <div class="body">
           <div><span class="name">{{ i.name }}</span>{% if i.strength %} {{ i.strength }}{% endif %}{% if i.dose %} — {{ i.dose }}{% endif %}</div>
-          {% if i.times or i.frequency or i.duration %}
-          <div class="meta">{% if i.times %}<span class="times">{% for n in i.times %}<i>{{ n }}</i>{% endfor %}</span>{% elif i.frequency %}{{ i.frequency }} · {% endif %}{{ i.duration }}</div>
+          {% if i.times or i.frequency or i.duration or i.timing or i.with_anupana or i.instructions %}
+          <div class="meta">{% if i.times %}<span class="times">{% for n in i.times %}<i>{{ n }}</i>{% endfor %}</span>{% elif i.frequency %}{{ i.frequency }}{% if i.duration or i.timing or i.with_anupana or i.instructions %} · {% endif %}{% endif %}{{ i.duration }}{% if i.duration and i.timing %} · {% endif %}{{ i.timing }}{% if i.with_anupana %}{% if i.duration or i.timing %} · {% endif %}{{ i.with_anupana }}{% endif %}{% if i.instructions %}{% if i.duration or i.timing or i.with_anupana %} · {% endif %}{{ i.instructions }}{% endif %}</div>
           {% endif %}
-          {% if i.timing or i.with_anupana or i.instructions %}<div class="how">{{ i.timing }}{% if i.timing and i.with_anupana %} · {% endif %}{{ i.with_anupana }}{% if i.instructions %}{% if i.timing or i.with_anupana %} · {% endif %}{{ i.instructions }}{% endif %}</div>{% endif %}
         </div>
       </div>
       {% endfor %}

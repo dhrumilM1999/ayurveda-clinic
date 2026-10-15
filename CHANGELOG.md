@@ -13,6 +13,26 @@ What changed in each step, in plain words.
   (re-open the check-up instead), and a walk-in has no earlier step (cancel it). Nothing is deleted, every undo is in
   the audit log. Bills are not touched.
 
+## Search while you type (2026-10-15)
+
+- Every search box now shows results **while you type** (about 0.3 second after you stop). No need to press Enter
+  (Enter still works, and the little x clears the box and shows everything again). A small spinner shows while it
+  searches. Old, slower answers can never replace newer ones, and Gujarati/Hindi typing waits until the letter is finished.
+- Screens: Patients, Appointments, Medicines, Pharmacy (Bills, Stock, Sales, Purchases), Online enquiries, Therapy plans,
+  Staff, Branches, Audit log, and the patient / medicine pick-lists (booking, prescription, counter sale).
+- Patient search: every word may match a name part, the patient ID or part of the mobile number ("bhavin 456").
+  Medicine search: names that start with what you typed come first.
+- The audit log now records a patient search at most once every 5 seconds per user, so typing does not flood it.
+- Code: one shared piece, `frontend/src/components/LiveSearch.tsx`. See docs/SMALL_CHANGES.md "How search works".
+
+## Ayurveda case sheet: 7 medicines fit, English labels (2026-10-11)
+
+- Each medicine now takes two lines (name and dose, then Morning-Noon-Night boxes, days and how to take it), so up to
+  7 medicines with notes, advice and the next visit fit above the QR code and signature. Before, a busy prescription
+  could run under the signature or be cut off at the bottom of the page without any warning.
+- The headings and the check-up lines are now in English: Symptoms, Diagnosis, Advice / Pathya, Next visit, and
+  Agni ... Srotas. Change the words in `backend/apps/documents/words.py` (SAFE TO EDIT).
+- The Date underline no longer runs past the right edge of the page.
 ## Panchakarma and therapy (2026-10-15)
 
 - **New module** (Settings, Modules, switch on "Panchakarma and therapy"): a list of therapies (27 starting ones in

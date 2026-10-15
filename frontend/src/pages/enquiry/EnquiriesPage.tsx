@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { api, errorMessage } from '../../api/client';
 import type { Enquiry, Page } from '../../api/types';
 import { useAuth } from '../../auth/AuthContext';
+import { LiveSearch, useLatestRequest } from '../../components/LiveSearch';
 
 const STATUSES = ['new', 'contacted', 'appointment', 'not_interested', 'closed'] as const;
 const COLORS: Record<string, string> = { new: 'red', contacted: 'gold', appointment: 'green', not_interested: 'default', closed: 'default' };
@@ -31,22 +32,25 @@ export default function EnquiriesPage() {
   const [adding, setAdding] = useState(false);
   const [form] = Form.useForm();
 
+  const next = useLatestRequest();
   const load = useCallback(async () => {
+    const signal = next();
     setLoading(true);
     try {
       const params: Record<string, unknown> = { page, page_size: 25, search: search || undefined };
       if (status !== 'open' && status !== 'all') params.status = status;
-      const { data } = await api.get<Page<Enquiry>>('/enquiries/', { params });
+      const { data } = await api.get<Page<Enquiry>>('/enquiries/', { params, signal });
+      if (signal.aborted) return;
       setRows(status === 'open' ? data.results.filter((r) => ['new', 'contacted'].includes(r.status)) : data.results);
       setTotal(data.count);
       const summary = await api.get<{ by_status: Record<string, number> }>('/enquiries/summary/');
       setCounts(summary.data.by_status);
     } catch (err) {
-      message.error(errorMessage(err, t('common.loadFailed')));
+      if (!signal.aborted) message.error(errorMessage(err, t('common.loadFailed')));
     } finally {
-      setLoading(false);
+      if (!signal.aborted) setLoading(false);
     }
-  }, [page, status, search, message, t]);
+  }, [page, status, search, message, t, next]);
   useEffect(() => { load(); }, [load]);
 
   const change = async (row: Enquiry, patch: Partial<Enquiry>) => {
@@ -108,7 +112,7 @@ export default function EnquiriesPage() {
       </Card>
 
       <div className="filter-bar">
-        <Input.Search allowClear placeholder={t('enquiry.search')} onSearch={(v) => { setSearch(v.trim()); setPage(1); }} style={{ width: 280 }} />
+        <LiveSearch placeholder={t('enquiry.search')} onSearch={(v) => { setSearch(v); setPage(1); }} loading={loading} width={280} />
         <Space size={4} wrap>
           {['open', ...STATUSES, 'all'].map((s) => (
             <Tag.CheckableTag key={s} checked={status === s} onChange={() => { setStatus(s); setPage(1); }}>
