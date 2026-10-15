@@ -2,6 +2,18 @@
 
 What changed in each step, in plain words.
 
+## Testing "by mistake" cases (2026-10-15)
+
+About 150 new tests for wrong input, double clicks, the wrong option and the wrong person (`docs/MISTAKE_PROTECTION.md`).
+Problems found and fixed:
+- Giving the same medicine twice from one prescription (double click on "Give") sold the stock twice. Now refused.
+- A bill line with a negative price or a discount over 100% was accepted. Now refused.
+- A follow-up date before the check-up (wrong year) was accepted. Now refused.
+- An admin could switch off their own account or the last admin. Now refused.
+- Adding a service with an existing name, a wrong id in a link, or a hidden control character in a search crashed the server (500). Now a clear message.
+- A completed check-up could not be reopened after a mistaken "Complete visit". New **Re-open check-up** (until the pharmacy gives medicines); a prescription line that was already given can no longer be removed or changed.
+- When the server was off, lists looked empty ("No patients yet"). They now say "Could not load this list" with Try again.
+
 ## Undo for small mistakes (2026-10-15)
 
 - A small **Undo** (back-arrow) button for wrong clicks: on the **Appointments** row it goes back one step (Waiting
