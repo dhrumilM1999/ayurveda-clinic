@@ -5,11 +5,12 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import type { VisitListItem } from '../../../api/types';
 import { useList } from '../../../api/useList';
+import { ListEmpty } from '../../../components/ListEmpty';
 
 export function VisitsTab({ patientId }: { patientId: string }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { rows, loading, pagination } = useList<VisitListItem>('/visits/', { patient: patientId }, 10);
+  const { rows, loading, pagination, failed, reload } = useList<VisitListItem>('/visits/', { patient: patientId }, 10);
 
   return (
     <>
@@ -21,7 +22,7 @@ export function VisitsTab({ patientId }: { patientId: string }) {
         dataSource={rows}
         pagination={{ ...pagination, hideOnSinglePage: true }}
         scroll={{ x: true }}
-        locale={{ emptyText: t('consult.noVisits') }}
+        locale={{ emptyText: <ListEmpty failed={failed} onRetry={reload} text={t('consult.noVisits')} /> }}
         onRow={(v) => ({ onClick: () => navigate(`/consult/${v.id}`), style: { cursor: 'pointer' } })}
         columns={[
           { title: t('appointments.date'), dataIndex: 'visit_date', render: (d: string) => <b>{dayjs(d).format('DD-MM-YYYY')}</b> },

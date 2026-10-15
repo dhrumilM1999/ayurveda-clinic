@@ -22,7 +22,9 @@
     "noAccessTitle": "No access",
     "noAccessText": "You don't have permission to open this screen in this branch.",
     "notFound": "This page does not exist.",
-    "delete": "Delete"
+    "delete": "Delete",
+    "loadFailedTable": "Could not load this list. Your data is safe; please check the connection and try again.",
+    "retry": "Try again"
   },
   "login": {
     "username": "Username",
@@ -797,7 +799,11 @@
       "done": "Done"
     },
     "walkInTag": "Walk-in",
-    "bookedTag": "Booked"
+    "bookedTag": "Booked",
+    "reopen": "Re-open check-up",
+    "reopenAsk": "Re-open this check-up?",
+    "reopenHelp": "Use this if you pressed Complete visit by mistake or need to correct something. The prescription becomes a draft again until you complete the visit. Not possible after the pharmacy has given medicines.",
+    "reopenedMsg": "The check-up is open again."
   },
   "templatesAdmin": {
     "title": "Check-up templates",

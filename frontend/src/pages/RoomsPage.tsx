@@ -7,12 +7,13 @@ import { api, errorMessage } from '../api/client';
 import type { Room, RoomType } from '../api/types';
 import { useList } from '../api/useList';
 import { useAuth } from '../auth/AuthContext';
+import { ListEmpty } from '../components/ListEmpty';
 
 export default function RoomsPage() {
   const { t } = useTranslation();
   const { message } = App.useApp();
   const { can, branch } = useAuth();
-  const { rows, loading, reload, pagination } = useList<Room>('/rooms/');
+  const { rows, loading, reload, pagination, failed } = useList<Room>('/rooms/');
   const [roomTypes, setRoomTypes] = useState<RoomType[]>([]);
   const [editing, setEditing] = useState<Partial<Room> | null>(null);
   const [typesOpen, setTypesOpen] = useState(false);
@@ -91,6 +92,7 @@ export default function RoomsPage() {
       <Table<Room>
         rowKey="id"
         loading={loading}
+        locale={{ emptyText: <ListEmpty failed={failed} onRetry={reload} text={undefined} /> }}
         dataSource={rows}
         pagination={pagination}
         scroll={{ x: true }}

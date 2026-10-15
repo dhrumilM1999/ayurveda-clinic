@@ -8,13 +8,14 @@ import type { Branch } from '../api/types';
 import { useList } from '../api/useList';
 import { useAuth } from '../auth/AuthContext';
 import { LiveSearch } from '../components/LiveSearch';
+import { ListEmpty } from '../components/ListEmpty';
 
 export default function BranchesPage() {
   const { t } = useTranslation();
   const { message } = App.useApp();
   const { can } = useAuth();
   const [search, setSearch] = useState('');
-  const { rows, loading, reload, pagination } = useList<Branch>('/branches/', { search });
+  const { rows, loading, reload, pagination, failed } = useList<Branch>('/branches/', { search });
   const [editing, setEditing] = useState<Partial<Branch> | null>(null);
   const [saving, setSaving] = useState(false);
   const [form] = Form.useForm();
@@ -54,6 +55,7 @@ export default function BranchesPage() {
       <Table<Branch>
         rowKey="id"
         loading={loading}
+        locale={{ emptyText: <ListEmpty failed={failed} onRetry={reload} text={undefined} /> }}
         dataSource={rows}
         pagination={pagination}
         scroll={{ x: true }}

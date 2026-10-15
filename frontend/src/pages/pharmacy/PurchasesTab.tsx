@@ -11,6 +11,7 @@ import { money } from '../medicines/shared';
 import { expiryText, qty } from './common';
 import { PurchaseModal } from './PurchaseModal';
 import { LiveSearch } from '../../components/LiveSearch';
+import { ListEmpty } from '../../components/ListEmpty';
 
 export function PurchasesTab() {
   const { t } = useTranslation();
@@ -55,14 +56,14 @@ function PurchaseList({ opening, query }: { opening: boolean; query: string }) {
   const rateOn = hasFeature('pharmacy_purchase_price');
   const prices = hasFeature('pharmacy_selling_price');
   const suppliersOn = hasFeature('pharmacy_suppliers');
-  const { rows, loading, pagination } = useList<PurchaseRecord>('/purchases/', { opening: opening ? 1 : 0, q: query || undefined });
+  const { rows, loading, pagination, failed, reload } = useList<PurchaseRecord>('/purchases/', { opening: opening ? 1 : 0, q: query || undefined });
   return (
     <Table<PurchaseRecord>
       rowKey="id"
       loading={loading}
       dataSource={rows}
       pagination={pagination}
-      locale={{ emptyText: t('pharmacy.noPurchases') }}
+      locale={{ emptyText: <ListEmpty failed={failed} onRetry={reload} text={t('pharmacy.noPurchases')} /> }}
       expandable={{
         expandedRowRender: (p) => (
           <Table<PurchaseItemRecord> size="small" rowKey="id" pagination={false} dataSource={p.items} className="inner-table" scroll={{ x: 900 }}
@@ -100,7 +101,7 @@ function PurchaseList({ opening, query }: { opening: boolean; query: string }) {
 
 function ReturnsList() {
   const { t } = useTranslation();
-  const { rows, loading, pagination } = useList<PurchaseReturnRecord>('/purchase-returns/', {});
+  const { rows, loading, pagination, failed, reload } = useList<PurchaseReturnRecord>('/purchase-returns/', {});
   return (
     <>
       <div className="form-help">{t('pharmacy.supplierReturnsHelp')}</div>
@@ -109,7 +110,7 @@ function ReturnsList() {
         loading={loading}
         dataSource={rows}
         pagination={pagination}
-        locale={{ emptyText: t('pharmacy.noSupplierReturns') }}
+        locale={{ emptyText: <ListEmpty failed={failed} onRetry={reload} text={t('pharmacy.noSupplierReturns')} /> }}
         columns={[
           { title: t('appointments.date'), dataIndex: 'return_date', width: 120, render: (d: string) => <b>{dayjs(d).format('DD-MM-YYYY')}</b> },
           { title: t('pharmacy.supplier'), dataIndex: 'supplier_name', render: (v: string) => v || '—' },

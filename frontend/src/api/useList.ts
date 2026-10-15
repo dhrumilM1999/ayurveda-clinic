@@ -14,6 +14,8 @@ export function useList<T>(url: string, params: Record<string, unknown> = {}, in
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(initialPageSize);
   const [loading, setLoading] = useState(false);
+  // true after a failed load: the table must say so instead of looking empty
+  const [failed, setFailed] = useState(false);
   const paramsKey = JSON.stringify(params);
 
   // Only the newest request may update the table (older, slower answers are cancelled and ignored)
@@ -30,6 +32,7 @@ export function useList<T>(url: string, params: Record<string, unknown> = {}, in
         signal: controller.signal,
       });
       if (controller.signal.aborted) return;
+      setFailed(false);
       if (Array.isArray(data)) {
         setRows(data);
         setTotal(data.length);
@@ -39,6 +42,7 @@ export function useList<T>(url: string, params: Record<string, unknown> = {}, in
       }
     } catch (err) {
       if (controller.signal.aborted || isCancel(err)) return;
+      setFailed(true);
       message.error(errorMessage(err, t('common.loadFailed')));
     } finally {
       if (abort.current === controller) setLoading(false);
@@ -66,5 +70,5 @@ export function useList<T>(url: string, params: Record<string, unknown> = {}, in
     },
   };
 
-  return { rows, total, loading, reload, pagination };
+  return { rows, total, loading, failed, reload, pagination };
 }

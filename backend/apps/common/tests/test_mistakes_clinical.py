@@ -193,3 +193,48 @@ def test_stock_of_another_branch_is_not_sold_or_seen(pharmacist, org, roles, bra
     res = sell(ca, final_rx, [{"prescription_item": str(line_of(final_rx).id), "batch": str(other.id), "quantity": "1"}])
     assert res.status_code == 400, res.data
     assert StockBatch.objects.get(pk=other.pk).quantity == 10
+
+
+# ---------------------------------------------------------------- "Complete visit" pressed by mistake
+@pytest.mark.django_db
+def test_complete_visit_can_be_reopened_until_medicines_are_given(org, doctor, pharmacist, branch_a, meds, final_rx):
+    from apps.pharmacy.models import StockBatch
+
+    visit = final_rx.visit
+    visit.status = "completed"
+    visit.save()
+    d = client_for(doctor, branch_a)
+    res = d.post(f"{VISITS}{visit.id}/reopen/")
+    assert res.status_code == 200 and res.data["status"] == "draft"
+    final_rx.refresh_from_db()
+    assert final_rx.status == "draft"                      # the pharmacy cannot give from a prescription being changed
+    # the doctor finishes again
+    assert d.post(f"{VISITS}{visit.id}/complete/").status_code == 200
+    final_rx.refresh_from_db()
+    assert final_rx.status == "final"
+    # the pharmacy gives a medicine: now it cannot be re-opened and the given line cannot be changed or removed
+    p = client_for(pharmacist, branch_a)
+    receive(p, meds, [("Triphala Churna", "B1", LATER, "10")])
+    batch = StockBatch.objects.get(batch_no="B1")
+    assert sell(p, final_rx, [{"prescription_item": str(line_of(final_rx).id), "batch": str(batch.id), "quantity": "1"}]).status_code == 201
+    again = d.post(f"{VISITS}{visit.id}/reopen/")
+    assert again.status_code == 400 and "already given" in str(again.data)
+    item = line_of(final_rx)
+    removed = d.patch(f"/api/v1/prescriptions/{final_rx.id}/", {"items": []}, format="json")
+    assert removed.status_code == 400 and "already given" in str(removed.data)
+    assert final_rx.items.filter(pk=item.pk).exists()
+
+
+@pytest.mark.django_db
+def test_only_doctors_may_reopen_and_not_an_open_checkup(doctor, receptionist, pharmacist, branch_a, appointment):
+    d = client_for(doctor, branch_a)
+    vid = open_visit(d, appointment)
+    assert d.post(f"{VISITS}{vid}/reopen/").status_code == 400                       # not completed
+    d.post(f"{VISITS}{vid}/complete/")
+    for user in (receptionist, pharmacist):
+        assert client_for(user, branch_a).post(f"{VISITS}{vid}/reopen/").status_code == 403
+    appointment.refresh_from_db()
+    assert appointment.status == "completed"
+    assert d.post(f"{VISITS}{vid}/reopen/").status_code == 200
+    appointment.refresh_from_db()
+    assert appointment.status == "in_consultation" and appointment.completed_at is None

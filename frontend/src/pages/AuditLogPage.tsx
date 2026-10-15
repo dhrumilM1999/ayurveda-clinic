@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import type { AuditLogEntry } from '../api/types';
 import { useList } from '../api/useList';
 import { LiveSearch } from '../components/LiveSearch';
+import { ListEmpty } from '../components/ListEmpty';
 
 const ACTIONS = [
   'view', 'create', 'update', 'delete', 'print', 'export', 'share',
@@ -22,7 +23,7 @@ export default function AuditLogPage() {
   const [search, setSearch] = useState('');
   const [range, setRange] = useState<[Dayjs | null, Dayjs | null] | null>(null);
 
-  const { rows, loading, pagination } = useList<AuditLogEntry>('/audit-logs/', {
+  const { rows, loading, pagination, failed, reload } = useList<AuditLogEntry>('/audit-logs/', {
     action,
     search,
     date_from: range?.[0]?.format('YYYY-MM-DD'),
@@ -45,6 +46,7 @@ export default function AuditLogPage() {
         rowKey="id"
         size="small"
         loading={loading}
+        locale={{ emptyText: <ListEmpty failed={failed} onRetry={reload} text={undefined} /> }}
         dataSource={rows}
         pagination={pagination}
         scroll={{ x: true }}

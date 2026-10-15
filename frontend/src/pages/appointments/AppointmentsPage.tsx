@@ -14,6 +14,7 @@ import { AppointmentActions } from './AppointmentActions';
 import { BookAppointmentModal } from './BookAppointmentModal';
 import { PatientCell, StatusTag, fmtTime } from './shared';
 import { LiveSearch } from '../../components/LiveSearch';
+import { ListEmpty } from '../../components/ListEmpty';
 
 type Filter = 'all' | 'booked' | 'waiting' | 'done' | 'cancelled';
 
@@ -36,7 +37,7 @@ export default function AppointmentsPage() {
   const [booking, setBooking] = useState<'booked' | 'walk_in' | null>(null);
   const dayKey = day.format('YYYY-MM-DD');
 
-  const { rows, loading, reload } = useList<Appointment>('/appointments/', {
+  const { rows, loading, reload, failed } = useList<Appointment>('/appointments/', {
     date: dayKey, doctor, q: query || undefined, ordering: 'start_time',
   }, 200); // one day fits on one page
 
@@ -116,7 +117,7 @@ export default function AppointmentsPage() {
         pagination={false}
         scroll={{ x: 900 }}
         rowClassName={(r) => (['cancelled', 'no_show'].includes(r.status) ? 'row-muted' : '')}
-        locale={{ emptyText: t('appointments.empty') }}
+        locale={{ emptyText: <ListEmpty failed={failed} onRetry={reload} text={t('appointments.empty')} /> }}
         columns={[
           {
             title: t('appointments.time'), key: 'time', width: 120,

@@ -80,7 +80,7 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
   onLoaded?: (visit: Visit) => void;
 }) {
   const { t } = useTranslation();
-  const { message } = App.useApp();
+  const { message, modal } = App.useApp();
   const { can, hasFeature } = useAuth();
   const [billOpen, setBillOpen] = useState(false); // OPD bill popup (services & charges for this check-up)
   const templateName = useTemplateName();
@@ -351,6 +351,23 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
     }
   };
 
+  // "Complete visit" pressed by mistake (or something to correct): open the check-up again
+  const reopen = () => {
+    modal.confirm({
+      title: t('consult.reopenAsk'), content: t('consult.reopenHelp'), okText: t('consult.reopen'), cancelText: t('common.cancel'),
+      onOk: async () => {
+        try {
+          const { data } = await api.post<Visit>(`/visits/${visitId}/reopen/`);
+          setVisit(data);
+          message.success(t('consult.reopenedMsg'));
+          onChanged();
+        } catch (err) {
+          message.error(errorMessage(err, t('common.saveFailed')));
+        }
+      },
+    });
+  };
+
   if (error) return <Alert type="error" showIcon message={error} />;
   if (!visit || !draft) return <Card><Skeleton active paragraph={{ rows: 8 }} /></Card>;
 
@@ -431,6 +448,9 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
                 <Tooltip title={t('consult.billHelp')}>
                   {hasFeature('opd_billing') && <Button size="small" onClick={() => setBillOpen(true)}>₹ {t('opd.visitBill')}</Button>}
                 </Tooltip>
+              )}
+              {!readOnly && visit.status === 'completed' && (
+                <Button size="small" onClick={reopen}>{t('consult.reopen')}</Button>
               )}
               {!readOnly && visit.status !== 'completed' && (
                 <Button size="small" type="primary" icon={<CheckCircleOutlined />} onClick={complete}>{t('consult.complete')}</Button>

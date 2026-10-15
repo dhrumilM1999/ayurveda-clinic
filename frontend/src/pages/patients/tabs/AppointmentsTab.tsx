@@ -10,12 +10,13 @@ import { useAuth } from '../../../auth/AuthContext';
 import { AppointmentActions } from '../../appointments/AppointmentActions';
 import { BookAppointmentModal } from '../../appointments/BookAppointmentModal';
 import { StatusTag, fmtTime } from '../../appointments/shared';
+import { ListEmpty } from '../../../components/ListEmpty';
 
 export function AppointmentsTab({ patient }: { patient: Patient }) {
   const { t } = useTranslation();
   const { can } = useAuth();
   const [booking, setBooking] = useState(false);
-  const { rows, loading, reload, pagination } = useList<Appointment>('/appointments/', {
+  const { rows, loading, reload, pagination, failed } = useList<Appointment>('/appointments/', {
     patient: patient.id, ordering: '-date',
   }, 10);
 
@@ -34,7 +35,7 @@ export function AppointmentsTab({ patient }: { patient: Patient }) {
         dataSource={rows}
         pagination={{ ...pagination, hideOnSinglePage: true }}
         scroll={{ x: true }}
-        locale={{ emptyText: t('appointments.noneForPatient') }}
+        locale={{ emptyText: <ListEmpty failed={failed} onRetry={reload} text={t('appointments.noneForPatient')} /> }}
         columns={[
           {
             title: t('appointments.date'), key: 'date',

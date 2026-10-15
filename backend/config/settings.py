@@ -172,6 +172,7 @@ DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", "clinic@example.com")
 
 # --- API (Django REST Framework) ---------------------------------------------
 REST_FRAMEWORK = {
+    "EXCEPTION_HANDLER": "apps.common.exception_handler.friendly_exception_handler",
     "DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework_simplejwt.authentication.JWTAuthentication",),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),

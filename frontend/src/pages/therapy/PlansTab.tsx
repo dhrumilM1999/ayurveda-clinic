@@ -13,6 +13,7 @@ import { DocumentModal } from '../../components/BillPreview';
 import { PatientCell, PatientPicker } from '../appointments/shared';
 import { PlanStatusTag, STAGES, StageTag, useTherapyName } from './common';
 import { LiveSearch } from '../../components/LiveSearch';
+import { ListEmpty } from '../../components/ListEmpty';
 
 const STATUS_FILTERS = ['planned', 'active', 'completed', 'cancelled'] as const;
 
@@ -22,7 +23,7 @@ export default function PlansTab({ therapies }: { therapies: TherapyType[] }) {
   const canManage = can('therapy.manage');
   const [status, setStatus] = useState<string>();
   const [search, setSearch] = useState('');
-  const { rows, loading, reload, pagination } = useList<TherapyPlan>('/therapy-plans/', { status, search: search || undefined });
+  const { rows, loading, reload, pagination, failed } = useList<TherapyPlan>('/therapy-plans/', { status, search: search || undefined });
   const [creating, setCreating] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
 
@@ -36,7 +37,7 @@ export default function PlansTab({ therapies }: { therapies: TherapyType[] }) {
       </Space>
       <Table<TherapyPlan>
         rowKey="id" size="small" loading={loading} dataSource={rows} pagination={pagination} scroll={{ x: 'max-content' }}
-        locale={{ emptyText: t('therapy.noPlans') }}
+        locale={{ emptyText: <ListEmpty failed={failed} onRetry={reload} text={t('therapy.noPlans')} /> }}
         onRow={(r) => ({ onClick: () => setOpenId(r.id), style: { cursor: 'pointer' } })}
         columns={[
           { title: t('therapy.plan.patient'), render: (_, r) => <PatientCell patient={r.patient_detail} /> },

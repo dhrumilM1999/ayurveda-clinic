@@ -14,6 +14,7 @@ import { MedicineFormModal } from './MedicineFormModal';
 import { VersionsDrawer } from './VersionsDrawer';
 import { FLAGS, MedicineFlags, money, useMedicineName } from './shared';
 import { LiveSearch } from '../../components/LiveSearch';
+import { ListEmpty } from '../../components/ListEmpty';
 
 export default function MedicinesPage() {
   const { t } = useTranslation();
@@ -30,7 +31,7 @@ export default function MedicinesPage() {
   const [history, setHistory] = useState<Medicine | null>(null);
   const [importing, setImporting] = useState(false);
 
-  const { rows, total, loading, reload, pagination } = useList<Medicine>('/medicines/', {
+  const { rows, total, loading, reload, pagination, failed } = useList<Medicine>('/medicines/', {
     q: query || undefined, kind: kind === 'all' ? undefined : kind, dosage_form: form,
   }, 50);
 
@@ -80,7 +81,7 @@ export default function MedicinesPage() {
         pagination={pagination}
         scroll={{ x: 1100 }}
         rowClassName={(m) => (!m.is_active || !m.branch_active ? 'row-muted' : '')}
-        locale={{ emptyText: t('medicines.empty') }}
+        locale={{ emptyText: <ListEmpty failed={failed} onRetry={reload} text={t('medicines.empty')} /> }}
         columns={[
           {
             title: t('medicines.name'), key: 'name',

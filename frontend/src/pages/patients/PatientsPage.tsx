@@ -11,6 +11,7 @@ import { useList } from '../../api/useList';
 import { useAuth } from '../../auth/AuthContext';
 import { PatientPhoto } from '../../components/PatientPhoto';
 import { LiveSearch } from '../../components/LiveSearch';
+import { ListEmpty } from '../../components/ListEmpty';
 
 export function genderAge(t: (key: string) => string, gender: string, age: number | null) {
   const g = t(`patients.genderShort.${gender}`);
@@ -24,7 +25,7 @@ export default function PatientsPage() {
   const masterLabel = useMasterLabel();
   const [search, setSearch] = useState('');
   const [gender, setGender] = useState<string>('all');
-  const { rows, loading, pagination, total } = useList<PatientListItem>('/patients/', {
+  const { rows, loading, pagination, total, failed, reload } = useList<PatientListItem>('/patients/', {
     q: search || undefined,
     gender: gender === 'all' ? undefined : gender,
   });
@@ -68,7 +69,7 @@ export default function PatientsPage() {
         pagination={pagination}
         scroll={{ x: true }}
         onRow={(record) => ({ onClick: () => navigate(`/patients/${record.id}`), style: { cursor: 'pointer' } })}
-        locale={{ emptyText: search ? t('patients.noResults') : t('patients.empty') }}
+        locale={{ emptyText: <ListEmpty failed={failed} onRetry={reload} text={search ? t('patients.noResults') : t('patients.empty')} /> }}
         columns={[
           {
             title: t('patients.patient'),

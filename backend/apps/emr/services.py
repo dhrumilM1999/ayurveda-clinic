@@ -274,6 +274,39 @@ def complete_visit(visit: Visit, user) -> Visit:
     return visit
 
 
+@transaction.atomic
+def reopen_visit(visit: Visit, user) -> Visit:
+    """
+    The doctor pressed "Complete visit" by mistake (or must correct something): open the check-up again.
+    Not possible once the pharmacy has given medicines from its prescription (the pharmacist takes them back first).
+    The prescription goes back to a draft so nobody can give medicines from a prescription that is still being changed.
+    """
+    from apps.prescriptions.models import Prescription, PrescriptionItem
+
+    if visit.status != "completed":
+        raise ValidationError({"detail": "This check-up is not completed."})
+    prescription = Prescription.objects.filter(visit=visit).first()
+    if prescription and PrescriptionItem.objects.filter(prescription=prescription, dispensed__isnull=False).exists():
+        raise ValidationError({"detail": "The pharmacy has already given medicines from this prescription, so the "
+                                         "check-up cannot be re-opened. Ask the pharmacist to take them back first."})
+    visit.status = "draft"
+    visit.completed_at = None
+    visit.updated_by = user
+    visit.save(update_fields=["status", "completed_at", "updated_by", "updated_at"])
+    appointment = visit.appointment
+    if appointment and appointment.status == "completed":
+        appointment.status = "in_consultation"
+        appointment.completed_at = None
+        appointment.updated_by = user
+        appointment.save(update_fields=["status", "completed_at", "updated_by", "updated_at"])
+    if prescription and prescription.status == "final":
+        prescription.status = "draft"
+        prescription.finalized_at = None
+        prescription.updated_by = user
+        prescription.save(update_fields=["status", "finalized_at", "updated_by", "updated_at"])
+    return visit
+
+
 def last_visit_date(patient, doctor, before):
     """Date of the patient's latest check-up with this doctor before a day (any branch), or None.
     Used by billing to tell a new case from a follow-up."""

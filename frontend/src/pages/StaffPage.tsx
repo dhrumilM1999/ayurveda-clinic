@@ -11,13 +11,14 @@ import { useAuth } from '../auth/AuthContext';
 import { SignatureUpload } from '../components/SignatureUpload';
 import { LANGUAGES } from '../i18n';
 import { LiveSearch } from '../components/LiveSearch';
+import { ListEmpty } from '../components/ListEmpty';
 
 export default function StaffPage() {
   const { t } = useTranslation();
   const { message } = App.useApp();
   const { can, me } = useAuth();
   const [search, setSearch] = useState('');
-  const { rows, loading, reload, pagination } = useList<Staff>('/staff/', { search });
+  const { rows, loading, reload, pagination, failed } = useList<Staff>('/staff/', { search });
   const [roles, setRoles] = useState<Role[]>([]);
   const [editing, setEditing] = useState<Partial<Staff> | null>(null);
   const [passwordFor, setPasswordFor] = useState<Staff | null>(null);
@@ -82,6 +83,7 @@ export default function StaffPage() {
       <Table<Staff>
         rowKey="id"
         loading={loading}
+        locale={{ emptyText: <ListEmpty failed={failed} onRetry={reload} text={undefined} /> }}
         dataSource={rows}
         pagination={pagination}
         scroll={{ x: true }}

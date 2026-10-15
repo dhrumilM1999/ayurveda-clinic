@@ -4,6 +4,7 @@ Other modules (check-up, pharmacy, printing) should use these functions.
 """
 from django.db import transaction
 from django.utils import timezone
+from rest_framework.exceptions import ValidationError
 
 from apps.medicines.models import Medicine
 
@@ -64,6 +65,10 @@ def save_prescription(visit, items: list[dict], notes, user, prescription: Presc
             row = PrescriptionItem(organization_id=prescription.organization_id, prescription=prescription,
                                    created_by=user)
         medicine: Medicine | None = line.get("medicine")
+        given = row.pk is not None and row.dispensed.exists()
+        if given and ((medicine.id if medicine else None) != row.medicine_id):
+            raise ValidationError({"items": f"{row.medicine_name} was already given by the pharmacy; "
+                                            "the medicine cannot be changed. Ask the pharmacist to take it back first."})
         if medicine is not None and (row.medicine_id != medicine.id or row.medicine_version != medicine.version):
             # Copy the medicine's details as they are now
             row.medicine = medicine
@@ -86,6 +91,9 @@ def save_prescription(visit, items: list[dict], notes, user, prescription: Presc
         keep.add(str(row.id))
     for row_id, row in existing.items():
         if row_id not in keep:
+            if row.dispensed.exists():
+                raise ValidationError({"items": f"{row.medicine_name} was already given by the pharmacy, so it cannot be "
+                                                "removed from the prescription. Ask the pharmacist to take it back first."})
             row.delete(user=user)
     return prescription
 

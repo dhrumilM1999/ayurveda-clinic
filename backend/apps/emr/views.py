@@ -22,7 +22,7 @@ from .serializers import (
     ExamTemplateSerializer, StartVisitSerializer, VisitExamSerializer, VisitListSerializer, VisitPhotoSerializer,
     VisitSerializer,
 )
-from .services import complete_visit, create_template, save_exam, save_template, start_visit
+from .services import complete_visit, create_template, reopen_visit, save_exam, save_template, start_visit
 
 MEDICAL_FIELDS = {
     "complaints", "history_notes", "examination_notes", "diagnoses", "advice", "advice_notes", "follow_up_notes",
@@ -89,6 +89,7 @@ class VisitViewSet(AuditedModelViewSet):
         "update": "emr.edit",
         "partial_update": "emr.edit",
         "complete": "emr.edit",
+        "reopen": "emr.edit",
         "save_exam": "emr.edit",
         "upload_photo": "emr.edit",
         "photo_file": "emr.view",
@@ -156,6 +157,13 @@ class VisitViewSet(AuditedModelViewSet):
     def complete(self, request, pk=None):
         visit = complete_visit(self.get_object(), request.user)
         log_action(request, "update", visit, changes={"status": {"from": "draft", "to": "completed"}})
+        return Response(VisitSerializer(visit, context=self.get_serializer_context()).data)
+
+    @action(detail=True, methods=["post"])
+    def reopen(self, request, pk=None):
+        """Undo "Complete visit" (only while the pharmacy has not given medicines)."""
+        visit = reopen_visit(self.get_object(), request.user)
+        log_action(request, "update", visit, changes={"status": {"from": "completed", "to": "draft"}, "undo": True})
         return Response(VisitSerializer(visit, context=self.get_serializer_context()).data)
 
     @action(detail=True, methods=["put"], url_path=r"exams/(?P<code>[a-z0-9_-]+)")
