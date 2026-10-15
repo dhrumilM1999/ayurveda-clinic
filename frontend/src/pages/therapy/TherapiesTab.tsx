@@ -8,6 +8,7 @@ import { api, errorMessage } from '../../api/client';
 import type { Page, TherapyType } from '../../api/types';
 import { useAuth } from '../../auth/AuthContext';
 import { STAGES, StageTag, useTherapyName } from './common';
+import { TranslateButton } from '../../components/TranslateButton';
 
 interface Service { id: string; name: string; price: string }
 
@@ -86,7 +87,11 @@ export default function TherapiesTab({ rows, reload }: { rows: TherapyType[]; re
         confirmLoading={saving} okText={t('common.save')} width={640} destroyOnHidden>
         <Form form={form} layout="vertical">
           <Form.Item name="name" label={t('therapy.list.name')} rules={[{ required: true, message: t('common.required') }]}><Input maxLength={150} /></Form.Item>
-          <Space style={{ width: '100%' }} styles={{ item: { flex: 1 } }} align="start">
+          <Form.Item noStyle shouldUpdate>{() => (
+  <TranslateButton english={form.getFieldValue('name') ?? ''} existing={{ gu: form.getFieldValue('name_gu'), hi: form.getFieldValue('name_hi') }}
+    onResult={(r) => form.setFieldsValue({ name_gu: r.gu, name_hi: r.hi })} />
+)}</Form.Item>
+          <Space style={{ width: '100%', marginTop: 8 }} styles={{ item: { flex: 1 } }} align="start">
             <Form.Item name="name_gu" label={t('therapy.list.nameGu')}><Input maxLength={150} /></Form.Item>
             <Form.Item name="name_hi" label={t('therapy.list.nameHi')}><Input maxLength={150} /></Form.Item>
           </Space>

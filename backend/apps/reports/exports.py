@@ -86,8 +86,13 @@ def to_excel(report: dict, *, title: str, subtitle: str) -> bytes:
     return out.getvalue()
 
 
-def to_pdf(report: dict, *, title: str, subtitle: str, organization, notes: str = "") -> bytes:
+def to_pdf(report: dict, *, title: str, subtitle: str, organization, notes: str = "", ps: dict | None = None) -> bytes:
+    """ps: the PDF settings (Settings -> PDF settings): text size, accent colour, extra header / footer line."""
     from weasyprint import HTML
+
+    from apps.documents.print_settings import page_settings
+
+    ps = ps or page_settings(None, "report")
 
     columns = report["columns"]
     landscape = len(columns) > 6
@@ -101,6 +106,6 @@ def to_pdf(report: dict, *, title: str, subtitle: str, organization, notes: str 
         "totals": [{"text": _text(totals.get(c["key"]), c["type"]), "number": c["type"] in ("money", "int")}
                    for c in columns] if totals else None,
         "printed_at": timezone.localtime().strftime("%d-%m-%Y %H:%M"),
-        "page_size": "A4 landscape" if landscape else "A4",
+        "page_size": "A4 landscape" if landscape else "A4", "ps": ps,
     })
     return HTML(string=html).write_pdf()

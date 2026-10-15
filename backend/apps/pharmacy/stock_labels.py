@@ -88,11 +88,15 @@ def build_stock_labels(branch, user, wanted: list[tuple[StockBatch, int]], label
             "barcode": barcode_svg(code, code_width, 7 if label_format == "compact" else 12),
         }
         labels.extend([label] * copies)
-    return {"labels": labels, "clinic": branch.organization.name, "format": label_format,
+    return {"labels": labels, "clinic": branch.organization.name, "branch": branch, "format": label_format,
             "width": width, "height": height}
 
 
-def render_stock_labels(data) -> bytes:
+def render_stock_labels(data, ps=None) -> bytes:
+    """ps: the PDF settings (Settings -> PDF settings): the accent colour of the clinic name."""
     from weasyprint import HTML
 
-    return HTML(string=render_to_string("documents/stock_label.html", data)).write_pdf()
+    from apps.documents.print_settings import page_settings
+
+    ps = ps or page_settings(data["branch"], "stock_label")
+    return HTML(string=render_to_string("documents/stock_label.html", {**data, "ps": ps})).write_pdf()

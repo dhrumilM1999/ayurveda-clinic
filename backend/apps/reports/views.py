@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 from apps.accounts.permissions import BranchPermission
 from apps.accounts.services import accessible_branches, user_has_perm
 from apps.audit.services import log_action
+from apps.documents.print_settings import page_settings
 
 from .exports import to_excel, to_pdf
 from .reports import REPORTS, build
@@ -122,7 +123,7 @@ class ReportView(APIView):
                 kind = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             else:
                 content = to_pdf(report, title=info["title"], subtitle=subtitle, organization=user.organization,
-                                 notes=NOTES.get(code, ""))
+                                 notes=NOTES.get(code, ""), ps=page_settings(request.branch, "report"))
                 kind = "application/pdf"
             response = HttpResponse(content, content_type=kind)
             response["Content-Disposition"] = f'attachment; filename="{name}"'

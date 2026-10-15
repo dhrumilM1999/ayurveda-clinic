@@ -3,9 +3,9 @@
 "detailed" = the detailed prescription (full check-up summary); the words are in apps/documents/words.py.{% endcomment %}
 {% block style %}
   .patient { display: flex; justify-content: space-between; gap: 4mm; margin: 2mm 0; }
-  .rx { font-size: 1.8em; font-weight: 700; color: #1f5c46; margin: 1mm 0; }
+  .rx { font-size: 1.8em; font-weight: 700; color: {{ ps.accent_color|default:"#1f5c46" }}; margin: 1mm 0; }
   .section { margin-top: 2.5mm; }
-  .section b.h { display: block; color: #1f5c46; font-size: 0.9em; margin-bottom: 0.5mm; }
+  .section b.h { display: block; color: {{ ps.accent_color|default:"#1f5c46" }}; font-size: 0.9em; margin-bottom: 0.5mm; }
   .times { display: flex; gap: 1mm; }
   .time { border: 0.2mm solid #555; border-radius: 1mm; min-width: 9mm; text-align: center; padding: 0.3mm; }
   .time b { display: block; }

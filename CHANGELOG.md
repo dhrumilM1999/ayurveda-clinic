@@ -24,6 +24,29 @@ What changed in each step, in plain words.
   Medicine search: names that start with what you typed come first.
 - The audit log now records a patient search at most once every 5 seconds per user, so typing does not flood it.
 - Code: one shared piece, `frontend/src/components/LiveSearch.tsx`. See docs/SMALL_CHANGES.md "How search works".
+## Translate button: English -> Gujarati and Hindi (2026-10-15)
+
+- A **Translate** button next to the English / Gujarati / Hindi boxes of medicines, services, therapies and check-up
+  templates (name, description, every question and answer). It fills Gujarati and Hindi as a suggestion you can edit.
+- Free and private: it uses Ollama on your PC. Without Ollama it says "AI is offline" and nothing else breaks.
+  Setup in `docs/SMALL_CHANGES.md`. No database change, no new package.
+
+## PDF settings: one screen for how every print-out looks (2026-10-15)
+
+- **New screen "PDF settings"** (left menu, for the admin). Change colour, text size, paper, margin, the letterhead,
+  an extra top / bottom line, signature box, QR code, DUPLICATE COPY, language and doctor registration number for all
+  documents at once (General tab) or for one document only (Prescription, Follow-up card, Prakriti report,
+  Certificate, Therapy plan, OPD bill, Pharmacy bill, Credit note, Medicine label, Stock label, Reports). On bills you
+  can also hide the HSN / batch / GST columns and add terms and conditions and a thank-you line.
+- **Live preview** on the right: the real PDF made by the server with your changes before you save. It uses your newest
+  real record (this is written to the audit log) or a clearly fictional sample. Switch paper, language and "show as
+  reprint". **Save** applies it to real print-outs; **Back to default** removes your changes in the open tab.
+- With more than one branch you can set "All branches" or "Only this branch". The branch wins.
+- The print windows now open with the paper you chose for that document.
+- Nothing changes until you edit something: the starting values are the old look. The Ayurveda case sheet stays one
+  fixed A4 page (it follows colour, logo, signature, QR and DUPLICATE, not text size or margin).
+- Database: one new small table (`documents_printsetting`) that stores only the things you changed.
+  Old tables are untouched. See `docs/SMALL_CHANGES.md` -> "Change how all PDFs look".
 
 ## Ayurveda case sheet: 7 medicines fit, English labels (2026-10-11)
 
@@ -33,6 +56,7 @@ What changed in each step, in plain words.
 - The headings and the check-up lines are now in English: Symptoms, Diagnosis, Advice / Pathya, Next visit, and
   Agni ... Srotas. Change the words in `backend/apps/documents/words.py` (SAFE TO EDIT).
 - The Date underline no longer runs past the right edge of the page.
+
 ## Panchakarma and therapy (2026-10-15)
 
 - **New module** (Settings, Modules, switch on "Panchakarma and therapy"): a list of therapies (27 starting ones in

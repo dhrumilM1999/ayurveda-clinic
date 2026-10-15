@@ -6,7 +6,7 @@
 // - multiBranchOnly: the item shows only when "Use more than one branch" is on (Settings)
 import {
   AppstoreAddOutlined, HeartOutlined, ApartmentOutlined, BarChartOutlined, DollarOutlined, WalletOutlined, AuditOutlined, ExperimentOutlined, ShopOutlined, FormOutlined, MedicineBoxOutlined, CalendarOutlined, DashboardOutlined, HomeOutlined,
-  GlobalOutlined, IdcardOutlined, OrderedListOutlined, SafetyCertificateOutlined, ScheduleOutlined, SettingOutlined, TeamOutlined,
+  FilePdfOutlined, GlobalOutlined, IdcardOutlined, OrderedListOutlined, SafetyCertificateOutlined, ScheduleOutlined, SettingOutlined, TeamOutlined,
 } from '@ant-design/icons';
 import type { ReactNode } from 'react';
 
@@ -42,5 +42,6 @@ export const menuItems: MenuItemConfig[] = [
   { key: 'fees', path: '/fees-services', labelKey: 'menu.fees', icon: <DollarOutlined />, permission: 'billing.manage' },
   { key: 'settings', path: '/settings', labelKey: 'menu.settings', icon: <SettingOutlined />, permission: 'settings.manage' },
   { key: 'additional', path: '/additional-settings', labelKey: 'menu.additional', icon: <AppstoreAddOutlined />, permission: 'settings.manage' },
+  { key: 'pdfSettings', path: '/pdf-settings', labelKey: 'menu.pdfSettings', icon: <FilePdfOutlined />, permission: 'settings.manage' },
   { key: 'audit', path: '/audit-log', labelKey: 'menu.audit', icon: <AuditOutlined />, permission: 'audit.view' },
 ];

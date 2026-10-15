@@ -48,6 +48,10 @@
 | `backend/apps/billing/sample_services.py` | The SAMPLE services & charges for a new clinic | **SAFE TO EDIT** |
 | `backend/apps/reports/` | Dashboard numbers in OPD words (`/dashboard/today/`); `reports.py` = the Reports figures, `exports.py` = Excel / PDF download | ASK FIRST |
 | `backend/apps/documents/` | Print-outs (prescription, certificate, follow-up card, Prakriti report), QR "genuine?" check, WhatsApp share | ASK FIRST |
+| `backend/templates/ai/translate_v1.txt` | The instruction for the Translate button (Ollama) | **SAFE TO EDIT** |
+| `backend/apps/common/translate.py` | Sends the English name to Ollama and returns Gujarati + Hindi | ASK FIRST |
+| `backend/apps/documents/print_settings.py` | PDF settings: the list of options, their starting values (`DEFAULTS`), which document has which option (`DOC_TYPES`) and the merge order (all branches -> branch -> one document) | **SAFE TO EDIT** the lists, ASK FIRST the merge code |
+| `backend/apps/documents/print_preview.py` | The live preview of PDF settings and the fictional sample documents | ASK FIRST |
 | `backend/apps/documents/words.py` | Words on print-outs in EN/GU/HI and the Prakriti guidance | **SAFE TO EDIT** |
 | `backend/apps/prescriptions/safety.py` | **Prescription safety rules** (fixed rules, not AI) | ASK FIRST |
 | `backend/apps/emr/templates_catalog.py` | **Starting check-up templates**: Ashtavidha, Dashavidha, Agni & habits, Prakriti questions (EN/GU/HI) | **SAFE TO EDIT** |
@@ -77,6 +81,7 @@
 | `frontend/src/pages/billing/` | Billing screen and the OPD bill popup | ASK FIRST |
 | `frontend/src/pages/FeesServicesPage.tsx` | Fees & services screen | ASK FIRST |
 | `frontend/src/pages/ReportsPage.tsx` | Reports screen. The `REPORTS` list at the top says which permission each report needs and which totals show as big numbers | ASK FIRST |
+| `frontend/src/pages/PdfSettingsPage.tsx` | The PDF settings screen with live preview (menu: PDF settings) | ASK FIRST |
 | `frontend/src/components/BillPreview.tsx` | PDF popup for bills and medicine labels (paper / format, print, download) | ASK FIRST |
 | `frontend/src/utils/dosage.ts` | Quick dosage (222 -> 2-2-2), quantity working-out, the quick day choices (`DAY_CHOICES`) | **SAFE TO EDIT** (`DAY_CHOICES`) |
 | `frontend/src/pages/consult/DaysBar.tsx` | Medicine days / follow-up days bar on the check-up screen | ASK FIRST |

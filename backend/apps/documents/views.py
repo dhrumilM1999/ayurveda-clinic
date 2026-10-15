@@ -24,6 +24,7 @@ from apps.emr.models import Visit, VisitExam
 from apps.prescriptions.models import Prescription
 
 from .models import Certificate, IssuedDocument
+from .print_settings import page_settings
 from .serializers import CertificateSerializer
 from .services import (
     SIZES, case_sheet_context, certificate_context, detailed_context, follow_up_context, issue, language_of, mark_printed, pad_for,
@@ -31,7 +32,6 @@ from .services import (
 )
 from .words import words_for
 
-DEFAULT_SIZE = {"prescription": "a5", "follow-up-card": "a6", "prakriti": "a4", "certificate": "a4", "therapy-plan": "a4"}
 PERMISSIONS = {  # any one of these codes
     "prescription": ("prescriptions.view",),
     "follow-up-card": ("emr.view", "appointments.view"),
@@ -91,6 +91,38 @@ def _load(kind, request, pk):
     raise NotFound("Unknown document.")
 
 
+DOC_TYPE = {"prescription": "prescription", "follow-up-card": "follow_up_card", "prakriti": "prakriti_report",
+            "certificate": "certificate", "therapy-plan": "therapy_plan"}
+
+
+def compose(branch, kind, record, template, make, *, lang, size, detailed, number, duplicate, qr, cancelled, ps):
+    """
+    Everything the template needs for one document -> (template, paper size, context). Used by the real print
+    (DocumentPdfView) and by the live preview of PDF settings, so both look the same.
+    """
+    context = make(lang)
+    if detailed and record is not None:
+        context.update(detailed_context(record, lang))
+    elif kind == "prescription" and branch.prescription_design == "ayurveda_pad":
+        # "Ayurveda case sheet" design (Settings -> Branch details): one A4 page. On half-A4 (A5) paper the
+        # same sheet is shrunk to fit; any other size prints on A4.
+        template = "prescription_ayurveda.html"
+        size = "a5" if size == "a5" else "a4"
+        if record is None:  # the live preview of PDF settings with a sample
+            from .print_preview import sample_case_sheet
+
+            context.update(sample_case_sheet(branch, lang))
+        else:
+            context.update(case_sheet_context(record, lang))
+        context["sheet_scale"] = "0.70711" if size == "a5" else "1"
+    context.update({
+        "number": number, "duplicate": duplicate, "qr": qr, "is_cancelled": cancelled,
+        # Prescriptions on the clinic's pre-printed pad (Settings -> Branch details)
+        "pad": pad_for(branch, size) if kind == "prescription" else None,
+    })
+    return template, size, context
+
+
 class DocumentPdfView(APIView):
     permission_classes = [IsAuthenticated, BranchPermission]
     branch_scoped = True
@@ -101,11 +133,13 @@ class DocumentPdfView(APIView):
         if kind not in PERMISSIONS:
             raise NotFound("Unknown document.")
         _any_perm(request, PERMISSIONS[kind])
-        size = request.query_params.get("size") or DEFAULT_SIZE[kind]
+        # The paper: the one asked for, else the one chosen in Settings -> PDF settings, else the usual one
+        ps = page_settings(request.branch, DOC_TYPE[kind], request.query_params.get("size") or None)
+        size = ps["paper"]
         if size not in SIZES:
             raise ValidationError({"size": "Choose a4, a5 or a6."})
         record, doc, template, make, patient = _load(kind, request, pk)
-        lang = language_of(patient, request.query_params.get("lang"))
+        lang = language_of(patient, request.query_params.get("lang"), ps)
         preview = request.query_params.get("preview") == "1"
         # ?detail=1: the DETAILED prescription (full check-up summary). It has the full medical history, so it
         # needs "See full medical history" as well.
@@ -113,22 +147,10 @@ class DocumentPdfView(APIView):
         if detailed:
             _any_perm(request, ("emr.view",))
         duplicate = doc.print_count > 0 if preview else mark_printed(doc)
-        context = make(lang)
-        if detailed:
-            context.update(detailed_context(record, lang))
-        elif kind == "prescription" and request.branch.prescription_design == "ayurveda_pad":
-            # "Ayurveda case sheet" design (Settings -> Branch details): one A4 page. On half-A4 (A5) paper the
-            # same sheet is shrunk to fit; any other size prints on A4.
-            template = "prescription_ayurveda.html"
-            size = "a5" if size == "a5" else "a4"
-            context.update(case_sheet_context(record, lang))
-            context["sheet_scale"] = "0.70711" if size == "a5" else "1"
-        content = render(template, size, {
-            **context, "number": doc.number, "duplicate": duplicate, "qr": _qr(verify_url(doc)),
-            "is_cancelled": doc.is_cancelled,
-            # Prescriptions on the clinic's pre-printed pad (Settings -> Branch details)
-            "pad": pad_for(request.branch, size) if kind == "prescription" else None,
-        })
+        template, size, context = compose(
+            request.branch, kind, record, template, make, lang=lang, size=size, detailed=detailed, number=doc.number,
+            duplicate=duplicate, qr=_qr(verify_url(doc)), cancelled=doc.is_cancelled, ps=ps)
+        content = render(template, size, context, ps)
         log_action(request, "view" if preview else "print", record, changes={
             "document": kind, "number": doc.number, "size": size, "duplicate": duplicate, "patient": str(patient.id),
             **({"detailed": True} if detailed else {})})

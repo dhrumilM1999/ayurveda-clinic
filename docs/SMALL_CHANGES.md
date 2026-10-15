@@ -318,3 +318,34 @@ shown when booking. Already booked appointments are not moved.
 
 Open `.env` and change `IDLE_TIMEOUT_MINUTES=15` (or `OTP_VALID_MINUTES`, …).
 Then run `stop.bat` and `start.bat`.
+
+## Change how all PDFs look (colour, text size, paper, footer ...)
+
+Open **PDF settings** in the left menu (needs the "settings.manage" permission, the admin has it).
+- The **General** tab changes every document at once. Each document (Prescription, OPD bill, Pharmacy bill,
+  Certificate, labels, Reports ...) has its own tab where you change only what should differ for it. Anything you do
+  not change there follows the General tab.
+- You can change: paper size, text size, colour, margin, clinic name / logo block, an extra line at the top and at the
+  bottom, signature box, QR code, DUPLICATE COPY on reprints, language, doctor registration number, and on bills the
+  HSN / batch / GST columns, terms and conditions and a thank-you line.
+- The right side is a **live preview** of the real PDF (your newest real record, or a clearly fictional sample if there
+  is none). It updates a moment after each change, before you save. Press **Save** to use it on real print-outs.
+  **Back to default** removes your changes in the open tab.
+- With more than one branch, choose "All branches" or "Only this branch" at the top. A branch setting wins over the
+  all-branches setting.
+- The paper chosen here is the one the print window opens with. You can still pick another paper in the window.
+
+Add a new option (for a programmer): add it to `DEFAULTS` and to the document's `keys` in
+`backend/apps/documents/print_settings.py`, use `ps.<name>` in the template in `backend/templates/documents/`, and add
+its words under `pdfSettings.keys` in `frontend/src/i18n/*.json`.
+
+## Auto-translate names into Gujarati and Hindi (Translate button)
+
+Next to the English / Gujarati / Hindi boxes (medicine, service, therapy, check-up template, and each question or
+answer of a template) there is a **Translate** button. Type the English name first, press it, and Gujarati and Hindi
+are filled in. It is only a suggestion: read it and fix any word before you save.
+- It uses **Ollama** on your Windows PC (free, nothing leaves the PC). Install Ollama, run `ollama pull gemma2:9b`, keep it
+  running. If it is not running the button says "AI is offline" and you can type by hand.
+- To use another model, put `OLLAMA_MODEL=<name>` in `.env` and restart (`stop.bat`, `start.bat`).
+- The instruction given to the AI is `backend/templates/ai/translate_v1.txt` (SAFE TO EDIT, e.g. to add rules for how
+  Ayurveda words should be written).

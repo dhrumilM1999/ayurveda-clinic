@@ -14,8 +14,8 @@ You may change the wording, colours and font sizes. Keep everything inside {{ }}
   body { margin: 0; font-family: "Noto Sans", "Noto Sans Gujarati", "Noto Sans Devanagari", sans-serif; color: #111; }
   .label { page-break-after: always; height: 100%; overflow: hidden; display: flex; flex-direction: column; gap: 0.6mm; }
   .label:last-child { page-break-after: auto; }
-  .top { display: flex; justify-content: space-between; gap: 2mm; font-size: 6pt; color: #333; border-bottom: 0.3mm solid #1f5c46; padding-bottom: 0.5mm; }
-  .clinic { font-weight: 700; color: #1f5c46; }
+  .top { display: flex; justify-content: space-between; gap: 2mm; font-size: 6pt; color: #333; border-bottom: 0.3mm solid {{ ps.accent_color|default:"#1f5c46" }}; padding-bottom: 0.5mm; }
+  .clinic { font-weight: 700; color: {{ ps.accent_color|default:"#1f5c46" }}; }
   .med { font-weight: 700; font-size: 9pt; line-height: 1.15; }
   .strength { font-weight: 400; font-size: 7pt; }
   .patient { font-size: 7pt; }

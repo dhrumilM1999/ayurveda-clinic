@@ -1937,3 +1937,17 @@ body {
 .enquiry-row { display: flex; gap: 12px; }
 .enquiry-trap { position: absolute; left: -9999px; height: 0; overflow: hidden; }
 @media (max-width: 520px) { .enquiry-row { flex-direction: column; gap: 0; } }
+
+/* PDF settings screen (src/pages/PdfSettingsPage.tsx) */
+.pdfset-layout { display: grid; grid-template-columns: minmax(380px, 5fr) 6fr; gap: 16px; align-items: start; }
+.pdfset-form { background: #fff; border: 1px solid #e6ebe8; border-radius: 8px; padding: 8px 16px 16px; min-width: 0; }
+.pdfset-group { margin-top: 12px; }
+.pdfset-row { display: flex; gap: 12px; padding: 8px 0; border-bottom: 1px solid #f0f3f1; align-items: flex-start; }
+.pdfset-label { flex: 0 0 38%; }
+.pdfset-control { flex: 1; min-width: 0; }
+.pdfset-preview { position: sticky; top: 8px; background: #fff; border: 1px solid #e6ebe8; border-radius: 8px; padding: 8px; min-width: 0; }
+.pdfset-preview-bar { padding: 4px 4px 8px; display: flex; flex-direction: column; gap: 4px; }
+.pdfset-frame { position: relative; height: calc(100vh - 220px); min-height: 480px; background: #e9eeeb; border-radius: 4px; overflow: hidden; }
+.pdfset-frame iframe { width: 100%; height: 100%; border: 0; }
+.pdfset-spin { position: absolute; top: 12px; right: 12px; z-index: 2; }
+@media (max-width: 1100px) { .pdfset-layout { grid-template-columns: 1fr; } .pdfset-preview { position: static; } }

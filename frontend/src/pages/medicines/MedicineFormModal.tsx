@@ -9,6 +9,7 @@ import { useAuth } from '../../auth/AuthContext';
 import { MasterSelect } from '../../components/MasterSelect';
 import { quickDosage } from '../../utils/dosage';
 import { FLAGS } from './shared';
+import { TranslateButton } from '../../components/TranslateButton';
 
 const MASTER_FIELDS = ['dosage_form', 'dose_unit', 'default_timing', 'default_anupana', 'category', 'pack_type'] as const;
 
@@ -101,6 +102,10 @@ export function MedicineFormModal({ medicine, onClose }: { medicine: Medicine | 
               <Col xs={24} md={12}><Form.Item name="category" label={t('medicines.category')}><MasterSelect category="product_category" /></Form.Item></Col>
             </>
           )}
+          <Col span={24}><Form.Item noStyle shouldUpdate>{() => (
+  <TranslateButton english={form.getFieldValue('name') ?? ''} existing={{ gu: form.getFieldValue('name_gu'), hi: form.getFieldValue('name_hi') }}
+    onResult={(r) => form.setFieldsValue({ name_gu: r.gu, name_hi: r.hi })} />
+)}</Form.Item></Col>
           <Col xs={24} md={12}><Form.Item name="name_gu" label={t('medicines.nameGu')}><Input maxLength={200} /></Form.Item></Col>
           <Col xs={24} md={12}><Form.Item name="name_hi" label={t('medicines.nameHi')}><Input maxLength={200} /></Form.Item></Col>
           <Col span={24}>

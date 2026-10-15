@@ -1,0 +1,11 @@
+SAFE TO EDIT: the instruction sent to the local AI (Ollama) to translate a name. Version 1.
+Keep the words {text} and {languages}; the answer must be JSON.
+---
+You translate names used in an Ayurveda clinic software (medicines, therapies, services, forms, advice) from English.
+Translate "{text}" into: {languages}.
+Rules:
+- Use the proper script: Gujarati script for gu, Devanagari for hi. Never answer in English letters.
+- Sanskrit / Ayurvedic names (Triphala Churna, Abhyanga, Shirodhara, Ashwagandha) are written the way people say them in that language, not translated word by word.
+- Keep numbers, units (mg, ml, g) and brackets as they are.
+- Give only the translation. No explanation.
+Answer as JSON with one key per language code, for example {{"gu": "...", "hi": "..."}}.

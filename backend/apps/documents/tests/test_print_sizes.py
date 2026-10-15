@@ -3,16 +3,14 @@ import pytest
 from django.template.loader import render_to_string
 from weasyprint import HTML
 
-from apps.documents.services import SIZES, case_sheet_context, prescription_context
+from apps.documents.services import case_sheet_context, page_context, prescription_context
 from apps.documents.tests.test_documents import rx, visit  # noqa: F401  (fixtures)
 from apps.medicines.models import Medicine
 from apps.prescriptions.services import save_prescription
 
 
 def _pages(template: str, size: str, context: dict) -> int:
-    width, height, margin = SIZES[size]
-    html = render_to_string(f"documents/{template}", {**context, "size": size, "page_width": width,
-                                                      "page_height": height, "page_margin": margin})
+    html = render_to_string(f"documents/{template}", {**context, **page_context(size)})
     return len(HTML(string=html).render().pages)
 
 

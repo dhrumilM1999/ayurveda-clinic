@@ -13,7 +13,7 @@ from django.conf import settings
 from django.db import models
 
 from apps.common.fields import EncryptedTextField
-from apps.common.models import BranchScopedModel
+from apps.common.models import BranchScopedModel, OrgScopedModel
 
 DOCUMENT_KINDS = [
     ("prescription", "Prescription"),
@@ -79,3 +79,28 @@ class Certificate(BranchScopedModel):
 
     def __str__(self):
         return f"{self.get_kind_display()} {self.number}"
+
+
+class PrintSetting(OrgScopedModel):
+    """
+    How the print-outs (PDF) look: one row = the settings the owner changed for one place.
+    - branch empty = for the whole clinic group; branch set = only that branch.
+    - doc_type "all" = every document; or one kind, e.g. "prescription" (list in print_settings.py).
+    "values" holds ONLY what was changed (e.g. {"accent_color": "#8a1c1c"}); everything else is inherited.
+    The merge order is in print_settings.resolve(). ASK FIRST before changing this model.
+    """
+
+    branch = models.ForeignKey("organizations.Branch", null=True, blank=True, on_delete=models.PROTECT, related_name="+")
+    doc_type = models.CharField(max_length=30, default="all")
+    values = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["organization", "doc_type"], condition=models.Q(is_deleted=False, branch__isnull=True),
+                                    name="uniq_print_setting_org"),
+            models.UniqueConstraint(fields=["organization", "branch", "doc_type"], condition=models.Q(is_deleted=False, branch__isnull=False),
+                                    name="uniq_print_setting_branch"),
+        ]
+
+    def __str__(self):
+        return f"{self.doc_type} ({self.branch or 'all branches'})"

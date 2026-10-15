@@ -26,6 +26,7 @@ import RoomsPage from './pages/RoomsPage';
 import SchedulesPage from './pages/SchedulesPage';
 import SettingsPage from './pages/SettingsPage';
 import AdditionalSettingsPage from './pages/AdditionalSettingsPage';
+import PdfSettingsPage from './pages/PdfSettingsPage';
 import FeesServicesPage from './pages/FeesServicesPage';
 import BillingPage from './pages/billing/BillingPage';
 import ReportsPage from './pages/ReportsPage';
@@ -89,6 +90,7 @@ export default function App() {
               <Route path="fees-services" element={<RequirePermission code="billing.manage"><FeesServicesPage /></RequirePermission>} />
               <Route path="settings" element={<RequirePermission code="settings.manage"><SettingsPage /></RequirePermission>} />
               <Route path="additional-settings" element={<RequirePermission code="settings.manage"><AdditionalSettingsPage /></RequirePermission>} />
+              <Route path="pdf-settings" element={<RequirePermission code="settings.manage"><PdfSettingsPage /></RequirePermission>} />
               <Route path="audit-log" element={<RequirePermission code="audit.view"><AuditLogPage /></RequirePermission>} />
               <Route path="login" element={<Navigate to="/" replace />} />
               <Route path="*" element={<NotFoundPage />} />

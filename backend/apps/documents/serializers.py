@@ -49,3 +49,53 @@ class CertificateSerializer(serializers.ModelSerializer):
         if attrs.get("kind") == "fitness" and not attrs.get("fit_from"):
             raise serializers.ValidationError({"fit_from": "Enter from which date the patient is fit."})
         return attrs
+
+
+class PrintSettingSaveSerializer(serializers.Serializer):
+    """PUT /print-settings/: save (or, with empty values, reset) one place of the PDF settings."""
+
+    scope = serializers.ChoiceField(choices=["org", "branch"])
+    doc_type = serializers.CharField(max_length=30)
+    values = serializers.DictField()
+
+    def validate(self, data):
+        from django.core.exceptions import ValidationError as DjangoValidationError
+
+        from .print_settings import DOC_TYPES, clean
+
+        if data["doc_type"] != "all" and data["doc_type"] not in DOC_TYPES:
+            raise serializers.ValidationError({"doc_type": "Unknown document."})
+        try:
+            data["values"] = clean(data["values"], data["doc_type"])
+        except DjangoValidationError as error:
+            raise serializers.ValidationError(error.message_dict if hasattr(error, "error_dict") else {"values": error.messages})
+        return data
+
+
+class PrintPreviewSerializer(serializers.Serializer):
+    """POST /print-settings/preview/: make a PDF with settings that are not saved yet."""
+
+    doc_type = serializers.CharField(max_length=30)
+    scope = serializers.ChoiceField(choices=["org", "branch"], default="org")
+    paper = serializers.CharField(max_length=10, required=False, allow_blank=True)
+    lang = serializers.ChoiceField(choices=["", "en", "gu", "hi"], required=False, allow_blank=True)
+    duplicate = serializers.BooleanField(default=False)
+    drafts = serializers.DictField(child=serializers.DictField(), default=dict)  # {"all": {...}, "<doc_type>": {...}}
+
+    def validate(self, data):
+        from django.core.exceptions import ValidationError as DjangoValidationError
+
+        from .print_settings import DOC_TYPES, clean
+
+        if data["doc_type"] not in DOC_TYPES:
+            raise serializers.ValidationError({"doc_type": "Unknown document."})
+        cleaned = {}
+        for kind, values in data["drafts"].items():
+            if kind != "all" and kind not in DOC_TYPES:
+                raise serializers.ValidationError({"drafts": f"Unknown document {kind}."})
+            try:
+                cleaned[(data["scope"], kind)] = clean(values, kind)
+            except DjangoValidationError as error:
+                raise serializers.ValidationError({"drafts": error.message_dict if hasattr(error, "error_dict") else error.messages})
+        data["drafts"] = cleaned
+        return data

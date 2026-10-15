@@ -12,18 +12,18 @@ Keep the {{ ... }} and {% ... %} parts. Sizes: A4, A5 and 80 mm thermal ("size" 
   * { box-sizing: border-box; }
   body {
     font-family: "Noto Sans", "Noto Sans Gujarati", "Noto Sans Devanagari", sans-serif;
-    font-size: {% if narrow %}8.5pt{% elif size == "a5" %}8.5pt{% else %}9.5pt{% endif %};
+    font-size: {{ ps.base_pt|default:"9.5" }}pt;
     color: #1d2a24; margin: 0;
   }
-  .head { display: flex; justify-content: space-between; gap: 12px; border-bottom: 2px solid #1f5c45; padding-bottom: 6px; }
-  .org { font-size: 1.6em; font-weight: 700; color: #1f5c45; }
+  .head { display: flex; justify-content: space-between; gap: 12px; border-bottom: 2px solid {{ ps.accent_color|default:"#1f5c46" }}; padding-bottom: 6px; }
+  .org { font-size: 1.6em; font-weight: 700; color: {{ ps.accent_color|default:"#1f5c46" }}; }
   .logo { display: block; max-height: {% if narrow %}12mm{% else %}16mm{% endif %}; max-width: 40mm; margin: {% if narrow %}0 auto 2px{% else %}0 0 2px{% endif %}; }
   .muted { color: #5b6862; }
   .small { font-size: 0.85em; }
   .title { text-align: center; font-weight: 700; letter-spacing: 0.08em; margin: 6px 0; font-size: 1.1em; }
   .meta { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
   table { width: 100%; border-collapse: collapse; }
-  th { background: #eef3ef; text-align: left; font-weight: 600; font-size: 0.85em; }
+  th { background: {{ ps.accent_soft|default:"#eef3f0" }}; text-align: left; font-weight: 600; font-size: 0.85em; }
   th, td { padding: 3px 4px; border-bottom: 1px solid #d9e1dc; vertical-align: top; }
   .r { text-align: right; white-space: nowrap; }
   .totals { width: 55%; margin-left: auto; margin-top: 6px; }
@@ -38,9 +38,6 @@ Keep the {{ ... }} and {% ... %} parts. Sizes: A4, A5 and 80 mm thermal ("size" 
     position: fixed; top: 40%; left: 0; right: 0; text-align: center; transform: rotate(-24deg);
     font-size: 40pt; font-weight: 800; color: rgba(194, 65, 45, 0.16); letter-spacing: 0.1em;
   }
-  {% if size == "58mm" %}
-  body { font-size: 7pt; }
-  {% endif %}
   {% if narrow %}
   .head { display: block; text-align: center; }
   .meta { display: block; }
@@ -52,15 +49,17 @@ Keep the {{ ... }} and {% ... %} parts. Sizes: A4, A5 and 80 mm thermal ("size" 
 </style>
 </head>
 <body>
-{% if duplicate %}<div class="watermark">DUPLICATE COPY</div>{% endif %}
+{% if duplicate and ps.show_duplicate_watermark %}<div class="watermark">DUPLICATE COPY</div>{% endif %}
 
 <div class="head">
   <div>
-    {% if logo %}<img class="logo" src="{{ logo }}" alt="">{% endif %}
+    {% if ps.show_letterhead %}
+    {% if logo and ps.show_logo %}<img class="logo" src="{{ logo }}" alt="">{% endif %}
     <div class="org">{{ organization.name }}</div>
     <div>{{ branch.name }}</div>
     <div class="muted small">{{ branch.address }}{% if branch.city %}, {{ branch.city }}{% endif %} {{ branch.pincode }}</div>
     <div class="muted small">{% if branch.phone %}Phone {{ branch.phone }}{% endif %}{% if branch.email %} · {{ branch.email }}{% endif %}</div>
+    {% endif %}
   </div>
   <div class="small {% if not narrow %}r{% endif %}">
     {% if branch.gstin %}<div>GSTIN: <b>{{ branch.gstin }}</b></div>{% endif %}
@@ -69,6 +68,7 @@ Keep the {{ ... }} and {% ... %} parts. Sizes: A4, A5 and 80 mm thermal ("size" 
   </div>
 </div>
 
+{% if ps.header_text %}<div class="small muted" style="text-align:center">{{ ps.header_text }}</div>{% endif %}
 {# Title: a bill with GST is a TAX INVOICE; a bill with only GST-free items (most health care services) is a BILL OF SUPPLY. Confirm the wording with your CA. #}
 <div class="title">{% if credit_note %}CREDIT NOTE{% elif has_gst %}TAX INVOICE{% else %}BILL OF SUPPLY{% endif %}</div>
 {% if not credit_note %}<div class="r small" style="text-align:center">{% if is_opd %}OPD BILL (Out-patient){% else %}PHARMACY BILL{% endif %}</div>{% endif %}
@@ -96,9 +96,9 @@ Keep the {{ ... }} and {% ... %} parts. Sizes: A4, A5 and 80 mm thermal ("size" 
   <thead>
     <tr>
       <th>#</th><th>Item</th>
-      {% if not narrow %}{% if has_batches %}<th>Batch</th><th>Exp.</th>{% endif %}<th>HSN/SAC</th>{% endif %}
+      {% if not narrow and ps.show_gst_columns %}{% if has_batches %}<th>Batch</th><th>Exp.</th>{% endif %}<th>HSN/SAC</th>{% endif %}
       <th class="r">Qty</th><th class="r">Rate</th>
-      {% if not narrow %}<th class="r">Disc %</th>{% if has_gst %}<th class="r">GST %</th>{% endif %}{% endif %}
+      {% if not narrow and ps.show_gst_columns %}<th class="r">Disc %</th>{% if has_gst %}<th class="r">GST %</th>{% endif %}{% endif %}
       <th class="r">Amount</th>
     </tr>
   </thead>
@@ -108,10 +108,10 @@ Keep the {{ ... }} and {% ... %} parts. Sizes: A4, A5 and 80 mm thermal ("size" 
     <tr>
       <td>{{ forloop.counter }}</td>
       <td>{{ cl.invoice_line.description }}{% if narrow %}<div class="muted small">{{ cl.invoice_line.batch_no }}</div>{% endif %}</td>
-      {% if not narrow %}{% if has_batches %}<td>{{ cl.invoice_line.batch_no }}</td><td>{{ cl.invoice_line.expiry_date|date:"m-Y" }}</td>{% endif %}<td>{{ cl.invoice_line.hsn_code }}</td>{% endif %}
+      {% if not narrow and ps.show_gst_columns %}{% if has_batches %}<td>{{ cl.invoice_line.batch_no }}</td><td>{{ cl.invoice_line.expiry_date|date:"m-Y" }}</td>{% endif %}<td>{{ cl.invoice_line.hsn_code }}</td>{% endif %}
       <td class="r">{{ cl.quantity|qty }} {{ cl.invoice_line.unit_label }}</td>
       <td class="r">{{ cl.invoice_line.unit_price|money }}</td>
-      {% if not narrow %}<td class="r">{{ cl.invoice_line.discount_percent|qty }}</td>{% if has_gst %}<td class="r">{{ cl.invoice_line.gst_rate|qty }}</td>{% endif %}{% endif %}
+      {% if not narrow and ps.show_gst_columns %}<td class="r">{{ cl.invoice_line.discount_percent|qty }}</td>{% if has_gst %}<td class="r">{{ cl.invoice_line.gst_rate|qty }}</td>{% endif %}{% endif %}
       <td class="r">{{ cl.total_amount|money }}</td>
     </tr>
     {% endfor %}
@@ -120,10 +120,10 @@ Keep the {{ ... }} and {% ... %} parts. Sizes: A4, A5 and 80 mm thermal ("size" 
     <tr>
       <td>{{ forloop.counter }}</td>
       <td>{{ line.description }}{% if narrow and line.batch_no %}<div class="muted small">B: {{ line.batch_no }} · Exp {{ line.expiry_date|date:"m-Y" }}</div>{% endif %}</td>
-      {% if not narrow %}{% if has_batches %}<td>{{ line.batch_no }}</td><td>{{ line.expiry_date|date:"m-Y" }}</td>{% endif %}<td>{{ line.hsn_code }}</td>{% endif %}
+      {% if not narrow and ps.show_gst_columns %}{% if has_batches %}<td>{{ line.batch_no }}</td><td>{{ line.expiry_date|date:"m-Y" }}</td>{% endif %}<td>{{ line.hsn_code }}</td>{% endif %}
       <td class="r">{{ line.quantity|qty }} {{ line.unit_label }}</td>
       <td class="r">{{ line.unit_price|money }}</td>
-      {% if not narrow %}<td class="r">{{ line.discount_percent|qty }}</td>{% if has_gst %}<td class="r">{{ line.gst_rate|qty }}</td>{% endif %}{% endif %}
+      {% if not narrow and ps.show_gst_columns %}<td class="r">{{ line.discount_percent|qty }}</td>{% if has_gst %}<td class="r">{{ line.gst_rate|qty }}</td>{% endif %}{% endif %}
       <td class="r">{{ line.total_amount|money }}</td>
     </tr>
     {% endfor %}
@@ -172,16 +172,18 @@ Keep the {{ ... }} and {% ... %} parts. Sizes: A4, A5 and 80 mm thermal ("size" 
 
 <div class="foot">
   <div>
-    {% if upi_qr %}
+    {% if upi_qr and ps.show_qr %}
       <div class="qr"><img src="{{ upi_qr }}" alt=""><div class="small">Scan to pay ₹ {{ invoice.balance|money }} by UPI</div></div>
     {% endif %}
-    <div class="muted small">{% if has_batches %}Please check medicines, batch and expiry before leaving the counter.{% else %}Thank you. Please keep this bill for your records.{% endif %}</div>
+    <div class="muted small">{% if ps.thank_you_text %}{{ ps.thank_you_text }}{% elif has_batches %}Please check medicines, batch and expiry before leaving the counter.{% else %}Thank you. Please keep this bill for your records.{% endif %}</div>
   </div>
-  <div class="sign">
+  {% if ps.show_signature %}<div class="sign">
     <div style="height: 10mm"></div>
     <div class="small">For {{ organization.name }}</div>
     <div class="muted small">{% if is_opd %}Authorised signatory{% else %}Pharmacist / authorised signatory{% endif %}</div>
-  </div>
+  </div>{% endif %}
 </div>
+{% if ps.terms_text %}<div class="small muted" style="margin-top: 4mm; white-space: pre-line"><b>Terms:</b> {{ ps.terms_text }}</div>{% endif %}
+{% if ps.footer_text %}<div class="small muted" style="margin-top: 2mm; text-align: center">{{ ps.footer_text }}</div>{% endif %}
 </body>
 </html>

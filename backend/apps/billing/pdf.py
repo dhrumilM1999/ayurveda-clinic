@@ -75,14 +75,24 @@ def _logo(organization) -> str:
     return _data_uri(organization.logo)
 
 
-def render_pdf(*, invoice, size="a4", duplicate=False, credit_note=None) -> bytes:
+def doc_type_of(invoice, credit_note=None) -> str:
+    """Which PDF-settings group a bill belongs to (Settings -> PDF settings)."""
+    return "credit_note" if credit_note is not None else ("opd_bill" if invoice.series == "OP" else "pharmacy_bill")
+
+
+def render_pdf(*, invoice, size="a4", duplicate=False, credit_note=None, ps=None, drafts=None, upi_link=None) -> bytes:
+    """ps: the PDF settings (made here from the branch when not given); drafts: unsaved ones for the live preview."""
     from weasyprint import HTML
 
-    width, height, margin = SIZES.get(size, SIZES["a4"])
+    from apps.documents.print_settings import page_settings
+
+    ps = ps or page_settings(invoice.branch, doc_type_of(invoice, credit_note), size, drafts)
+    width, height, _ = SIZES.get(size, SIZES["a4"])
+    margin = ps["margin"]
     lines = list(invoice.lines.all()) if credit_note is None else [cl.invoice_line for cl in credit_note.lines.all()]
     if height is None:  # thermal roll: height grows with the number of lines
         height = f"{150 + 14 * len(lines)}mm"
-    upi = upi_link_for(invoice) if credit_note is None else ""
+    upi = upi_link if upi_link is not None else (upi_link_for(invoice) if credit_note is None else "")
     html = render_to_string("documents/invoice.html", {
         "invoice": invoice, "lines": lines, "credit_note": credit_note,
         "credit_lines": list(credit_note.lines.all()) if credit_note else [],
@@ -94,6 +104,6 @@ def render_pdf(*, invoice, size="a4", duplicate=False, credit_note=None) -> byte
         "gst_summary": _gst_summary(lines),
         "amount_words": rupees_in_words(credit_note.total_amount if credit_note else invoice.total_amount),
         "upi_qr": _qr_data_uri(upi) if upi else "", "duplicate": duplicate,
-        "size": size, "narrow": size in ("80mm", "58mm"), "page_width": width, "page_height": height, "page_margin": margin,
+        "ps": ps, "size": size, "narrow": size in ("80mm", "58mm"), "page_width": width, "page_height": height, "page_margin": margin,
     })
     return HTML(string=html).write_pdf()

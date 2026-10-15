@@ -17,6 +17,7 @@ def _test_settings(settings):
     settings.SMS_PROVIDER = "fake"
     settings.WHATSAPP_PROVIDER = "fake"
     settings.PAYMENT_PROVIDER = "fake"
+    settings.AI_PROVIDER = "fake"
     settings.SHOW_DEV_OTP_ON_SCREEN = False
     FakeSmsProvider.outbox.clear()
     FakeWhatsAppProvider.outbox.clear()

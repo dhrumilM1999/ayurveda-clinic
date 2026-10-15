@@ -194,6 +194,13 @@ REST_FRAMEWORK = {
 
 # Address of the app that patients reach when they scan the QR code on a print-out (the "is this genuine?"
 # page). On one PC this is http://localhost:5173; on the clinic network use the PC's address, later the website.
+# AI helper (free, local): Ollama on this PC. Used by the "Translate" button next to Gujarati / Hindi names.
+# AI_PROVIDER: ollama (real) | fake (tests) | off. If Ollama is not running the button says "AI is offline".
+AI_PROVIDER = env("AI_PROVIDER", "ollama")
+OLLAMA_URL = env("OLLAMA_URL", "http://host.docker.internal:11434").rstrip("/")
+OLLAMA_MODEL = env("OLLAMA_MODEL", "gemma2:9b")
+AI_TIMEOUT_SECONDS = int(env("AI_TIMEOUT_SECONDS", "60"))
+
 PUBLIC_APP_URL = env("PUBLIC_APP_URL", "http://localhost:5173").rstrip("/")
 
 # Websites (comma separated, e.g. https://www.myclinic.in) that may send the online enquiry form from the browser.
