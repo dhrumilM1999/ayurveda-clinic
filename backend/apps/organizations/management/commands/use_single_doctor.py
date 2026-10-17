@@ -5,6 +5,7 @@ Keeps ONE doctor in the clinic: "doctor1" becomes Dr. Grishm Shingala, and every
 
   docker compose exec backend python manage.py use_single_doctor
 """
+from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.db.models import Max
@@ -26,6 +27,9 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args, **options):
+        if settings.IS_PRODUCTION and not settings.DEMO_MODE:
+            raise CommandError("Refusing to run: this command creates demo data with a well-known password and must "
+                               "never run on the live server (DEMO_MODE is not true).")
         org = Organization.objects.filter(is_deleted=False).order_by("created_at").first()
         keep = User.objects.filter(organization=org, username="doctor1", is_deleted=False).first()
         if keep is None:

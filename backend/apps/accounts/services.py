@@ -2,6 +2,8 @@
 Functions other modules use to ask "can this user do X in this branch?".
 ASK FIRST before editing.
 """
+from django.conf import settings
+
 from apps.organizations.models import Branch
 
 from .models import Role, UserBranchRole
@@ -50,7 +52,9 @@ def user_has_perm(user, code: str, branch=None) -> bool:
 
 
 def user_requires_2fa(user) -> bool:
-    """Doctors and admins must enter an OTP at login."""
+    """Doctors and admins must enter an OTP at login (unless the owner switched this off with REQUIRE_2FA=0)."""
+    if not settings.REQUIRE_2FA:
+        return False
     if user.is_org_admin:
         return True
     return Role.objects.filter(
@@ -88,3 +92,14 @@ def doctors_in_branch(branch):
         .filter(Q(is_org_admin=True) | Q(branch_roles__branch=branch, branch_roles__is_deleted=False))
         .distinct()
     )
+
+
+def revoke_all_tokens(user) -> int:
+    """Log the user out everywhere: every refresh token they hold stops working (their screens end within minutes)."""
+    from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
+
+    count = 0
+    for token in OutstandingToken.objects.filter(user=user):
+        _, created = BlacklistedToken.objects.get_or_create(token=token)
+        count += int(created)
+    return count

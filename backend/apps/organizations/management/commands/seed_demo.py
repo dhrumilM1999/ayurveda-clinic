@@ -74,6 +74,9 @@ class Command(BaseCommand):
                             help="Add today's sample appointments and walk-ins.")
 
     def handle(self, *args, **options):
+        if settings.IS_PRODUCTION and not settings.DEMO_MODE:
+            raise CommandError("Refusing to run: this command creates demo data with a well-known password and must "
+                               "never run on the live server (DEMO_MODE is not true).")
         if options["reset"]:
             if not settings.DEMO_MODE:
                 raise CommandError("Refusing to reset: DEMO_MODE is not true in .env.")

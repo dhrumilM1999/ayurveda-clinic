@@ -15,6 +15,7 @@ import random
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 
+from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 from rest_framework.test import APIClient
@@ -79,6 +80,9 @@ class Command(BaseCommand):
         return value.label if value else code
 
     def handle(self, *args, **options):
+        if settings.IS_PRODUCTION and not settings.DEMO_MODE:
+            raise CommandError("Refusing to run: this command creates demo data with a well-known password and must "
+                               "never run on the live server (DEMO_MODE is not true).")
         self.org = Organization.objects.filter(is_deleted=False).order_by("created_at").first()
         if self.org is None:
             raise CommandError("No clinic yet. Run seed_demo first.")
