@@ -8,6 +8,8 @@ import mimetypes
 from django.conf import settings
 from django.db import transaction
 from django.template.loader import render_to_string
+
+from apps.common.pdf_safety import embedded_only_fetcher
 from django.utils import timezone
 
 from apps.common.services import translated_master
@@ -118,7 +120,7 @@ def render_html(template: str, size: str, context: dict, ps: dict | None = None)
 def render(template: str, size: str, context: dict, ps: dict | None = None) -> bytes:
     from weasyprint import HTML
 
-    return HTML(string=render_html(template, size, context, ps)).write_pdf()
+    return HTML(string=render_html(template, size, context, ps), url_fetcher=embedded_only_fetcher).write_pdf()
 
 
 def _patient(patient, w) -> dict:

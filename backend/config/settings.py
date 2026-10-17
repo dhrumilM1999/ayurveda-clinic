@@ -35,14 +35,19 @@ def env_list(name, default=""):
 
 
 # --- Core --------------------------------------------------------------------
-APP_ENV = env("APP_ENV", "development")  # "development" or "production"
-DEBUG = env_bool("DJANGO_DEBUG", APP_ENV == "development")
+# Debug mode shows detailed errors. It is OFF unless DJANGO_DEBUG=1 (only on your own PC).
+# Anything that is not debug mode is treated as "production" = real patients, strictest rules.
+DEBUG = env_bool("DJANGO_DEBUG", False) and env("APP_ENV", "development") != "production"
+IS_PRODUCTION = not DEBUG
+APP_ENV = "production" if IS_PRODUCTION else "development"
 SECRET_KEY = env("DJANGO_SECRET_KEY", "dev-only-insecure-key-change-me-before-using-real-data")
-if APP_ENV == "production" and SECRET_KEY.startswith("dev-only"):
-    raise ImproperlyConfigured("Set a real DJANGO_SECRET_KEY in .env before running in production.")
 
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,backend")
-CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS", "http://localhost:5173,http://localhost:8000")
+CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS", "http://localhost:5173,http://localhost:8000" if DEBUG else "")
+# 1 = the site is reached through an HTTPS proxy (Caddy): cookies become "secure" and HSTS is sent.
+HTTPS = env_bool("DJANGO_HTTPS", False)
+# Where the Django admin lives. Change it on the real server (e.g. ADMIN_URL=manage-7f3k2/).
+ADMIN_URL = env("ADMIN_URL", "admin/").strip("/") + "/"
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -82,6 +87,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "apps.common.middleware.SecurityHeadersMiddleware",
+    "apps.common.middleware.AdminLoginLimitMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -168,6 +175,12 @@ EMAIL_PROVIDER = env("EMAIL_PROVIDER", "mailpit")
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = env("EMAIL_HOST", "mailpit")
 EMAIL_PORT = env_int("EMAIL_PORT", 1025)
+# Real mailbox (free options: your own domain mail, Zoho, Gmail app password). Empty in development (Mailpit).
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", False)
+EMAIL_USE_SSL = env_bool("EMAIL_USE_SSL", False)
+EMAIL_TIMEOUT = 15
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", "clinic@example.com")
 
 # --- API (Django REST Framework) ---------------------------------------------
@@ -219,18 +232,34 @@ SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
-CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
+# Login limits are counted in the cache. In development one process is enough; on the real server several
+# worker processes run, so the counters are kept in a shared folder (otherwise each worker counts alone).
+if DEBUG:
+    CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
+else:
+    CACHES = {"default": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": env("CACHE_DIR", "/tmp/ayurveda_cache"),
+    }}
 
 # --- Login security ----------------------------------------------------------
 OTP_LENGTH = 6
 OTP_VALID_MINUTES = env_int("OTP_VALID_MINUTES", 5)
 OTP_MAX_ATTEMPTS = env_int("OTP_MAX_ATTEMPTS", 5)
 # Development only: also show the OTP on the login screen so testing is easy.
+# It can NEVER be on when debug mode is off, whatever .env says.
 SHOW_DEV_OTP_ON_SCREEN = env_bool("SHOW_DEV_OTP_ON_SCREEN", False) and DEBUG
+# How doctors/admins receive the login OTP: "sms" (SMS adapter) or "email" (to the e-mail saved on their account).
+TWO_FACTOR_METHOD = env("TWO_FACTOR_METHOD", "sms").strip().lower()
+# REQUIRE_2FA=0 switches the OTP step OFF for everybody (weaker security; only until SMS/e-mail works).
+REQUIRE_2FA = env_bool("REQUIRE_2FA", True)
 # Minutes without mouse/keyboard activity before the app logs the user out.
 IDLE_TIMEOUT_MINUTES = env_int("IDLE_TIMEOUT_MINUTES", 15)
 # The Vite dev server forwards the real browser IP in X-Forwarded-For.
-TRUST_X_FORWARDED_FOR = env_bool("TRUST_X_FORWARDED_FOR", DEBUG)
+# Behind the HTTPS proxy (Caddy) every request comes from the proxy, so the real address must be read from
+# this header - otherwise all users would share one login limit and the audit log would show the proxy's IP.
+# Only safe when the backend port is NOT reachable from the internet (only through the proxy).
+TRUST_X_FORWARDED_FOR = env_bool("TRUST_X_FORWARDED_FOR", DEBUG or HTTPS)
 
 # Key that scrambles sensitive medical notes in the database. Keep it safe and never change it
 # once real data exists (old notes would become unreadable). Empty = development key.
@@ -249,19 +278,44 @@ DEMO_MODE = env_bool("DEMO_MODE", False)
 
 # --- Browser security headers ------------------------------------------------
 SECURE_CONTENT_TYPE_NOSNIFF = True
-X_FRAME_OPTIONS = "DENY"
+X_FRAME_OPTIONS = "DENY"  # the public /enquiry page is a screen of the React app: its framing is set by the web server
 SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
 SECURE_REFERRER_POLICY = "same-origin"
-if APP_ENV == "production":
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin"
+if HTTPS:
+    # The proxy already redirects http -> https, so Django does not redirect (SECURE_SSL_REDIRECT stays off).
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_HSTS_SECONDS = env_int("HSTS_SECONDS", 31536000)  # browsers remember "https only" for 1 year
+    # includeSubDomains also forces HTTPS on every other sub-site of vednathayurved.com. Switch it on only
+    # when you are sure all of them have a working certificate.
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool("HSTS_INCLUDE_SUBDOMAINS", False)
+    SECURE_HSTS_PRELOAD = False
+SECURE_SSL_REDIRECT = False
 
+# --- Safety checks before the server may start with real data ----------------
+from config.prod_rules import startup_problems  # noqa: E402
+
+_problems = startup_problems(
+    debug=DEBUG, secret_key=SECRET_KEY, field_encryption_key=FIELD_ENCRYPTION_KEY, sms_provider=SMS_PROVIDER,
+    two_factor_method=TWO_FACTOR_METHOD, require_2fa=REQUIRE_2FA, allowed_hosts=ALLOWED_HOSTS,
+)
+if _problems and not env_bool("SKIP_STARTUP_CHECKS", False):
+    raise ImproperlyConfigured(
+        "The server will not start because it is not safe for real patient data:"
+        + "\n - " + "\n - ".join(_problems)
+    )
+
+# Logs never contain passwords, tokens, OTPs or database values (see apps/common/logging_filters.py).
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "filters": {"redact": {"()": "apps.common.logging_filters.RedactFilter"}},
     "formatters": {"simple": {"format": "[{levelname}] {name}: {message}", "style": "{"}},
-    "handlers": {"console": {"class": "logging.StreamHandler", "formatter": "simple"}},
+    "handlers": {"console": {"class": "logging.StreamHandler", "formatter": "simple", "filters": ["redact"]}},
     "root": {"handlers": ["console"], "level": "INFO"},
     "loggers": {"django.db.backends": {"level": "WARNING"}},
 }

@@ -7,6 +7,8 @@ const backend = process.env.VITE_PROXY_TARGET || 'http://localhost:8000';
 
 export default defineConfig({
   plugins: [react()],
+  // No source maps in the build: they would show the program's original code to every visitor.
+  build: { sourcemap: false },
   server: {
     host: '0.0.0.0',
     port: 5173,

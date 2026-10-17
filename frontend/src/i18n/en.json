@@ -33,6 +33,7 @@
     "failed": "Login failed. Please check your username and password.",
     "otp": "OTP (one-time password)",
     "otpSent": "We sent a 6-digit OTP to your phone {{phone}}. Enter it below.",
+    "otpSentEmail": "We sent a 6-digit OTP to your e-mail {{phone}}. Enter it below.",
     "devOtp": "Development mode: your OTP is {{code}}",
     "verify": "Verify and log in",
     "otpFailed": "The OTP is wrong or has expired.",

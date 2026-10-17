@@ -8,6 +8,8 @@ Which optional fields are printed comes from Additional settings (label_* switch
 The words on the label follow the patient's language. The template is templates/documents/medicine_label.html.
 """
 from django.template.loader import render_to_string
+
+from apps.common.pdf_safety import embedded_only_fetcher
 from django.utils import timezone
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
@@ -146,7 +148,7 @@ def render_labels(data, label_format: str, ps=None) -> bytes:
     width, height = FORMATS[label_format]
     ps = ps or page_settings(data["branch"], "medicine_label")
     html = render_to_string("documents/medicine_label.html", {**data, "format": label_format, "width": width, "height": height, "ps": ps})
-    return HTML(string=html).write_pdf()
+    return HTML(string=html, url_fetcher=embedded_only_fetcher).write_pdf()
 
 
 class MedicineLabelView(APIView):
