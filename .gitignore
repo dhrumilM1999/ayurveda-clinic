@@ -32,3 +32,9 @@ demo-video/*.mp4
 # Compiled TypeScript output (the app is built by Vite; never commit these)
 frontend/src/**/*.js
 *.tsbuildinfo
+
+# Live server helper files
+.deploy-previous-commit
+.env.*
+!.env.example
+!.env.production.example
