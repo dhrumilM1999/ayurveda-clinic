@@ -82,3 +82,25 @@ def test_typed_password_is_checked_for_strength(monkeypatch):
 def test_no_input_needs_generate_password():
     with pytest.raises(CommandError):
         run(generate_password=False)
+
+
+@pytest.mark.django_db
+def test_real_clinic_profile_fills_clinic_branch_doctor_and_timings():
+    from apps.accounts.models import DoctorSchedule
+
+    call_command("create_clinic", profile="clinic_profiles/vednath.json", admin_phone="9876543210",
+                 generate_password=True, no_input=True)
+    org = Organization.objects.get()
+    assert org.name == "Vednath Ayurved"
+    branch = Branch.objects.get()
+    assert (branch.code, branch.city) == ("ADJ", "Surat")
+    owner = User.objects.get(username="drgrishma")
+    assert owner.is_doctor and owner.is_org_admin and owner.registration_number
+    assert DoctorSchedule.objects.filter(doctor=owner).count() == 12   # Mon-Sat, morning and evening
+    assert User.objects.count() == 1
+
+
+@pytest.mark.django_db
+def test_missing_profile_file_is_a_clear_error():
+    with pytest.raises(CommandError):
+        run(profile="clinic_profiles/nope.json")

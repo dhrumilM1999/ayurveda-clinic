@@ -11,16 +11,20 @@ Safe to run again: if a clinic already exists nothing is changed (only missing s
         --city Surat --admin-username owner --admin-name "Dr Name" --admin-phone 9876543210 --generate-password
 """
 import getpass
+import json
 import re
 import secrets
 import string
+
+from datetime import time
+from pathlib import Path
 
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from apps.accounts.models import User, UserBranchRole
+from apps.accounts.models import DoctorSchedule, User, UserBranchRole
 from apps.accounts.services import create_default_roles
 from apps.organizations.management.commands.ensure_defaults import ensure_defaults_for
 from apps.organizations.models import Branch, Organization
@@ -56,6 +60,7 @@ class Command(BaseCommand):
         parser.add_argument("--admin-phone", help="Mobile number (the login OTP goes here)")
         parser.add_argument("--admin-email", default="")
         parser.add_argument("--generate-password", action="store_true", help="Make a strong password and show it once")
+        parser.add_argument("--profile", help="JSON file with the clinic's real details, e.g. clinic_profiles/vednath.json")
         parser.add_argument("--no-input", action="store_true", help="Never ask questions (missing values are an error)")
 
     # ---- small helpers ---------------------------------------------------------------
@@ -91,6 +96,29 @@ class Command(BaseCommand):
                 continue
             return first, False
 
+    def _load_profile(self, options):
+        """Fill options that were not given on the command line from the profile file."""
+        path = options.get("profile")
+        if not path:
+            return {}
+        file = Path(path)
+        if not file.is_absolute():
+            file = Path(__file__).resolve().parents[4] / path   # relative to the backend folder
+        try:
+            profile = json.loads(file.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as error:
+            raise CommandError(f"Cannot read the profile file {file}: {error}")
+        org, branch, owner = profile.get("organization", {}), profile.get("branch", {}), profile.get("owner", {})
+        wanted = {
+            "org_name": org.get("name"), "branch_name": branch.get("name"), "branch_code": branch.get("code"),
+            "city": branch.get("city"), "state": branch.get("state"), "gstin": branch.get("gstin"),
+            "admin_username": owner.get("username"), "admin_name": owner.get("full_name"),
+        }
+        for key, value in wanted.items():
+            if options.get(key) in (None, "") and value:
+                options[key] = value
+        return profile
+
     # ---- main --------------------------------------------------------------------------
     def handle(self, *args, **options):
         existing = Organization.objects.order_by("created_at").first()
@@ -103,6 +131,7 @@ class Command(BaseCommand):
             )
             return
 
+        profile = self._load_profile(options)
         org_name = self._ask(options, "org_name", "Clinic name")
         branch_name = self._ask(options, "branch_name", "First branch name", default="Main Branch")
         branch_code = self._ask(options, "branch_code", "Branch short code (letters, e.g. AHD)", default="MAIN").upper()
@@ -112,7 +141,7 @@ class Command(BaseCommand):
         username = self._ask(options, "admin_username", "Owner login name (no spaces)", default="owner")
         full_name = self._ask(options, "admin_name", "Owner full name")
         phone = self._ask(options, "admin_phone", "Owner mobile number")
-        email = options.get("admin_email") or ""
+        email = self._ask(options, "admin_email", "Owner e-mail (login codes can go here; Enter to skip)", required=False)
 
         if not re.fullmatch(r"[A-Z0-9]{1,20}", branch_code):
             raise CommandError("The branch code can only have letters and numbers (no spaces).")
@@ -130,17 +159,34 @@ class Command(BaseCommand):
         password, generated = self._password(options)
 
         with transaction.atomic():
-            org = Organization.objects.create(name=org_name, short_name=org_name[:50], gstin=gstin, phone=phone)
+            org_info = profile.get("organization", {})
+            org = Organization.objects.create(
+                name=org_name, short_name=org_info.get("short_name") or org_name[:50],
+                legal_name=org_info.get("legal_name", ""), gstin=gstin, phone=phone, email=email,
+                default_language=org_info.get("default_language", "en"),
+            )
             roles = create_default_roles(org)
             ensure_defaults_for(org)
             branch = Branch.objects.create(
                 organization=org, name=branch_name, code=branch_code, city=city, state=state, gstin=gstin, phone=phone,
             )
+            owner_info = profile.get("owner", {})
             owner = User.objects.create_user(
                 username=username, password=password, full_name=full_name, phone=phone, email=email,
                 organization=org, is_org_admin=True, is_staff=True, is_superuser=True,
+                is_doctor=bool(owner_info.get("is_doctor")), qualification=owner_info.get("qualification", ""),
+                registration_number=owner_info.get("registration_number", ""),
             )
             UserBranchRole.objects.create(organization=org, user=owner, branch=branch, role=roles["admin"])
+            schedule = profile.get("schedule")
+            if schedule and owner.is_doctor:
+                for weekday in schedule.get("weekdays", []):
+                    for start, end in schedule.get("slots", []):
+                        DoctorSchedule.objects.create(
+                            organization=org, branch=branch, doctor=owner, weekday=weekday,
+                            start_time=time.fromisoformat(start), end_time=time.fromisoformat(end),
+                            slot_minutes=schedule.get("slot_minutes", 15),
+                        )
 
         self.stdout.write("")
         self.stdout.write(f"Done. Clinic '{org.name}' with branch '{branch.name}' is ready.")

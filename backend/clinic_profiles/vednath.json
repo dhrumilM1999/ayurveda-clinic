@@ -1,0 +1,30 @@
+{
+  "_note": "SAFE TO EDIT: the real clinic details used by 'create_clinic --profile clinic_profiles/vednath.json'. Anything left empty is asked on the screen or filled later in Settings. Used only when the live database is empty.",
+  "organization": {
+    "name": "Vednath Ayurved",
+    "short_name": "Vednath",
+    "legal_name": "",
+    "default_language": "en"
+  },
+  "branch": {
+    "name": "Vednath Ayurved - Adajan",
+    "code": "ADJ",
+    "city": "Surat",
+    "state": "Gujarat",
+    "address": "Adajan, Surat",
+    "pincode": "",
+    "gstin": ""
+  },
+  "owner": {
+    "username": "drgrishma",
+    "full_name": "Dr. Grishma Shingala",
+    "is_doctor": true,
+    "qualification": "BAMS (GAU) Ayurved Physician & Diet Consultant",
+    "registration_number": "GB-26175"
+  },
+  "schedule": {
+    "weekdays": [0, 1, 2, 3, 4, 5],
+    "slots": [["09:00", "13:00"], ["17:00", "20:00"]],
+    "slot_minutes": 15
+  }
+}
