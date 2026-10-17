@@ -30,8 +30,9 @@ class SecurityHeadersMiddleware:
         response.headers.setdefault("Permissions-Policy", PERMISSIONS_POLICY)
         if path.startswith("/api/"):
             # Patient data must never be kept by a browser cache, a proxy or a shared PC.
-            response.headers["Cache-Control"] = "no-store, private"
-            response.headers["Pragma"] = "no-cache"
+            if "public" not in response.headers.get("Cache-Control", ""):  # only the clinic logo is meant to be cached
+                response.headers["Cache-Control"] = "no-store, private"
+                response.headers["Pragma"] = "no-cache"
             if (response.headers.get("Content-Type") or "").startswith("application/json"):
                 response.headers.setdefault("Content-Security-Policy", API_CSP)
             # Every API answer: never shown inside another site's frame

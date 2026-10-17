@@ -6,6 +6,8 @@ ASK FIRST before editing.
 import logging
 import re
 
+from django.conf import settings
+
 _PATTERNS = [
     (re.compile(r"(Bearer\s+)[A-Za-z0-9._\-]+", re.I), r"\1[hidden]"),
     (re.compile(r"eyJ[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]*"), "[hidden]"),  # JWT tokens
@@ -23,12 +25,14 @@ def redact(text: str) -> str:
 
 class RedactFilter(logging.Filter):
     def filter(self, record):
+        if not settings.IS_PRODUCTION:
+            return True  # on the owner's own PC the OTP in the console is wanted (logs.bat)
         try:
             record.msg = redact(record.getMessage())
             record.args = None
         except Exception:  # never let logging break a request
             pass
         if record.exc_info:
-            # Exception texts can hold values too: keep the type and a cleaned message, drop the rest of the detail.
+            # Exception texts can hold values too (for example a database 'Key (..)=(..)' line): clean them as well.
             record.exc_text = redact(logging.Formatter().formatException(record.exc_info))
         return True

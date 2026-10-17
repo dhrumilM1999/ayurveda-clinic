@@ -13,6 +13,7 @@ import { LANGUAGES, setLanguage } from '../i18n';
 interface OtpStep {
   challenge_id: string;
   phone_hint: string;
+  channel?: 'sms' | 'email';
   dev_otp?: string;
 }
 
@@ -82,7 +83,7 @@ export default function LoginPage() {
           ) : (
             <>
               <h1 className="login-title">{t('login.otpTitle')}</h1>
-              <div className="login-sub">{t('login.otpSent', { phone: otpStep.phone_hint || '—' })}</div>
+              <div className="login-sub">{t(otpStep.channel === 'email' ? 'login.otpSentEmail' : 'login.otpSent', { phone: otpStep.phone_hint || '—' })}</div>
             </>
           )}
 

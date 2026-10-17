@@ -71,8 +71,8 @@ def run_checks():
     if settings.SHOW_DEV_OTP_ON_SCREEN:
         add("FAIL", "Login code is NOT shown on the screen", "Remove SHOW_DEV_OTP_ON_SCREEN from the settings file.")
     elif _env_true("SHOW_DEV_OTP_ON_SCREEN"):
-        add("WARN", "SHOW_DEV_OTP_ON_SCREEN is set in the settings file",
-            "It has no effect while debug is off, but remove it to be safe.")
+        add("WARN", "Login code is NOT shown on the screen",
+            "SHOW_DEV_OTP_ON_SCREEN is set in the settings file. It has no effect while debug is off, but remove it to be safe.")
     else:
         add("PASS", "Login code is NOT shown on the screen")
     if not settings.REQUIRE_2FA:

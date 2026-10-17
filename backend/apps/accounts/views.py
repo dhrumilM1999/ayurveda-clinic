@@ -78,6 +78,7 @@ class LoginView(APIView):
                 "otp_required": True,
                 "challenge_id": str(challenge.id),
                 "phone_hint": otp.phone_hint(user),
+                "channel": settings.TWO_FACTOR_METHOD,
             }
             if settings.SHOW_DEV_OTP_ON_SCREEN:
                 data["dev_otp"] = code
