@@ -176,13 +176,18 @@ Running it again is harmless: if a clinic exists it changes nothing.
 
 Open https://app.vednathayurved.com and log in with the login name and password from step 7.
 
-**About the login code (OTP).** Owners and doctors must enter a 6-digit code after the password. SMS sending is not paid for yet, so the code is *written in the server log*, not sent to the phone. To read it, connect to the server (step 3) and run:
+**About the login code (OTP).** Owners and doctors normally type a 6-digit code after the password. SMS is paid, so it is not available yet. You have two free choices (set in `.env`, `nano .env`, then `bash deploy/update.sh`):
+
+- **E-mail codes (recommended):** set `REQUIRE_2FA=1`, `TWO_FACTOR_METHOD=email` and fill the `EMAIL_*` lines with a real mailbox (your domain mail, Zoho free, or Gmail with an "app password"). Every doctor/admin account needs an e-mail address saved.
+- **Temporary, to start today:** `REQUIRE_2FA=0` (this is how `.env` is created). No code, password only, so use **very strong passwords** and switch e-mail codes on within the first week.
+
+After the first start run the safety checker and fix every `FAIL`:
 
 ```bash
-docker compose -f docker-compose.prod.yml logs backend --tail 20
+docker compose -f docker-compose.prod.yml exec backend python manage.py check_production_ready
 ```
 
-Find the line `Your clinic login OTP is 123456`. The code is valid for 5 minutes. This is inconvenient but safe. When you want codes by real SMS, ask Claude Code to connect a paid SMS service (an Indian DLT-registered SMS provider) — it is a one-line change plus a key.
+(It shows a `WARN` while 2FA is off, and a `FAIL` if no backup has been made yet: run `bash deploy/backup.sh` first.)
 
 First-day tick list:
 
@@ -301,7 +306,7 @@ bash deploy/status.sh
 | Site does not open at all | `bash deploy/status.sh`. If a container is not healthy, read its log (below). Check that the DNS still points to the server (`nslookup`). |
 | Browser says "not secure" / certificate error | DNS not ready yet, or ports 80/443 blocked at the provider's firewall (open them in the provider's website panel, *Networking/Firewall*). Look: `docker compose -f docker-compose.prod.yml logs caddy --tail 50` |
 | "Could not load data" for everyone | Backend problem. `docker compose -f docker-compose.prod.yml logs backend --tail 100` and show the red lines to Claude Code. |
-| Cannot log in, no code arrives | The code is in the backend log (see step 8). |
+| Cannot log in, no code arrives | Check the `EMAIL_*` settings and that your account has an e-mail address; or use `REQUIRE_2FA=0` temporarily (see step 8). |
 | Server very slow | `bash deploy/status.sh` (memory, disk). A 2 GB server is tight: upgrade to 4 GB at your provider. |
 | Disk full | `bash deploy/status.sh`; reduce `KEEP_DAILY` in `deploy/backup.sh`, delete old files in `backups/`, run `docker system prune -f`. |
 | After an update things are wrong | `bash deploy/update.sh --rollback` |
@@ -333,9 +338,8 @@ docker compose -f docker-compose.prod.yml restart backend
 | The clinic software, Docker, Caddy, PostgreSQL, fail2ban, firewall | Free |
 | Backups on the server | Free (uses the server's disk) |
 | Off-server backup with rclone/scp | Free tool; storage is free if you use your own PC or a free tier. Large cloud storage may cost a little |
-| Login codes by SMS | **Not used now** (codes appear in the server log). Real SMS = paid DLT service, only if you ask |
+| Login codes | By e-mail through a mailbox you already have (free), or off for now. Real SMS = paid DLT service, only if you ask |
 | WhatsApp | Free "click to chat" links (staff press Send) |
-| Email | Not used now |
 | AI translate button | Not available on the server (needs Ollama on a PC) — shows "AI is offline" |
 | UPI payments | Free QR code; staff mark bills paid |
 

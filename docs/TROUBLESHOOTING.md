@@ -31,7 +31,7 @@
 |---|---|
 | `bash deploy/status.sh` shows `!!` lines | Each `!!` line says what is wrong (container not healthy, disk full, backup too old, certificate). Follow the hint printed on that line. |
 | Site shows a certificate error | DNS (`nslookup app...`) must show the server IP, and ports 80 + 443 must be open at the provider's firewall. See `docker compose -f docker-compose.prod.yml logs caddy --tail 50`. |
-| No login code arrives | SMS is not paid for, so the code is in the log: `docker compose -f docker-compose.prod.yml logs backend --tail 20`, look for `login OTP`. |
+| No login code arrives | On the live server codes go by e-mail (`TWO_FACTOR_METHOD=email` and the `EMAIL_*` settings in `.env`), or are off with `REQUIRE_2FA=0`. See docs/GO_LIVE.md step 8. |
 | `docker: permission denied` on the server | Log out and in again as `clinic` (the Docker group is applied at login). |
 | Update did not become healthy | `bash deploy/update.sh --rollback`, then show `logs backend --tail 100` to Claude Code. |
 | Backup failed | See `backups/backup.log`. Common reasons: disk full, database container stopped. |

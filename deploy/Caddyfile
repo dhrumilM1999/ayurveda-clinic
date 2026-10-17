@@ -21,6 +21,14 @@
 		-Server
 	}
 
+	# --- The online enquiry page may be shown inside your main website (iframe) ---
+	# ENQUIRY_FRAME_ORIGINS (in .env, space separated, e.g. "https://vednathayurved.com https://www.vednathayurved.com")
+	@enquiry path /enquiry /enquiry/*
+	header @enquiry {
+		-X-Frame-Options
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'self' {$ENQUIRY_FRAME_ORIGINS:}"
+	}
+
 	# --- Patient files are NEVER served from disk by Caddy (they only go through the API) ---
 	@blocked path /media/* /private_media/* /private-not-served/*
 	handle @blocked {
@@ -31,9 +39,11 @@
 	@backend path /api/* /{$ADMIN_URL:admin}/*
 	handle @backend {
 		request_body {
-			max_size 25MB
+			max_size 15MB
 		}
 		reverse_proxy backend:8000 {
+			# Always overwrite: the backend must see the real visitor address, never one the visitor made up
+			header_up X-Forwarded-For {remote_host}
 			# Gunicorn is slow-ish on big PDFs: allow time
 			transport http {
 				response_header_timeout 120s
@@ -58,12 +68,22 @@
 		# index.html must always be fetched fresh, so updates show up at once
 		@spa not path /assets/* /logo.svg /favicon.ico
 		header @spa Cache-Control "no-cache"
+		# Screens may only run scripts from this site itself
+		@notenquiry not path /enquiry /enquiry/*
+		header @notenquiry Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'"
 		try_files {path} /index.html
 		file_server
 	}
 
 	log {
 		output stdout
-		format console
+		# Search words (patient names) travel in the address after "?": never write them to the log
+		format filter {
+			wrap console
+			fields {
+				request>uri regexp \?.* ""
+				request>headers delete
+			}
+		}
 	}
 }

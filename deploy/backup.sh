@@ -85,4 +85,5 @@ else
 fi
 
 trap - EXIT
+touch "$BACKUP_DIR/LAST_BACKUP_OK"   # the app checks this file is recent
 say "Backup finished OK."
