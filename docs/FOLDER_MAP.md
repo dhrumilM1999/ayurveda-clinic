@@ -103,3 +103,20 @@
 | `backend/apps/therapy/catalog.py` | Starting list of therapies (name, Gujarati, Hindi, stage, minutes, oil) | SAFE TO EDIT |
 | `backend/apps/therapy/services.py` | Therapy rules: no double booking, plan status | ASK FIRST |
 | `frontend/src/pages/therapy/` | Panchakarma screens (sessions, plans, therapies) | ASK FIRST |
+
+## Going live (server) — added for the live deployment
+
+| Path | What it is | |
+|---|---|---|
+| `docker-compose.prod.yml` | The **live server** version of docker-compose (Caddy + backend + database). Your PC does not use it | ASK FIRST |
+| `.env.production.example` | List of every setting for the live server (with explanations) | SAFE TO EDIT (the example only) |
+| `deploy/Caddyfile` | The front door: HTTPS, security headers, which address goes where | ASK FIRST |
+| `deploy/make-env.sh` | Creates the server's `.env` with fresh secrets | ASK FIRST |
+| `deploy/server-setup.sh` | One-time preparation of a new Ubuntu server | ASK FIRST |
+| `deploy/update.sh` | Safe update (backup, new code, restart) and `--rollback` | ASK FIRST |
+| `deploy/backup.sh`, `deploy/restore.sh` | Backup and restore. In `backup.sh` you may change `KEEP_DAILY` / `KEEP_WEEKLY` | **SAFE TO EDIT** the two numbers, ASK FIRST the rest |
+| `deploy/status.sh` | Health report (containers, disk, backup age, certificate). Warning limits at the top | **SAFE TO EDIT** the limits |
+| `deploy/ayurveda-backup.service` / `.timer` | Nightly backup schedule for the server (time on the `OnCalendar` line) | **SAFE TO EDIT** the time |
+| `frontend/Dockerfile.prod` | Builds the screens for the live server | ASK FIRST |
+| `backend/apps/organizations/management/commands/create_clinic.py` | Creates the first real clinic and owner login (no demo data) | ASK FIRST |
+| `docs/GO_LIVE.md`, `docs/GO_LIVE_CHECKLIST.md` | How to go live, and the tick list | SAFE TO EDIT |

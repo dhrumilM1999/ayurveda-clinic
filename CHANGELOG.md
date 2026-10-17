@@ -2,6 +2,16 @@
 
 What changed in each step, in plain words.
 
+## Going live on a server (2026-10-17)
+
+Everything needed to put the software on one Ubuntu server with free HTTPS (guide: `docs/GO_LIVE.md`, tick list: `docs/GO_LIVE_CHECKLIST.md`):
+- `docker-compose.prod.yml` + `deploy/Caddyfile`: Caddy (automatic HTTPS, the screens as ready-made files, security headers), the backend run by gunicorn as a normal user, and the database that is **not reachable from the internet**. Only ports 80 and 443 are open. No Redis/Celery/Mailpit (the app does not use them yet).
+- `.env.production.example` and `deploy/make-env.sh` (makes the secrets for you, never prints them).
+- `create_clinic` command: creates the first clinic, branch and owner login with **no demo data**.
+- Backups: `deploy/backup.sh` (14 daily + 8 weekly, checked, with a log, optional copy off the server with rclone/scp), `deploy/restore.sh` (with a safe `--test` practice mode), nightly systemd timer.
+- `deploy/server-setup.sh` (firewall, fail2ban, automatic security updates, Docker, swap), `deploy/update.sh` (backup first, `--rollback`), `deploy/status.sh`.
+- The backend image has a new "production" version (the PC keeps using the old one). `gunicorn` was added to `requirements.txt` (the web server for the live site).
+
 ## Testing "by mistake" cases (2026-10-15)
 
 About 150 new tests for wrong input, double clicks, the wrong option and the wrong person (`docs/MISTAKE_PROTECTION.md`).
