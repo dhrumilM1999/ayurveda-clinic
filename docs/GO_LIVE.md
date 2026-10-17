@@ -17,6 +17,8 @@ Browser  --https-->  [ your server (one small Linux computer, rented) ]
 Everything runs in Docker on that one server, exactly like on your PC, but with `docker-compose.prod.yml` instead of `docker-compose.yml`.
 Your PC setup (`start.bat`) is **not changed** by any of this.
 
+Security rules for the live server (what the software refuses to start without, and why) are in `docs/SECURITY_LIVE.md`.
+
 Time needed: about 1.5 hours the first time (most of it waiting).
 
 ---
@@ -187,7 +189,7 @@ After the first start run the safety checker and fix every `FAIL`:
 docker compose -f docker-compose.prod.yml exec backend python manage.py check_production_ready
 ```
 
-(It shows a `WARN` while 2FA is off, and a `FAIL` if no backup has been made yet: run `bash deploy/backup.sh` first.)
+(What every check means: `docs/SECURITY_LIVE.md`. It shows a `WARN` while 2FA is off, and a `FAIL` if no backup has been made yet: run `bash deploy/backup.sh` first.)
 
 First-day tick list:
 
