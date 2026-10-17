@@ -2,6 +2,17 @@
 
 What changed in each step, in plain words.
 
+## Safe for the live server (2026-10-17)
+
+See `docs/SECURITY_LIVE.md`. In short:
+- Debug is **off unless `DJANGO_DEBUG=1`**. In live mode the software refuses to start with the sample secret key, no encryption key, a `*` host, or login codes that cannot be delivered.
+- HTTPS settings (`DJANGO_HTTPS=1`), safe browser headers, no caching of patient data, admin address moved (`ADMIN_URL`) with a login limit, no browsable API.
+- Doctors/admins' login code can go by **e-mail** (`TWO_FACTOR_METHOD=email`) or be switched off temporarily (`REQUIRE_2FA=0`); the code is never on screen or in the log in live mode.
+- Logs hide tokens, passwords, OTPs and database values; PDFs only use embedded pictures.
+- Resetting a staff password logs that person out everywhere.
+- Demo commands refuse to run on the live server. New command `check_production_ready` (PASS / WARN / FAIL list).
+- Security fix in a library: Django REST framework 3.17.2. New tests walk every API address.
+
 ## Testing "by mistake" cases (2026-10-15)
 
 About 150 new tests for wrong input, double clicks, the wrong option and the wrong person (`docs/MISTAKE_PROTECTION.md`).

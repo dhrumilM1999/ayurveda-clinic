@@ -388,3 +388,19 @@ def test_verify_page_shows_only_initials(org, branch_a, org_admin):
     assert "R. P." in body
     for secret in ("Ramesh", "Patel", "9811000001"):
         assert secret not in body
+
+
+def test_pdf_maker_refuses_files_and_websites_but_allows_embedded_pictures(tmp_path):
+    from weasyprint import HTML
+
+    from apps.common.pdf_safety import check_address, embedded_only_fetcher
+
+    secret = tmp_path / "secret.png"
+    secret.write_bytes(b"not an image")
+    with pytest.raises(ValueError):
+        check_address(secret.as_uri())
+    with pytest.raises(ValueError):
+        check_address("http://169.254.169.254/latest/meta-data/")
+    pixel = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+    pdf = HTML(string=f'<img src="{pixel}"><img src="{secret.as_uri()}">', url_fetcher=embedded_only_fetcher).write_pdf()
+    assert pdf.startswith(b"%PDF")

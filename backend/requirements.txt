@@ -1,6 +1,6 @@
 # Python packages for the backend. ASK FIRST before adding or upgrading packages.
 Django>=5.2,<5.3                      # the web framework
-djangorestframework>=3.15,<3.17       # builds the REST API
+djangorestframework>=3.17.2,<3.18      # builds the REST API (3.17.2 fixes two published security issues)
 djangorestframework-simplejwt>=5.3,<6 # JWT login tokens
 argon2-cffi>=23.1                     # strong password hashing (Argon2)
 psycopg[binary]>=3.2,<4               # talks to PostgreSQL
