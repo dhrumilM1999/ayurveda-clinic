@@ -29,6 +29,9 @@ from apps.accounts.services import create_default_roles
 from apps.organizations.management.commands.ensure_defaults import ensure_defaults_for
 from apps.organizations.models import Branch, Organization
 
+# Printed-letterhead texts of a branch that the profile file may set
+PROFILE_PRINT_FIELDS = ("print_subtitle", "print_closed_note", "letterhead_footer")
+
 GSTIN_PATTERN = re.compile(r"^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$")
 
 
@@ -113,6 +116,7 @@ class Command(BaseCommand):
             "org_name": org.get("name"), "branch_name": branch.get("name"), "branch_code": branch.get("code"),
             "city": branch.get("city"), "state": branch.get("state"), "gstin": branch.get("gstin"),
             "admin_username": owner.get("username"), "admin_name": owner.get("full_name"),
+            "admin_phone": owner.get("phone"),
         }
         for key, value in wanted.items():
             if options.get(key) in (None, "") and value:
@@ -160,15 +164,18 @@ class Command(BaseCommand):
 
         with transaction.atomic():
             org_info = profile.get("organization", {})
+            branch_info = profile.get("branch", {})
             org = Organization.objects.create(
                 name=org_name, short_name=org_info.get("short_name") or org_name[:50],
                 legal_name=org_info.get("legal_name", ""), gstin=gstin, phone=phone, email=email,
-                default_language=org_info.get("default_language", "en"),
+                address=branch_info.get("address", ""), default_language=org_info.get("default_language", "en"),
             )
             roles = create_default_roles(org)
             ensure_defaults_for(org)
             branch = Branch.objects.create(
                 organization=org, name=branch_name, code=branch_code, city=city, state=state, gstin=gstin, phone=phone,
+                address=branch_info.get("address", ""), pincode=branch_info.get("pincode", ""),
+                **{key: branch_info[key] for key in PROFILE_PRINT_FIELDS if branch_info.get(key)},
             )
             owner_info = profile.get("owner", {})
             owner = User.objects.create_user(

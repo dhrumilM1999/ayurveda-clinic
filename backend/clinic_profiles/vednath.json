@@ -1,5 +1,5 @@
 {
-  "_note": "SAFE TO EDIT: the real clinic details used by 'create_clinic --profile clinic_profiles/vednath.json'. Anything left empty is asked on the screen or filled later in Settings. Used only when the live database is empty.",
+  "_note": "SAFE TO EDIT: the real clinic details used by 'create_clinic --profile clinic_profiles/vednath.json'. Taken from the clinic letterhead. Anything left empty is asked on the screen or filled later in Settings. Used only when the live database is empty.",
   "organization": {
     "name": "Vednath Ayurved",
     "short_name": "Vednath",
@@ -11,13 +11,18 @@
     "code": "ADJ",
     "city": "Surat",
     "state": "Gujarat",
-    "address": "Adajan, Surat",
+    "address": "7/8, Devi Plaza, Anand Mahal Road, Opp. Shree Ram Petrol Pump, Adajan, Surat",
     "pincode": "",
-    "gstin": ""
+    "gstin": "",
+    "phone": "9925604218",
+    "print_subtitle": "વેદનાથ આયુર્વેદ & પંચકર્મ હોસ્પિટલ",
+    "print_closed_note": "રવિવારે બંધ રહેશે.",
+    "letterhead_footer": "૭/૮, દેવી પ્લાઝા, આનંદ મહલ રોડ, શ્રી રામ પેટ્રોલ પંપની સામે, અડાજણ, સુરત."
   },
   "owner": {
-    "username": "drgrishma",
-    "full_name": "Dr. Grishma Shingala",
+    "username": "drgrishm",
+    "full_name": "Dr. Grishm Shingala",
+    "phone": "9925604218",
     "is_doctor": true,
     "qualification": "BAMS (GAU) Ayurved Physician & Diet Consultant",
     "registration_number": "GB-26175"

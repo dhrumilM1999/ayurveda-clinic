@@ -88,13 +88,14 @@ def test_no_input_needs_generate_password():
 def test_real_clinic_profile_fills_clinic_branch_doctor_and_timings():
     from apps.accounts.models import DoctorSchedule
 
-    call_command("create_clinic", profile="clinic_profiles/vednath.json", admin_phone="9876543210",
-                 generate_password=True, no_input=True)
+    call_command("create_clinic", profile="clinic_profiles/vednath.json", generate_password=True, no_input=True)
     org = Organization.objects.get()
     assert org.name == "Vednath Ayurved"
     branch = Branch.objects.get()
     assert (branch.code, branch.city) == ("ADJ", "Surat")
-    owner = User.objects.get(username="drgrishma")
+    owner = User.objects.get(username="drgrishm")
+    assert owner.full_name == "Dr. Grishm Shingala" and owner.phone == "9925604218"
+    assert "Devi Plaza" in branch.address and branch.print_closed_note and branch.letterhead_footer
     assert owner.is_doctor and owner.is_org_admin and owner.registration_number
     assert DoctorSchedule.objects.filter(doctor=owner).count() == 12   # Mon-Sat, morning and evening
     assert User.objects.count() == 1

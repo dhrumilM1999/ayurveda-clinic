@@ -169,7 +169,7 @@ This makes your clinic, first branch and **your owner login**. There is **no dem
 docker compose -f docker-compose.prod.yml exec backend python manage.py create_clinic --profile clinic_profiles/vednath.json
 ```
 
-The file `backend/clinic_profiles/vednath.json` already holds the real details of **Vednath Ayurved, Adajan** and **Dr. Grishma Shingala** (qualification, registration number, Monday to Saturday timings 9-1 and 5-8). Check it and fix any spelling **before** this step (`nano backend/clinic_profiles/vednath.json`, then `docker compose -f docker-compose.prod.yml build backend`). Phone, e-mail, address, GSTIN and fees are not in the file: you are asked for the phone and e-mail, the rest is entered later in Settings.
+The file `backend/clinic_profiles/vednath.json` already holds the real details of **Vednath Ayurved, Adajan** and **Dr. Grishm Shingala** (qualification, registration number GB-26175, mobile 9925604218, Monday to Saturday timings 9-1 and 5-8, the Gujarati address, timings and "closed on Sunday" lines from the letterhead). Check it and fix any spelling **before** this step (`nano backend/clinic_profiles/vednath.json`, then `docker compose -f docker-compose.prod.yml build backend`). The e-mail (for login codes) is asked on the screen. Pincode, GSTIN, logo (upload it in Settings) and fees are not in the file: enter them later in Settings.
 
 Without `--profile` it asks, one by one: clinic name, branch name, short code (letters, used in invoice numbers), city, state, GSTIN (press Enter to skip), your login name, your full name, your mobile number.
 Then it asks you to type a password twice (hidden). Or add `--generate-password` to the command and it makes a strong one and shows it **once** — write it down.
