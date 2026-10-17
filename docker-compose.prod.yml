@@ -55,14 +55,15 @@ services:
     # On every start: update database tables (safe to repeat), add missing starting values,
     # collect the admin page's style files, then run gunicorn.
     # ONE worker with several threads on purpose: login rate-limits are counted in memory and must be shared.
+    # (every line below is indented the same on purpose: extra indentation would break the line joining)
     command: >
       sh -c "python manage.py migrate --noinput &&
-             python manage.py ensure_defaults &&
-             python manage.py collectstatic --noinput &&
-             exec gunicorn config.wsgi:application --bind 0.0.0.0:8000
-               --workers $${GUNICORN_WORKERS:-1} --threads $${GUNICORN_THREADS:-8}
-               --timeout 120 --graceful-timeout 30 --max-requests 2000 --max-requests-jitter 200
-               --access-logfile - --error-logfile -"
+      python manage.py ensure_defaults &&
+      python manage.py collectstatic --noinput &&
+      exec gunicorn config.wsgi:application --bind 0.0.0.0:8000
+      --worker-class gthread --workers $${GUNICORN_WORKERS:-1} --threads $${GUNICORN_THREADS:-8}
+      --timeout 120 --graceful-timeout 30 --max-requests 2000 --max-requests-jitter 200
+      --access-logfile - --error-logfile -"
     volumes:
       - staticfiles:/app/staticfiles
       # Private patient documents, photos, signatures. Only the backend can read them.

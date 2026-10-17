@@ -23,7 +23,9 @@
 
 	# --- Patient files are NEVER served from disk by Caddy (they only go through the API) ---
 	@blocked path /media/* /private_media/* /private-not-served/*
-	respond @blocked 404
+	handle @blocked {
+		respond 404
+	}
 
 	# --- Backend: API, secret admin page, static files of the admin page ---
 	@backend path /api/* /{$ADMIN_URL:admin}/*
@@ -41,6 +43,7 @@
 
 	# Styles/scripts of the admin page (collected by the backend at start-up)
 	handle /static/* {
+		uri strip_prefix /static
 		root * /srv/django
 		file_server
 		header Cache-Control "public, max-age=86400"
