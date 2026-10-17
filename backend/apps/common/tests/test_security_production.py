@@ -22,7 +22,8 @@ from conftest import PASSWORD, client_for, make_user
 from config.prod_rules import secret_key_problem, startup_problems
 
 BACKEND_DIR = Path(__file__).resolve().parents[3]
-GOOD_KEY = "k9Zt3vQ8mXw2LpR7cYb5NfHd6JsAe1UgT4oVxKq0"
+GOOD_KEY = "k9Zt3vQ8mXw2LpR7cYb5NfHd6JsAe1UgT4oVxKq0Wn8Bz5Dr2F"
+FERNET_KEY = "Wn5Gw6bq0q2m7yY3X4p3dL1o8cVQz9rHk6tA2uJbE1s="
 
 
 def load_settings(**env):
@@ -39,7 +40,7 @@ def load_settings(**env):
 
 
 PROD_ENV = {
-    "DJANGO_SECRET_KEY": GOOD_KEY, "FIELD_ENCRYPTION_KEY": "x" * 44, "DJANGO_ALLOWED_HOSTS": "app.example.com",
+    "DJANGO_SECRET_KEY": GOOD_KEY, "FIELD_ENCRYPTION_KEY": FERNET_KEY, "DJANGO_ALLOWED_HOSTS": "app.example.com",
     "SMS_PROVIDER": "console", "TWO_FACTOR_METHOD": "email",
 }
 
@@ -62,6 +63,11 @@ def test_server_refuses_to_start_with_empty_secret_key_or_no_encryption_key():
     assert load_settings(**{**PROD_ENV, "DJANGO_SECRET_KEY": ""}).returncode != 0
     result = load_settings(**{**PROD_ENV, "FIELD_ENCRYPTION_KEY": ""})
     assert result.returncode != 0 and "FIELD_ENCRYPTION_KEY" in result.stderr
+
+
+def test_a_made_up_encryption_key_is_refused():
+    result = load_settings(**{**PROD_ENV, "FIELD_ENCRYPTION_KEY": "abc"})
+    assert result.returncode != 0 and "not a valid key" in result.stderr
 
 
 def test_debug_is_off_by_default_and_hosts_must_be_real():
@@ -251,7 +257,7 @@ def test_check_production_ready_fails_on_a_demo_setup_and_passes_the_basics(sett
     # A clean live setup
     settings.DEBUG = False
     settings.SECRET_KEY = GOOD_KEY
-    settings.FIELD_ENCRYPTION_KEY = "x" * 44
+    settings.FIELD_ENCRYPTION_KEY = FERNET_KEY
     settings.ALLOWED_HOSTS = ["app.example.com"]
     settings.CSRF_TRUSTED_ORIGINS = ["https://app.example.com"]
     settings.PUBLIC_APP_URL = "https://app.example.com"

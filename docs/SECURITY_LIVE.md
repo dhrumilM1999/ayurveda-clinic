@@ -7,7 +7,7 @@ Your own PC (`docker compose up`, `DJANGO_DEBUG=true`) keeps working as before.
 
 When `DJANGO_DEBUG` is **not** `1`/`true`, the software runs in live mode. In live mode it **refuses to start** unless:
 
-- `DJANGO_SECRET_KEY` is a long random value (40+ characters, not the sample key),
+- `DJANGO_SECRET_KEY` is a long random value (50+ characters, not the sample key),
 - `FIELD_ENCRYPTION_KEY` is set (it scrambles medical notes; keep a safe copy, never change it),
 - `DJANGO_ALLOWED_HOSTS` lists the real website name (not `*`),
 - doctors/admins can really receive their login code (see section 3).

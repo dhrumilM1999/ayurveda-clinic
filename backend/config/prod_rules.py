@@ -7,7 +7,7 @@ ASK FIRST before editing this file.
 """
 
 WEAK_SECRET_MARKERS = ("dev-only", "change-me", "changeme", "insecure", "secret", "password")
-MIN_SECRET_LENGTH = 40
+MIN_SECRET_LENGTH = 50
 
 
 def secret_key_problem(key: str | None) -> str:
@@ -35,6 +35,14 @@ def startup_problems(*, debug, secret_key, field_encryption_key, sms_provider, t
     if not (field_encryption_key or "").strip():
         problems.append("FIELD_ENCRYPTION_KEY is empty. It scrambles medical notes in the database; "
                         "set it once and never change or lose it.")
+    else:
+        try:
+            from cryptography.fernet import Fernet
+
+            Fernet(field_encryption_key.strip().encode())
+        except Exception:
+            problems.append("FIELD_ENCRYPTION_KEY is not a valid key. Make one with: python -c \"from cryptography.fernet "
+                            "import Fernet; print(Fernet.generate_key().decode())\"")
     hosts = [h for h in allowed_hosts if h and h != "*"]
     if not hosts or "*" in allowed_hosts:
         problems.append("DJANGO_ALLOWED_HOSTS must list the real website name (not empty and not '*').")
