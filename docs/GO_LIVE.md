@@ -82,14 +82,14 @@ You will see a prompt like `root@server:~#`. Everything you type now runs on the
 
 ## 4. Prepare the server (once)
 
-First get the code. The code lives at `https://github.com/dhrumilM1999/ayurveda-clinic.git`.
+First get the code. The code lives at `https://github.com/dhrumilM1999/ayurveda-clinic.git`. The server uses the branch called **`production`** (see the last section, "Two kinds of data").
 
 ```bash
 apt-get update && apt-get install -y git
 ```
 
 ```bash
-git clone https://github.com/dhrumilM1999/ayurveda-clinic.git /root/ayurveda-clinic
+git clone -b production https://github.com/dhrumilM1999/ayurveda-clinic.git /root/ayurveda-clinic
 ```
 
 **If GitHub asks for a username and password, the repository is private.** Use a *personal access token* (it is the "password"):
@@ -166,10 +166,12 @@ If not, see section 11.
 This makes your clinic, first branch and **your owner login**. There is **no demo data**: no sample patients, users or bills.
 
 ```bash
-docker compose -f docker-compose.prod.yml exec backend python manage.py create_clinic
+docker compose -f docker-compose.prod.yml exec backend python manage.py create_clinic --profile clinic_profiles/vednath.json
 ```
 
-It asks, one by one: clinic name, branch name, short code (letters, used in invoice numbers), city, state, GSTIN (press Enter to skip), your login name, your full name, your mobile number.
+The file `backend/clinic_profiles/vednath.json` already holds the real details of **Vednath Ayurved, Adajan** and **Dr. Grishma Shingala** (qualification, registration number, Monday to Saturday timings 9-1 and 5-8). Check it and fix any spelling **before** this step (`nano backend/clinic_profiles/vednath.json`, then `docker compose -f docker-compose.prod.yml build backend`). Phone, e-mail, address, GSTIN and fees are not in the file: you are asked for the phone and e-mail, the rest is entered later in Settings.
+
+Without `--profile` it asks, one by one: clinic name, branch name, short code (letters, used in invoice numbers), city, state, GSTIN (press Enter to skip), your login name, your full name, your mobile number.
 Then it asks you to type a password twice (hidden). Or add `--generate-password` to the command and it makes a strong one and shows it **once** — write it down.
 Names are your own data; you can change them later on the Settings screens.
 Running it again is harmless: if a clinic exists it changes nothing.
@@ -346,3 +348,10 @@ docker compose -f docker-compose.prod.yml restart backend
 | UPI payments | Free QR code; staff mark bills paid |
 
 Nothing here needs a paid account except the server and the domain.
+
+## Two kinds of data: real (live) and demo (your PC)
+
+- Git branch **`production`** is what runs on the server. It starts with **no patients at all** and the real clinic details from `clinic_profiles/vednath.json`.
+- Your **demo data** (45 made-up patients etc.) is kept for local testing in `C:/Users/KRISHNA/Documents/ayurveda-demo-data-backup/` (outside the project). Double-click `restore-demo-data.bat` there to get it back into your local database. The demo code (`seed_demo`, `reset-demo-data.bat`) stays in the project and refuses to run on the live server.
+- Keep developing on your normal feature branches with the demo data. When something is ready for the clinic, merge it into `production`, push, and run `bash deploy/update.sh` on the server.
+- Never copy real patient data to your PC, and never copy demo data to the server.

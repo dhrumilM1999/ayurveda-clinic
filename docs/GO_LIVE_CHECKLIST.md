@@ -15,7 +15,8 @@ Full explanations: `docs/GO_LIVE.md`.
 - [ ] `make-env.sh` done; **`.env` copied to the safe place** (especially `FIELD_ENCRYPTION_KEY`).
 - [ ] `docker compose -f docker-compose.prod.yml up -d --build` finished; `bash deploy/status.sh` says ALL GOOD (except backups).
 - [ ] https://app… opens with a padlock.
-- [ ] `create_clinic` done; owner login works.
+- [ ] Spelling in `backend/clinic_profiles/vednath.json` checked (doctor name, registration number, branch name).
+- [ ] `create_clinic --profile clinic_profiles/vednath.json` done; owner login works.
 - [ ] `check_production_ready` shows no FAIL. E-mail login codes switched on (or `REQUIRE_2FA=0` noted as temporary).
 - [ ] Password changed; clinic name, logo, address, GSTIN, timings, UPI ID entered.
 - [ ] Doctors, staff, schedules, fees, services and real medicines entered.

@@ -120,3 +120,4 @@
 | `frontend/Dockerfile.prod` | Builds the screens for the live server | ASK FIRST |
 | `backend/apps/organizations/management/commands/create_clinic.py` | Creates the first real clinic and owner login (no demo data) | ASK FIRST |
 | `docs/GO_LIVE.md`, `docs/GO_LIVE_CHECKLIST.md` | How to go live, and the tick list | SAFE TO EDIT |
+| `backend/clinic_profiles/vednath.json` | Real clinic details used once by `create_clinic --profile` on the live server (name, branch, doctor, timings) | **SAFE TO EDIT** (before the first `create_clinic`) |

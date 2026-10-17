@@ -10,6 +10,7 @@ Everything needed to put the software on one Ubuntu server with free HTTPS (guid
 - `create_clinic` command: creates the first clinic, branch and owner login with **no demo data**.
 - Backups: `deploy/backup.sh` (14 daily + 8 weekly, checked, with a log, optional copy off the server with rclone/scp), `deploy/restore.sh` (with a safe `--test` practice mode), nightly systemd timer.
 - `deploy/server-setup.sh` (firewall, fail2ban, automatic security updates, Docker, swap), `deploy/update.sh` (backup first, `--rollback`), `deploy/status.sh`.
+- `create_clinic --profile clinic_profiles/vednath.json` creates the real clinic (Vednath Ayurved, Adajan) with Dr. Grishma Shingala as owner and doctor, and her timings. Git branch `production` is for the server; demo data is saved outside the project for local testing.
 - The backend image has a new "production" version (the PC keeps using the old one). `gunicorn` was added to `requirements.txt` (the web server for the live site).
 
 ## Safe for the live server (2026-10-17)
