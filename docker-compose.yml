@@ -31,7 +31,8 @@ services:
     restart: unless-stopped
     env_file: .env
     environment:
-      POSTGRES_HOST: db
+      # db = the database on this PC. .env can point to a cloud database instead (see docs/LIVE_DATABASE.md)
+      POSTGRES_HOST: ${POSTGRES_HOST:-db}
       MEDIA_ROOT: /app/media
       PRIVATE_MEDIA_ROOT: /app/private_media
     # On every start: update the database tables, add demo data if the database is empty,

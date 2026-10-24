@@ -34,3 +34,4 @@ demo-video/
 frontend/src/**/*.js
 *.tsbuildinfo
 backend/audit_archive/
+.env.local-db
