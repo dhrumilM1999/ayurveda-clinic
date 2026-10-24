@@ -8,7 +8,7 @@ DELETE /handwritten-prescriptions/<id>/                          marks a page as
 from django.http import FileResponse
 from rest_framework import mixins, status as http, viewsets
 from rest_framework.decorators import action
-from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -16,6 +16,7 @@ from rest_framework.response import Response
 from apps.accounts.permissions import BranchPermission
 from apps.audit.services import log_action
 from apps.emr.models import Visit
+from apps.organizations.services import is_feature_enabled
 
 from .handwriting import save_handwriting
 from .models import HandwrittenPrescription
@@ -65,6 +66,8 @@ class HandwrittenPrescriptionViewSet(mixins.ListModelMixin, mixins.RetrieveModel
         return Response(page_data(self.get_object()))
 
     def create(self, request, *args, **kwargs):
+        if not is_feature_enabled(request.branch, "digital_pad"):
+            raise PermissionDenied("The digital pad is switched off. Switch it on in Additional settings.")
         visit = Visit.objects.filter(organization_id=request.user.organization_id, branch=request.branch,
                                      pk=request.data.get("visit")).select_related("branch", "patient", "doctor").first()
         if visit is None:

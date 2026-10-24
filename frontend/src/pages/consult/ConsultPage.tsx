@@ -132,10 +132,10 @@ export default function ConsultPage() {
                 onClick={() => open({ appointment: a.id }, a.id)}>
                 <div className="consult-item-top">
                   <b className="consult-item-name">{a.patient_detail.full_name}</b>
-                  <span className="cell-sub">{a.token_number ? `#${a.token_number}` : fmtTime(a.start_time)}{a.token_number && a.start_time ? ` · ${fmtTime(a.start_time)}` : ''}</span>
+                  <span className="cell-sub">{a.token_number ? t('consult.tokenLabel', { n: a.token_number }) : fmtTime(a.start_time)}{a.token_number && a.start_time ? ` · ${fmtTime(a.start_time)}` : ''}</span>
                 </div>
                 <div className="consult-item-sub">
-                  <span className="cell-sub mono">{a.patient_detail.uhid}</span>
+                  <span className="cell-sub mono">{t('consult.idLabel', { id: a.patient_detail.uhid })}</span>
                   <StatusTag status={a.status} />
                 </div>
                 <div className="consult-item-tags">
@@ -161,6 +161,13 @@ export default function ConsultPage() {
         ) : (
           <div className="consult-empty">
             <Empty description={t('consult.choosePatient')} />
+            <ol className="how-steps">
+              <li>{t('consult.step1')}</li>
+              <li>{t('consult.step2')}</li>
+              <li>{t('consult.step3')}</li>
+              <li>{t('consult.step4')}</li>
+            </ol>
+            <div className="cell-sub how-note">{t('consult.manyPatients')}</div>
           </div>
         )}
       </section>

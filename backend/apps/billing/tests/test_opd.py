@@ -74,11 +74,19 @@ def test_fee_at_check_in_then_services_after_check_up(org, branch_a, receptionis
 
 
 @pytest.mark.django_db
-def test_doctor_cannot_take_payment(branch_a, doctor, appointment):
+def test_doctor_can_take_the_fee_in_the_room_and_it_shows_who_received_it(branch_a, doctor, receptionist, appointment):
     res = client_for(doctor, branch_a).post("/api/v1/opd-bills/charge/", {
         "appointment": str(appointment.id), "lines": [consultation_line(300)],
         "payment": {"mode": "cash", "amount": "300"}}, format="json")
-    assert res.status_code == 403
+    assert res.status_code == 201 and res.data["status"] == "paid"
+    assert res.data["payments"][0]["received_by"] == doctor.full_name
+    # the front desk can still collect (here: the rest of a second charge on the same bill)
+    more = client_for(receptionist, branch_a).post("/api/v1/opd-bills/charge/", {
+        "appointment": str(appointment.id), "lines": [consultation_line(200)],
+        "payment": {"mode": "upi", "amount": "200"}}, format="json")
+    assert more.status_code == 201
+    names = {p["received_by"] for p in more.data["payments"]}
+    assert names == {doctor.full_name, receptionist.full_name}
 
 
 @pytest.mark.django_db

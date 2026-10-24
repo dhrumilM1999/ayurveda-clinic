@@ -1966,3 +1966,11 @@ body {
 
 /* A dosage that looks like a typing slip (for example 2-2-22) */
 .dose-warning { color: #ad6800; font-size: 11px; line-height: 1.25; max-width: 130px; margin-top: 2px; }
+
+/* Check-up screen: the buttons wrap instead of running out of the page; the steps guide in the empty page */
+.visit-actions { justify-content: flex-end; max-width: 100%; }
+.how-steps { max-width: 420px; margin: 14px auto 6px; padding-left: 20px; text-align: left; color: rgba(35, 48, 42, 0.8); line-height: 1.7; }
+.how-note { max-width: 420px; margin: 0 auto; text-align: left; }
+.consult-empty { text-align: center; }
+.row-clickable { cursor: pointer; }
+.row-clickable:hover td { background: rgba(31, 92, 70, 0.05) !important; }

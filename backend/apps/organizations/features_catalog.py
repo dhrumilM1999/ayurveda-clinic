@@ -78,6 +78,8 @@ ADDITIONAL_FEATURES = {
     "label_date": {"group": "labels", "label": "Label: date given", "default": True, "requires": "medicine_labels"},
     "label_clinic": {"group": "labels", "label": "Label: clinic / pharmacy name", "default": True,
                      "requires": "medicine_labels"},
+    # Prescription
+    "digital_pad": {"group": "prescription", "label": "Digital pad: handwritten prescription", "default": False},
     # Billing
     "combined_opd_bill": {"group": "billing", "label": "Medicines on the OPD bill (one combined bill)",
                           "default": True, "requires": "pharmacy_billing"},

@@ -28,12 +28,13 @@ export function StatusTag({ status }: { status: AppointmentStatus }) {
 }
 
 export function PatientCell({ patient }: { patient: AppointmentPatient }) {
+  const { t } = useTranslation();
   return (
     <div style={{ lineHeight: 1.35 }}>
       <Typography.Text strong>{patient.full_name}</Typography.Text>
       {patient.is_vip && <Tag color="gold" style={{ marginInlineStart: 6 }}>VIP</Tag>}
       <div className="cell-sub">
-        <span className="mono">{patient.uhid}</span> · {patient.mobile_masked}
+        <span className="mono">{t('consult.idLabel', { id: patient.uhid })}</span> · {patient.mobile_masked}
       </div>
     </div>
   );

@@ -24,7 +24,7 @@ export interface Me {
     is_doctor: boolean;
     preferred_language: string;
   };
-  organization: { id: string; name: string; multi_branch: boolean } | null;
+  organization: { id: string; name: string; multi_branch: boolean; doctor_count: number } | null;
   branches: MyBranch[];
   idle_timeout_minutes: number;
 }
@@ -547,6 +547,10 @@ export interface Visit {
   prakriti: PrakritiResult | null;
   created_at: string;
   updated_at: string;
+  /** True when the patient had an earlier check-up (follow-up), false for a new patient */
+  is_follow_up?: boolean;
+  /** Where the appointment stands: checked_in (waiting), in_consultation (With doctor), completed ... */
+  appointment_status?: string | null;
 }
 
 export interface VisitListItem {

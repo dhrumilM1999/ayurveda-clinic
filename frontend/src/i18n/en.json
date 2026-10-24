@@ -648,7 +648,8 @@
       "completed": "Done",
       "cancelled": "Cancelled",
       "no_show": "Did not come"
-    }
+    },
+    "clickToStart": "Doctor: click a patient to start the check-up. The patient becomes With doctor."
   },
   "queue": {
     "title": "Queue",
@@ -804,7 +805,16 @@
     "reopen": "Re-open check-up",
     "reopenAsk": "Re-open this check-up?",
     "reopenHelp": "Use this if you pressed Complete visit by mistake or need to correct something. The prescription becomes a draft again until you complete the visit. Not possible after the pharmacy has given medicines.",
-    "reopenedMsg": "The check-up is open again."
+    "reopenedMsg": "The check-up is open again.",
+    "idLabel": "ID {{id}}",
+    "idHelp": "Patient ID: the number that belongs to this patient for life.",
+    "tokenLabel": "Token {{n}}",
+    "tokenHelp": "Token: today's waiting-room number. A new one every day.",
+    "step1": "The receptionist gives a token or checks the patient in. The patient shows as Waiting.",
+    "step2": "Click the patient on the left. The check-up opens and the patient becomes With doctor.",
+    "step3": "Write complaints, diagnosis and medicines. Everything saves by itself.",
+    "step4": "Press Complete visit. The prescription goes to the pharmacy and the bill is ready.",
+    "manyPatients": "You may keep more than one patient With doctor and go back and forth; each one stays With doctor until you press Complete visit."
   },
   "templatesAdmin": {
     "title": "Check-up templates",
@@ -1372,7 +1382,8 @@
       "stock": "Medicine stock",
       "labels": "Patient medicine labels",
       "stock_labels": "Pharmacy stock labels",
-      "enquiries": "Online enquiry"
+      "enquiries": "Online enquiry",
+      "prescription": "Prescription"
     },
     "features": {
       "opd_billing": {
@@ -1526,6 +1537,10 @@
       "pharmacy_hold_bills": {
         "label": "Hold a counter bill",
         "help": "On the Counter sale tab, put a bill on hold and finish it later (kept in this browser only)."
+      },
+      "digital_pad": {
+        "label": "Digital pad: handwritten prescription",
+        "help": "Shows the Handwriting button in the doctor's check-up: write on the digital pad (or a tablet pen), and the handwriting is saved with the letterhead as one picture. Off: the button is hidden and no new handwriting can be saved; pages already written stay visible. Off by default."
       }
     },
     "choices": {

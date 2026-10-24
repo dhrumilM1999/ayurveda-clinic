@@ -82,7 +82,7 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
 }) {
   const { t } = useTranslation();
   const { message, modal } = App.useApp();
-  const { can, hasFeature } = useAuth();
+  const { can, hasFeature, multiBranch, multiDoctor } = useAuth();
   const [billOpen, setBillOpen] = useState(false); // OPD bill popup (services & charges for this check-up)
   const templateName = useTemplateName();
   const prakritiName = usePrakritiName();
@@ -418,19 +418,21 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
             <div style={{ minWidth: 0 }}>
               <Space size={8} wrap>
                 <Link to={`/patients/${p.id}`} className="visit-patient">{p.full_name}</Link>
-                <span className="uhid-chip">{p.uhid}</span>
+                <Tooltip title={t('consult.idHelp')}><span className="uhid-chip">{t('consult.idLabel', { id: p.uhid })}</span></Tooltip>
                 <span className="cell-sub">{genderAge(t, p.gender, p.age_years)}</span>
-                {visit.token_number && <span className="token-chip">#{visit.token_number}</span>}
+                {visit.token_number && <Tooltip title={t('consult.tokenHelp')}><span className="token-chip">{t('consult.tokenLabel', { n: visit.token_number })}</span></Tooltip>}
+                <Tag color={visit.is_follow_up ? 'cyan' : 'blue'} bordered={false}>{visit.is_follow_up ? t('consult.followUpTag') : t('consult.newTag')}</Tag>
+                {visit.status === 'draft' && visit.appointment_status === 'in_consultation' && <Tag color="green">{t('appointments.status.in_consultation')}</Tag>}
                 {visit.prakriti?.type && (
                   <Tag color="purple">{t('consult.prakritiTag', { type: prakritiName(visit.prakriti.type) })}</Tag>
                 )}
                 {visit.status === 'completed' && <Tag color="green" icon={<CheckCircleOutlined />}>{t('consult.completed')}</Tag>}
               </Space>
               <div className="cell-sub">
-                {dayjs(visit.visit_date).format('DD-MM-YYYY')} · {visit.doctor_name} · {visit.branch_name}
+                {[dayjs(visit.visit_date).format('DD-MM-YYYY'), multiDoctor ? visit.doctor_name : '', multiBranch ? visit.branch_name : ''].filter(Boolean).join(' · ')}
               </div>
             </div>
-            <Space size={8}>
+            <Space size={[8, 8]} wrap className="visit-actions">
               <span className={`save-state save-${saveState}`}>
                 <CloudSyncOutlined /> {t(`consult.save.${saveState}`)}
               </span>
@@ -448,7 +450,7 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
               <PrintMenu visitId={visit.id} rxId={rx.id} hasFollowUp={!!draft.follow_up_date} patientName={p.full_name}
                 language={patient?.preferred_language} doctorId={visit.doctor} diagnoses={draft.diagnoses.map((d) => d.label)}
                 beforePrint={() => save()} />
-              {can('prescriptions.create') && (
+              {can('prescriptions.create') && hasFeature('digital_pad') && (
                 <Button size="small" icon={<EditOutlined />} onClick={() => setHandwritingOpen(true)}>{t('handwriting.open')}</Button>
               )}
               <PlanTherapyButton patientId={p.id} patientName={p.full_name} visitId={visit.id} />

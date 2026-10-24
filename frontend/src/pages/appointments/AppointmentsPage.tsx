@@ -1,11 +1,11 @@
 // Appointments of one day in the current branch: book, walk-in, check in, reschedule, cancel.
 import { LeftOutlined, PlusOutlined, ReloadOutlined, RightOutlined, UserAddOutlined } from '@ant-design/icons';
-import { Button, DatePicker, Segmented, Select, Space, Table, Typography } from 'antd';
+import { App, Button, DatePicker, Segmented, Select, Space, Table, Typography } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
-import { api } from '../../api/client';
+import { Link, useNavigate } from 'react-router-dom';
+import { api, errorMessage } from '../../api/client';
 import type { Appointment, AppointmentDoctor, AppointmentStatus } from '../../api/types';
 import { useList } from '../../api/useList';
 import { useAuth } from '../../auth/AuthContext';
@@ -28,7 +28,19 @@ const FILTER_STATUSES: Record<Filter, AppointmentStatus[] | null> = {
 
 export default function AppointmentsPage() {
   const { t } = useTranslation();
-  const { can } = useAuth();
+  const { message } = App.useApp();
+  const { can, multiDoctor } = useAuth();
+  const navigate = useNavigate();
+  // The doctor clicks a patient in this list: the check-up opens and the patient becomes With doctor
+  const startCheckup = async (r: Appointment) => {
+    try {
+      const { data } = await api.post<{ id: string }>('/visits/', { appointment: r.id });
+      navigate(`/consult/${data.id}`);
+    } catch (err) {
+      message.error(errorMessage(err, t('common.loadFailed')));
+    }
+  };
+  const canStart = (r: Appointment) => can('emr.edit') && r.date === dayjs().format('YYYY-MM-DD') && ['booked', 'checked_in', 'in_consultation', 'completed'].includes(r.status);
   const [day, setDay] = useState<Dayjs>(dayjs());
   const [doctor, setDoctor] = useState<string>();
   const [filter, setFilter] = useState<Filter>('all');
@@ -88,18 +100,19 @@ export default function AppointmentsPage() {
           <Button icon={<RightOutlined />} onClick={() => setDay(day.add(1, 'day'))} aria-label={t('appointments.nextDay')} />
         </Space.Compact>
         {!isToday && <Button onClick={() => setDay(dayjs())}>{t('appointments.today')}</Button>}
-        <Select
+        {multiDoctor && <Select
           allowClear
           placeholder={t('appointments.allDoctors')}
           value={doctor}
           onChange={setDoctor}
           style={{ minWidth: 200 }}
           options={doctors.map((d) => ({ value: d.id, label: d.full_name }))}
-        />
+        />}
         <LiveSearch placeholder={t('appointments.searchPlaceholder')} onSearch={setQuery} loading={loading} width={240} />
         <Button icon={<ReloadOutlined />} onClick={reload} aria-label={t('appointments.refresh')} />
       </div>
 
+      {can('emr.edit') && <div className="cell-sub" style={{ margin: '0 0 8px' }}>{t('appointments.clickToStart')}</div>}
       <Segmented
         className="status-filter"
         value={filter}
@@ -116,7 +129,13 @@ export default function AppointmentsPage() {
         dataSource={sorted}
         pagination={false}
         scroll={{ x: 900 }}
-        rowClassName={(r) => (['cancelled', 'no_show'].includes(r.status) ? 'row-muted' : '')}
+        rowClassName={(r) => (['cancelled', 'no_show'].includes(r.status) ? 'row-muted' : canStart(r) ? 'row-clickable' : '')}
+        onRow={(r) => ({
+          onClick: (e) => {
+            if (!canStart(r) || (e.target as HTMLElement).closest('a, button, .ant-dropdown, .ant-popover, .ant-modal')) return;
+            startCheckup(r);
+          },
+        })}
         locale={{ emptyText: <ListEmpty failed={failed} onRetry={reload} text={t('appointments.empty')} /> }}
         columns={[
           {
@@ -124,7 +143,7 @@ export default function AppointmentsPage() {
             render: (_: unknown, r: Appointment) => (
               <div style={{ lineHeight: 1.35 }}>
                 <b>{r.start_time ? fmtTime(r.start_time) : t('appointments.walkInShort')}</b>
-                {r.token_number && <div><span className="token-chip">#{r.token_number}</span></div>}
+                {r.token_number && <div><span className="token-chip">{t('consult.tokenLabel', { n: r.token_number })}</span></div>}
               </div>
             ),
           },
@@ -134,7 +153,7 @@ export default function AppointmentsPage() {
               <Link to={`/patients/${r.patient}`} style={{ color: 'inherit' }}><PatientCell patient={r.patient_detail} /></Link>
             ),
           },
-          { title: t('appointments.doctor'), dataIndex: 'doctor_name' },
+          ...(multiDoctor ? [{ title: t('appointments.doctor'), dataIndex: 'doctor_name' }] : []),
           {
             title: t('appointments.reason'), dataIndex: 'reason', ellipsis: true,
             render: (v: string, r: Appointment) => (

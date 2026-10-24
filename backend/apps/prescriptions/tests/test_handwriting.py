@@ -10,7 +10,7 @@ from apps.audit.models import AuditLog
 from apps.emr.models import Visit
 from apps.patients.models import Patient
 from apps.prescriptions.models import HandwrittenPrescription
-from conftest import client_for
+from conftest import client_for, set_additional_features
 
 URL = "/api/v1/handwritten-prescriptions/"
 
@@ -25,6 +25,11 @@ def ink_png(width=1200, height=800, write=True, fmt="PNG"):
     out = io.BytesIO()
     image.save(out, fmt)
     return SimpleUploadedFile("ink.png", out.getvalue(), content_type="image/png")
+
+
+@pytest.fixture(autouse=True)
+def pad_on(org):
+    set_additional_features(org, codes=["digital_pad"])  # the digital pad is an optional extra (Additional settings)
 
 
 @pytest.fixture
@@ -138,3 +143,15 @@ def test_page_prints_as_pdf_with_the_usual_rx_number(doctor, pharmacist, branch_
     assert res.status_code == 200 and res.content[:4] == b"%PDF"
     again = client_for(doctor, branch_a).get(f"/api/v1/documents/handwritten-rx/{page['id']}/?size=a5")
     assert again.status_code == 200  # the first real print
+
+
+@pytest.mark.django_db
+def test_digital_pad_switch_off_blocks_new_pages_but_keeps_old_ones(org, doctor, pharmacist, branch_a, visit):
+    c = client_for(doctor, branch_a)
+    page = save(c, visit).data["id"]
+    set_additional_features(org, on=False, codes=["digital_pad"])
+    assert save(c, visit).status_code == 403                                   # no new handwriting while it is off
+    assert c.get(f"{URL}?visit={visit.id}").status_code == 200                 # what was written stays visible
+    assert client_for(pharmacist, branch_a).get(f"{URL}{page}/image/").status_code == 200
+    set_additional_features(org, codes=["digital_pad"])
+    assert save(c, visit).status_code == 201                                   # back on: works again

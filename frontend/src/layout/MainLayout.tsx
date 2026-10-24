@@ -120,10 +120,7 @@ export default function MainLayout() {
               options={me?.branches.map((b) => ({ value: b.id, label: b.name }))}
               placeholder={t('layout.chooseBranch')}
               aria-label={t('layout.branch')}
-            /> : (
-              // Single-branch mode: just show the clinic / branch name
-              <span className="branch-name"><EnvironmentOutlined /> {branch?.name}</span>
-            )}
+            /> : null /* one clinic: nothing to choose, so no branch name here */}
           </div>
           <div className="app-header-right">
             <Segmented
