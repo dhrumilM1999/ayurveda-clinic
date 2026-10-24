@@ -266,3 +266,6 @@ LOGGING = {
     "root": {"handlers": ["console"], "level": "INFO"},
     "loggers": {"django.db.backends": {"level": "WARNING"}},
 }
+
+# Shown in the Error log so a developer knows which version the problem happened in. Set in .env (for example a date or git id).
+APP_VERSION = env("APP_VERSION", "dev")

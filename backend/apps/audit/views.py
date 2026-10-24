@@ -78,7 +78,7 @@ class ErrorLogSerializer(serializers.ModelSerializer):
 
 class ErrorLogDetailSerializer(ErrorLogSerializer):
     class Meta(ErrorLogSerializer.Meta):
-        fields = ErrorLogSerializer.Meta.fields + ["details", "trail", "ip_address", "user_agent"]
+        fields = ErrorLogSerializer.Meta.fields + ["details", "trail", "extra", "ip_address", "user_agent"]
         read_only_fields = [f for f in fields if f not in ("is_resolved", "note")]
 
 
@@ -152,6 +152,7 @@ class ErrorReportSerializer(serializers.Serializer):
     status_code = serializers.IntegerField(required=False, allow_null=True, min_value=0, max_value=599)
     code = serializers.CharField(max_length=12, allow_blank=True, required=False, default="")
     trail = serializers.ListField(child=serializers.DictField(), max_length=60, required=False, default=list)
+    extra = serializers.DictField(child=serializers.CharField(allow_blank=True, max_length=2000), required=False, default=dict)
 
 
 class ErrorReportView(APIView):
@@ -181,6 +182,7 @@ class ErrorReportView(APIView):
         code = record_error(
             request, source="frontend", level="error", status_code=d.get("status_code"), method=d["method"], path=d["path"],
             message=d["message"] or d["kind"], details=d["details"], screen=d["screen"], trail=d["trail"],
+            extra={**d["extra"], "kind": d["kind"], "user_agent_screen": request.META.get("HTTP_USER_AGENT", "")[:200]},
             session_id=session_id_of(request),
         )
         return Response({"code": code}, status=201)

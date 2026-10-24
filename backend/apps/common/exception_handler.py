@@ -46,7 +46,7 @@ def _message_of(data) -> str:
 
 def friendly_exception_handler(exc, context):
     """Friendly text for the screens, and every failure written to the Error log (apps/audit/error_log.py)."""
-    from apps.audit.error_log import record_error  # imported here: this file loads before the apps are ready
+    from apps.audit.error_log import record_error, request_facts  # imported here: this file loads before the apps are ready
 
     response = _friendly(exc, context)
     request = context.get("request")
@@ -62,9 +62,11 @@ def friendly_exception_handler(exc, context):
             request, source="backend", level="error", status_code=500, method=method, path=path,
             message=f"{type(exc).__name__}: {exc}",
             details="".join(traceback.format_exception(type(exc), exc, exc.__traceback__)),
+            extra={**request_facts(request), "exception": f"{type(exc).__module__}.{type(exc).__name__}"},
         )
         return Response({"detail": CRASH.format(code=code or "-"), "code": code}, status=500)
     if known_user and response.status_code in LOGGED_STATUS:
         record_error(request, source="backend", level=LOGGED_STATUS[response.status_code], status_code=response.status_code,
-                     method=method, path=path, message=_message_of(response.data))
+                     method=method, path=path, message=_message_of(response.data),
+                     extra={**request_facts(request), "server_answer": response.data})
     return response

@@ -14,6 +14,7 @@ export interface ErrorReport {
   method?: string;
   status_code?: number | null;
   code?: string;
+  extra?: Record<string, string>;
 }
 
 const SESSION_KEY = 'error_session_id';
@@ -79,6 +80,17 @@ export function plainPath(url: string | undefined): string {
   return (url ?? '').split('?')[0]!.replace(/^https?:\/\/[^/]+/, '');
 }
 
+/** What a developer needs about the browser (nothing about the person). */
+function browserFacts(): Record<string, string> {
+  return {
+    viewport: `${window.innerWidth}x${window.innerHeight}`,
+    language: document.documentElement.lang || navigator.language,
+    online: String(navigator.onLine),
+    url: window.location.pathname,
+    time: new Date().toISOString(),
+  };
+}
+
 export function currentScreen(): string {
   return window.location.pathname;
 }
@@ -99,6 +111,7 @@ export async function sendReport(report: ErrorReport) {
       details: (report.details ?? '').slice(0, 20000),
       screen: currentScreen(),
       trail: [...trail],
+      extra: { ...browserFacts(), ...(report.extra ?? {}) },
     }, {
       headers: {
         Authorization: `Bearer ${access}`,

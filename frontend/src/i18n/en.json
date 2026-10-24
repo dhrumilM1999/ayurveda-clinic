@@ -2300,6 +2300,7 @@
       "code": "Code: {{code}}.",
       "reload": "Reload",
       "home": "Go to start"
-    }
+    },
+    "developer": "Developer details"
   }
 }

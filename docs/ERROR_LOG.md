@@ -17,6 +17,7 @@ The same problem happening again is counted on one line ("Times"), so the list s
 Press a line to open it:
 - **What the person did before it** – the last pages they opened and what the screen asked the server (no typed text, no patient data).
 - **Technical detail** – for a server crash, the full technical message.
+- **Developer details** – which server function ran, which fields were sent (names only), the server answer, browser size and language, app version (`APP_VERSION` in `.env`).
 - **Copy for Claude** – copies everything in plain text. Paste it in the chat with Claude and it can be fixed.
 - **Mark solved** and a short note. Lines are never deleted.
 - **This login** (link under the user's name) – shows everything from that one login.

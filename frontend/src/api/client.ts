@@ -32,7 +32,7 @@ function noteFailedCall(failure: AxiosError) {
   const status = error.response?.status;
   addStep('api', `${method} ${path} ${status ?? 'no answer'}`);
   if (!error.response) {
-    sendReport({ kind: 'network', message: `Could not reach the server: ${method} ${path}`, path, method });
+    sendReport({ kind: 'network', message: `Could not reach the server: ${method} ${path}`, path, method, extra: { error_code: error.code ?? '' } });
   } else if (status && status >= 500 && error.response.data?.code) {
     // The server already wrote this one; add what the person did before it
     sendReport({ kind: 'trail', code: error.response.data.code, path, method, status_code: status });

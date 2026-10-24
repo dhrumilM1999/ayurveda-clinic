@@ -22,6 +22,7 @@ function describe(e: ErrorLogEntry): string {
     `Message: ${e.message}`,
   ];
   if (e.details) lines.push('', 'Technical detail:', e.details.slice(0, 3000));
+  if (e.extra && Object.keys(e.extra).length) lines.push('', 'Developer facts:', ...Object.entries(e.extra).map(([k, v]) => `${k}: ${v}`));
   if (e.trail?.length) lines.push('', 'Steps before it:', ...e.trail.map((s) => `${s.t} ${s.type}: ${s.text}`));
   return lines.join('\n');
 }
@@ -72,6 +73,14 @@ function Detail({ id, onChanged }: { id: string; onChanged: () => void }) {
         {t('errorLog.first')}: {dayjs(row.created_at).format('DD-MM-YYYY HH:mm')}
         {row.ip_address ? ` · ${row.ip_address}` : ''}{row.user_agent ? ` · ${row.user_agent}` : ''}
       </div>
+      {row.extra && Object.keys(row.extra).length > 0 && (
+        <>
+          <div className="section-title">{t('errorLog.developer')}</div>
+          <table className="errlog-facts"><tbody>
+            {Object.entries(row.extra).map(([k, v]) => <tr key={k}><th>{k}</th><td>{v}</td></tr>)}
+          </tbody></table>
+        </>
+      )}
       {row.details && (
         <>
           <div className="section-title">{t('errorLog.details')}</div>

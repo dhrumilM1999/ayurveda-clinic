@@ -2000,3 +2000,6 @@ body {
 .errlog-detail { padding: 4px 8px 8px; }
 .errlog-pre { background: #f6f3ec; border-radius: 6px; padding: 8px 10px; max-height: 260px; overflow: auto; font-size: 12px; white-space: pre-wrap; margin: 0; }
 .errlog-trail { margin: 0; padding-left: 20px; font-size: 13px; }
+.errlog-facts { font-size: 12px; border-collapse: collapse; }
+.errlog-facts th { text-align: left; padding: 2px 12px 2px 0; color: rgba(35, 48, 42, 0.6); font-weight: 600; vertical-align: top; white-space: nowrap; }
+.errlog-facts td { padding: 2px 0; word-break: break-all; font-family: Consolas, monospace; }

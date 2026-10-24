@@ -180,6 +180,7 @@ export interface ErrorLogEntry {
   // only when one line is opened
   details?: string;
   trail?: { t: string; type: string; text: string }[];
+  extra?: Record<string, string>;
   ip_address?: string | null;
   user_agent?: string;
 }

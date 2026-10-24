@@ -7,6 +7,7 @@ What is NOT stored: typed text, request bodies, the part of a web address after 
 where, and to whom.
 """
 import hashlib
+import json
 import logging
 import re
 import uuid
@@ -53,8 +54,54 @@ def _clean_trail(trail) -> list:
     return clean
 
 
+def _clean_extra(extra) -> dict:
+    """Developer facts as short text. Never request bodies: only field NAMES, never what was typed."""
+    clean = {}
+    for key, value in (extra or {}).items():
+        text = value if isinstance(value, str) else json.dumps(value, default=str, ensure_ascii=False)
+        clean[str(key)[:60]] = text[:2000]
+    return clean
+
+
+def request_facts(request) -> dict:
+    """What a developer needs to find the code: which view, which fields were sent (names only), who, which version."""
+    if request is None:
+        return {}
+    from django.conf import settings
+
+    facts = {}
+    match = getattr(request, "resolver_match", None)
+    if match is not None:
+        facts["view"] = match.view_name or ""
+        facts["handler"] = getattr(getattr(match, "func", None), "__qualname__", "") or getattr(
+            getattr(match.func, "cls", None), "__name__", "")
+    action_name = getattr(getattr(request, "parser_context", None), "get", lambda *_: None)("view")
+    action = getattr(action_name, "action", "")
+    if action:
+        facts["action"] = action
+    query = getattr(request, "query_params", None)
+    if query is not None:
+        facts["query_fields"] = sorted(query.keys())
+    try:
+        data = request.data
+        if hasattr(data, "keys"):
+            facts["body_fields"] = sorted(data.keys())
+    except Exception:  # noqa: BLE001 - an unreadable body is not worth failing for
+        pass
+    user = getattr(request, "user", None)
+    if getattr(user, "is_authenticated", False):
+        facts["user_id"] = str(user.pk)
+        facts["is_org_admin"] = str(getattr(user, "is_org_admin", False))
+    branch = getattr(request, "branch", None)
+    if branch is not None:
+        facts["branch_id"] = str(branch.pk)
+    facts["host"] = request.META.get("HTTP_HOST") or request.META.get("SERVER_NAME", "")
+    facts["app_version"] = getattr(settings, "APP_VERSION", "")
+    return {k: v for k, v in facts.items() if v not in ("", [], None)}
+
+
 def record_error(request, *, source, level, message, status_code=None, details="", method="", path="", screen="",
-                 trail=None, user=None, session_id=""):
+                 trail=None, user=None, session_id="", extra=None):
     """Write (or count again) one line. Returns the short code the user can read out, or "" if nothing was written."""
     try:
         if user is None and request is not None:
@@ -79,7 +126,9 @@ def record_error(request, *, source, level, message, status_code=None, details="
                     row.trail = _clean_trail(trail)
                 if session_id:
                     row.session_id = session_id
-                row.save(update_fields=["count", "last_seen", "details", "trail", "session_id"])
+                if extra:
+                    row.extra = _clean_extra(extra)
+                row.save(update_fields=["count", "last_seen", "details", "trail", "session_id", "extra"])
                 return row.request_code
             meta = getattr(request, "META", {}) if request is not None else {}
             row = ErrorLog.objects.create(
@@ -92,7 +141,7 @@ def record_error(request, *, source, level, message, status_code=None, details="
                 request_code=uuid.uuid4().hex[:8].upper(),
                 source=source, level=level, status_code=status_code, method=method[:10], path=path,
                 screen=(screen or "")[:255], message=message, details=(details or "")[:MAX_DETAILS],
-                trail=_clean_trail(trail), ip_address=client_ip(request),
+                trail=_clean_trail(trail), extra=_clean_extra(extra), ip_address=client_ip(request),
                 user_agent=meta.get("HTTP_USER_AGENT", "")[:255], fingerprint=fingerprint,
             )
             return row.request_code

@@ -103,3 +103,17 @@ def test_other_clinics_and_bad_reports_are_kept_out(org_admin, receptionist, bra
     assert c.post(REPORT, {"kind": "js", "message": "x" * 5000}, format="json").status_code == 400
     assert APIClient().post(REPORT, {"kind": "js", "message": "x"}, format="json").status_code == 401
     assert ErrorLog.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_developer_facts_are_kept_but_never_what_was_typed(org_admin, receptionist, branch_a):
+    c = client_for(receptionist, branch_a)
+    c.post("/api/v1/audit-logs/", {"secret_field": "Kamla Shah 9825011111"}, format="json")
+    row = ErrorLog.objects.get()
+    assert row.extra["view"] == "audit-log-list" and row.extra["host"]
+    assert "secret_field" in row.extra["body_fields"]
+    assert "Kamla" not in str(row.extra) and "9825011111" not in str(row.extra)
+    owner = client_for(org_admin, branch_a)
+    assert owner.get(f"{LIST}{row.id}/").data["extra"]["view"] == "audit-log-list"
+    owner.post(REPORT, {"kind": "js", "message": "m", "extra": {"viewport": "1366x768", "language": "gu"}}, format="json")
+    assert ErrorLog.objects.get(source="frontend").extra["viewport"] == "1366x768"

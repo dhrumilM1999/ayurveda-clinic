@@ -108,6 +108,7 @@ class ErrorLog(models.Model):
     message = models.TextField(blank=True)
     details = models.TextField(blank=True, help_text="Technical detail: server traceback or browser stack")
     trail = models.JSONField(default=list, blank=True, help_text="The last steps the user took before this")
+    extra = models.JSONField(default=dict, blank=True, help_text="For the developer: view, field names, server answer, browser, version")
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.CharField(max_length=255, blank=True)
     fingerprint = models.CharField(max_length=40, db_index=True)
