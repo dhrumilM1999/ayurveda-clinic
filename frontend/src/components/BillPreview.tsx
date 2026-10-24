@@ -199,10 +199,10 @@ export function LabelsButton({ dispense, prescription, size = 'small' }: {
   );
 }
 
-type DocKind = 'prescription' | 'follow-up-card' | 'prakriti' | 'certificate' | 'therapy-plan';
+type DocKind = 'prescription' | 'follow-up-card' | 'prakriti' | 'certificate' | 'therapy-plan' | 'handwritten-rx';
 // the name of each document in Settings -> PDF settings
 const DOC_TYPE: Record<DocKind, string> = {
-  prescription: 'prescription', 'follow-up-card': 'follow_up_card', prakriti: 'prakriti_report', certificate: 'certificate', 'therapy-plan': 'therapy_plan',
+  prescription: 'prescription', 'follow-up-card': 'follow_up_card', prakriti: 'prakriti_report', certificate: 'certificate', 'therapy-plan': 'therapy_plan', 'handwritten-rx': 'prescription',
 };
 
 /** A medical document (prescription, follow-up card, Prakriti report, certificate) on screen, in the patient's
@@ -220,7 +220,7 @@ export function DocumentModal({ kind, id, title, language, detail, onClose }: {
   const defaults = usePaperDefaults();
   if (!defaults) return null;
   const sizes: Record<DocKind, string[]> = {
-    prescription: detail ? ['a4', 'a5'] : ['a5', 'a4'], 'follow-up-card': ['a6', 'a5'], prakriti: ['a4', 'a5'], certificate: ['a4', 'a5'], 'therapy-plan': ['a4', 'a5'],
+    prescription: detail ? ['a4', 'a5'] : ['a5', 'a4'], 'follow-up-card': ['a6', 'a5'], prakriti: ['a4', 'a5'], certificate: ['a4', 'a5'], 'therapy-plan': ['a4', 'a5'], 'handwritten-rx': ['a5', 'a4'],
   };
   return (
     <PdfModal title={title} fileName={detail ? 'prescription-detailed' : `${kind}`} onClose={onClose}

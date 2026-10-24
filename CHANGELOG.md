@@ -2,6 +2,14 @@
 
 What changed in each step, in plain words.
 
+## Handwritten prescription with the digital pad (2026-10-24)
+
+- New **Handwriting** button on the check-up screen: write on the iScribe pad (or tablet pen / touch / mouse), see it live,
+  press Save. The software keeps the handwriting AND one combined picture (letterhead + patient line + handwriting + QR + signature)
+  on that patient's check-up. Print it like any prescription; the pharmacist sees the pages while giving medicines.
+  See `docs/HANDWRITING_PAD.md`. New table `HandwrittenPrescription`, new library `pypdfium2` (turns the PDF page into a picture).
+- The letterhead on A5 prints no longer lets a long address run under the doctor's name.
+
 ## Testing "by mistake" cases (2026-10-15)
 
 About 150 new tests for wrong input, double clicks, the wrong option and the wrong person (`docs/MISTAKE_PROTECTION.md`).

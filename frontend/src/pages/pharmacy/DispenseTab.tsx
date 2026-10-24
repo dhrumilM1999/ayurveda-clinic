@@ -15,6 +15,7 @@ import { LabelsButton } from '../../components/BillPreview';
 import { PatientCell } from '../appointments/shared';
 import { money } from '../medicines/shared';
 import { UpiPayment } from './BillsTab';
+import { HandwrittenPages } from '../consult/handwriting/HandwrittenPages';
 import { DispenseStatusTag, PrintButton, ScanInput, expiryText, lineFromScan, qty } from './common';
 
 const REFRESH_SECONDS = 30;
@@ -310,6 +311,7 @@ function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClos
           {detail.allergies.length > 0 && (
             <Alert type="error" showIcon style={{ marginBottom: 12 }} message={<><b>{t('patients.allergyAlert')}:</b> {detail.allergies.join(', ')}</>} />
           )}
+          <HandwrittenPages prescriptionId={prescriptionId} />
           {billing && detail.sales.some((s) => s.number) && (
             <div className="cell-sub" style={{ marginBottom: 8 }}>
               {t('pharmacy.earlierBills')}: {detail.sales.map((s) => s.number).filter(Boolean).join(', ')}

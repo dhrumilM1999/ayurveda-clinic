@@ -17,6 +17,8 @@ Keep everything inside {{ }} and {% %}.
   .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 4mm; border-bottom: 0.6mm solid {{ ps.accent_color|default:"#1f5c46" }}; padding-bottom: 2mm; }
   .brand { display: flex; gap: 3mm; align-items: center; max-width: 58%; }
   .brand img { max-height: 16mm; max-width: 30mm; }
+  /* the address wraps inside this width, so it never runs under the doctor's name on the right */
+  .brand > div:last-child { max-width: {% if size == "a4" %}72mm{% elif size == "a5" %}46mm{% else %}34mm{% endif %}; }
   .org { font-size: 1.6em; font-weight: 700; color: {{ ps.accent_color|default:"#1f5c46" }}; line-height: 1.1; }
   .muted { color: #5c5c5c; }
   .small { font-size: 0.85em; }

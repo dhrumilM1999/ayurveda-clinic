@@ -1,7 +1,7 @@
 """
 Handwritten prescriptions (digital pad).
 POST /handwritten-prescriptions/   multipart: visit (id), ink (PNG, transparent), paper (a5 | a4, optional)
-GET  /handwritten-prescriptions/?visit=<id> | ?patient=<id>      the pages (never the pictures themselves)
+GET  /handwritten-prescriptions/?visit=<id> | ?patient=<id> | ?prescription=<id>      the pages (never the pictures themselves)
 GET  /handwritten-prescriptions/<id>/image/?kind=combined|ink   the picture (private, audit-logged)
 DELETE /handwritten-prescriptions/<id>/                          marks a page as removed (the file is kept)
 """
@@ -49,10 +49,12 @@ class HandwrittenPrescriptionViewSet(mixins.ListModelMixin, mixins.RetrieveModel
             qs = qs.filter(visit_id=params["visit"])
         if params.get("patient"):
             qs = qs.filter(patient_id=params["patient"])
+        if params.get("prescription"):
+            qs = qs.filter(prescription_id=params["prescription"])
         return qs
 
     def list(self, request, *args, **kwargs):
-        if not (request.query_params.get("visit") or request.query_params.get("patient")):
+        if not (request.query_params.get("visit") or request.query_params.get("patient") or request.query_params.get("prescription")):
             raise ValidationError({"visit": "Choose a check-up or a patient."})
         pages = self.get_queryset()
         log_action(request, "view", None, object_type="prescriptions.handwritten", object_repr="list",

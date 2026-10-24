@@ -4,7 +4,7 @@
 // - Undo / Redo: buttons at the top, or Ctrl+Z / Ctrl+Y (Ctrl+Shift+Z) while the check-up is open.
 // SAFE TO EDIT: AUTOSAVE_MS, RETRY_MS, UNDO_STEPS below.
 import {
-  AlertOutlined, CheckCircleOutlined, CloudSyncOutlined, FileSearchOutlined, RedoOutlined, SaveOutlined, UndoOutlined,
+  AlertOutlined, CheckCircleOutlined, CloudSyncOutlined, EditOutlined, FileSearchOutlined, RedoOutlined, SaveOutlined, UndoOutlined,
 } from '@ant-design/icons';
 import { Alert, App, Button, Card, Modal, Skeleton, Space, Tag, Tooltip } from 'antd';
 import dayjs from 'dayjs';
@@ -19,6 +19,7 @@ import type {
 import { useAuth } from '../../auth/AuthContext';
 import { OpdBillModal } from '../billing/OpdBillModal';
 import { PlanTherapyButton } from '../therapy/PlanTherapyButton';
+import { HandwritingModal } from './handwriting/HandwritingModal';
 import { PrintMenu } from './PrintMenu';
 import { genderAge } from '../patients/PatientsPage';
 import { VitalsTab } from '../patients/tabs/VitalsTab';
@@ -97,6 +98,7 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
   const [saveState, setSaveState] = useState<'saved' | 'dirty' | 'saving' | 'error'>('saved');
   const [error, setError] = useState<string | null>(null);
   const readOnly = !can('emr.edit');
+  const [handwritingOpen, setHandwritingOpen] = useState(false);
   const canSeeRx = can('prescriptions.view');
   const rxReadOnly = !can('prescriptions.create');
 
@@ -407,6 +409,9 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
   return (
     <div className="workspace" ref={workspaceRef}>
       {billOpen && <OpdBillModal target={{ visit: visitId }} onClose={() => setBillOpen(false)} />}
+      {handwritingOpen && (
+        <HandwritingModal open visitId={visitId} patientName={visit.patient_detail.full_name} onClose={() => setHandwritingOpen(false)} />
+      )}
       <div className="workspace-main">
         <Card className="visit-head" size="small">
           <div className="visit-head-row">
@@ -443,6 +448,9 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
               <PrintMenu visitId={visit.id} rxId={rx.id} hasFollowUp={!!draft.follow_up_date} patientName={p.full_name}
                 language={patient?.preferred_language} doctorId={visit.doctor} diagnoses={draft.diagnoses.map((d) => d.label)}
                 beforePrint={() => save()} />
+              {can('prescriptions.create') && (
+                <Button size="small" icon={<EditOutlined />} onClick={() => setHandwritingOpen(true)}>{t('handwriting.open')}</Button>
+              )}
               <PlanTherapyButton patientId={p.id} patientName={p.full_name} visitId={visit.id} />
               {(can('billing.charge') || can('billing.create')) && (
                 <Tooltip title={t('consult.billHelp')}>

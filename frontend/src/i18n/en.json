@@ -2138,5 +2138,38 @@
       "sgst": "SGST",
       "tax": "Total GST"
     }
+  },
+  "handwriting": {
+    "open": "Handwriting",
+    "title": "Handwritten prescription",
+    "pen": "Pen",
+    "eraser": "Eraser",
+    "thickness": "Thickness",
+    "undo": "Undo",
+    "clear": "Clear all",
+    "portrait": "Upright",
+    "landscape": "Wide",
+    "paper": "Paper",
+    "color": {
+      "black": "Black",
+      "blue": "Blue",
+      "red": "Red"
+    },
+    "save": "Save prescription",
+    "nothing": "Write something first.",
+    "saveFailed": "Could not save the handwriting. Please try again.",
+    "saved": "Saved",
+    "savedHelp": "Your handwriting and the clinic letterhead are saved together as one picture ({{number}}).",
+    "print": "Print",
+    "another": "Write another page",
+    "done": "Done",
+    "earlier": "Pages saved for this check-up",
+    "noPages": "No handwritten pages yet.",
+    "page": "Page {{n}}",
+    "removeAsk": "Remove this page?",
+    "removed": "Page removed.",
+    "unsavedAsk": "The handwriting is not saved yet. Close without saving?",
+    "discard": "Close without saving",
+    "hint": "Write with the pad pen (set the pad to Mouse mode in iScribe4U), a tablet pen, your finger or a mouse."
   }
 }

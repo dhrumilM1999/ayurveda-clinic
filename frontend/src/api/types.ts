@@ -1236,3 +1236,16 @@ export interface TherapyOptions {
   therapists: { id: string; name: string }[];
   rooms: { id: string; name: string; capacity: number }[];
 }
+
+// ---- Handwritten prescription (digital pad) ----
+export interface HandwrittenPage {
+  id: string;
+  visit: string;
+  patient: string;
+  paper: 'a5' | 'a4';
+  number: string;
+  created_at: string;
+  width_px: number;
+  height_px: number;
+  doctor_name: string;
+}
