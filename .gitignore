@@ -27,8 +27,8 @@ Thumbs.db
 backups/
 backend/.venv/
 
-# Demo videos are too big for Git (keep them on the PC or in Google Drive); captions are committed
-demo-video/*.mp4
+# Demo videos are not needed in Git (stopped; kept on the PC only)
+demo-video/
 
 # Compiled TypeScript output (the app is built by Vite; never commit these)
 frontend/src/**/*.js
