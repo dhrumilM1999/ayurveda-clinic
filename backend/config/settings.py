@@ -42,6 +42,10 @@ if APP_ENV == "production" and SECRET_KEY.startswith("dev-only"):
     raise ImproperlyConfigured("Set a real DJANGO_SECRET_KEY in .env before running in production.")
 
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,backend")
+# On a development PC the clinic's own network address (for example 192.168.1.50 when a phone opens the app) changes
+# with the router, so any address is accepted while DEBUG is on. A live server (DEBUG off) uses only the list above.
+if DEBUG:
+    ALLOWED_HOSTS = ["*"]
 CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS", "http://localhost:5173,http://localhost:8000")
 
 INSTALLED_APPS = [
