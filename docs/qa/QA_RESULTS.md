@@ -5,7 +5,7 @@ Audit of `docs/qa/QA_CHECKLIST.md` (the owner's checklist). Written from real ru
 ## Final QA summary
 
 - **Audit date:** 2026-10-24
-- **Git branch / commit:** feature/panchakarma at 86806d5 (plus this report). Go-live branches (security hardening, deployment, backups) were NOT part of this branch and are marked BLOCKED where needed
+- **Git branch / commit:** feature/panchakarma at cee3359 (plus this report). Go-live branches (security hardening, deployment, backups) were NOT part of this branch and are marked BLOCKED where needed
 - **Environment:** developer PC, Docker Compose (Django 5, PostgreSQL 16, Vite dev server), fictional demo data only
 - **Total checklist items:** 427
 - **PASS:** 354   **FAIL:** 24   **BLOCKED:** 8   **NOT RUN:** 41
