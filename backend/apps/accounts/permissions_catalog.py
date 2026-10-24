@@ -75,7 +75,8 @@ DEFAULT_ROLES = {
             "emr.view", "emr.edit",
             "prescriptions.view", "prescriptions.create",
             "medicines.view", "therapy.view", "therapy.manage",
-            "billing.view", "billing.charge", "reports.view", "ai.use",
+            # The doctor may collect the fee in the room (the front desk may too): billing.create = take payments
+            "billing.view", "billing.charge", "billing.create", "reports.view", "ai.use",
         ],
     },
     "receptionist": {

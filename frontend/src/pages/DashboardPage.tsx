@@ -146,7 +146,7 @@ export default function DashboardPage() {
           <div className="section-title" style={{ marginTop: 16 }}>{t('dashboard.moneyToday')}</div>
           <Tiles tiles={[
             ...(hasFeature('opd_billing')
-              ? [{ key: 'opdCollection', icon: <WalletOutlined />, color: c.primary, value: money(m.opd), note: t('dashboard.opdCollectionNote'), link: '/billing' }] : []),
+              ? [{ key: 'opdCollection', icon: <WalletOutlined />, color: c.primary, value: money(m.opd), note: t(hasFeature('combined_opd_bill') ? 'dashboard.opdCollectionNoteCombined' : 'dashboard.opdCollectionNote'), link: '/billing' }] : []),
             ...(features.pharmacy !== false && hasFeature('pharmacy_billing')
               ? [{ key: 'pharmacyCollection', icon: <ShopOutlined />, color: '#8a4fa8', value: money(m.pharmacy), note: t('dashboard.pharmacyCollectionNote'), link: '/billing' }] : []),
             { key: 'totalCollection', icon: <WalletOutlined />, color: '#3d6fb6', value: money(m.total), note: t('dashboard.totalCollectionNote') },

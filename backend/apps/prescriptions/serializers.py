@@ -12,14 +12,22 @@ MAX_LINES = 40
 
 class PrescriptionItemSerializer(serializers.ModelSerializer):
     medicine_flags = serializers.SerializerMethodField()
+    # Packs of this medicine the branch can give today (None = not a stock medicine / pharmacy module off)
+    stock_available = serializers.SerializerMethodField()
 
     class Meta:
         model = PrescriptionItem
         fields = [
             "id", "medicine", "medicine_name", "medicine_kind", "medicine_version", "dosage_form", "dose",
             "dose_unit", "frequency", "timing", "anupana", "duration", "duration_unit", "quantity",
-            "instructions", "medicine_flags",
+            "instructions", "medicine_flags", "stock_available",
         ]
+
+    def get_stock_available(self, obj):
+        stock = self.context.get("stock")
+        if stock is None or obj.medicine_id is None:
+            return None
+        return str(stock.get(obj.medicine_id, 0))
 
     def get_medicine_flags(self, obj):
         m = obj.medicine

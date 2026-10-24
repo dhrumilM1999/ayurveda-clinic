@@ -1,7 +1,7 @@
 // Small helpers for writing prescriptions quickly.
 
 /** The quick choices for medicine days and follow-up days. */
-export const DAY_CHOICES = [3, 5, 7, 15, 30, 60, 90, 180];
+export const DAY_CHOICES = [3, 5, 7, 15, 30, 60, 90, 120, 150, 180];
 
 /**
  * Quick dosage: three digits become morning-noon-night.
@@ -52,4 +52,24 @@ export function autoQuantity(line: { dose: string; dose_unit: string; frequency:
   const total = Math.ceil(dose * perDay * days * 100) / 100;
   if (!total) return '';
   return `${total} ${total === 1 ? line.dose_unit.toLowerCase() : unit}`;
+}
+
+/**
+ * Is a dosage pattern such as "1-0-1" believable? Returns 'format' when it is not a morning-noon-night pattern
+ * (e.g. "2222"), 'high' when one time is more than 10 (e.g. "2-2-22" from a typing slip), else null (fine).
+ * Free words (e.g. "SOS", "as needed") and empty values are never flagged.
+ */
+export function dosageProblem(frequency: string): 'format' | 'high' | null {
+  const v = (frequency || '').trim();
+  if (!v || /[a-z]/i.test(v)) return null;
+  if (/^\d{4,}$/.test(v)) return 'format';
+  const parts = v.split('-');
+  if (parts.length < 2 || parts.length > 4) return 'format';
+  let high = false;
+  for (const p of parts) {
+    const n = amount(p);
+    if (n === null) return 'format';
+    if (n > 10) high = true;
+  }
+  return high ? 'high' : null;
 }

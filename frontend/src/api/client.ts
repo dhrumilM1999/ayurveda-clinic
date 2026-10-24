@@ -3,6 +3,7 @@
 // - When the short-lived token expires, gets a new one once, then retries.
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { tokenStore } from '../auth/tokenStore';
+import { addStep, getSessionId, plainPath, sendReport } from '../errorLog/tracker';
 
 export const api = axios.create({ baseURL: '/api/v1' });
 
@@ -11,6 +12,7 @@ api.interceptors.request.use((config) => {
   if (token) config.headers.Authorization = `Bearer ${token}`;
   const branch = tokenStore.getBranch();
   if (branch) config.headers['X-Branch-ID'] = branch;
+  config.headers['X-Session-ID'] = getSessionId();
   return config;
 });
 
@@ -20,6 +22,22 @@ export function setSessionExpiredHandler(handler: () => void) {
 }
 
 let refreshing: Promise<string | null> | null = null;
+
+/** Puts a failed call in the trail; tells the Error log when the server could not be reached or crashed. */
+function noteFailedCall(failure: AxiosError) {
+  const error = failure as AxiosError<{ code?: string }>;
+  if (axios.isCancel(error)) return; // a search that was replaced by a newer one
+  const method = (error.config?.method ?? 'get').toUpperCase();
+  const path = plainPath(error.config?.url);
+  const status = error.response?.status;
+  addStep('api', `${method} ${path} ${status ?? 'no answer'}`);
+  if (!error.response) {
+    sendReport({ kind: 'network', message: `Could not reach the server: ${method} ${path}`, path, method, extra: { error_code: error.code ?? '' } });
+  } else if (status && status >= 500 && error.response.data?.code) {
+    // The server already wrote this one; add what the person did before it
+    sendReport({ kind: 'trail', code: error.response.data.code, path, method, status_code: status });
+  }
+}
 
 async function refreshAccessToken(): Promise<string | null> {
   const refresh = tokenStore.getRefresh();
@@ -34,8 +52,12 @@ async function refreshAccessToken(): Promise<string | null> {
 }
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    addStep('api', `${(response.config.method ?? 'get').toUpperCase()} ${plainPath(response.config.url)} ${response.status}`);
+    return response;
+  },
   async (error: AxiosError) => {
+    noteFailedCall(error);
     const original = error.config as (InternalAxiosRequestConfig & { _retried?: boolean }) | undefined;
     if (error.response?.status === 401 && original && !original._retried && tokenStore.getRefresh()) {
       original._retried = true;

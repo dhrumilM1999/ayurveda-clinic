@@ -15,12 +15,14 @@ Keep everything inside {{ }} and {% %}.
   * { box-sizing: border-box; }
   body { margin: 0; font-family: "Noto Sans", "Noto Sans Gujarati", "Noto Sans Devanagari", sans-serif; font-size: {{ ps.base_pt|default:"10" }}pt; color: #1d1d1d; }
   .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 4mm; border-bottom: 0.6mm solid {{ ps.accent_color|default:"#1f5c46" }}; padding-bottom: 2mm; }
-  .brand { display: flex; gap: 3mm; align-items: center; }
+  .brand { display: flex; gap: 3mm; align-items: center; max-width: 58%; }
   .brand img { max-height: 16mm; max-width: 30mm; }
+  /* the address wraps inside this width, so it never runs under the doctor's name on the right */
+  .brand > div:last-child { max-width: {% if size == "a4" %}72mm{% elif size == "a5" %}46mm{% else %}34mm{% endif %}; }
   .org { font-size: 1.6em; font-weight: 700; color: {{ ps.accent_color|default:"#1f5c46" }}; line-height: 1.1; }
   .muted { color: #5c5c5c; }
   .small { font-size: 0.85em; }
-  .doctor { text-align: right; }
+  .doctor { text-align: right; max-width: 40%; }
   .doctor b { font-size: 1.1em; }
   .title { text-align: center; font-weight: 700; letter-spacing: 0.4mm; margin: 2.5mm 0; font-size: 1.15em; }
   .watermark { position: fixed; top: 40%; left: 0; right: 0; text-align: center; font-size: 36pt; color: rgba(192, 57, 43, 0.15); transform: rotate(-25deg); font-weight: 700; }

@@ -77,7 +77,9 @@
     "enquiries": "Online enquiry",
     "reports": "Reports",
     "therapy": "Panchakarma",
-    "pdfSettings": "PDF settings"
+    "pdfSettings": "PDF settings",
+    "calendar": "Calendar",
+    "errorLog": "Error log"
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",
@@ -121,7 +123,8 @@
     "totalCollectionNote": "Cash + UPI + card, minus refunds",
     "stillDue": "Still to collect",
     "stillDueNote_one": "{{count}} bill of today not fully paid",
-    "stillDueNote_other": "{{count}} bills of today not fully paid"
+    "stillDueNote_other": "{{count}} bills of today not fully paid",
+    "opdCollectionNoteCombined": "Consultation, services and medicines on the one bill, received today"
   },
   "branches": {
     "title": "Branches",
@@ -647,7 +650,8 @@
       "completed": "Done",
       "cancelled": "Cancelled",
       "no_show": "Did not come"
-    }
+    },
+    "clickToStart": "Doctor: click a patient to start the check-up. The patient becomes With doctor."
   },
   "queue": {
     "title": "Queue",
@@ -727,7 +731,8 @@
       "followUp": "Follow-up",
       "progress": "Progress",
       "photos": "Photos",
-      "rx": "Rx (medicines)"
+      "rx": "Rx (medicines)",
+      "investigations": "Lab tests"
     },
     "units": {
       "days": "days",
@@ -803,7 +808,16 @@
     "reopen": "Re-open check-up",
     "reopenAsk": "Re-open this check-up?",
     "reopenHelp": "Use this if you pressed Complete visit by mistake or need to correct something. The prescription becomes a draft again until you complete the visit. Not possible after the pharmacy has given medicines.",
-    "reopenedMsg": "The check-up is open again."
+    "reopenedMsg": "The check-up is open again.",
+    "idLabel": "ID {{id}}",
+    "idHelp": "Patient ID: the number that belongs to this patient for life.",
+    "tokenLabel": "Token {{n}}",
+    "tokenHelp": "Token: today's waiting-room number. A new one every day.",
+    "step1": "The receptionist gives a token or checks the patient in. The patient shows as Waiting.",
+    "step2": "Click the patient on the left. The check-up opens and the patient becomes With doctor.",
+    "step3": "Write complaints, diagnosis and medicines. Everything saves by itself.",
+    "step4": "Press Complete visit. The prescription goes to the pharmacy and the bill is ready.",
+    "manyPatients": "You may keep more than one patient With doctor and go back and forth; each one stays With doctor until you press Complete visit."
   },
   "templatesAdmin": {
     "title": "Check-up templates",
@@ -1013,7 +1027,16 @@
     "hasDanger": "has serious warnings",
     "instructionsLabel": "Instructions",
     "repeat_one": "Repeat this medicine",
-    "repeat_other": "Repeat these {{count}} medicines"
+    "repeat_other": "Repeat these {{count}} medicines",
+    "stock": {
+      "none": "Not in stock",
+      "few": "Only {{n}} left",
+      "ok": "In stock: {{n}}"
+    },
+    "dosageCheck": {
+      "format": "Please check: write it like 1-0-1 or type 3 digits (101).",
+      "high": "Please check: more than 10 at one time?"
+    }
   },
   "pharmacy": {
     "title": "Pharmacy",
@@ -1128,7 +1151,8 @@
       "out": "Out of stock",
       "low": "Low stock",
       "expiring": "Near expiry",
-      "expired": "Expired in stock"
+      "expired": "Expired in stock",
+      "needed": "Asked for, not in stock"
     },
     "checkStatus": {
       "open": "Counting",
@@ -1255,7 +1279,16 @@
     "e1NeedsRx": "{{name}} is a Schedule E1 medicine: sell it only against a doctor's prescription.",
     "addedExtra": "{{name}} added (not on the prescription).",
     "notOnRx": "Not on prescription",
-    "outOfStockName": "{{name}}: no stock that can be sold."
+    "outOfStockName": "{{name}}: no stock that can be sold.",
+    "needed": {
+      "title": "Asked for by doctors, not in stock",
+      "help": "Medicines written in prescriptions in the last 30 days that the pharmacy does not have now. Order these first.",
+      "none": "Nothing is missing.",
+      "medicine": "Medicine",
+      "times": "Asked (times)",
+      "last": "Last asked"
+    },
+    "missingStock": "{{n}} not in stock"
   },
   "billing": {
     "status": {
@@ -1352,7 +1385,8 @@
       "stock": "Medicine stock",
       "labels": "Patient medicine labels",
       "stock_labels": "Pharmacy stock labels",
-      "enquiries": "Online enquiry"
+      "enquiries": "Online enquiry",
+      "prescription": "Prescription"
     },
     "features": {
       "opd_billing": {
@@ -1506,6 +1540,10 @@
       "pharmacy_hold_bills": {
         "label": "Hold a counter bill",
         "help": "On the Counter sale tab, put a bill on hold and finish it later (kept in this browser only)."
+      },
+      "digital_pad": {
+        "label": "Digital pad: handwritten prescription",
+        "help": "Shows the Handwriting button in the doctor's check-up: write on the digital pad (or a tablet pen), and the handwriting is saved with the letterhead as one picture. Off: the button is hidden and no new handwriting can be saved; pages already written stay visible. Off by default."
       }
     },
     "choices": {
@@ -1601,7 +1639,8 @@
     },
     "billColumn": "OPD bill",
     "visitBill": "OPD bill",
-    "next": "Next: OPD bill"
+    "next": "Next: OPD bill",
+    "billConsultation": "Bill the consultation"
   },
   "labels": {
     "button": "Labels",
@@ -2138,5 +2177,130 @@
       "sgst": "SGST",
       "tax": "Total GST"
     }
+  },
+  "handwriting": {
+    "open": "Handwriting",
+    "title": "Handwritten prescription",
+    "pen": "Pen",
+    "eraser": "Eraser",
+    "thickness": "Thickness",
+    "undo": "Undo",
+    "clear": "Clear all",
+    "portrait": "Upright",
+    "landscape": "Wide",
+    "paper": "Paper",
+    "color": {
+      "black": "Black",
+      "blue": "Blue",
+      "red": "Red"
+    },
+    "save": "Save prescription",
+    "nothing": "Write something first.",
+    "saveFailed": "Could not save the handwriting. Please try again.",
+    "saved": "Saved",
+    "savedHelp": "Your handwriting and the clinic letterhead are saved together as one picture ({{number}}).",
+    "print": "Print",
+    "another": "Write another page",
+    "done": "Done",
+    "earlier": "Pages saved for this check-up",
+    "noPages": "No handwritten pages yet.",
+    "page": "Page {{n}}",
+    "removeAsk": "Remove this page?",
+    "removed": "Page removed.",
+    "unsavedAsk": "The handwriting is not saved yet. Close without saving?",
+    "discard": "Close without saving",
+    "hint": "Write with the pad pen (set the pad to Mouse mode in iScribe4U), a tablet pen, your finger or a mouse."
+  },
+  "calendar": {
+    "title": "Calendar",
+    "subtitle": "Which days have free time. Click a day to see its times and book.",
+    "prev": "Previous month",
+    "next": "Next month",
+    "closed": "Closed",
+    "free": "{{n}} free",
+    "patients": "{{n}} patients",
+    "dayLine": "{{free}} times free, {{booked}} booked, {{walk}} walk-in",
+    "pickDoctor": "Choose a doctor to see the times.",
+    "noSlots": "The doctor does not sit on this day.",
+    "past": "Passed",
+    "freeTag": "Free",
+    "bookThis": "Book",
+    "walkIns": "Walk-ins today"
+  },
+  "investigations": {
+    "pick": "Search a test (e.g. CBC, sugar, X-ray)",
+    "advise": "Advise test",
+    "adviseTyped": "Advise typed test",
+    "notInList": "\"{{name}}\" is not in the list. Press the button to advise it by this name.",
+    "help": "Pick from the list or type any test name. When the patient brings the report, press Add report.",
+    "none": "No tests advised in this check-up.",
+    "earlier": "Reports still waiting from earlier check-ups ({{n}})",
+    "advisedOn": "Advised {{date}}",
+    "reportedOn": "Report {{date}}",
+    "viewReport": "View report",
+    "addReport": "Add report",
+    "replaceReport": "Change report",
+    "markDone": "Mark done",
+    "removeAsk": "Remove this test from the check-up?",
+    "status": {
+      "advised": "Waiting for report",
+      "done": "Report received",
+      "cancelled": "Not needed"
+    }
+  },
+  "errorLog": {
+    "title": "Error log",
+    "help": "Everything that went wrong for anyone, from the moment they logged in: server errors, screens that crashed, lost connections, and actions that were refused. The same problem again is counted on one line. Press a line to see the steps the person took before it.",
+    "open": "Open errors",
+    "warnings": "Warnings",
+    "notices": "Notices",
+    "last24": "Problems in last 24 hours",
+    "level": {
+      "error": "Error",
+      "warning": "Warning",
+      "notice": "Notice"
+    },
+    "levelHelp": "Error = something broke. Warning = an action was refused. Notice = a mistake in what was entered.",
+    "source": {
+      "backend": "Server",
+      "frontend": "Screen"
+    },
+    "sourceFilter": "Where from",
+    "levelFilter": "How serious",
+    "state": "Status",
+    "stateOpen": "Still open",
+    "stateDone": "Resolved",
+    "stateAll": "All",
+    "when": "Last time",
+    "first": "First time",
+    "who": "Who",
+    "branch": "Branch",
+    "where": "Where",
+    "what": "What happened",
+    "times": "Times",
+    "code": "Code",
+    "details": "Technical detail",
+    "trail": "What the person did before it (oldest first)",
+    "noTrail": "No steps were saved for this one.",
+    "session": "This login",
+    "sessionHelp": "Show everything from the same login",
+    "clearSession": "Show all again",
+    "resolve": "Mark solved",
+    "reopen": "Open again",
+    "note": "Note",
+    "noteSaved": "Saved",
+    "copy": "Copy for Claude",
+    "copied": "Copied. Paste it in the chat with Claude.",
+    "none": "No errors. All good.",
+    "resolvedBy": "Solved by {{name}}",
+    "searchHelp": "Search by name, message, page or code",
+    "crash": {
+      "title": "This screen had a problem",
+      "text": "It has been written to the Error log, so it can be fixed. Your work before this is saved.",
+      "code": "Code: {{code}}.",
+      "reload": "Reload",
+      "home": "Go to start"
+    },
+    "developer": "Developer details"
   }
 }

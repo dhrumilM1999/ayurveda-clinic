@@ -8,6 +8,7 @@ Safe to run any time (runs automatically on start). Never changes or removes exi
 from django.core.management.base import BaseCommand
 
 from apps.common.services import ensure_master_values
+from apps.emr.investigations import load_sample_lab_tests
 from apps.emr.services import ensure_exam_templates
 from apps.organizations.models import Organization
 from apps.patients.services import ensure_consent_purposes
@@ -17,6 +18,7 @@ def ensure_defaults_for(organization):
     masters = ensure_master_values(organization)
     purposes = ensure_consent_purposes(organization)
     ensure_exam_templates(organization)
+    load_sample_lab_tests(organization)  # only adds names that are missing
     return masters, purposes
 
 

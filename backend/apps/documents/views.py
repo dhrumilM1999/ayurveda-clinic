@@ -28,7 +28,7 @@ from .print_settings import page_settings
 from .serializers import CertificateSerializer
 from .services import (
     SIZES, case_sheet_context, certificate_context, detailed_context, follow_up_context, issue, language_of, mark_printed, pad_for,
-    prakriti_context, prescription_context, therapy_plan_context, render, verify_url, _qr,
+    handwritten_rx_context, prakriti_context, prescription_context, therapy_plan_context, render, verify_url, _qr,
 )
 from .words import words_for
 
@@ -38,6 +38,7 @@ PERMISSIONS = {  # any one of these codes
     "prakriti": ("emr.view",),
     "certificate": ("emr.view",),
     "therapy-plan": ("therapy.view",),
+    "handwritten-rx": ("prescriptions.view",),
 }
 
 
@@ -80,6 +81,16 @@ def _load(kind, request, pk):
         doc = issue("certificate", cert.id, branch=branch, patient=cert.patient, doctor=cert.doctor,
                     issued_on=cert.issued_on, number=cert.number)
         return cert, doc, "certificate.html", lambda lang: certificate_context(cert, lang), cert.patient
+    if kind == "handwritten-rx":
+        from apps.prescriptions.models import HandwrittenPrescription
+
+        hw = (HandwrittenPrescription.objects.filter(branch=branch, pk=pk)
+              .select_related("visit__appointment", "patient", "doctor", "branch__organization").first())
+        if hw is None:
+            raise NotFound("Handwritten prescription not found.")
+        doc = issue("handwritten_rx", hw.id, branch=branch, patient=hw.patient, doctor=hw.doctor,
+                    issued_on=hw.visit.visit_date, series="RX")
+        return hw, doc, "prescription_handwritten.html", lambda lang: handwritten_rx_context(hw, lang), hw.patient
     if kind == "therapy-plan":
         from apps.therapy.models import TherapyPlan
 
@@ -92,7 +103,7 @@ def _load(kind, request, pk):
 
 
 DOC_TYPE = {"prescription": "prescription", "follow-up-card": "follow_up_card", "prakriti": "prakriti_report",
-            "certificate": "certificate", "therapy-plan": "therapy_plan"}
+            "certificate": "certificate", "therapy-plan": "therapy_plan", "handwritten-rx": "prescription"}
 
 
 def compose(branch, kind, record, template, make, *, lang, size, detailed, number, duplicate, qr, cancelled, ps):
@@ -118,7 +129,7 @@ def compose(branch, kind, record, template, make, *, lang, size, detailed, numbe
     context.update({
         "number": number, "duplicate": duplicate, "qr": qr, "is_cancelled": cancelled,
         # Prescriptions on the clinic's pre-printed pad (Settings -> Branch details)
-        "pad": pad_for(branch, size) if kind == "prescription" else None,
+        "pad": pad_for(branch, size) if kind in ("prescription", "handwritten-rx") else None,
     })
     return template, size, context
 

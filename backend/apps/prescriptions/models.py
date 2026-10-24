@@ -79,3 +79,42 @@ class PrescriptionTemplate(OrgScopedModel):
 
     def __str__(self):
         return self.name
+
+
+def _private_storage():
+    from django.core.files.storage import storages
+
+    return storages["private"]
+
+
+def handwriting_path(instance, filename):
+    """Saved under a random name, so the file name never shows patient details."""
+    import uuid
+
+    return f"patients/{instance.patient_id}/handwriting/{uuid.uuid4().hex}.png"
+
+
+class HandwrittenPrescription(BranchScopedModel):
+    """
+    A prescription the doctor wrote by hand on the digital pad (or any pen screen).
+    - `ink`: only the handwriting (transparent PNG).
+    - `image`: ONE picture = the clinic letterhead + patient details + the handwriting + signature and QR.
+    A doctor may write several pages for one check-up. Never deleted (a mistake is replaced by a new page and the
+    old one is marked removed). Private storage only; every view is written to the audit log.
+    """
+
+    visit = models.ForeignKey("emr.Visit", on_delete=models.PROTECT, related_name="handwritten_prescriptions")
+    prescription = models.ForeignKey(Prescription, null=True, blank=True, on_delete=models.PROTECT,
+                                     related_name="handwritten_pages")
+    patient = models.ForeignKey("patients.Patient", on_delete=models.PROTECT, related_name="handwritten_prescriptions")
+    doctor = models.ForeignKey("accounts.User", on_delete=models.PROTECT, related_name="+")
+    paper = models.CharField(max_length=4, default="a5")  # a5 or a4: the page the combined picture was made for
+    ink = models.FileField(storage=_private_storage, upload_to=handwriting_path)
+    image = models.FileField(storage=_private_storage, upload_to=handwriting_path, blank=True)
+    number = models.CharField(max_length=40, blank=True)  # the Rx number printed on the page
+    width_px = models.PositiveIntegerField(default=0)
+    height_px = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["created_at"]
+        indexes = [models.Index(fields=["branch", "created_at"])]

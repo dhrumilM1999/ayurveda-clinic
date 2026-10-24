@@ -58,6 +58,9 @@ class VisitSerializer(serializers.ModelSerializer):
     exams = serializers.SerializerMethodField()
     photos = serializers.SerializerMethodField()
     prakriti = serializers.SerializerMethodField()
+    # "new" patient (first check-up) or a follow-up (came before), and where the appointment stands (With doctor, Done ...)
+    is_follow_up = serializers.SerializerMethodField()
+    appointment_status = serializers.CharField(source="appointment.status", read_only=True, default=None)
     complaints = serializers.JSONField(required=False)
     diagnoses = serializers.JSONField(required=False)
     advice = serializers.JSONField(required=False)
@@ -68,7 +71,8 @@ class VisitSerializer(serializers.ModelSerializer):
             "id", "patient", "patient_detail", "doctor", "doctor_name", "branch", "branch_name",
             "appointment", "token_number", "visit_date", "status", "completed_at",
             "complaints", "history_notes", "examination_notes", "diagnoses", "advice", "advice_notes",
-            "follow_up_date", "follow_up_notes", "exams", "photos", "prakriti", "created_at", "updated_at",
+            "follow_up_date", "follow_up_notes", "exams", "photos", "prakriti", "is_follow_up", "appointment_status",
+            "created_at", "updated_at",
         ]
         read_only_fields = [
             "id", "patient", "doctor", "branch", "appointment", "visit_date", "status", "completed_at",
@@ -77,6 +81,9 @@ class VisitSerializer(serializers.ModelSerializer):
 
     def get_patient_detail(self, obj):
         return patient_summary(obj.patient)
+
+    def get_is_follow_up(self, obj):
+        return Visit.objects.filter(patient_id=obj.patient_id, created_at__lt=obj.created_at).exclude(pk=obj.pk).exists()
 
     def get_exams(self, obj):
         return VisitExamSerializer(obj.exams.all(), many=True).data

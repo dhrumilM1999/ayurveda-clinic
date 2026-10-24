@@ -6,6 +6,9 @@ import './styles.css';
 import App from './App';
 import { AuthProvider } from './auth/AuthContext';
 import { BrandingProvider } from './branding/BrandingContext';
+import { installGlobalHandlers } from './errorLog/tracker';
+
+installGlobalHandlers();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

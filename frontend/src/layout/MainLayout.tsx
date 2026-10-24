@@ -11,6 +11,8 @@ import { BrandLogo } from '../branding/BrandLogo';
 import { useBranding } from '../branding/BrandingContext';
 import { clinicConfig } from '../config/clinic';
 import { menuItems } from '../config/menu';
+import { ErrorBoundary } from '../errorLog/ErrorBoundary';
+import { addStep } from '../errorLog/tracker';
 import { LANGUAGES, setLanguage } from '../i18n';
 
 const { Header, Sider, Content } = Layout;
@@ -34,6 +36,7 @@ export default function MainLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  useEffect(() => { addStep('page', location.pathname); }, [location.pathname]);
 
   const onIdle = useCallback(() => logout('idle'), [logout]);
   useIdleLogout(me?.idle_timeout_minutes, onIdle);
@@ -120,10 +123,7 @@ export default function MainLayout() {
               options={me?.branches.map((b) => ({ value: b.id, label: b.name }))}
               placeholder={t('layout.chooseBranch')}
               aria-label={t('layout.branch')}
-            /> : (
-              // Single-branch mode: just show the clinic / branch name
-              <span className="branch-name"><EnvironmentOutlined /> {branch?.name}</span>
-            )}
+            /> : null /* one clinic: nothing to choose, so no branch name here */}
           </div>
           <div className="app-header-right">
             <Segmented
@@ -157,7 +157,7 @@ export default function MainLayout() {
             <Alert type="warning" showIcon message={t('layout.noBranch')} />
           ) : (
             // key={branch.id}: reload the screen when the branch changes
-            <Outlet key={branch.id} />
+            <ErrorBoundary resetKey={location.pathname}><Outlet key={branch.id} /></ErrorBoundary>
           )}
         </Content>
       </Layout>

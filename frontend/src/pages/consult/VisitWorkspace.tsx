@@ -4,7 +4,7 @@
 // - Undo / Redo: buttons at the top, or Ctrl+Z / Ctrl+Y (Ctrl+Shift+Z) while the check-up is open.
 // SAFE TO EDIT: AUTOSAVE_MS, RETRY_MS, UNDO_STEPS below.
 import {
-  AlertOutlined, CheckCircleOutlined, CloudSyncOutlined, FileSearchOutlined, RedoOutlined, SaveOutlined, UndoOutlined,
+  AlertOutlined, CheckCircleOutlined, CloudSyncOutlined, EditOutlined, FileSearchOutlined, RedoOutlined, SaveOutlined, UndoOutlined,
 } from '@ant-design/icons';
 import { Alert, App, Button, Card, Modal, Skeleton, Space, Tag, Tooltip } from 'antd';
 import dayjs from 'dayjs';
@@ -19,6 +19,7 @@ import type {
 import { useAuth } from '../../auth/AuthContext';
 import { OpdBillModal } from '../billing/OpdBillModal';
 import { PlanTherapyButton } from '../therapy/PlanTherapyButton';
+import { HandwritingModal } from './handwriting/HandwritingModal';
 import { PrintMenu } from './PrintMenu';
 import { genderAge } from '../patients/PatientsPage';
 import { VitalsTab } from '../patients/tabs/VitalsTab';
@@ -27,6 +28,7 @@ import {
   TemplateSection, type VisitDraft,
 } from './sections';
 import { PhotosSection, ProgressSection } from './extraSections';
+import { InvestigationsSection } from './InvestigationsSection';
 import { DaysBar } from './DaysBar';
 import { RxSection, withQuantity, type RxDraft } from './RxSection';
 import { usePrakritiName, useTemplateName } from './shared';
@@ -81,7 +83,7 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
 }) {
   const { t } = useTranslation();
   const { message, modal } = App.useApp();
-  const { can, hasFeature } = useAuth();
+  const { can, hasFeature, multiBranch, multiDoctor } = useAuth();
   const [billOpen, setBillOpen] = useState(false); // OPD bill popup (services & charges for this check-up)
   const templateName = useTemplateName();
   const prakritiName = usePrakritiName();
@@ -97,6 +99,7 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
   const [saveState, setSaveState] = useState<'saved' | 'dirty' | 'saving' | 'error'>('saved');
   const [error, setError] = useState<string | null>(null);
   const readOnly = !can('emr.edit');
+  const [handwritingOpen, setHandwritingOpen] = useState(false);
   const canSeeRx = can('prescriptions.view');
   const rxReadOnly = !can('prescriptions.create');
 
@@ -390,6 +393,7 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
     ...templates.map((tpl) => ({ key: `tpl:${tpl.code}`, label: templateName(tpl) })),
     { key: 'progress', label: t('consult.sections.progress') },
     { key: 'photos', label: t('consult.sections.photos') },
+    ...(can('emr.view') ? [{ key: 'investigations', label: t('consult.sections.investigations') }] : []),
     { key: 'diagnosis', label: t('consult.sections.diagnosis') },
     ...(canSeeRx ? [{ key: 'rx', label: t('consult.sections.rx') }] : []),
     { key: 'advice', label: t('consult.sections.advice') },
@@ -407,25 +411,30 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
   return (
     <div className="workspace" ref={workspaceRef}>
       {billOpen && <OpdBillModal target={{ visit: visitId }} onClose={() => setBillOpen(false)} />}
+      {handwritingOpen && (
+        <HandwritingModal open visitId={visitId} patientName={visit.patient_detail.full_name} onClose={() => setHandwritingOpen(false)} />
+      )}
       <div className="workspace-main">
         <Card className="visit-head" size="small">
           <div className="visit-head-row">
             <div style={{ minWidth: 0 }}>
               <Space size={8} wrap>
                 <Link to={`/patients/${p.id}`} className="visit-patient">{p.full_name}</Link>
-                <span className="uhid-chip">{p.uhid}</span>
+                <Tooltip title={t('consult.idHelp')}><span className="uhid-chip">{t('consult.idLabel', { id: p.uhid })}</span></Tooltip>
                 <span className="cell-sub">{genderAge(t, p.gender, p.age_years)}</span>
-                {visit.token_number && <span className="token-chip">#{visit.token_number}</span>}
+                {visit.token_number && <Tooltip title={t('consult.tokenHelp')}><span className="token-chip">{t('consult.tokenLabel', { n: visit.token_number })}</span></Tooltip>}
+                <Tag color={visit.is_follow_up ? 'cyan' : 'blue'} bordered={false}>{visit.is_follow_up ? t('consult.followUpTag') : t('consult.newTag')}</Tag>
+                {visit.status === 'draft' && visit.appointment_status === 'in_consultation' && <Tag color="green">{t('appointments.status.in_consultation')}</Tag>}
                 {visit.prakriti?.type && (
                   <Tag color="purple">{t('consult.prakritiTag', { type: prakritiName(visit.prakriti.type) })}</Tag>
                 )}
                 {visit.status === 'completed' && <Tag color="green" icon={<CheckCircleOutlined />}>{t('consult.completed')}</Tag>}
               </Space>
               <div className="cell-sub">
-                {dayjs(visit.visit_date).format('DD-MM-YYYY')} · {visit.doctor_name} · {visit.branch_name}
+                {[dayjs(visit.visit_date).format('DD-MM-YYYY'), multiDoctor ? visit.doctor_name : '', multiBranch ? visit.branch_name : ''].filter(Boolean).join(' · ')}
               </div>
             </div>
-            <Space size={8}>
+            <Space size={[8, 8]} wrap className="visit-actions">
               <span className={`save-state save-${saveState}`}>
                 <CloudSyncOutlined /> {t(`consult.save.${saveState}`)}
               </span>
@@ -437,12 +446,15 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
                   <Tooltip title={t('consult.redoHelp')}>
                     <Button size="small" icon={<RedoOutlined />} disabled={!future.current.length} onClick={redo} aria-label={t('consult.redo')} />
                   </Tooltip>
-                  <Button size="small" icon={<SaveOutlined />} onClick={() => save()}>{t('common.save')}</Button>
+                  <Button size="small" icon={<SaveOutlined />} loading={saveState === 'saving'} onClick={() => save()}>{t('common.save')}</Button>
                 </>
               )}
               <PrintMenu visitId={visit.id} rxId={rx.id} hasFollowUp={!!draft.follow_up_date} patientName={p.full_name}
                 language={patient?.preferred_language} doctorId={visit.doctor} diagnoses={draft.diagnoses.map((d) => d.label)}
                 beforePrint={() => save()} />
+              {can('prescriptions.create') && hasFeature('digital_pad') && (
+                <Button size="small" icon={<EditOutlined />} onClick={() => setHandwritingOpen(true)}>{t('handwriting.open')}</Button>
+              )}
               <PlanTherapyButton patientId={p.id} patientName={p.full_name} visitId={visit.id} />
               {(can('billing.charge') || can('billing.create')) && (
                 <Tooltip title={t('consult.billHelp')}>
@@ -488,6 +500,7 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
           {section === 'progress' && (
             <ProgressSection patientId={visit.patient} visitId={visit.id} visitDate={visit.visit_date} complaints={draft.complaints} />
           )}
+          {section === 'investigations' && <InvestigationsSection visitId={visit.id} patientId={visit.patient} readOnly={readOnly} />}
           {section === 'photos' && <PhotosSection visitId={visit.id} patientId={visit.patient} readOnly={readOnly} />}
           {section === 'complaints' && <ComplaintsSection {...props} />}
           {section === 'history' && <NotesSection {...props} />}
@@ -520,7 +533,7 @@ function PreviousVisits({ patientId, currentId, templates, onRepeat }: {
   onRepeat?: (lines: RxLine[]) => void;
 }) {
   const { t } = useTranslation();
-  const { can } = useAuth();
+  const { can, multiBranch, multiDoctor } = useAuth();
   const [rows, setRows] = useState<VisitListItem[]>([]);
   const [open, setOpen] = useState<Visit | null>(null);
   const [openRx, setOpenRx] = useState<Prescription | null>(null);
@@ -549,7 +562,7 @@ function PreviousVisits({ patientId, currentId, templates, onRepeat }: {
         <button type="button" className="prev-visit" key={v.id}
           onClick={() => openVisit(v.id)}>
           <div className="prev-visit-date">{dayjs(v.visit_date).format('DD-MM-YYYY')}</div>
-          <div className="cell-sub">{v.doctor_name} · {v.branch_name}</div>
+          <div className="cell-sub">{[multiDoctor ? v.doctor_name : '', multiBranch ? v.branch_name : ''].filter(Boolean).join(' · ')}</div>
           {v.diagnoses.length > 0 && <div className="prev-visit-dx">{v.diagnoses.join(', ')}</div>}
           {v.complaints.length > 0 && <div className="cell-sub">{v.complaints.join(', ')}</div>}
         </button>
@@ -568,7 +581,7 @@ function PreviousVisits({ patientId, currentId, templates, onRepeat }: {
         )}>
         {open && (
           <>
-            <div className="cell-sub" style={{ marginBottom: 8 }}>{open.doctor_name} · {open.branch_name}</div>
+            <div className="cell-sub" style={{ marginBottom: 8 }}>{[multiDoctor ? open.doctor_name : '', multiBranch ? open.branch_name : ''].filter(Boolean).join(' · ')}</div>
             <SummarySection draft={toDraft(open)} templates={templates} exams={toExams(open.exams)}
               examFields={toExamFields(open.exams, templates)} rxItems={openRx?.items} rxNotes={openRx?.notes} />
           </>

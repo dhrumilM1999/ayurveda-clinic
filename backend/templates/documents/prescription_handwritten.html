@@ -1,0 +1,28 @@
+{% extends "documents/_doc_base.html" %}
+{% comment %}SAFE TO EDIT: a handwritten prescription page: clinic letterhead, patient line, then the doctor's handwriting
+(from the digital pad) as a picture, then signature and QR. The letterhead, signature and QR come from _doc_base.html and
+follow Settings -> PDF settings. Change .ink-box height to give the handwriting more or less room.{% endcomment %}
+{% block style %}
+  .patient { display: flex; justify-content: space-between; gap: 4mm; margin: 2mm 0; }
+  .ink-box { height: {% if size == "a4" %}175mm{% else %}98mm{% endif %}; margin-top: 2mm; overflow: hidden; }
+  .ink-box img { max-width: 100%; max-height: 100%; }
+  {% if size != "a4" %}
+  .qr img { width: 15mm; height: 15mm; }
+  .sign { min-width: 35mm; }
+  .sign img { max-height: 11mm; }
+  .foot { margin-top: 3mm; }
+  {% endif %}
+{% endblock %}
+{% block content %}
+<div class="patient">
+  <div>
+    <div><b>{{ patient.name }}</b>{% if patient.age is not None %} · {{ patient.age }} {{ w.years }}{% endif %}{% if patient.gender %} · {{ patient.gender }}{% endif %}</div>
+    <div class="small muted">{{ w.patient_id }} {{ patient.uhid }}{% if token %} · {{ w.token }} #{{ token }}{% endif %}</div>
+  </div>
+  <div class="small" style="text-align: right">
+    <div>{{ w.date }} <b>{{ date|date:"d-m-Y" }}</b></div>
+    {% if number %}<div class="muted">{{ w.rx_no }} {{ number }}</div>{% endif %}
+  </div>
+</div>
+<div class="ink-box">{% if ink %}<img src="{{ ink }}" alt="">{% endif %}</div>
+{% endblock %}

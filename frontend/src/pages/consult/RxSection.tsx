@@ -12,10 +12,10 @@ import { api, errorMessage } from '../../api/client';
 import { useLiveLookup } from '../../components/LiveSearch';
 import { useMasterLabel, useMasters } from '../../api/masters';
 import type { Diagnosis, Medicine, Page, Prescription, PrescriptionTemplate, RxLine, RxWarning } from '../../api/types';
-import { autoQuantity, quickDosage } from '../../utils/dosage';
+import { autoQuantity, dosageProblem, quickDosage } from '../../utils/dosage';
 import { LabelsButton } from '../../components/BillPreview';
 import { MasterSelect } from '../../components/MasterSelect';
-import { MedicineFlags, money } from '../medicines/shared';
+import { MedicineFlags, StockTag, money } from '../medicines/shared';
 
 export type RxDraft = { id?: string; items: RxLine[]; notes: string; status?: 'draft' | 'final'; medicine_days?: number | null };
 
@@ -44,6 +44,7 @@ function lineFromMedicine(m: Medicine): RxLine {
     quantity: '',
     instructions: '',
     medicine_flags: (['schedule_e1', 'contains_metals', 'pregnancy_caution', 'child_caution'] as const).filter((f) => m[f]),
+    stock_available: m.stock_available ?? null,
   };
 }
 
@@ -136,7 +137,7 @@ export function RxSection({ rx, onChange, warnings, diagnoses, readOnly, daysBar
       label: (
         <div className="rx-option">
           <span><b>{m.name}</b> <span className="cell-sub">{m.dosage_form?.label}</span></span>
-          <span className="rx-option-meta"><MedicineFlags medicine={m} /> <span className="cell-sub num">{money(m.branch_price)}</span></span>
+          <span className="rx-option-meta"><StockTag stock={m.stock_available} /> <MedicineFlags medicine={m} /> <span className="cell-sub num">{money(m.branch_price)}</span></span>
         </div>
       ),
     })),
@@ -213,6 +214,7 @@ export function RxSection({ rx, onChange, warnings, diagnoses, readOnly, daysBar
                   <b>{l.medicine_name}</b>
                   {l.dosage_form && <span className="cell-sub">{l.dosage_form}</span>}
                   {l.medicine === null && <Tag className="tag-tight">{t('rx.freeText')}</Tag>}
+                  <StockTag stock={l.stock_available} />
                   <MedicineFlags flags={l.medicine_flags} />
                 </div>
                 {!readOnly && (
@@ -232,9 +234,11 @@ export function RxSection({ rx, onChange, warnings, diagnoses, readOnly, daysBar
                 <div className="rx-field">
                   <Tooltip title={t('rx.frequencyHelp')}><span>{t('rx.frequency')}</span></Tooltip>
                   <AutoComplete size="small" value={l.frequency} disabled={readOnly} style={{ width: 84 }} placeholder="1-0-1"
+                    status={dosageProblem(l.frequency) ? 'warning' : undefined}
                     filterOption={false}
                     options={FREQUENCIES.filter((f) => !l.frequency || (f.startsWith(l.frequency) && f !== l.frequency)).map((f) => ({ value: f }))}
                     onChange={(v) => update(i, { frequency: quickDosage(v).slice(0, 20) })} />
+                  {dosageProblem(l.frequency) && <div className="dose-warning">{t(`rx.dosageCheck.${dosageProblem(l.frequency)}`)}</div>}
                 </div>
                 <div className="rx-field">
                   <span>{t('rx.timing')}</span>
@@ -303,7 +307,7 @@ function SaveTemplateModal({ items, notes, diagnoses, onClose }: {
     try {
       await api.post('/prescription-templates/', {
         name: values.name, diagnosis: values.diagnosis ?? null, notes,
-        items: items.map(({ id: _id, medicine_flags: _f, ...rest }) => rest),
+        items: items.map(({ id: _id, medicine_flags: _f, stock_available: _s, ...rest }) => rest),
       });
       message.success(t('rx.templateSaved'));
       onClose(true);

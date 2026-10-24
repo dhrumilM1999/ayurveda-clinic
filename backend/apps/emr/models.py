@@ -150,3 +150,48 @@ class VisitPhoto(OrgScopedModel):
     @property
     def patient_id(self):
         return self.visit.patient_id
+
+
+# ---- Lab tests and investigations --------------------------------------------------------------------
+LAB_CATEGORIES = [("blood", "Blood"), ("urine", "Urine"), ("stool", "Stool"), ("imaging", "X-ray / scan"), ("heart", "Heart"), ("other", "Other")]
+INVESTIGATION_STATUSES = [("advised", "Advised"), ("done", "Report received"), ("cancelled", "Not needed")]
+
+
+class LabTest(OrgScopedModel):
+    """The clinic's list of lab tests and scans the doctor can advise (CBC, LFT, X-ray knee ...)."""
+
+    name = models.CharField(max_length=150)
+    name_gu = models.CharField("Name (Gujarati)", max_length=150, blank=True)
+    name_hi = models.CharField("Name (Hindi)", max_length=150, blank=True)
+    category = models.CharField(max_length=10, choices=LAB_CATEGORIES, default="blood")
+    is_active = models.BooleanField(default=True)
+    sort_order = models.PositiveSmallIntegerField(default=0)
+    is_sample = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["sort_order", "name"]
+        constraints = [
+            models.UniqueConstraint(fields=["organization", "name"], condition=Q(is_deleted=False), name="uniq_lab_test_name_per_org"),
+        ]
+
+    def __str__(self):
+        return self.name
+
+
+class VisitInvestigation(OrgScopedModel):
+    """A test the doctor advised at a check-up, and later its report (a file the staff uploaded, and/or the result in words)."""
+
+    visit = models.ForeignKey(Visit, on_delete=models.PROTECT, related_name="investigations")
+    patient = models.ForeignKey("patients.Patient", on_delete=models.PROTECT, related_name="investigations")
+    test = models.ForeignKey(LabTest, null=True, blank=True, on_delete=models.PROTECT, related_name="+")
+    test_name = models.CharField(max_length=150)  # a copy, so an old record keeps its name; also used for a test typed in words
+    status = models.CharField(max_length=10, choices=INVESTIGATION_STATUSES, default="advised", db_index=True)
+    advised_on = models.DateField(db_index=True)
+    note = models.CharField(max_length=250, blank=True)  # e.g. "fasting, come in the morning"
+    result_text = EncryptedTextField(blank=True)
+    reported_on = models.DateField(null=True, blank=True)
+    document = models.ForeignKey("patients.PatientDocument", null=True, blank=True, on_delete=models.PROTECT, related_name="+")
+
+    class Meta:
+        ordering = ["advised_on", "created_at"]
+        indexes = [models.Index(fields=["patient", "status"])]

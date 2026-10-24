@@ -7,6 +7,8 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from '../../api/client';
 import type { Appointment, AppointmentDoctor, Slot } from '../../api/types';
+import { useAuth } from '../../auth/AuthContext';
+import { OpdBillModal } from '../billing/OpdBillModal';
 import { NotificationResult, PatientPicker, SlotPicker, fmtTime } from './shared';
 
 export interface BookProps {
@@ -15,10 +17,12 @@ export interface BookProps {
   patient?: { id: string; label: string };
   defaultDate?: Dayjs;
   defaultDoctor?: string;
+  /** A time chosen on the calendar, such as '10:30' */
+  defaultStart?: string;
   onClose: (changed: boolean) => void;
 }
 
-export function BookAppointmentModal({ open, kind, patient, defaultDate, defaultDoctor, onClose }: BookProps) {
+export function BookAppointmentModal({ open, kind, patient, defaultDate, defaultDoctor, defaultStart, onClose }: BookProps) {
   const { t } = useTranslation();
   const { message } = App.useApp();
   const [form] = Form.useForm();
@@ -27,6 +31,10 @@ export function BookAppointmentModal({ open, kind, patient, defaultDate, default
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [result, setResult] = useState<Appointment | null>(null);
+  const { can, hasFeature } = useAuth();
+  const [billOpen, setBillOpen] = useState(false);
+  // a walk-in pays the consultation fee at the desk right away
+  const canBill = (can('billing.charge') || can('billing.create')) && hasFeature('opd_billing');
   const walkIn = kind === 'walk_in';
   const doctor: string | undefined = Form.useWatch('doctor', form);
   const date: Dayjs | undefined = Form.useWatch('date', form);
@@ -65,7 +73,10 @@ export function BookAppointmentModal({ open, kind, patient, defaultDate, default
     form.setFieldValue('start_time', undefined);
     setSlotsLoading(true);
     api.get<{ slots: Slot[] }>('/appointments/slots/', { params: { doctor, date: dayKey } })
-      .then(({ data }) => setSlots(data.slots))
+      .then(({ data }) => {
+        setSlots(data.slots);
+        if (defaultStart && data.slots.some((x) => x.start === defaultStart && x.status === 'free')) form.setFieldValue('start_time', defaultStart);
+      })
       .catch(() => setSlots([]))
       .finally(() => setSlotsLoading(false));
   }, [open, walkIn, doctor, dayKey, form]);
@@ -97,7 +108,12 @@ export function BookAppointmentModal({ open, kind, patient, defaultDate, default
       : t('appointments.bookedDone', { date: dayjs(result.date).format('DD-MM-YYYY'), time: fmtTime(result.start_time) });
     return (
       <Modal open={open} title={walkIn ? t('appointments.walkIn') : t('appointments.book')} onCancel={() => onClose(true)}
-        footer={<Button type="primary" onClick={() => onClose(true)}>{t('common.close')}</Button>} width={560}>
+        footer={(
+          <>
+            {result.kind === 'walk_in' && canBill && <Button type="primary" onClick={() => setBillOpen(true)}>₹ {t('opd.billConsultation')}</Button>}
+            <Button type={result.kind === 'walk_in' && canBill ? 'default' : 'primary'} onClick={() => onClose(true)}>{t('common.close')}</Button>
+          </>
+        )} width={560}>
         <Result
           className="compact-result"
           icon={<CheckCircleFilled style={{ color: 'var(--clinic-primary)' }} />}
@@ -105,6 +121,7 @@ export function BookAppointmentModal({ open, kind, patient, defaultDate, default
           subTitle={`${result.patient_detail.full_name} · ${result.doctor_name}`}
         />
         <NotificationResult notification={result.notification} />
+        {billOpen && <OpdBillModal target={{ appointment: result.id }} onClose={() => setBillOpen(false)} />}
       </Modal>
     );
   }

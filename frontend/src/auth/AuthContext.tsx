@@ -6,6 +6,7 @@ import { api, setSessionExpiredHandler } from '../api/client';
 import type { AdditionalFeature, FeatureFlag, Me, MyBranch } from '../api/types';
 import i18n, { setLanguage } from '../i18n';
 import { clearAllDrafts } from '../utils/formDraft';
+import { startSession } from '../errorLog/tracker';
 import { tokenStore } from './tokenStore';
 
 interface AuthValue {
@@ -20,6 +21,9 @@ interface AuthValue {
   reloadFeatures: () => Promise<void>;
   /** Does the user have this permission in the current branch? */
   can: (code: string) => boolean;
+  /** More than one branch / more than one doctor? With one clinic and one doctor the screens do not repeat their names. */
+  multiBranch: boolean;
+  multiDoctor: boolean;
   completeLogin: (access: string, refresh: string) => Promise<void>;
   switchBranch: (branchId: string) => void;
   logout: (reason?: 'idle' | 'expired') => Promise<void>;
@@ -114,6 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const completeLogin = useCallback(
     async (access: string, refresh: string) => {
       tokenStore.setTokens(access, refresh);
+      startSession();
       setLogoutReason(null);
       setLoading(true);
       await loadMe();
@@ -129,8 +134,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const branch = useMemo(() => me?.branches.find((b) => b.id === branchId) ?? null, [me, branchId]);
   const can = useCallback((code: string) => !!branch?.permissions.includes(code), [branch]);
 
+  const multiBranch = !!me?.organization?.multi_branch;
+  const multiDoctor = (me?.organization?.doctor_count ?? 2) > 1;
   const value: AuthValue = {
-    me, loading, branch, features, hasFeature, reloadFeatures, can, completeLogin, switchBranch, logout, logoutReason,
+    me, loading, branch, features, hasFeature, reloadFeatures, can, multiBranch, multiDoctor, completeLogin, switchBranch, logout, logoutReason,
   };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

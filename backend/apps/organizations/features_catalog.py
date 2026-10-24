@@ -38,20 +38,20 @@ ADDITIONAL_FEATURES = {
                          "requires": "pharmacy_selling_price"},
     "pharmacy_discounts": {"group": "pharmacy", "label": "Discounts on pharmacy bills", "default": False,
                            "requires": "pharmacy_billing"},
-    "pharmacy_sales_returns": {"group": "pharmacy", "label": "Sales returns (and credit notes)", "default": False},
+    "pharmacy_sales_returns": {"group": "pharmacy", "label": "Sales returns (and credit notes)", "default": True},
     "pharmacy_loose_sale": {"group": "pharmacy", "label": "Sell loose (part of a pack)", "default": False},
     "pharmacy_racks": {"group": "pharmacy", "label": "Racks and shelf locations", "default": False},
     "pharmacy_barcode": {"group": "pharmacy", "label": "Barcodes and scanning", "default": False},
     "pharmacy_purchase_details": {"group": "pharmacy", "label": "Detailed purchase entry", "default": False,
                                   "requires": "pharmacy_purchase_price"},
-    "pharmacy_opening_stock": {"group": "pharmacy", "label": "Opening stock entry", "default": False},
-    "pharmacy_supplier_returns": {"group": "pharmacy", "label": "Returns to supplier", "default": False},
-    "pharmacy_stock_alerts": {"group": "pharmacy", "label": "Stock alerts (low, out, expiry)", "default": False},
-    "pharmacy_stock_ledger": {"group": "pharmacy", "label": "Stock ledger screen", "default": False},
+    "pharmacy_opening_stock": {"group": "pharmacy", "label": "Opening stock entry", "default": True},
+    "pharmacy_supplier_returns": {"group": "pharmacy", "label": "Returns to supplier", "default": True},
+    "pharmacy_stock_alerts": {"group": "pharmacy", "label": "Stock alerts (low, out, expiry)", "default": True},
+    "pharmacy_stock_ledger": {"group": "pharmacy", "label": "Stock ledger screen", "default": True},
     "pharmacy_reports": {"group": "pharmacy", "label": "Pharmacy reports (what to buy, daily, top selling, margin, GST)",
-                         "default": False},
+                         "default": True},
     "pharmacy_hold_bills": {"group": "pharmacy", "label": "Hold a counter bill and finish it later", "default": False},
-    "pharmacy_stock_check": {"group": "pharmacy", "label": "Physical stock check", "default": False},
+    "pharmacy_stock_check": {"group": "pharmacy", "label": "Physical stock check", "default": True},
     # Website: people who ask for an appointment on the clinic website (public form /enquiry) - off by default
     "online_enquiry": {"group": "enquiries", "label": "Online enquiry from the clinic website", "default": False},
     "medicines_homeopathy": {"group": "medicines", "label": "Homeopathy medicines", "default": False},
@@ -78,9 +78,11 @@ ADDITIONAL_FEATURES = {
     "label_date": {"group": "labels", "label": "Label: date given", "default": True, "requires": "medicine_labels"},
     "label_clinic": {"group": "labels", "label": "Label: clinic / pharmacy name", "default": True,
                      "requires": "medicine_labels"},
+    # Prescription
+    "digital_pad": {"group": "prescription", "label": "Digital pad: handwritten prescription", "default": False},
     # Billing
     "combined_opd_bill": {"group": "billing", "label": "Medicines on the OPD bill (one combined bill)",
-                          "default": False, "requires": "pharmacy_billing"},
+                          "default": True, "requires": "pharmacy_billing"},
 }
 
 # Additional settings that are a CHOICE (not on/off). "options" are codes; screen text is in frontend/src/i18n.

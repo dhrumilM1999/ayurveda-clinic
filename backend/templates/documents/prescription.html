@@ -126,6 +126,9 @@
 </table>
 
 {% if notes %}<div class="section"><b class="h">{{ w.instructions }}</b>{{ notes|linebreaksbr }}</div>{% endif %}
+{% if investigations %}
+<div class="section"><b class="h">{{ w.investigations }}</b><div>{{ investigations|join:" · " }}</div></div>
+{% endif %}
 {% if advice or advice_notes %}
 <div class="section"><b class="h">{{ w.advice }}</b>
   {% if advice %}<div>{{ advice|join:" · " }}</div>{% endif %}

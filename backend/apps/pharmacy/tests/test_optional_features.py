@@ -8,6 +8,10 @@ from apps.pharmacy.models import StockBatch
 from apps.pharmacy.tests.test_pharmacy import LATER, TODAY, final_rx, meds, receive, sell  # noqa: F401 (fixtures)
 from conftest import client_for, set_additional_features
 
+# Extras that a new clinic already has switched on; these tests switch them off to check the "off" behaviour
+ON_BY_DEFAULT = ["pharmacy_opening_stock", "pharmacy_sales_returns", "pharmacy_supplier_returns", "pharmacy_stock_check",
+                 "pharmacy_stock_ledger", "pharmacy_reports", "pharmacy_stock_alerts"]
+
 
 @pytest.mark.django_db
 def test_basic_pharmacy_works_with_all_extras_off(org, pharmacist, branch_a, meds, final_rx):
@@ -27,7 +31,8 @@ def test_basic_pharmacy_works_with_all_extras_off(org, pharmacist, branch_a, med
 
 
 @pytest.mark.django_db
-def test_extras_are_refused_while_off(pharmacist, branch_a, meds, final_rx):
+def test_extras_are_refused_while_off(org, pharmacist, branch_a, meds, final_rx):
+    set_additional_features(org, on=False, codes=ON_BY_DEFAULT)
     client = client_for(pharmacist, branch_a)
     receive(client, meds, [("Triphala Churna", "B1", LATER, "5")])
     assert client.get("/api/v1/racks/").status_code == 403
@@ -49,6 +54,7 @@ def test_extras_are_refused_while_off(pharmacist, branch_a, meds, final_rx):
 
 @pytest.mark.django_db
 def test_switching_on_one_extra_enables_only_that_one(org, pharmacist, branch_a, meds):
+    set_additional_features(org, on=False, codes=ON_BY_DEFAULT)
     set_additional_features(org, codes=["pharmacy_racks"])
     client = client_for(pharmacist, branch_a)
     assert client.get("/api/v1/racks/").status_code == 200

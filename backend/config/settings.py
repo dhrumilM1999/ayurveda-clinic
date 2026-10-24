@@ -113,6 +113,8 @@ DATABASES = {
         "HOST": env("POSTGRES_HOST", "db"),
         "PORT": env("POSTGRES_PORT", "5432"),
         "CONN_MAX_AGE": 60,
+        # A cloud database (for example Supabase) needs POSTGRES_SSLMODE=require in .env. Empty = no SSL (local Docker).
+        "OPTIONS": {"sslmode": env("POSTGRES_SSLMODE", "")} if env("POSTGRES_SSLMODE", "") else {},
     }
 }
 
@@ -190,6 +192,7 @@ REST_FRAMEWORK = {
         "anon": "100/min",
         "verify": env("THROTTLE_VERIFY", "30/min"),
         "enquiry": env("THROTTLE_ENQUIRY", "10/hour"),
+        "error_report": env("THROTTLE_ERROR_REPORT", "60/min"),
     },
 }
 
@@ -265,3 +268,6 @@ LOGGING = {
     "root": {"handlers": ["console"], "level": "INFO"},
     "loggers": {"django.db.backends": {"level": "WARNING"}},
 }
+
+# Shown in the Error log so a developer knows which version the problem happened in. Set in .env (for example a date or git id).
+APP_VERSION = env("APP_VERSION", "dev")

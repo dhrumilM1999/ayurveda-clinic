@@ -148,7 +148,11 @@ class MeView(APIView):
                 "is_doctor": user.is_doctor,
                 "preferred_language": user.preferred_language,
             },
-            "organization": {"id": str(org.id), "name": org.name, "multi_branch": org.multi_branch} if org else None,
+            "organization": {
+                "id": str(org.id), "name": org.name, "multi_branch": org.multi_branch,
+                # With one doctor the screens do not repeat the doctor's name everywhere
+                "doctor_count": User.objects.filter(organization=org, is_doctor=True, is_active=True).count(),
+            } if org else None,
             "branches": branches,
             "idle_timeout_minutes": settings.IDLE_TIMEOUT_MINUTES,
         })

@@ -59,6 +59,10 @@ class MedicineViewSet(AuditedModelViewSet):
         branch = getattr(self.request, "branch", None)
         if branch is not None:
             context["branch_rows"] = {r.medicine_id: r for r in BranchMedicine.objects.filter(branch=branch)}
+            if self.action == "list" and is_feature_enabled(branch, "pharmacy"):
+                from apps.pharmacy.services import stock_by_medicine  # the pharmacy owns the stock
+
+                context["stock"] = stock_by_medicine(branch)
         return context
 
     def perform_create(self, serializer):

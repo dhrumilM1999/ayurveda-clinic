@@ -326,3 +326,23 @@ def test_undo_has_limits(org, receptionist, doctor, branch_a, schedule, patient)
     other = make_patient(org, mobile="9876500777", first="Asha")
     walk = client.post(URL, {"patient": str(other.id), "doctor": str(doctor.id), "kind": "walk_in"}, format="json")
     assert walk.status_code == 201 and walk.data["undo_to"] is None
+
+
+# --- Calendar -----------------------------------------------------------------------
+@pytest.mark.django_db
+def test_calendar_shows_free_and_booked_slots_per_day(receptionist, doctor, branch_a, schedule, patient):
+    client = client_for(receptionist, branch_a)
+    book(client, patient, doctor, start="10:00")
+    tomorrow_day = tomorrow()
+    res = client.get(URL + "calendar/", {"from": str(tomorrow_day), "to": str(tomorrow_day + timedelta(days=2))})
+    assert res.status_code == 200
+    first = res.data["days"][0]
+    assert first["date"] == str(tomorrow_day) and first["sits"] is True
+    assert first["slots"] == 12 and first["booked"] == 1 and first["free"] == 11
+    assert len(res.data["days"]) == 3
+    one = client.get(URL + "calendar/", {"from": str(tomorrow_day), "to": str(tomorrow_day), "doctor": str(doctor.id)})
+    assert one.data["days"][0]["booked"] == 1
+    assert client.get(URL + "calendar/", {"from": str(tomorrow_day), "to": str(tomorrow_day + timedelta(days=90))}).status_code == 400
+    # a day the doctor does not sit: no slots; a cancelled booking is not counted
+    Appointment.objects.all().update(status="cancelled")
+    assert client.get(URL + "calendar/", {"from": str(tomorrow_day), "to": str(tomorrow_day)}).data["days"][0]["booked"] == 0

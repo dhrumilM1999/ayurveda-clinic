@@ -60,6 +60,11 @@ def receive_stock(branch, user, *, items, supplier=None, invoice_no="", invoice_
     A batch number already in stock gets the quantity added (and the latest prices / dates).
     """
     today = timezone.localdate()
+    # The same supplier invoice entered twice (a double click, or a retry) would double the stock: refuse it
+    if invoice_no.strip() and not is_opening and Purchase.objects.filter(
+            branch=branch, supplier=supplier, invoice_no__iexact=invoice_no.strip()).exists():
+        raise ValidationError({"invoice_no": f"Invoice {invoice_no.strip()} of this supplier is already entered. "
+                                             "To correct stock use a stock correction."})
     purchase = Purchase.objects.create(
         organization_id=branch.organization_id, branch=branch, supplier=supplier, invoice_no=invoice_no,
         invoice_date=invoice_date or today, is_opening=is_opening, notes=notes[:300], other_charges=other_charges,
@@ -194,6 +199,15 @@ def suggested_batches(branch, medicine_ids) -> dict:
     for b in batches:
         result.setdefault(b.medicine_id, []).append(b)
     return result
+
+
+def stock_by_medicine(branch) -> dict:
+    """{medicine_id: packs that can be given today} for one branch (expired batches do not count). One query."""
+    today = timezone.localdate()
+    rows = (StockBatch.objects.filter(branch=branch, quantity__gt=0)
+            .filter(Q(expiry_date__isnull=True) | Q(expiry_date__gte=today))
+            .values("medicine_id").annotate(total=Sum("quantity")))
+    return {r["medicine_id"]: r["total"] for r in rows}
 
 
 def dispensed_quantities(prescription) -> dict:
@@ -547,9 +561,33 @@ def stock_summary(branch, search="", show="all", rack_id=None):
     return rows
 
 
+def needed_medicines(branch, days: int = 30) -> list[dict]:
+    """
+    Medicines the doctors prescribed (final prescriptions of the last `days` days) that the branch cannot give now:
+    no usable stock, and not given yet. The shop orders these first. [{medicine, name, times, last_at}] most asked first.
+    """
+    from django.db.models import Count, Max
+
+    from apps.prescriptions.models import PrescriptionItem
+
+    since = timezone.now() - timedelta(days=days)
+    in_stock = set(stock_by_medicine(branch))
+    rows = (PrescriptionItem.objects.filter(prescription__branch=branch, prescription__status="final",
+                                            prescription__finalized_at__gte=since, medicine__isnull=False,
+                                            dispensed__isnull=True)
+            .exclude(medicine_id__in=in_stock)
+            .values("medicine_id", "medicine__name")
+            .annotate(times=Count("prescription_id", distinct=True), last_at=Max("prescription__finalized_at"))
+            .order_by("-times", "medicine__name"))
+    return [{"medicine": str(r["medicine_id"]), "name": r["medicine__name"], "times": r["times"], "last_at": r["last_at"]}
+            for r in rows]
+
+
 def alert_counts(branch) -> dict:
     rows = stock_summary(branch)
-    return {key: sum(1 for r in rows if r[key]) for key in ("low", "out", "expiring", "expired")}
+    counts = {key: sum(1 for r in rows if r[key]) for key in ("low", "out", "expiring", "expired")}
+    counts["needed"] = len(needed_medicines(branch))
+    return counts
 
 
 # --- Barcode scan -----------------------------------------------------------------------------------

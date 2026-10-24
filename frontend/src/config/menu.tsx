@@ -5,7 +5,7 @@
 // - feature: the item hides when that module is switched off for the branch (Settings)
 // - multiBranchOnly: the item shows only when "Use more than one branch" is on (Settings)
 import {
-  AppstoreAddOutlined, HeartOutlined, ApartmentOutlined, BarChartOutlined, DollarOutlined, WalletOutlined, AuditOutlined, ExperimentOutlined, ShopOutlined, FormOutlined, MedicineBoxOutlined, CalendarOutlined, DashboardOutlined, HomeOutlined,
+  AppstoreAddOutlined, BugOutlined, CarryOutOutlined, HeartOutlined, ApartmentOutlined, BarChartOutlined, DollarOutlined, WalletOutlined, AuditOutlined, ExperimentOutlined, ShopOutlined, FormOutlined, MedicineBoxOutlined, CalendarOutlined, DashboardOutlined, HomeOutlined,
   FilePdfOutlined, GlobalOutlined, IdcardOutlined, OrderedListOutlined, SafetyCertificateOutlined, ScheduleOutlined, SettingOutlined, TeamOutlined,
 } from '@ant-design/icons';
 import type { ReactNode } from 'react';
@@ -25,6 +25,7 @@ export const menuItems: MenuItemConfig[] = [
   { key: 'dashboard', path: '/', labelKey: 'menu.dashboard', icon: <DashboardOutlined />, permission: 'dashboard.view' },
   { key: 'patients', path: '/patients', labelKey: 'menu.patients', icon: <IdcardOutlined />, permission: 'patients.view' },
   { key: 'appointments', path: '/appointments', labelKey: 'menu.appointments', icon: <ScheduleOutlined />, permission: 'appointments.view', feature: 'appointments' },
+  { key: 'calendar', path: '/calendar', labelKey: 'menu.calendar', icon: <CarryOutOutlined />, permission: 'appointments.view', feature: 'appointments' },
   { key: 'consult', path: '/consult', labelKey: 'menu.consult', icon: <MedicineBoxOutlined />, permission: 'emr.view' },
   { key: 'medicines', path: '/medicines', labelKey: 'menu.medicines', icon: <ExperimentOutlined />, permission: 'medicines.view' },
   { key: 'billing', path: '/billing', labelKey: 'menu.billing', icon: <WalletOutlined />, permission: 'billing.view', anyFeature: ['opd_billing', 'pharmacy_billing'] },
@@ -44,4 +45,5 @@ export const menuItems: MenuItemConfig[] = [
   { key: 'additional', path: '/additional-settings', labelKey: 'menu.additional', icon: <AppstoreAddOutlined />, permission: 'settings.manage' },
   { key: 'pdfSettings', path: '/pdf-settings', labelKey: 'menu.pdfSettings', icon: <FilePdfOutlined />, permission: 'settings.manage' },
   { key: 'audit', path: '/audit-log', labelKey: 'menu.audit', icon: <AuditOutlined />, permission: 'audit.view' },
+  { key: 'errorLog', path: '/error-log', labelKey: 'menu.errorLog', icon: <BugOutlined />, permission: 'audit.view' },
 ];

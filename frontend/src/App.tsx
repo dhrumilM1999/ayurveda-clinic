@@ -11,6 +11,7 @@ import AppointmentsPage from './pages/appointments/AppointmentsPage';
 import QueueDisplayPage from './pages/appointments/QueueDisplayPage';
 import QueuePage from './pages/appointments/QueuePage';
 import AuditLogPage from './pages/AuditLogPage';
+import ErrorLogPage from './pages/ErrorLogPage';
 import ConsultPage from './pages/consult/ConsultPage';
 import MedicinesPage from './pages/medicines/MedicinesPage';
 import PharmacyPage from './pages/pharmacy/PharmacyPage';
@@ -33,6 +34,7 @@ import ReportsPage from './pages/ReportsPage';
 import VerifyPage from './pages/VerifyPage';
 import EnquiriesPage from './pages/enquiry/EnquiriesPage';
 import TherapyPage from './pages/therapy/TherapyPage';
+import CalendarPage from './pages/appointments/CalendarPage';
 import EnquiryFormPage from './pages/enquiry/EnquiryFormPage';
 import StaffPage from './pages/StaffPage';
 import TemplatesPage from './pages/TemplatesPage';
@@ -78,6 +80,7 @@ export default function App() {
               <Route path="billing" element={<RequirePermission code="billing.view"><BillingPage /></RequirePermission>} />
               <Route path="pharmacy" element={<RequirePermission code="pharmacy.view"><PharmacyPage /></RequirePermission>} />
               <Route path="enquiries" element={<RequirePermission code="enquiries.view"><EnquiriesPage /></RequirePermission>} />
+              <Route path="calendar" element={<RequirePermission code="appointments.view"><CalendarPage /></RequirePermission>} />
               <Route path="therapy" element={<RequirePermission code="therapy.view"><TherapyPage /></RequirePermission>} />
               <Route path="reports" element={<RequirePermission code="reports.view"><ReportsPage /></RequirePermission>} />
               <Route path="queue" element={<RequirePermission code="appointments.view"><QueuePage /></RequirePermission>} />
@@ -92,6 +95,7 @@ export default function App() {
               <Route path="additional-settings" element={<RequirePermission code="settings.manage"><AdditionalSettingsPage /></RequirePermission>} />
               <Route path="pdf-settings" element={<RequirePermission code="settings.manage"><PdfSettingsPage /></RequirePermission>} />
               <Route path="audit-log" element={<RequirePermission code="audit.view"><AuditLogPage /></RequirePermission>} />
+              <Route path="error-log" element={<RequirePermission code="audit.view"><ErrorLogPage /></RequirePermission>} />
               <Route path="login" element={<Navigate to="/" replace />} />
               <Route path="*" element={<NotFoundPage />} />
             </Route>

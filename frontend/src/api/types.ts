@@ -24,7 +24,7 @@ export interface Me {
     is_doctor: boolean;
     preferred_language: string;
   };
-  organization: { id: string; name: string; multi_branch: boolean } | null;
+  organization: { id: string; name: string; multi_branch: boolean; doctor_count: number } | null;
   branches: MyBranch[];
   idle_timeout_minutes: number;
 }
@@ -156,6 +156,33 @@ export interface AuditLogEntry {
   object_repr: string;
   changes: Record<string, unknown>;
   ip_address: string | null;
+}
+
+export interface ErrorLogEntry {
+  id: string;
+  created_at: string;
+  last_seen: string;
+  branch_name: string;
+  username: string;
+  session_id: string;
+  request_code: string;
+  source: 'backend' | 'frontend';
+  level: 'error' | 'warning' | 'notice';
+  status_code: number | null;
+  method: string;
+  path: string;
+  screen: string;
+  message: string;
+  count: number;
+  is_resolved: boolean;
+  resolved_by_name: string;
+  note: string;
+  // only when one line is opened
+  details?: string;
+  trail?: { t: string; type: string; text: string }[];
+  extra?: Record<string, string>;
+  ip_address?: string | null;
+  user_agent?: string;
 }
 
 // --- Patients (Step 2) ---------------------------------------------------------
@@ -547,6 +574,10 @@ export interface Visit {
   prakriti: PrakritiResult | null;
   created_at: string;
   updated_at: string;
+  /** True when the patient had an earlier check-up (follow-up), false for a new patient */
+  is_follow_up?: boolean;
+  /** Where the appointment stands: checked_in (waiting), in_consultation (With doctor), completed ... */
+  appointment_status?: string | null;
 }
 
 export interface VisitListItem {
@@ -611,6 +642,8 @@ export interface Medicine {
   strength: string;
   sku: string;
   notes: string;
+  /** Packs this branch can give today (null when the clinic has no pharmacy module) */
+  stock_available?: string | null;
 }
 
 export interface MedicineVersion {
@@ -646,6 +679,8 @@ export interface RxLine {
   quantity: string;
   instructions: string;
   medicine_flags?: MedicineFlag[];
+  /** Packs the pharmacy can give today (null / missing = not tracked) */
+  stock_available?: string | null;
 }
 
 export interface RxWarning {
@@ -781,6 +816,15 @@ export interface StockAlerts {
   out: number;
   expiring: number;
   expired: number;
+  /** Medicines doctors asked for that are not in stock */
+  needed: number;
+}
+
+export interface NeededMedicine {
+  medicine: string;
+  name: string;
+  times: number;
+  last_at: string;
 }
 
 export interface ScanResult {
@@ -857,6 +901,8 @@ export interface DispenseQueueRow {
   finalized_at: string | null;
   item_count: number;
   status: DispenseStatus;
+  /** Medicines of this prescription that are not in stock now */
+  missing_stock?: number;
 }
 
 export interface DispenseLine {
@@ -1235,4 +1281,37 @@ export interface TherapySession {
 export interface TherapyOptions {
   therapists: { id: string; name: string }[];
   rooms: { id: string; name: string; capacity: number }[];
+}
+
+// ---- Handwritten prescription (digital pad) ----
+export interface HandwrittenPage {
+  id: string;
+  visit: string;
+  patient: string;
+  paper: 'a5' | 'a4';
+  number: string;
+  created_at: string;
+  width_px: number;
+  height_px: number;
+  doctor_name: string;
+}
+
+export interface LabTest { id: string; name: string; name_gu: string; name_hi: string; category: string; is_active: boolean }
+
+export interface Investigation {
+  id: string;
+  visit: string;
+  visit_date: string;
+  patient: string;
+  test: string | null;
+  test_name: string;
+  test_name_gu?: string;
+  test_name_hi?: string;
+  status: 'advised' | 'done' | 'cancelled';
+  advised_on: string;
+  note: string;
+  result_text: string;
+  reported_on: string | null;
+  document: string | null;
+  document_title: string;
 }

@@ -39,3 +39,13 @@ export function MedicineFlags({ medicine, flags }: { medicine?: Medicine; flags?
     </span>
   );
 }
+
+/** How many packs the pharmacy has: red when none, orange when almost finished. Nothing when the clinic has no pharmacy. */
+export function StockTag({ stock }: { stock?: string | null }) {
+  const { t } = useTranslation();
+  if (stock === undefined || stock === null) return null;
+  const n = Number(stock);
+  if (n <= 0) return <Tag color="red" className="tag-tight">{t('rx.stock.none')}</Tag>;
+  if (n <= 2) return <Tag color="orange" className="tag-tight">{t('rx.stock.few', { n })}</Tag>;
+  return <Tag color="green" className="tag-tight">{t('rx.stock.ok', { n })}</Tag>;
+}

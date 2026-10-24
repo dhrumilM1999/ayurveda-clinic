@@ -1010,6 +1010,11 @@ body {
 .save-state {
   font-size: 12px;
   color: rgba(35, 48, 42, 0.5);
+  /* One fixed size, so the buttons beside it never move when the words change (Saved / Unsaved changes / Saving) */
+  display: inline-block;
+  min-width: 150px;
+  text-align: right;
+  white-space: nowrap;
 }
 .save-dirty,
 .save-saving {
@@ -1951,3 +1956,50 @@ body {
 .pdfset-frame iframe { width: 100%; height: 100%; border: 0; }
 .pdfset-spin { position: absolute; top: 12px; right: 12px; z-index: 2; }
 @media (max-width: 1100px) { .pdfset-layout { grid-template-columns: 1fr; } .pdfset-preview { position: static; } }
+
+/* Handwriting window (digital pad): the writing area, colour dots and the saved pages */
+.hw-stage { display: flex; justify-content: center; background: #ece8df; border-radius: 10px; padding: 10px; }
+.hw-wrap { background: #fff; box-shadow: 0 1px 6px rgba(0, 0, 0, 0.18); border-radius: 4px; touch-action: none; }
+.hw-canvas { display: block; touch-action: none; user-select: none; border-radius: 4px;
+  background-image: repeating-linear-gradient(transparent 0, transparent 38px, #e7edf3 39px); }
+.hw-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
+.hw-color { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px #bbb; cursor: pointer; padding: 0; }
+.hw-color.on { box-shadow: 0 0 0 2px var(--clinic-primary); }
+.hw-pages { display: flex; flex-wrap: wrap; gap: 14px; }
+.hw-page { margin: 0; width: 160px; }
+.hw-page figcaption { margin-top: 4px; }
+
+/* A dosage that looks like a typing slip (for example 2-2-22) */
+.dose-warning { color: #ad6800; font-size: 11px; line-height: 1.25; max-width: 130px; margin-top: 2px; }
+
+/* Check-up screen: the buttons wrap instead of running out of the page; the steps guide in the empty page */
+.visit-actions { justify-content: flex-end; max-width: 100%; }
+.how-steps { max-width: 420px; margin: 14px auto 6px; padding-left: 20px; text-align: left; color: rgba(35, 48, 42, 0.8); line-height: 1.7; }
+.how-note { max-width: 420px; margin: 0 auto; text-align: left; }
+.consult-empty { text-align: center; }
+.row-clickable { cursor: pointer; }
+.row-clickable:hover td { background: rgba(31, 92, 70, 0.05) !important; }
+
+/* Calendar page */
+.cal-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 1000px) { .cal-layout { grid-template-columns: 1fr; } }
+.cal-grid { background: #fff; border-radius: 10px; padding: 8px; }
+.cal-cell { display: flex; flex-direction: column; gap: 2px; font-size: 11px; line-height: 1.25; margin-top: 2px; }
+.cal-free { color: #1f7a45; font-weight: 600; }
+.cal-free.none { color: #b3261e; }
+.cal-booked { color: #8a5a00; }
+.cal-closed { color: rgba(35, 48, 42, 0.4); }
+.cal-day { background: #fff; border-radius: 10px; padding: 12px 14px; }
+.cal-day-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
+
+/* Lab tests in the check-up */
+.inv-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 0; border-bottom: 1px solid rgba(0, 0, 0, 0.06); }
+.inv-main { min-width: 200px; }
+
+/* Error log */
+.errlog-detail { padding: 4px 8px 8px; }
+.errlog-pre { background: #f6f3ec; border-radius: 6px; padding: 8px 10px; max-height: 260px; overflow: auto; font-size: 12px; white-space: pre-wrap; margin: 0; }
+.errlog-trail { margin: 0; padding-left: 20px; font-size: 13px; }
+.errlog-facts { font-size: 12px; border-collapse: collapse; }
+.errlog-facts th { text-align: left; padding: 2px 12px 2px 0; color: rgba(35, 48, 42, 0.6); font-weight: 600; vertical-align: top; white-space: nowrap; }
+.errlog-facts td { padding: 2px 0; word-break: break-all; font-family: Consolas, monospace; }

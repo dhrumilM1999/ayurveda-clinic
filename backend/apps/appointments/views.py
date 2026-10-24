@@ -1,4 +1,5 @@
 from datetime import date as date_cls
+from datetime import timedelta
 
 from django.db import IntegrityError, transaction
 from django.db.models import Count, Q
@@ -207,6 +208,42 @@ class AppointmentViewSet(AuditedModelViewSet):
         if doctor is None:
             raise ValidationError({"doctor": "Please choose a doctor of this branch."})
         return Response({"date": str(day), "doctor": str(doctor.id), "slots": doctor_slots(request.branch, doctor, day)})
+
+    @action(detail=False, methods=["get"])
+    def calendar(self, request):
+        """
+        The calendar: for every day from ?from= to ?to= (at most 62 days) does the doctor sit, how many slots are free /
+        booked, and how many patients are booked or walked in. ?doctor= one doctor (default: all doctors of the branch).
+        """
+        first = parse_day(request.query_params.get("from"), timezone.localdate())
+        last = parse_day(request.query_params.get("to"), first + timedelta(days=30))
+        if last < first or (last - first).days > 62:
+            raise ValidationError({"to": "Choose a period of at most 62 days."})
+        doctors = doctors_in_branch(request.branch)
+        if request.query_params.get("doctor"):
+            doctors = doctors.filter(pk=request.query_params["doctor"])
+        doctors = list(doctors)
+        counts = {}
+        appts = Appointment.objects.filter(branch=request.branch, date__range=(first, last), doctor__in=doctors)             .exclude(status__in=["cancelled"]).values("date", "kind").annotate(n=Count("id"))
+        for row in appts:
+            entry = counts.setdefault(row["date"], {"booked": 0, "walk_in": 0})
+            entry["walk_in" if row["kind"] == "walk_in" else "booked"] += row["n"]
+        days = []
+        day = first
+        while day <= last:
+            free = booked_slots = past = 0
+            timings = []
+            for doctor in doctors:
+                for slot in doctor_slots(request.branch, doctor, day):
+                    free += slot["status"] == "free"
+                    booked_slots += slot["status"] == "booked"
+                    past += slot["status"] == "past"
+            total = free + booked_slots + past
+            entry = counts.get(day, {"booked": 0, "walk_in": 0})
+            days.append({"date": str(day), "sits": total > 0, "free": free, "past": past, "slots": total,
+                         "booked": entry["booked"], "walk_in": entry["walk_in"]})
+            day += timedelta(days=1)
+        return Response({"from": str(first), "to": str(last), "days": days})
 
     @action(detail=False, methods=["get"])
     def queue(self, request):

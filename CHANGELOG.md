@@ -2,6 +2,35 @@
 
 What changed in each step, in plain words.
 
+## Error log, calendar, lab tests (2026-10-24)
+
+- **Error log** (new menu item for the owner): every server error, screen crash, lost connection and refused action, with who, where, how many times, a short code and the steps the person took before it. "Copy for Claude" copies it in plain text. See `docs/ERROR_LOG.md`.
+- **Saving no longer shakes the check-up screen:** the "Saved / Unsaved changes" note has a fixed size, so the buttons beside it stay still; the Save button shows a spinner while saving.
+- **Lab tests:** the doctor advises tests, adds the report later, and the tests print on the prescription.
+- **Calendar:** month view of free and booked days.
+- Branch note: this work is on branch `fix/clinic-flow-lab-qa`; `feature/panchakarma` is back to Panchakarma only.
+
+- **Day chips** (medicine days and follow-up): 120 and 150 days added, so the choices are 3, 5, 7, 15, 30, 60, 90, 120, 150, 180 and a custom box.
+
+## Prescribe, give, bill: one tested clinic day (2026-10-24)
+
+- A new full-day test runs the whole flow with every role (front desk, doctor, pharmacist, owner): `apps/common/tests/test_full_day.py`.
+- **The doctor sees the pharmacy stock while prescribing:** "In stock: n", "Only n left" or "Not in stock" next to each medicine.
+- **Pharmacy queue** shows "n not in stock" for a prescription; the line says "Out of stock"; the rest can be given and the missing one stays open.
+- **New alert "Asked for, not in stock"** (Pharmacy, Stock and the dashboard): medicines doctors wrote in the last 30 days that the shelf does not have.
+- **Walk-in:** a "Bill the consultation" button right after the token.
+- **Medicines on the one OPD bill** is now on by default; the dashboard says so.
+- Pharmacy basics now on for a new clinic: stock alerts, opening stock, sales returns, supplier returns, stock check, stock ledger, pharmacy reports.
+- Guide for the doctor and staff: `docs/CLINIC_DAY.md`.
+
+## Handwritten prescription with the digital pad (2026-10-24)
+
+- New **Handwriting** button on the check-up screen: write on the iScribe pad (or tablet pen / touch / mouse), see it live,
+  press Save. The software keeps the handwriting AND one combined picture (letterhead + patient line + handwriting + QR + signature)
+  on that patient's check-up. Print it like any prescription; the pharmacist sees the pages while giving medicines.
+  See `docs/HANDWRITING_PAD.md`. New table `HandwrittenPrescription`, new library `pypdfium2` (turns the PDF page into a picture).
+- The letterhead on A5 prints no longer lets a long address run under the doctor's name.
+
 ## Testing "by mistake" cases (2026-10-15)
 
 About 150 new tests for wrong input, double clicks, the wrong option and the wrong person (`docs/MISTAKE_PROTECTION.md`).

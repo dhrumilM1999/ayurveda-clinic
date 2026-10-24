@@ -15,6 +15,7 @@ import { LabelsButton } from '../../components/BillPreview';
 import { PatientCell } from '../appointments/shared';
 import { money } from '../medicines/shared';
 import { UpiPayment } from './BillsTab';
+import { HandwrittenPages } from '../consult/handwriting/HandwrittenPages';
 import { DispenseStatusTag, PrintButton, ScanInput, expiryText, lineFromScan, qty } from './common';
 
 const REFRESH_SECONDS = 30;
@@ -84,7 +85,15 @@ export function DispenseTab() {
           },
           { title: t('appointments.patient'), key: 'patient', render: (_: unknown, r: DispenseQueueRow) => <PatientCell patient={r.patient_detail} /> },
           { title: t('appointments.doctor'), dataIndex: 'doctor_name' },
-          { title: t('pharmacy.medicines'), dataIndex: 'item_count', width: 110, align: 'center' as const },
+          {
+            title: t('pharmacy.medicines'), dataIndex: 'item_count', width: 150, align: 'center' as const,
+            render: (n: number, r: DispenseQueueRow) => (
+              <div style={{ lineHeight: 1.3 }}>
+                <div>{n}</div>
+                {r.missing_stock ? <Tag color="red" className="tag-tight" style={{ marginInlineEnd: 0 }}>{t('pharmacy.missingStock', { n: r.missing_stock })}</Tag> : null}
+              </div>
+            ),
+          },
           { title: t('common.status'), dataIndex: 'status', width: 130, render: (s: DispenseStatus) => <DispenseStatusTag status={s} /> },
           {
             title: '', key: 'action', width: 120, align: 'right' as const,
@@ -310,6 +319,7 @@ function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClos
           {detail.allergies.length > 0 && (
             <Alert type="error" showIcon style={{ marginBottom: 12 }} message={<><b>{t('patients.allergyAlert')}:</b> {detail.allergies.join(', ')}</>} />
           )}
+          <HandwrittenPages prescriptionId={prescriptionId} hideWhenEmpty />
           {billing && detail.sales.some((s) => s.number) && (
             <div className="cell-sub" style={{ marginBottom: 8 }}>
               {t('pharmacy.earlierBills')}: {detail.sales.map((s) => s.number).filter(Boolean).join(', ')}

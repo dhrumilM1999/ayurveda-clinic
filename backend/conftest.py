@@ -87,6 +87,7 @@ def all_additional_features(org):
     from apps.organizations.features_catalog import ADDITIONAL_FEATURES
 
     set_additional_features(org, codes=[c for c in ADDITIONAL_FEATURES if c != "combined_opd_bill"])
+    set_additional_features(org, on=False, codes=["combined_opd_bill"])  # separate pharmacy bills (it is on by default)
 
 
 def make_user(org, username, branch_roles=None, **extra):
