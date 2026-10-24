@@ -271,3 +271,8 @@ LOGGING = {
 
 # Shown in the Error log so a developer knows which version the problem happened in. Set in .env (for example a date or git id).
 APP_VERSION = env("APP_VERSION", "dev")
+
+# Audit log: rows older than this many days are saved to AUDIT_ARCHIVE_DIR and removed (manage.py purge_audit_log).
+# The database refuses anything shorter than 90 days. Keep the archive folder in your backups.
+AUDIT_RETENTION_DAYS = max(90, env_int("AUDIT_RETENTION_DAYS", 90))
+AUDIT_ARCHIVE_DIR = env("AUDIT_ARCHIVE_DIR", str(BASE_DIR / "audit_archive"))
