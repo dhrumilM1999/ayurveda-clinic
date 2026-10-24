@@ -1974,3 +1974,15 @@ body {
 .consult-empty { text-align: center; }
 .row-clickable { cursor: pointer; }
 .row-clickable:hover td { background: rgba(31, 92, 70, 0.05) !important; }
+
+/* Calendar page */
+.cal-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 1000px) { .cal-layout { grid-template-columns: 1fr; } }
+.cal-grid { background: #fff; border-radius: 10px; padding: 8px; }
+.cal-cell { display: flex; flex-direction: column; gap: 2px; font-size: 11px; line-height: 1.25; margin-top: 2px; }
+.cal-free { color: #1f7a45; font-weight: 600; }
+.cal-free.none { color: #b3261e; }
+.cal-booked { color: #8a5a00; }
+.cal-closed { color: rgba(35, 48, 42, 0.4); }
+.cal-day { background: #fff; border-radius: 10px; padding: 12px 14px; }
+.cal-day-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }

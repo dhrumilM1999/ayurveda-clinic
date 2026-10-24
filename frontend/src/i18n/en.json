@@ -77,7 +77,8 @@
     "enquiries": "Online enquiry",
     "reports": "Reports",
     "therapy": "Panchakarma",
-    "pdfSettings": "PDF settings"
+    "pdfSettings": "PDF settings",
+    "calendar": "Calendar"
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",
@@ -2207,5 +2208,21 @@
     "unsavedAsk": "The handwriting is not saved yet. Close without saving?",
     "discard": "Close without saving",
     "hint": "Write with the pad pen (set the pad to Mouse mode in iScribe4U), a tablet pen, your finger or a mouse."
+  },
+  "calendar": {
+    "title": "Calendar",
+    "subtitle": "Which days have free time. Click a day to see its times and book.",
+    "prev": "Previous month",
+    "next": "Next month",
+    "closed": "Closed",
+    "free": "{{n}} free",
+    "patients": "{{n}} patients",
+    "dayLine": "{{free}} times free, {{booked}} booked, {{walk}} walk-in",
+    "pickDoctor": "Choose a doctor to see the times.",
+    "noSlots": "The doctor does not sit on this day.",
+    "past": "Passed",
+    "freeTag": "Free",
+    "bookThis": "Book",
+    "walkIns": "Walk-ins today"
   }
 }

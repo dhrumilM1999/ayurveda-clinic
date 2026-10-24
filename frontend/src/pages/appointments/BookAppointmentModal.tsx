@@ -17,10 +17,12 @@ export interface BookProps {
   patient?: { id: string; label: string };
   defaultDate?: Dayjs;
   defaultDoctor?: string;
+  /** A time chosen on the calendar, such as '10:30' */
+  defaultStart?: string;
   onClose: (changed: boolean) => void;
 }
 
-export function BookAppointmentModal({ open, kind, patient, defaultDate, defaultDoctor, onClose }: BookProps) {
+export function BookAppointmentModal({ open, kind, patient, defaultDate, defaultDoctor, defaultStart, onClose }: BookProps) {
   const { t } = useTranslation();
   const { message } = App.useApp();
   const [form] = Form.useForm();
@@ -71,7 +73,10 @@ export function BookAppointmentModal({ open, kind, patient, defaultDate, default
     form.setFieldValue('start_time', undefined);
     setSlotsLoading(true);
     api.get<{ slots: Slot[] }>('/appointments/slots/', { params: { doctor, date: dayKey } })
-      .then(({ data }) => setSlots(data.slots))
+      .then(({ data }) => {
+        setSlots(data.slots);
+        if (defaultStart && data.slots.some((x) => x.start === defaultStart && x.status === 'free')) form.setFieldValue('start_time', defaultStart);
+      })
       .catch(() => setSlots([]))
       .finally(() => setSlotsLoading(false));
   }, [open, walkIn, doctor, dayKey, form]);
