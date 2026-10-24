@@ -33,7 +33,7 @@ def day(org, roles, branch_a, doctor, pharmacist, receptionist, branch_admin):
     pharm = client_for(pharmacist, branch_a)
     # stock: Triphala has 10, Ashwagandha only 1, Kaishore Guggulu none at all
     for name, qty in (("Triphala Churna", "10"), ("Ashwagandha Churna", "1")):
-        res = pharm.post(API + "purchases/", {"invoice_no": "S1", "invoice_date": str(date.today()), "items": [{
+        res = pharm.post(API + "purchases/", {"invoice_no": "S-" + name[:3].upper(), "invoice_date": str(date.today()), "items": [{
             "medicine": str(meds[name].id), "batch_no": name[:3].upper() + "1", "expiry_date": LATER, "quantity": qty,
             "purchase_rate": "50", "mrp": "112", "gst_rate": "12"}]}, format="json")
         assert res.status_code == 201, res.data

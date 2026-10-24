@@ -60,6 +60,11 @@ def receive_stock(branch, user, *, items, supplier=None, invoice_no="", invoice_
     A batch number already in stock gets the quantity added (and the latest prices / dates).
     """
     today = timezone.localdate()
+    # The same supplier invoice entered twice (a double click, or a retry) would double the stock: refuse it
+    if invoice_no.strip() and not is_opening and Purchase.objects.filter(
+            branch=branch, supplier=supplier, invoice_no__iexact=invoice_no.strip()).exists():
+        raise ValidationError({"invoice_no": f"Invoice {invoice_no.strip()} of this supplier is already entered. "
+                                             "To correct stock use a stock correction."})
     purchase = Purchase.objects.create(
         organization_id=branch.organization_id, branch=branch, supplier=supplier, invoice_no=invoice_no,
         invoice_date=invoice_date or today, is_opening=is_opening, notes=notes[:300], other_charges=other_charges,

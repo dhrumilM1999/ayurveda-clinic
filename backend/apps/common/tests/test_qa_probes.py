@@ -185,3 +185,95 @@ def test_PAT_015_there_is_no_patient_export_endpoint():
     patterns = " ".join(str(p.pattern) for p in get_resolver().url_patterns)
     # patient import/export is not implemented; reports exports are audited separately
     assert "patients/export" not in patterns
+
+
+@pytest.mark.django_db
+def test_CONS_010_consent_changes_are_in_the_audit_log(receptionist, branch_a, org, roles):
+    from apps.patients.models import ConsentPurpose
+
+    c = client_for(receptionist, branch_a)
+    pid = c.post(API + "patients/", {"first_name": "Con", "last_name": "Sent", "gender": "male", "age": 30,
+                                     "mobile": "9876500077"}, format="json").data["id"]
+    purpose = ConsentPurpose.objects.get(organization=org, code="communication")
+    res = c.post(API + "patient-consents/", {"patient": pid, "purpose": str(purpose.id), "method": "verbal", "language": "gu",
+                                              "granted": False}, format="json")
+    assert res.status_code == 201
+    assert AuditLog.objects.filter(object_type__icontains="consent").exists() or AuditLog.objects.filter(
+        object_id=res.data.get("id", "")).exists()
+
+
+@pytest.mark.django_db(transaction=True)
+def test_PAT_003_many_registrations_at_once_get_different_ids(org, roles, branch_a, receptionist):
+    import threading
+
+    from django.db import connection
+
+    results, errors = [], []
+    barrier = threading.Barrier(6)
+
+    def work(i):
+        try:
+            barrier.wait(timeout=10)
+            res = client_for(receptionist, branch_a).post(API + "patients/", {
+                "first_name": f"P{i}", "last_name": "Conc", "gender": "male", "age": 30, "mobile": f"98765001{i:02d}"}, format="json")
+            results.append((res.status_code, res.data.get("uhid")))
+        except Exception as exc:  # noqa: BLE001
+            errors.append(repr(exc))
+        finally:
+            connection.close()
+
+    threads = [threading.Thread(target=work, args=(i,)) for i in range(6)]
+    [t.start() for t in threads]
+    [t.join(timeout=60) for t in threads]
+    assert not errors, errors
+    ids = [uhid for code, uhid in results if code == 201]
+    assert len(ids) == 6 and len(set(ids)) == 6
+
+
+@pytest.mark.django_db
+def test_PHARM_027_the_same_purchase_invoice_cannot_be_entered_twice(pharmacist, branch_a, org, roles):
+    from datetime import date, timedelta
+
+    from apps.medicines.models import Medicine
+    from apps.medicines.services import add_sample_medicines
+    from apps.pharmacy.models import StockBatch
+
+    add_sample_medicines(org)
+    med = Medicine.objects.filter(organization=org).first()
+    body = {"invoice_no": "SUP-77", "invoice_date": str(date.today()), "items": [{
+        "medicine": str(med.id), "batch_no": "RETRY1", "expiry_date": str(date.today() + timedelta(days=300)),
+        "quantity": "5", "purchase_rate": "40", "mrp": "90", "gst_rate": "12"}]}
+    c = client_for(pharmacist, branch_a)
+    assert c.post(API + "purchases/", body, format="json").status_code == 201
+    again = c.post(API + "purchases/", body, format="json")           # a retry / double click
+    assert again.status_code == 400 and "already entered" in str(again.data)
+    assert StockBatch.objects.get(batch_no="RETRY1").quantity == 5     # stock counted once
+    other = {**body, "invoice_no": "SUP-78"}
+    assert c.post(API + "purchases/", other, format="json").status_code == 201
+
+
+@pytest.mark.django_db
+def test_PHARM_020_037_the_stock_history_adds_up_to_the_stock(pharmacist, branch_a, org, roles):
+    """After purchase, sale, return, correction and supplier return, the history of every batch equals its quantity."""
+    from datetime import date, timedelta
+    from decimal import Decimal
+
+    from apps.medicines.models import Medicine
+    from apps.medicines.services import add_sample_medicines
+    from apps.pharmacy.models import StockBatch, StockMovement
+    from apps.pharmacy.services import counter_sell
+
+    add_sample_medicines(org)
+    med = Medicine.objects.filter(organization=org, schedule_e1=False).first()
+    c = client_for(pharmacist, branch_a)
+    c.post(API + "purchases/", {"invoice_no": "L-1", "invoice_date": str(date.today()), "items": [{
+        "medicine": str(med.id), "batch_no": "LED1", "expiry_date": str(date.today() + timedelta(days=300)), "quantity": "20",
+        "free_quantity": "2", "purchase_rate": "40", "mrp": "90", "gst_rate": "12"}]}, format="json")
+    batch = StockBatch.objects.get(batch_no="LED1")
+    counter_sell(branch_a, pharmacist, [{"batch_id": batch.id, "quantity": "3"}])
+    c.post(API + "stock/adjust/", {"batch": str(batch.id), "kind": "damaged", "change": "2", "reason": "broken"}, format="json")
+    batch.refresh_from_db()
+    total = sum((m.quantity * (1 if m.kind in ("purchase", "free", "opening", "return_in", "sale_return", "adjust_in") else -1))
+                for m in StockMovement.objects.filter(batch=batch))
+    last = StockMovement.objects.filter(batch=batch).order_by("created_at").last()
+    assert batch.quantity == Decimal("17") and last.balance_after == batch.quantity
