@@ -1963,3 +1963,6 @@ body {
 .hw-pages { display: flex; flex-wrap: wrap; gap: 14px; }
 .hw-page { margin: 0; width: 160px; }
 .hw-page figcaption { margin-top: 4px; }
+
+/* A dosage that looks like a typing slip (for example 2-2-22) */
+.dose-warning { color: #ad6800; font-size: 11px; line-height: 1.25; max-width: 130px; margin-top: 2px; }

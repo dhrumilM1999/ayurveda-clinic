@@ -12,7 +12,7 @@ import { api, errorMessage } from '../../api/client';
 import { useLiveLookup } from '../../components/LiveSearch';
 import { useMasterLabel, useMasters } from '../../api/masters';
 import type { Diagnosis, Medicine, Page, Prescription, PrescriptionTemplate, RxLine, RxWarning } from '../../api/types';
-import { autoQuantity, quickDosage } from '../../utils/dosage';
+import { autoQuantity, dosageProblem, quickDosage } from '../../utils/dosage';
 import { LabelsButton } from '../../components/BillPreview';
 import { MasterSelect } from '../../components/MasterSelect';
 import { MedicineFlags, StockTag, money } from '../medicines/shared';
@@ -234,9 +234,11 @@ export function RxSection({ rx, onChange, warnings, diagnoses, readOnly, daysBar
                 <div className="rx-field">
                   <Tooltip title={t('rx.frequencyHelp')}><span>{t('rx.frequency')}</span></Tooltip>
                   <AutoComplete size="small" value={l.frequency} disabled={readOnly} style={{ width: 84 }} placeholder="1-0-1"
+                    status={dosageProblem(l.frequency) ? 'warning' : undefined}
                     filterOption={false}
                     options={FREQUENCIES.filter((f) => !l.frequency || (f.startsWith(l.frequency) && f !== l.frequency)).map((f) => ({ value: f }))}
                     onChange={(v) => update(i, { frequency: quickDosage(v).slice(0, 20) })} />
+                  {dosageProblem(l.frequency) && <div className="dose-warning">{t(`rx.dosageCheck.${dosageProblem(l.frequency)}`)}</div>}
                 </div>
                 <div className="rx-field">
                   <span>{t('rx.timing')}</span>

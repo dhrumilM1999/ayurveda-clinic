@@ -1019,6 +1019,10 @@
       "none": "Not in stock",
       "few": "Only {{n}} left",
       "ok": "In stock: {{n}}"
+    },
+    "dosageCheck": {
+      "format": "Please check: write it like 1-0-1 or type 3 digits (101).",
+      "high": "Please check: more than 10 at one time?"
     }
   },
   "pharmacy": {
