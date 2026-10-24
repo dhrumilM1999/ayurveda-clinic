@@ -88,7 +88,10 @@ export function DispenseTab() {
           {
             title: t('pharmacy.medicines'), dataIndex: 'item_count', width: 150, align: 'center' as const,
             render: (n: number, r: DispenseQueueRow) => (
-              <span>{n}{r.missing_stock ? <Tag color="red" className="tag-tight" style={{ marginInlineStart: 6 }}>{t('pharmacy.missingStock', { n: r.missing_stock })}</Tag> : null}</span>
+              <div style={{ lineHeight: 1.3 }}>
+                <div>{n}</div>
+                {r.missing_stock ? <Tag color="red" className="tag-tight" style={{ marginInlineEnd: 0 }}>{t('pharmacy.missingStock', { n: r.missing_stock })}</Tag> : null}
+              </div>
             ),
           },
           { title: t('common.status'), dataIndex: 'status', width: 130, render: (s: DispenseStatus) => <DispenseStatusTag status={s} /> },
@@ -316,7 +319,7 @@ function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClos
           {detail.allergies.length > 0 && (
             <Alert type="error" showIcon style={{ marginBottom: 12 }} message={<><b>{t('patients.allergyAlert')}:</b> {detail.allergies.join(', ')}</>} />
           )}
-          <HandwrittenPages prescriptionId={prescriptionId} />
+          <HandwrittenPages prescriptionId={prescriptionId} hideWhenEmpty />
           {billing && detail.sales.some((s) => s.number) && (
             <div className="cell-sub" style={{ marginBottom: 8 }}>
               {t('pharmacy.earlierBills')}: {detail.sales.map((s) => s.number).filter(Boolean).join(', ')}

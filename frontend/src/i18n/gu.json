@@ -121,7 +121,8 @@
     "totalCollectionNote": "રોકડ + UPI + કાર્ડ, રિફંડ બાદ",
     "stillDue": "હજી લેવાના",
     "stillDueNote_one": "આજનું {{count}} બિલ પૂરું ચૂકવાયું નથી",
-    "stillDueNote_other": "આજના {{count}} બિલ પૂરા ચૂકવાયા નથી"
+    "stillDueNote_other": "આજના {{count}} બિલ પૂરા ચૂકવાયા નથી",
+    "opdCollectionNoteCombined": "એક જ બિલ પર કન્સલ્ટેશન, સેવાઓ અને દવાઓ, આજે મળેલા"
   },
   "branches": {
     "title": "બ્રાંચ",
@@ -1616,7 +1617,8 @@
     },
     "billColumn": "OPD બિલ",
     "visitBill": "OPD બિલ",
-    "next": "આગળ: OPD બિલ"
+    "next": "આગળ: OPD બિલ",
+    "billConsultation": "કન્સલ્ટેશનનું બિલ બનાવો"
   },
   "labels": {
     "button": "લેબલ",

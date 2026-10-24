@@ -121,7 +121,8 @@
     "totalCollectionNote": "नकद + UPI + कार्ड, रिफ़ंड घटाकर",
     "stillDue": "अभी लेना बाकी",
     "stillDueNote_one": "आज का {{count}} बिल पूरा नहीं चुका",
-    "stillDueNote_other": "आज के {{count}} बिल पूरे नहीं चुके"
+    "stillDueNote_other": "आज के {{count}} बिल पूरे नहीं चुके",
+    "opdCollectionNoteCombined": "एक ही बिल पर परामर्श, सेवाएँ और दवाइयाँ, आज प्राप्त"
   },
   "branches": {
     "title": "ब्रांच",
@@ -1616,7 +1617,8 @@
     },
     "billColumn": "OPD बिल",
     "visitBill": "OPD बिल",
-    "next": "आगे: OPD बिल"
+    "next": "आगे: OPD बिल",
+    "billConsultation": "परामर्श का बिल बनाएँ"
   },
   "labels": {
     "button": "लेबल",

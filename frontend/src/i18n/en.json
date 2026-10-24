@@ -121,7 +121,8 @@
     "totalCollectionNote": "Cash + UPI + card, minus refunds",
     "stillDue": "Still to collect",
     "stillDueNote_one": "{{count}} bill of today not fully paid",
-    "stillDueNote_other": "{{count}} bills of today not fully paid"
+    "stillDueNote_other": "{{count}} bills of today not fully paid",
+    "opdCollectionNoteCombined": "Consultation, services and medicines on the one bill, received today"
   },
   "branches": {
     "title": "Branches",
@@ -1616,7 +1617,8 @@
     },
     "billColumn": "OPD bill",
     "visitBill": "OPD bill",
-    "next": "Next: OPD bill"
+    "next": "Next: OPD bill",
+    "billConsultation": "Bill the consultation"
   },
   "labels": {
     "button": "Labels",

@@ -25,8 +25,8 @@ export function PrivateImage({ pageId, kind = 'combined', width }: { pageId: str
   return url ? <Image src={url} width={width} alt="" /> : <Spin size="small" />;
 }
 
-export function HandwrittenPages({ visitId, patientId, prescriptionId, refreshKey = 0, onChanged }: {
-  visitId?: string; patientId?: string; prescriptionId?: string; refreshKey?: number; onChanged?: (count: number) => void;
+export function HandwrittenPages({ visitId, patientId, prescriptionId, hideWhenEmpty, refreshKey = 0, onChanged }: {
+  visitId?: string; patientId?: string; prescriptionId?: string; hideWhenEmpty?: boolean; refreshKey?: number; onChanged?: (count: number) => void;
 }) {
   const { t } = useTranslation();
   const { message } = App.useApp();
@@ -58,6 +58,7 @@ export function HandwrittenPages({ visitId, patientId, prescriptionId, refreshKe
   };
 
   if (pages === null) return <Spin size="small" />;
+  if (!pages.length && hideWhenEmpty) return null;
   if (!pages.length) return <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('handwriting.noPages')} />;
   return (
     <>
