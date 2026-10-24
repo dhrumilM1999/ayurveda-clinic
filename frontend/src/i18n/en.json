@@ -730,7 +730,8 @@
       "followUp": "Follow-up",
       "progress": "Progress",
       "photos": "Photos",
-      "rx": "Rx (medicines)"
+      "rx": "Rx (medicines)",
+      "investigations": "Lab tests"
     },
     "units": {
       "days": "days",
@@ -2224,5 +2225,26 @@
     "freeTag": "Free",
     "bookThis": "Book",
     "walkIns": "Walk-ins today"
+  },
+  "investigations": {
+    "pick": "Search a test (e.g. CBC, sugar, X-ray)",
+    "advise": "Advise test",
+    "adviseTyped": "Advise typed test",
+    "notInList": "\"{{name}}\" is not in the list. Press the button to advise it by this name.",
+    "help": "Pick from the list or type any test name. When the patient brings the report, press Add report.",
+    "none": "No tests advised in this check-up.",
+    "earlier": "Reports still waiting from earlier check-ups ({{n}})",
+    "advisedOn": "Advised {{date}}",
+    "reportedOn": "Report {{date}}",
+    "viewReport": "View report",
+    "addReport": "Add report",
+    "replaceReport": "Change report",
+    "markDone": "Mark done",
+    "removeAsk": "Remove this test from the check-up?",
+    "status": {
+      "advised": "Waiting for report",
+      "done": "Report received",
+      "cancelled": "Not needed"
+    }
   }
 }

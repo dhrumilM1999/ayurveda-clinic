@@ -1268,3 +1268,23 @@ export interface HandwrittenPage {
   height_px: number;
   doctor_name: string;
 }
+
+export interface LabTest { id: string; name: string; name_gu: string; name_hi: string; category: string; is_active: boolean }
+
+export interface Investigation {
+  id: string;
+  visit: string;
+  visit_date: string;
+  patient: string;
+  test: string | null;
+  test_name: string;
+  test_name_gu?: string;
+  test_name_hi?: string;
+  status: 'advised' | 'done' | 'cancelled';
+  advised_on: string;
+  note: string;
+  result_text: string;
+  reported_on: string | null;
+  document: string | null;
+  document_title: string;
+}

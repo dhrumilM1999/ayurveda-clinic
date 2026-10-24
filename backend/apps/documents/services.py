@@ -170,6 +170,9 @@ def prescription_context(prescription, lang: str) -> dict:
         "items": items, "notes": prescription.notes,
         "advice": [translated_master(org_id, "advice", a, lang) for a in (visit.advice or [])],
         "advice_notes": visit.advice_notes,
+        # Tests the doctor advised at this check-up (in the patient's language when the test has a translation)
+        "investigations": [(getattr(i.test, f"name_{lang}", "") if i.test_id and lang in ("gu", "hi") else "") or i.test_name
+                           for i in visit.investigations.exclude(status="cancelled").select_related("test")],
         "follow_up_date": visit.follow_up_date, "follow_up_notes": visit.follow_up_notes,
         **letterhead(prescription.branch, prescription.doctor),
     }

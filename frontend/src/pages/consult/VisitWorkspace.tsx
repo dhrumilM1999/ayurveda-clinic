@@ -28,6 +28,7 @@ import {
   TemplateSection, type VisitDraft,
 } from './sections';
 import { PhotosSection, ProgressSection } from './extraSections';
+import { InvestigationsSection } from './InvestigationsSection';
 import { DaysBar } from './DaysBar';
 import { RxSection, withQuantity, type RxDraft } from './RxSection';
 import { usePrakritiName, useTemplateName } from './shared';
@@ -392,6 +393,7 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
     ...templates.map((tpl) => ({ key: `tpl:${tpl.code}`, label: templateName(tpl) })),
     { key: 'progress', label: t('consult.sections.progress') },
     { key: 'photos', label: t('consult.sections.photos') },
+    ...(can('emr.view') ? [{ key: 'investigations', label: t('consult.sections.investigations') }] : []),
     { key: 'diagnosis', label: t('consult.sections.diagnosis') },
     ...(canSeeRx ? [{ key: 'rx', label: t('consult.sections.rx') }] : []),
     { key: 'advice', label: t('consult.sections.advice') },
@@ -498,6 +500,7 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
           {section === 'progress' && (
             <ProgressSection patientId={visit.patient} visitId={visit.id} visitDate={visit.visit_date} complaints={draft.complaints} />
           )}
+          {section === 'investigations' && <InvestigationsSection visitId={visit.id} patientId={visit.patient} readOnly={readOnly} />}
           {section === 'photos' && <PhotosSection visitId={visit.id} patientId={visit.patient} readOnly={readOnly} />}
           {section === 'complaints' && <ComplaintsSection {...props} />}
           {section === 'history' && <NotesSection {...props} />}
