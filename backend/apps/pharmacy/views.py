@@ -29,7 +29,7 @@ from .serializers import (
 from .services import (
     WALK_IN, alert_counts, complete_verification, correct_stock, counter_sell, dispense_status, dispensed_quantities,
     ledger, locations_for, receive_stock, return_to_supplier, scan, sell, set_location, set_reorder_level,
-    start_verification, stock_summary, suggested_batches, take_back,
+    needed_medicines, start_verification, stock_by_medicine, stock_summary, suggested_batches, take_back,
 )
 
 
@@ -228,11 +228,11 @@ class StockViewSet(PharmacyMixin, viewsets.ViewSet):
     """Stock of this branch: summary, alerts, batches, barcode scan, corrections, locations, ledger."""
 
     required_permissions = {
-        "list": "pharmacy.view", "alerts": "pharmacy.view", "batches": "pharmacy.view", "scan": "pharmacy.view",
+        "list": "pharmacy.view", "alerts": "pharmacy.view", "needed": "pharmacy.view", "batches": "pharmacy.view", "scan": "pharmacy.view",
         "movements": "pharmacy.view", "adjust": "pharmacy.stock", "reorder_level": "pharmacy.stock",
         "location": "pharmacy.stock", "labels": "pharmacy.view",
     }
-    required_features = {"alerts": "pharmacy_stock_alerts", "scan": "pharmacy_barcode", "location": "pharmacy_racks",
+    required_features = {"alerts": "pharmacy_stock_alerts", "needed": "pharmacy_stock_alerts", "scan": "pharmacy_barcode", "location": "pharmacy_racks",
                          "labels": "pharmacy_stock_labels"}
 
     def list(self, request):
@@ -253,6 +253,11 @@ class StockViewSet(PharmacyMixin, viewsets.ViewSet):
     @action(detail=False, methods=["get"])
     def alerts(self, request):
         return Response(alert_counts(request.branch))
+
+    @action(detail=False, methods=["get"])
+    def needed(self, request):
+        """Medicines doctors asked for in the last 30 days that are not on the shelf: what to order first."""
+        return Response(needed_medicines(request.branch))
 
     @action(detail=False, methods=["get"])
     def batches(self, request):
@@ -427,15 +432,20 @@ class DispensingViewSet(PharmacyMixin, viewsets.ViewSet):
         day = _day(request.query_params.get("date"), timezone.localdate())
         wanted = request.query_params.get("status")
         rows = []
+        stock = stock_by_medicine(request.branch)
         for rx in self._prescriptions(request).filter(visit__visit_date=day).order_by("finalized_at"):
             status = dispense_status(rx)
             if wanted and status != wanted:
                 continue
             appointment = getattr(rx.visit, "appointment", None)
+            given = dispensed_quantities(rx) if status != "pending" else {}
+            # stock medicines of this prescription that cannot be given now (not in stock) and were not given yet
+            missing = sum(1 for i in rx.items.all() if i.medicine_id and not given.get(i.id) and not stock.get(i.medicine_id))
             rows.append({
                 "id": str(rx.id), "patient_detail": patient_summary(rx.patient), "doctor_name": rx.doctor.full_name,
                 "token_number": appointment.token_number if appointment else None,
                 "finalized_at": rx.finalized_at, "item_count": len(rx.items.all()), "status": status,
+                "missing_stock": missing,
             })
         return Response(rows)
 
@@ -469,6 +479,8 @@ class DispensingViewSet(PharmacyMixin, viewsets.ViewSet):
                 "anupana": i.anupana, "duration": i.duration, "duration_unit": i.duration_unit,
                 "instructions": i.instructions, "given": money(given.get(i.id)),
                 "batches": BatchSerializer(batches.get(i.medicine_id, []), many=True).data,
+                # a stock medicine that is not on the shelf (or only expired) and was not given yet
+                "out_of_stock": bool(i.medicine_id) and not batches.get(i.medicine_id) and not given.get(i.id),
             } for i in items],
         })
 

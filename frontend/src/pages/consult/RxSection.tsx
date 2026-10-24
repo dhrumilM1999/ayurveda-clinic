@@ -15,7 +15,7 @@ import type { Diagnosis, Medicine, Page, Prescription, PrescriptionTemplate, RxL
 import { autoQuantity, quickDosage } from '../../utils/dosage';
 import { LabelsButton } from '../../components/BillPreview';
 import { MasterSelect } from '../../components/MasterSelect';
-import { MedicineFlags, money } from '../medicines/shared';
+import { MedicineFlags, StockTag, money } from '../medicines/shared';
 
 export type RxDraft = { id?: string; items: RxLine[]; notes: string; status?: 'draft' | 'final'; medicine_days?: number | null };
 
@@ -44,6 +44,7 @@ function lineFromMedicine(m: Medicine): RxLine {
     quantity: '',
     instructions: '',
     medicine_flags: (['schedule_e1', 'contains_metals', 'pregnancy_caution', 'child_caution'] as const).filter((f) => m[f]),
+    stock_available: m.stock_available ?? null,
   };
 }
 
@@ -136,7 +137,7 @@ export function RxSection({ rx, onChange, warnings, diagnoses, readOnly, daysBar
       label: (
         <div className="rx-option">
           <span><b>{m.name}</b> <span className="cell-sub">{m.dosage_form?.label}</span></span>
-          <span className="rx-option-meta"><MedicineFlags medicine={m} /> <span className="cell-sub num">{money(m.branch_price)}</span></span>
+          <span className="rx-option-meta"><StockTag stock={m.stock_available} /> <MedicineFlags medicine={m} /> <span className="cell-sub num">{money(m.branch_price)}</span></span>
         </div>
       ),
     })),
@@ -213,6 +214,7 @@ export function RxSection({ rx, onChange, warnings, diagnoses, readOnly, daysBar
                   <b>{l.medicine_name}</b>
                   {l.dosage_form && <span className="cell-sub">{l.dosage_form}</span>}
                   {l.medicine === null && <Tag className="tag-tight">{t('rx.freeText')}</Tag>}
+                  <StockTag stock={l.stock_available} />
                   <MedicineFlags flags={l.medicine_flags} />
                 </div>
                 {!readOnly && (
@@ -303,7 +305,7 @@ function SaveTemplateModal({ items, notes, diagnoses, onClose }: {
     try {
       await api.post('/prescription-templates/', {
         name: values.name, diagnosis: values.diagnosis ?? null, notes,
-        items: items.map(({ id: _id, medicine_flags: _f, ...rest }) => rest),
+        items: items.map(({ id: _id, medicine_flags: _f, stock_available: _s, ...rest }) => rest),
       });
       message.success(t('rx.templateSaved'));
       onClose(true);

@@ -11,6 +11,7 @@ from apps.accounts.permissions import BranchPermission
 from apps.audit.services import log_action
 from apps.common.viewsets import AuditedModelViewSet
 from apps.emr.models import Visit
+from apps.organizations.services import is_feature_enabled
 from apps.patients.models import Patient
 
 from .models import Prescription, PrescriptionTemplate
@@ -74,6 +75,15 @@ class PrescriptionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, view
         if not 1 <= days <= 3650:
             raise ValidationError({"medicine_days": "Between 1 and 3650 days."})
         return days
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        branch = getattr(self.request, "branch", None)
+        if branch is not None and is_feature_enabled(branch, "pharmacy"):
+            from apps.pharmacy.services import stock_by_medicine  # the pharmacy owns the stock
+
+            context["stock"] = stock_by_medicine(branch)
+        return context
 
     def create(self, request, *args, **kwargs):
         visit = Visit.objects.filter(organization_id=request.user.organization_id, pk=request.data.get("visit")).first()

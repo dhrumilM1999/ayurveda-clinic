@@ -85,7 +85,12 @@ export function DispenseTab() {
           },
           { title: t('appointments.patient'), key: 'patient', render: (_: unknown, r: DispenseQueueRow) => <PatientCell patient={r.patient_detail} /> },
           { title: t('appointments.doctor'), dataIndex: 'doctor_name' },
-          { title: t('pharmacy.medicines'), dataIndex: 'item_count', width: 110, align: 'center' as const },
+          {
+            title: t('pharmacy.medicines'), dataIndex: 'item_count', width: 150, align: 'center' as const,
+            render: (n: number, r: DispenseQueueRow) => (
+              <span>{n}{r.missing_stock ? <Tag color="red" className="tag-tight" style={{ marginInlineStart: 6 }}>{t('pharmacy.missingStock', { n: r.missing_stock })}</Tag> : null}</span>
+            ),
+          },
           { title: t('common.status'), dataIndex: 'status', width: 130, render: (s: DispenseStatus) => <DispenseStatusTag status={s} /> },
           {
             title: '', key: 'action', width: 120, align: 'right' as const,

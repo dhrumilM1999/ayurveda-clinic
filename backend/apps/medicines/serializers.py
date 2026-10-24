@@ -16,6 +16,8 @@ class MedicineSerializer(serializers.ModelSerializer):
     # This branch's own settings (filled by the view)
     branch_price = serializers.SerializerMethodField()
     branch_active = serializers.SerializerMethodField()
+    # Packs this branch can give today (empty when the clinic does not run the pharmacy module)
+    stock_available = serializers.SerializerMethodField()
 
     class Meta:
         model = Medicine
@@ -25,9 +27,15 @@ class MedicineSerializer(serializers.ModelSerializer):
             "strength", "sku", "notes", "manufacturer", "classical_equivalent", "classical_equivalent_name", "ayush_licence_no", "hsn_code",
             "gst_rate", "mrp", "pack_size", "default_dose", "dose_unit", "default_frequency", "default_timing",
             "default_anupana", "schedule_e1", "contains_metals", "pregnancy_caution", "child_caution",
-            "safety_notes", "is_sample", "is_active", "version", "branch_price", "branch_active", "updated_at",
+            "safety_notes", "is_sample", "is_active", "version", "branch_price", "branch_active", "stock_available", "updated_at",
         ]
         read_only_fields = ["id", "is_sample", "version", "updated_at"]
+
+    def get_stock_available(self, obj):
+        stock = self.context.get("stock")
+        if stock is None:
+            return None
+        return str(stock.get(obj.id, 0))
 
     def _branch_row(self, obj) -> BranchMedicine | None:
         rows = self.context.get("branch_rows")

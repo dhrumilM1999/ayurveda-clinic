@@ -80,7 +80,7 @@ ADDITIONAL_FEATURES = {
                      "requires": "medicine_labels"},
     # Billing
     "combined_opd_bill": {"group": "billing", "label": "Medicines on the OPD bill (one combined bill)",
-                          "default": False, "requires": "pharmacy_billing"},
+                          "default": True, "requires": "pharmacy_billing"},
 }
 
 # Additional settings that are a CHOICE (not on/off). "options" are codes; screen text is in frontend/src/i18n.

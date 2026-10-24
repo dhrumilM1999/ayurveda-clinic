@@ -8,7 +8,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { api, errorMessage } from '../../api/client';
-import type { Rack, ScanResult, StockAlerts, StockBatch, StockRow, Supplier } from '../../api/types';
+import type { NeededMedicine, Rack, ScanResult, StockAlerts, StockBatch, StockRow, Supplier } from '../../api/types';
 import { useAuth } from '../../auth/AuthContext';
 import { money } from '../medicines/shared';
 import { LedgerDrawer } from './LedgerTab';
@@ -23,10 +23,15 @@ export function AlertTiles({ onPick, active }: { onPick?: (show: Show) => void; 
   const { t } = useTranslation();
   const [alerts, setAlerts] = useState<StockAlerts | null>(null);
   useEffect(() => { api.get<StockAlerts>('/stock/alerts/').then(({ data }) => setAlerts(data)).catch(() => setAlerts(null)); }, []);
+  const [neededOpen, setNeededOpen] = useState(false);
+  const [needed, setNeeded] = useState<NeededMedicine[]>([]);
   if (!alerts) return null;
   const tiles: { key: Show; color: string }[] = [
     { key: 'out', color: 'red' }, { key: 'low', color: 'orange' }, { key: 'expiring', color: 'gold' }, { key: 'expired', color: 'magenta' },
   ];
+  const openNeeded = () => {
+    api.get<NeededMedicine[]>('/stock/needed/').then(({ data }) => { setNeeded(data); setNeededOpen(true); }).catch(() => undefined);
+  };
   return (
     <div className="alert-tiles">
       {tiles.map(({ key, color }) => (
@@ -36,6 +41,20 @@ export function AlertTiles({ onPick, active }: { onPick?: (show: Show) => void; 
           <span className="alert-label">{t(`pharmacy.alerts.${key}`)}</span>
         </button>
       ))}
+      <button type="button" className={`alert-tile tile-red${alerts.needed ? ' active' : ''}`} onClick={openNeeded}>
+        <span className="alert-count num">{alerts.needed}</span>
+        <span className="alert-label">{t('pharmacy.alerts.needed')}</span>
+      </button>
+      <Modal open={neededOpen} onCancel={() => setNeededOpen(false)} footer={null} title={t('pharmacy.needed.title')} destroyOnHidden>
+        <div className="cell-sub" style={{ marginBottom: 8 }}>{t('pharmacy.needed.help')}</div>
+        <Table<NeededMedicine> size="small" rowKey="medicine" dataSource={needed} pagination={false}
+          locale={{ emptyText: t('pharmacy.needed.none') }}
+          columns={[
+            { title: t('pharmacy.needed.medicine'), dataIndex: 'name' },
+            { title: t('pharmacy.needed.times'), dataIndex: 'times', width: 110 },
+            { title: t('pharmacy.needed.last'), dataIndex: 'last_at', width: 120, render: (v: string) => dayjs(v).format('DD-MM-YYYY') },
+          ]} />
+      </Modal>
     </div>
   );
 }

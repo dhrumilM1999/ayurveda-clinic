@@ -611,6 +611,8 @@ export interface Medicine {
   strength: string;
   sku: string;
   notes: string;
+  /** Packs this branch can give today (null when the clinic has no pharmacy module) */
+  stock_available?: string | null;
 }
 
 export interface MedicineVersion {
@@ -646,6 +648,8 @@ export interface RxLine {
   quantity: string;
   instructions: string;
   medicine_flags?: MedicineFlag[];
+  /** Packs the pharmacy can give today (null / missing = not tracked) */
+  stock_available?: string | null;
 }
 
 export interface RxWarning {
@@ -781,6 +785,15 @@ export interface StockAlerts {
   out: number;
   expiring: number;
   expired: number;
+  /** Medicines doctors asked for that are not in stock */
+  needed: number;
+}
+
+export interface NeededMedicine {
+  medicine: string;
+  name: string;
+  times: number;
+  last_at: string;
 }
 
 export interface ScanResult {
@@ -857,6 +870,8 @@ export interface DispenseQueueRow {
   finalized_at: string | null;
   item_count: number;
   status: DispenseStatus;
+  /** Medicines of this prescription that are not in stock now */
+  missing_stock?: number;
 }
 
 export interface DispenseLine {

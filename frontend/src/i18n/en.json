@@ -1013,7 +1013,12 @@
     "hasDanger": "has serious warnings",
     "instructionsLabel": "Instructions",
     "repeat_one": "Repeat this medicine",
-    "repeat_other": "Repeat these {{count}} medicines"
+    "repeat_other": "Repeat these {{count}} medicines",
+    "stock": {
+      "none": "Not in stock",
+      "few": "Only {{n}} left",
+      "ok": "In stock: {{n}}"
+    }
   },
   "pharmacy": {
     "title": "Pharmacy",
@@ -1128,7 +1133,8 @@
       "out": "Out of stock",
       "low": "Low stock",
       "expiring": "Near expiry",
-      "expired": "Expired in stock"
+      "expired": "Expired in stock",
+      "needed": "Asked for, not in stock"
     },
     "checkStatus": {
       "open": "Counting",
@@ -1255,7 +1261,16 @@
     "e1NeedsRx": "{{name}} is a Schedule E1 medicine: sell it only against a doctor's prescription.",
     "addedExtra": "{{name}} added (not on the prescription).",
     "notOnRx": "Not on prescription",
-    "outOfStockName": "{{name}}: no stock that can be sold."
+    "outOfStockName": "{{name}}: no stock that can be sold.",
+    "needed": {
+      "title": "Asked for by doctors, not in stock",
+      "help": "Medicines written in prescriptions in the last 30 days that the pharmacy does not have now. Order these first.",
+      "none": "Nothing is missing.",
+      "medicine": "Medicine",
+      "times": "Asked (times)",
+      "last": "Last asked"
+    },
+    "missingStock": "{{n}} not in stock"
   },
   "billing": {
     "status": {
