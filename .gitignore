@@ -1,5 +1,6 @@
 # Secrets and local settings - never commit
 .env
+.env.supabase
 
 # Python
 __pycache__/

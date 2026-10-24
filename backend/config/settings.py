@@ -113,6 +113,8 @@ DATABASES = {
         "HOST": env("POSTGRES_HOST", "db"),
         "PORT": env("POSTGRES_PORT", "5432"),
         "CONN_MAX_AGE": 60,
+        # A cloud database (for example Supabase) needs POSTGRES_SSLMODE=require in .env. Empty = no SSL (local Docker).
+        "OPTIONS": {"sslmode": env("POSTGRES_SSLMODE", "")} if env("POSTGRES_SSLMODE", "") else {},
     }
 }
 
