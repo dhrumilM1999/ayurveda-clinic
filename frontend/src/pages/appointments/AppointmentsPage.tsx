@@ -149,9 +149,10 @@ export default function AppointmentsPage() {
           },
           {
             title: t('appointments.patient'), key: 'patient',
-            render: (_: unknown, r: Appointment) => (
-              <Link to={`/patients/${r.patient}`} style={{ color: 'inherit' }}><PatientCell patient={r.patient_detail} /></Link>
-            ),
+            // The doctor clicks the whole row to start the check-up; other staff click the name to open the patient file
+            render: (_: unknown, r: Appointment) => (canStart(r)
+              ? <PatientCell patient={r.patient_detail} />
+              : <Link to={`/patients/${r.patient}`} style={{ color: 'inherit' }}><PatientCell patient={r.patient_detail} /></Link>),
           },
           ...(multiDoctor ? [{ title: t('appointments.doctor'), dataIndex: 'doctor_name' }] : []),
           {

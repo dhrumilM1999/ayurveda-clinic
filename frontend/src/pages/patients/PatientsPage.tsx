@@ -21,7 +21,7 @@ export function genderAge(t: (key: string) => string, gender: string, age: numbe
 export default function PatientsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { can } = useAuth();
+  const { can, multiBranch } = useAuth();
   const masterLabel = useMasterLabel();
   const [search, setSearch] = useState('');
   const [gender, setGender] = useState<string>('all');
@@ -94,7 +94,7 @@ export default function PatientsPage() {
             render: (d: string, p: PatientListItem) => (
               <div>
                 <div>{dayjs(d).format('DD-MM-YYYY')}</div>
-                <Typography.Text type="secondary" style={{ fontSize: 12 }}>{p.registered_branch_name}</Typography.Text>
+                {multiBranch && <Typography.Text type="secondary" style={{ fontSize: 12 }}>{p.registered_branch_name}</Typography.Text>}
               </div>
             ),
           },

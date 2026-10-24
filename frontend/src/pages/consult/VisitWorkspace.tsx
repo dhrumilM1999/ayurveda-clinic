@@ -530,7 +530,7 @@ function PreviousVisits({ patientId, currentId, templates, onRepeat }: {
   onRepeat?: (lines: RxLine[]) => void;
 }) {
   const { t } = useTranslation();
-  const { can } = useAuth();
+  const { can, multiBranch, multiDoctor } = useAuth();
   const [rows, setRows] = useState<VisitListItem[]>([]);
   const [open, setOpen] = useState<Visit | null>(null);
   const [openRx, setOpenRx] = useState<Prescription | null>(null);
@@ -559,7 +559,7 @@ function PreviousVisits({ patientId, currentId, templates, onRepeat }: {
         <button type="button" className="prev-visit" key={v.id}
           onClick={() => openVisit(v.id)}>
           <div className="prev-visit-date">{dayjs(v.visit_date).format('DD-MM-YYYY')}</div>
-          <div className="cell-sub">{v.doctor_name} · {v.branch_name}</div>
+          <div className="cell-sub">{[multiDoctor ? v.doctor_name : '', multiBranch ? v.branch_name : ''].filter(Boolean).join(' · ')}</div>
           {v.diagnoses.length > 0 && <div className="prev-visit-dx">{v.diagnoses.join(', ')}</div>}
           {v.complaints.length > 0 && <div className="cell-sub">{v.complaints.join(', ')}</div>}
         </button>
@@ -578,7 +578,7 @@ function PreviousVisits({ patientId, currentId, templates, onRepeat }: {
         )}>
         {open && (
           <>
-            <div className="cell-sub" style={{ marginBottom: 8 }}>{open.doctor_name} · {open.branch_name}</div>
+            <div className="cell-sub" style={{ marginBottom: 8 }}>{[multiDoctor ? open.doctor_name : '', multiBranch ? open.branch_name : ''].filter(Boolean).join(' · ')}</div>
             <SummarySection draft={toDraft(open)} templates={templates} exams={toExams(open.exams)}
               examFields={toExamFields(open.exams, templates)} rxItems={openRx?.items} rxNotes={openRx?.notes} />
           </>

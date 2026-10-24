@@ -2,12 +2,14 @@
 import { Table, Tag, Typography } from 'antd';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../../auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import type { VisitListItem } from '../../../api/types';
 import { useList } from '../../../api/useList';
 import { ListEmpty } from '../../../components/ListEmpty';
 
 export function VisitsTab({ patientId }: { patientId: string }) {
+  const { multiBranch, multiDoctor } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { rows, loading, pagination, failed, reload } = useList<VisitListItem>('/visits/', { patient: patientId }, 10);
@@ -26,7 +28,7 @@ export function VisitsTab({ patientId }: { patientId: string }) {
         onRow={(v) => ({ onClick: () => navigate(`/consult/${v.id}`), style: { cursor: 'pointer' } })}
         columns={[
           { title: t('appointments.date'), dataIndex: 'visit_date', render: (d: string) => <b>{dayjs(d).format('DD-MM-YYYY')}</b> },
-          { title: t('appointments.doctor'), key: 'doc', render: (_: unknown, v: VisitListItem) => `${v.doctor_name} · ${v.branch_name}` },
+          { title: t('appointments.doctor'), key: 'doc', render: (_: unknown, v: VisitListItem) => [multiDoctor ? v.doctor_name : '', multiBranch ? v.branch_name : ''].filter(Boolean).join(' · ') || v.doctor_name },
           { title: t('consult.sections.complaints'), dataIndex: 'complaints', render: (c: string[]) => c.join(', ') || '—' },
           { title: t('consult.sections.diagnosis'), dataIndex: 'diagnoses', render: (d: string[]) => d.join(', ') || '—' },
           {
