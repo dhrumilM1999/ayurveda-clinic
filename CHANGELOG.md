@@ -2,6 +2,8 @@
 
 What changed in each step, in plain words.
 
+- **Day chips** (medicine days and follow-up): 120 and 150 days added, so the choices are 3, 5, 7, 15, 30, 60, 90, 120, 150, 180 and a custom box.
+
 ## Prescribe, give, bill: one tested clinic day (2026-10-24)
 
 - A new full-day test runs the whole flow with every role (front desk, doctor, pharmacist, owner): `apps/common/tests/test_full_day.py`.

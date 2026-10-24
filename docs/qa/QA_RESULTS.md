@@ -236,7 +236,7 @@ PASS 21 · FAIL 0 · BLOCKED 0 · NOT RUN 1
 | RX-004 | PASS | Dosage formatting handles supported patterns and does not transform unrelated medicine names or text. | quickDosage converts only exactly 3 digits; names and free text unchanged |
 | RX-005 | PASS | Invalid or ambiguous dosage input is flagged instead of silently misinterpreted. | FOUND AND FIXED in this audit: 2222 silently became 2-2-22. Now a warning is shown (commit 86806d5) |
 | RX-006 | PASS | Medicine strength, dosage form, route, timing, frequency, duration and instructions remain associated with the correct medicine. | Fields stay on their own line (test_edit_lines_keeps_ids) |
-| RX-007 | PASS | Follow-up day presets include 3, 5, 7, 15, 30, 60, 90 and 180 days plus a custom option. | Real screen: chips 3, 5, 7, 15, 30, 60, 90, 180 days plus a custom box |
+| RX-007 | PASS | Follow-up day presets include 3, 5, 7, 15, 30, 60, 90 and 180 days plus a custom option. | Real screen: chips 3, 5, 7, 15, 30, 60, 90, 120, 150, 180 days plus a custom box (120 and 150 added at the owner's request) |
 | RX-008 | PASS | Selecting a follow-up preset sets the initial/default value for both follow-up and medicine duration fields as requested. | Real screen: 180 sets BOTH follow-up (180) and the medicine line duration (180) |
 | RX-009 | PASS | Doctor can change follow-up timing independently after the default is applied. | Real screen: follow-up changed to 30, medicine stays 180 |
 | RX-010 | PASS | Doctor can change medicine duration independently after the default is applied. | Real screen: medicine changed to 90, follow-up stays 30 |

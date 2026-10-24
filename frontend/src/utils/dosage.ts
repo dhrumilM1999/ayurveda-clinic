@@ -1,7 +1,7 @@
 // Small helpers for writing prescriptions quickly.
 
 /** The quick choices for medicine days and follow-up days. */
-export const DAY_CHOICES = [3, 5, 7, 15, 30, 60, 90, 180];
+export const DAY_CHOICES = [3, 5, 7, 15, 30, 60, 90, 120, 150, 180];
 
 /**
  * Quick dosage: three digits become morning-noon-night.
