@@ -111,7 +111,7 @@ def test_DB_005_006_every_main_table_has_uuid_owner_timestamps_and_soft_delete()
         "TokenSequence", "UhidSequence", "DocumentSequence", "LoginOtp", "OutstandingToken", "BlacklistedToken", "Migration",
         # By design: the audit log is append-only (no soft delete / updated_at), version histories are immutable rows
         # with a counter id, the login code table is temporary and the message log is a plain record.
-        "LoginChallenge", "AuditLog", "OutboundMessage", "ExamTemplateVersion", "MedicineVersion",
+        "LoginChallenge", "AuditLog", "ErrorLog", "OutboundMessage", "ExamTemplateVersion", "MedicineVersion",
     }
     problems = []
     for model in django_apps.get_models():

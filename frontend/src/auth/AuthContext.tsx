@@ -6,6 +6,7 @@ import { api, setSessionExpiredHandler } from '../api/client';
 import type { AdditionalFeature, FeatureFlag, Me, MyBranch } from '../api/types';
 import i18n, { setLanguage } from '../i18n';
 import { clearAllDrafts } from '../utils/formDraft';
+import { startSession } from '../errorLog/tracker';
 import { tokenStore } from './tokenStore';
 
 interface AuthValue {
@@ -117,6 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const completeLogin = useCallback(
     async (access: string, refresh: string) => {
       tokenStore.setTokens(access, refresh);
+      startSession();
       setLogoutReason(null);
       setLoading(true);
       await loadMe();

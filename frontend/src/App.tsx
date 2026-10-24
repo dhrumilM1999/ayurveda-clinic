@@ -11,6 +11,7 @@ import AppointmentsPage from './pages/appointments/AppointmentsPage';
 import QueueDisplayPage from './pages/appointments/QueueDisplayPage';
 import QueuePage from './pages/appointments/QueuePage';
 import AuditLogPage from './pages/AuditLogPage';
+import ErrorLogPage from './pages/ErrorLogPage';
 import ConsultPage from './pages/consult/ConsultPage';
 import MedicinesPage from './pages/medicines/MedicinesPage';
 import PharmacyPage from './pages/pharmacy/PharmacyPage';
@@ -94,6 +95,7 @@ export default function App() {
               <Route path="additional-settings" element={<RequirePermission code="settings.manage"><AdditionalSettingsPage /></RequirePermission>} />
               <Route path="pdf-settings" element={<RequirePermission code="settings.manage"><PdfSettingsPage /></RequirePermission>} />
               <Route path="audit-log" element={<RequirePermission code="audit.view"><AuditLogPage /></RequirePermission>} />
+              <Route path="error-log" element={<RequirePermission code="audit.view"><ErrorLogPage /></RequirePermission>} />
               <Route path="login" element={<Navigate to="/" replace />} />
               <Route path="*" element={<NotFoundPage />} />
             </Route>

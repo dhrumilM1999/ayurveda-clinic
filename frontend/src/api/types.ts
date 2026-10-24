@@ -158,6 +158,32 @@ export interface AuditLogEntry {
   ip_address: string | null;
 }
 
+export interface ErrorLogEntry {
+  id: string;
+  created_at: string;
+  last_seen: string;
+  branch_name: string;
+  username: string;
+  session_id: string;
+  request_code: string;
+  source: 'backend' | 'frontend';
+  level: 'error' | 'warning' | 'notice';
+  status_code: number | null;
+  method: string;
+  path: string;
+  screen: string;
+  message: string;
+  count: number;
+  is_resolved: boolean;
+  resolved_by_name: string;
+  note: string;
+  // only when one line is opened
+  details?: string;
+  trail?: { t: string; type: string; text: string }[];
+  ip_address?: string | null;
+  user_agent?: string;
+}
+
 // --- Patients (Step 2) ---------------------------------------------------------
 export interface MasterRef {
   id: string;

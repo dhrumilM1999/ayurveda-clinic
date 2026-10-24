@@ -446,7 +446,7 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
                   <Tooltip title={t('consult.redoHelp')}>
                     <Button size="small" icon={<RedoOutlined />} disabled={!future.current.length} onClick={redo} aria-label={t('consult.redo')} />
                   </Tooltip>
-                  <Button size="small" icon={<SaveOutlined />} onClick={() => save()}>{t('common.save')}</Button>
+                  <Button size="small" icon={<SaveOutlined />} loading={saveState === 'saving'} onClick={() => save()}>{t('common.save')}</Button>
                 </>
               )}
               <PrintMenu visitId={visit.id} rxId={rx.id} hasFollowUp={!!draft.follow_up_date} patientName={p.full_name}

@@ -2,6 +2,14 @@
 
 What changed in each step, in plain words.
 
+## Error log, calendar, lab tests (2026-10-24)
+
+- **Error log** (new menu item for the owner): every server error, screen crash, lost connection and refused action, with who, where, how many times, a short code and the steps the person took before it. "Copy for Claude" copies it in plain text. See `docs/ERROR_LOG.md`.
+- **Saving no longer shakes the check-up screen:** the "Saved / Unsaved changes" note has a fixed size, so the buttons beside it stay still; the Save button shows a spinner while saving.
+- **Lab tests:** the doctor advises tests, adds the report later, and the tests print on the prescription.
+- **Calendar:** month view of free and booked days.
+- Branch note: this work is on branch `fix/clinic-flow-lab-qa`; `feature/panchakarma` is back to Panchakarma only.
+
 - **Day chips** (medicine days and follow-up): 120 and 150 days added, so the choices are 3, 5, 7, 15, 30, 60, 90, 120, 150, 180 and a custom box.
 
 ## Prescribe, give, bill: one tested clinic day (2026-10-24)

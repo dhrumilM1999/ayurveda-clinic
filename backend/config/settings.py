@@ -190,6 +190,7 @@ REST_FRAMEWORK = {
         "anon": "100/min",
         "verify": env("THROTTLE_VERIFY", "30/min"),
         "enquiry": env("THROTTLE_ENQUIRY", "10/hour"),
+        "error_report": env("THROTTLE_ERROR_REPORT", "60/min"),
     },
 }
 

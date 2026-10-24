@@ -5,7 +5,7 @@
 // - feature: the item hides when that module is switched off for the branch (Settings)
 // - multiBranchOnly: the item shows only when "Use more than one branch" is on (Settings)
 import {
-  AppstoreAddOutlined, CarryOutOutlined, HeartOutlined, ApartmentOutlined, BarChartOutlined, DollarOutlined, WalletOutlined, AuditOutlined, ExperimentOutlined, ShopOutlined, FormOutlined, MedicineBoxOutlined, CalendarOutlined, DashboardOutlined, HomeOutlined,
+  AppstoreAddOutlined, BugOutlined, CarryOutOutlined, HeartOutlined, ApartmentOutlined, BarChartOutlined, DollarOutlined, WalletOutlined, AuditOutlined, ExperimentOutlined, ShopOutlined, FormOutlined, MedicineBoxOutlined, CalendarOutlined, DashboardOutlined, HomeOutlined,
   FilePdfOutlined, GlobalOutlined, IdcardOutlined, OrderedListOutlined, SafetyCertificateOutlined, ScheduleOutlined, SettingOutlined, TeamOutlined,
 } from '@ant-design/icons';
 import type { ReactNode } from 'react';
@@ -45,4 +45,5 @@ export const menuItems: MenuItemConfig[] = [
   { key: 'additional', path: '/additional-settings', labelKey: 'menu.additional', icon: <AppstoreAddOutlined />, permission: 'settings.manage' },
   { key: 'pdfSettings', path: '/pdf-settings', labelKey: 'menu.pdfSettings', icon: <FilePdfOutlined />, permission: 'settings.manage' },
   { key: 'audit', path: '/audit-log', labelKey: 'menu.audit', icon: <AuditOutlined />, permission: 'audit.view' },
+  { key: 'errorLog', path: '/error-log', labelKey: 'menu.errorLog', icon: <BugOutlined />, permission: 'audit.view' },
 ];

@@ -78,7 +78,8 @@
     "reports": "Reports",
     "therapy": "Panchakarma",
     "pdfSettings": "PDF settings",
-    "calendar": "Calendar"
+    "calendar": "Calendar",
+    "errorLog": "Error log"
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",
@@ -2245,6 +2246,60 @@
       "advised": "Waiting for report",
       "done": "Report received",
       "cancelled": "Not needed"
+    }
+  },
+  "errorLog": {
+    "title": "Error log",
+    "help": "Everything that went wrong for anyone, from the moment they logged in: server errors, screens that crashed, lost connections, and actions that were refused. The same problem again is counted on one line. Press a line to see the steps the person took before it.",
+    "open": "Open errors",
+    "warnings": "Warnings",
+    "notices": "Notices",
+    "last24": "Problems in last 24 hours",
+    "level": {
+      "error": "Error",
+      "warning": "Warning",
+      "notice": "Notice"
+    },
+    "levelHelp": "Error = something broke. Warning = an action was refused. Notice = a mistake in what was entered.",
+    "source": {
+      "backend": "Server",
+      "frontend": "Screen"
+    },
+    "sourceFilter": "Where from",
+    "levelFilter": "How serious",
+    "state": "Status",
+    "stateOpen": "Still open",
+    "stateDone": "Resolved",
+    "stateAll": "All",
+    "when": "Last time",
+    "first": "First time",
+    "who": "Who",
+    "branch": "Branch",
+    "where": "Where",
+    "what": "What happened",
+    "times": "Times",
+    "code": "Code",
+    "details": "Technical detail",
+    "trail": "What the person did before it (oldest first)",
+    "noTrail": "No steps were saved for this one.",
+    "session": "This login",
+    "sessionHelp": "Show everything from the same login",
+    "clearSession": "Show all again",
+    "resolve": "Mark solved",
+    "reopen": "Open again",
+    "note": "Note",
+    "noteSaved": "Saved",
+    "copy": "Copy for Claude",
+    "copied": "Copied. Paste it in the chat with Claude.",
+    "none": "No errors. All good.",
+    "resolvedBy": "Solved by {{name}}",
+    "searchHelp": "Search by name, message, page or code",
+    "crash": {
+      "title": "This screen had a problem",
+      "text": "It has been written to the Error log, so it can be fixed. Your work before this is saved.",
+      "code": "Code: {{code}}.",
+      "reload": "Reload",
+      "home": "Go to start"
     }
   }
 }
