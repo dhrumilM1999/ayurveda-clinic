@@ -322,6 +322,15 @@ def follow_up_context(visit, lang: str) -> dict:
             **letterhead(visit.branch, visit.doctor)}
 
 
+def handwritten_rx_context(handwriting, lang: str) -> dict:
+    """A handwritten prescription page: patient line, letterhead and the handwriting picture itself."""
+    visit = handwriting.visit
+    w = words_for(lang)
+    return {"w": w, "lang": lang, "patient": _patient(handwriting.patient, w), "date": visit.visit_date,
+            "token": visit.appointment.token_number if visit.appointment_id else None,
+            "ink": _data_uri(handwriting.ink), **letterhead(handwriting.branch, handwriting.doctor)}
+
+
 def therapy_plan_context(plan, lang: str) -> dict:
     from apps.therapy.services import plan_print_data
 
