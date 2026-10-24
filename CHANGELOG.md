@@ -2,6 +2,17 @@
 
 What changed in each step, in plain words.
 
+## Prescribe, give, bill: one tested clinic day (2026-10-24)
+
+- A new full-day test runs the whole flow with every role (front desk, doctor, pharmacist, owner): `apps/common/tests/test_full_day.py`.
+- **The doctor sees the pharmacy stock while prescribing:** "In stock: n", "Only n left" or "Not in stock" next to each medicine.
+- **Pharmacy queue** shows "n not in stock" for a prescription; the line says "Out of stock"; the rest can be given and the missing one stays open.
+- **New alert "Asked for, not in stock"** (Pharmacy, Stock and the dashboard): medicines doctors wrote in the last 30 days that the shelf does not have.
+- **Walk-in:** a "Bill the consultation" button right after the token.
+- **Medicines on the one OPD bill** is now on by default; the dashboard says so.
+- Pharmacy basics now on for a new clinic: stock alerts, opening stock, sales returns, supplier returns, stock check, stock ledger, pharmacy reports.
+- Guide for the doctor and staff: `docs/CLINIC_DAY.md`.
+
 ## Handwritten prescription with the digital pad (2026-10-24)
 
 - New **Handwriting** button on the check-up screen: write on the iScribe pad (or tablet pen / touch / mouse), see it live,
