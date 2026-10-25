@@ -51,14 +51,14 @@ The password for every sample user is **`Ayur@2026`**
 
 | Username | Who | OTP needed? |
 |---|---|---|
-| `admin` | Clinic Owner (all access) | Yes |
-| `doctor1` | Dr. Asha Mehta (Mon-Sat 10-13, Mon-Fri 17-20) | Yes |
-| `doctor2` | Dr. Ravi Patel (Mon-Sat 10-14) | Yes |
+| `admin` | Clinic Owner (all access) | No (OTP is switched off) |
+| `doctor1` | Dr. Asha Mehta (Mon-Sat 10-13, Mon-Fri 17-20) | No (OTP is switched off) |
+| `doctor2` | Dr. Ravi Patel (Mon-Sat 10-14) | No (OTP is switched off) |
 | `reception1` | Nita Shah, receptionist | No |
 | `therapist1` | Kiran Joshi, therapist | No |
 | `pharmacist1` | Meena Desai, pharmacist | No |
 
-**OTP (one-time password):** doctors and admins type a 6-digit code after the password.
+**OTP (one-time password):** switched OFF for now: everyone logs in with username + password only. To switch it on later, put `LOGIN_OTP_ENABLED=true` in `.env` (and set up a real SMS or email provider first).
 No real SMS is sent yet. You can find the code in two places:
 - on the login screen, in a yellow box ("Development mode: your OTP is …"), and
 - in **`logs.bat`**: look for `SMS (console, not really sent)`.

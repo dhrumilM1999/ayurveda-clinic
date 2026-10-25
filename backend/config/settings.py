@@ -229,6 +229,9 @@ SIMPLE_JWT = {
 CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
 
 # --- Login security ----------------------------------------------------------
+# Login one-time password (OTP) for doctors and admins. OFF for now: everyone logs in with username + password.
+# To switch it on later (needs a working SMS provider, see docs/SMALL_CHANGES.md): LOGIN_OTP_ENABLED=true in .env
+LOGIN_OTP_ENABLED = env_bool("LOGIN_OTP_ENABLED", False)
 OTP_LENGTH = 6
 OTP_VALID_MINUTES = env_int("OTP_VALID_MINUTES", 5)
 OTP_MAX_ATTEMPTS = env_int("OTP_MAX_ATTEMPTS", 5)
