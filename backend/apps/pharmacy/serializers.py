@@ -91,12 +91,50 @@ class PurchaseSerializer(serializers.ModelSerializer):
     supplier_name = serializers.CharField(source="supplier.name", read_only=True, default="")
     items = PurchaseItemSerializer(many=True, read_only=True)
     created_by_name = serializers.CharField(source="created_by.full_name", read_only=True, default="")
+    # What is owed on this invoice (only for a supplier invoice, not opening stock)
+    payable = serializers.SerializerMethodField()
+    paid = serializers.SerializerMethodField()
+    balance_due = serializers.SerializerMethodField()
+    due_date = serializers.SerializerMethodField()
+    payment_status = serializers.SerializerMethodField()
+
+    def _money(self, purchase):
+        from .payables import payable_of
+
+        if purchase.is_opening or purchase.supplier_id is None or not purchase.in_dues:
+            return None
+        paid = sum((a.amount for a in purchase.payment_allocations.all() if not a.payment.is_reversed), Decimal("0"))
+        payable = payable_of(purchase)
+        return payable, paid, payable - paid
+
+    def get_payable(self, p):
+        m = self._money(p)
+        return str(m[0]) if m else None
+
+    def get_paid(self, p):
+        m = self._money(p)
+        return str(m[1]) if m else None
+
+    def get_balance_due(self, p):
+        m = self._money(p)
+        return str(m[2]) if m else None
+
+    def get_due_date(self, p):
+        from .payables import due_date_of
+
+        return str(due_date_of(p, p.supplier)) if p.supplier_id and not p.is_opening and p.in_dues else None
+
+    def get_payment_status(self, p):
+        m = self._money(p)
+        if not m:
+            return ""
+        return "paid" if m[2] <= 0 else ("partly" if m[1] > 0 else "unpaid")
 
     class Meta:
         model = Purchase
         fields = ["id", "supplier", "supplier_name", "invoice_no", "invoice_date", "is_opening", "taxable_amount",
                   "discount_amount", "gst_amount", "other_charges", "round_off", "total_amount", "printed_total", "notes", "items",
-                  "created_by_name", "created_at"]
+                  "created_by_name", "created_at", "payable", "paid", "balance_due", "due_date", "payment_status"]
 
 
 class PurchaseLineInput(serializers.Serializer):
@@ -136,6 +174,9 @@ class PurchaseInput(serializers.Serializer):
     # Total printed on the supplier invoice; a difference from the calculated total is refused unless accepted
     printed_total = serializers.DecimalField(required=False, allow_null=True, **MONEY)
     accept_difference = serializers.BooleanField(required=False, default=False)
+    # Paid to the supplier at the time of buying (the rest stays "to pay"); needs a supplier
+    paid_now = serializers.DecimalField(required=False, default=0, **MONEY)
+    paid_mode = serializers.CharField(required=False, default="cash", max_length=10)
     notes = serializers.CharField(max_length=300, required=False, allow_blank=True)
     items = PurchaseLineInput(many=True)
 
@@ -288,3 +329,16 @@ class VerificationSerializer(serializers.ModelSerializer):
 class CountInput(serializers.Serializer):
     item = serializers.UUIDField()
     counted_quantity = serializers.DecimalField(max_digits=12, decimal_places=3, min_value=Decimal("0"), allow_null=True)
+
+
+POSITIVE_MONEY = {"max_digits": 12, "decimal_places": 2, "min_value": Decimal("0.01")}
+
+
+class SupplierPaymentInput(serializers.Serializer):
+    supplier = serializers.UUIDField()
+    amount = serializers.DecimalField(**POSITIVE_MONEY)
+    mode = serializers.CharField(max_length=10, default="cash")
+    payment_date = serializers.DateField(required=False)
+    reference = serializers.CharField(max_length=60, required=False, allow_blank=True, default="")
+    notes = serializers.CharField(max_length=300, required=False, allow_blank=True, default="")
+    purchase_ids = serializers.ListField(child=serializers.UUIDField(), required=False, allow_empty=True, max_length=50)

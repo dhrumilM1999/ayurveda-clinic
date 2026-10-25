@@ -1,5 +1,12 @@
 # Pharmacy: the whole flow, and a check against `clinic_purchase_inventory_feature_spec.md`
 
+> **Update 2026-10-25 - fixed since this check:** gap 1 (expiry date now required while expiry tracking is on), gap 2 (type the
+> total printed on the supplier invoice: a difference of more than Rs 1 must be accepted on purpose and is shown on the purchase),
+> gap 4 (new **Supplier dues** tab: what you owe each distributor, payments, part payments, late invoices, reversal of a wrong
+> payment, opening balance, "paid now" when buying), gap 5 (same purchase without invoice number refused within 5 minutes) and
+> gap 6 (same counter sale refused within 15 seconds). Still open: gap 3 (reverse a wrong purchase) and the later items.
+> Purchases entered before the dues feature are not counted as money still to pay (`in_dues`).
+
 Checked on 2026-10-25 against the code in `backend/apps/pharmacy/` (services, views, models) and the real demo data.
 
 ## 1. The flow, from buying a medicine to the patient taking it

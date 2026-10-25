@@ -2,6 +2,14 @@
 
 What changed in each step, in plain words.
 
+## Pharmacy: safer stock-in and supplier dues (2026-10-25)
+
+- **Expiry date is required** for every batch while expiry tracking is on.
+- **Total on the supplier invoice:** type it when you enter a purchase; the software compares it with its own total and shows the difference. More than Rs 1 difference must be accepted with "save anyway"; the purchase list shows what the invoice says.
+- **Double clicks:** the same purchase (no invoice number) within 5 minutes, or the same counter sale within 15 seconds, is refused.
+- **Supplier dues (new tab):** for medicines bought on credit. Shows what you owe each distributor, what is late (credit days from the supplier), payments (cash / UPI / bank / cheque), part payments, "paid now" while buying, goods sent back as credit, the opening balance, and a full account per supplier. A wrong payment is reversed (never deleted). Only people who can receive stock see it.
+- Guide: `docs/PHARMACY_FLOW_AND_SPEC_CHECK.md`.
+
 ## Error log, calendar, lab tests (2026-10-24)
 
 - **Error log** (new menu item for the owner): every server error, screen crash, lost connection and refused action, with who, where, how many times, a short code and the steps the person took before it. "Copy for Claude" copies it in plain text. See `docs/ERROR_LOG.md`.

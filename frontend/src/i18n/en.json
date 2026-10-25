@@ -1052,7 +1052,8 @@
       "ledger": "Stock ledger",
       "setup": "Racks & suppliers",
       "counter": "Counter sale",
-      "reports": "Pharmacy reports"
+      "reports": "Pharmacy reports",
+      "dues": "Supplier dues"
     },
     "status": {
       "pending": "To give",
@@ -2310,5 +2311,66 @@
       "home": "Go to start"
     },
     "developer": "Developer details"
+  },
+  "dues": {
+    "help": "Medicines bought on credit: what you owe each distributor, what is late, and the payments you made. Press a supplier to see the invoices and pay.",
+    "totalOwed": "Total to pay",
+    "totalOverdue": "Late (past due date)",
+    "none": "Nothing is owed to any supplier yet. Buy medicines under a supplier (Purchases) and they appear here.",
+    "owed": "To pay",
+    "overdue": "Late",
+    "notDue": "Not yet due",
+    "lastPayment": "Last payment",
+    "terms": "Credit days",
+    "days": "{{n}} days",
+    "billed": "Billed",
+    "paid": "Paid",
+    "returned": "Sent back",
+    "stillDue": "Still due",
+    "invoices": "Invoices",
+    "noInvoices": "No invoices.",
+    "ledger": "Account (every entry)",
+    "entry": "Entry",
+    "bill": "Bill",
+    "credit": "Paid / credit",
+    "balance": "Balance",
+    "dueOn": "Due on",
+    "lateDays": "{{n}} days late",
+    "pay": "Pay supplier",
+    "payTo": "Pay {{name}}",
+    "amount": "Amount",
+    "owedNow": "owed {{amount}}",
+    "mode": "How paid",
+    "reference": "UPI / cheque no.",
+    "whichInvoices": "Which invoices?",
+    "whichInvoicesHelp": "Leave empty to pay the oldest invoices first.",
+    "oldestFirst": "Oldest first",
+    "noNumber": "(no number)",
+    "note": "Note",
+    "paymentSaved": "Payment saved.",
+    "reverse": "Reverse",
+    "reversed": "reversed",
+    "reversePayment": "Reverse this payment",
+    "reverseHelp": "Use this for a payment entered by mistake. It stays in the account, marked reversed, and the amount is owed again.",
+    "reason": "Why is it reversed?",
+    "openingBalance": "Opening balance",
+    "openingHelp": "What you already owed this supplier on the day you started using the software.",
+    "overdueAlert": "{{amount}} is past its due date.",
+    "paidNow": "Paid now",
+    "paidNowHelp": "Money paid to the supplier today; the rest stays to pay.",
+    "toPay": "To pay",
+    "dueAmount": "{{amount}} due",
+    "status": {
+      "paid": "Paid",
+      "partly": "Part paid",
+      "unpaid": "Not paid"
+    },
+    "modes": {
+      "cash": "Cash",
+      "upi": "UPI",
+      "bank": "Bank transfer",
+      "cheque": "Cheque",
+      "other": "Other"
+    }
   }
 }

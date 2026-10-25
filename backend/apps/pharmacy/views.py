@@ -1,5 +1,7 @@
 from datetime import date as date_cls
+from decimal import Decimal
 
+from django.db import transaction
 from django.db.models import Count, Q
 from django.utils import timezone
 from rest_framework import mixins, status as http, viewsets
@@ -19,11 +21,15 @@ from apps.medicines.models import Medicine
 from apps.organizations.services import is_feature_enabled
 from apps.prescriptions.models import Prescription
 
-from .models import Dispense, Purchase, PurchaseReturn, Rack, StockBatch, StockVerification, StockVerificationItem, Supplier
+from .models import (
+    Dispense, Purchase, PurchaseReturn, Rack, StockBatch, StockVerification, StockVerificationItem, Supplier, SupplierPayment,
+)
+from . import payables
 from . import reports as pharmacy_reports
+from .payables import record_payment as record_supplier_payment
 from .serializers import (
     AdjustInput, BatchSerializer, CounterSaleInput, CountInput, LocationInput, MovementSerializer, PurchaseInput, PurchaseReturnInput,
-    PurchaseReturnSerializer, PurchaseSerializer, RackSerializer, SaleReturnInput, SellInput, SupplierSerializer,
+    PurchaseReturnSerializer, PurchaseSerializer, RackSerializer, SaleReturnInput, SellInput, SupplierPaymentInput, SupplierSerializer,
     VerificationItemSerializer, VerificationSerializer,
 )
 from .services import (
@@ -189,11 +195,19 @@ class PurchaseViewSet(PharmacyMixin, mixins.ListModelMixin, mixins.RetrieveModel
                     raise ValidationError({"items": f"{medicine.name}: please enter the MRP."})
                 line["mrp"] = medicine.mrp or 0
             items.append(line)
-        purchase = receive_stock(request.branch, request.user, items=items, supplier=supplier,
-                                 invoice_no=v.get("invoice_no", ""), invoice_date=v.get("invoice_date"),
-                                 notes=v.get("notes", ""), other_charges=v.get("other_charges", 0),
-                                 is_opening=v.get("is_opening", False), printed_total=v.get("printed_total"),
-                                 accept_difference=v.get("accept_difference", False))
+        paid_now = v.get("paid_now") or 0
+        if paid_now and (supplier is None or v.get("is_opening")):
+            raise ValidationError({"paid_now": "Choose the supplier to record a payment."})
+        with transaction.atomic():
+            purchase = receive_stock(request.branch, request.user, items=items, supplier=supplier,
+                                     invoice_no=v.get("invoice_no", ""), invoice_date=v.get("invoice_date"),
+                                     notes=v.get("notes", ""), other_charges=v.get("other_charges", 0),
+                                     is_opening=v.get("is_opening", False), printed_total=v.get("printed_total"),
+                                     accept_difference=v.get("accept_difference", False))
+            if paid_now:
+                record_supplier_payment(request.branch, request.user, supplier=supplier, amount=paid_now,
+                                        mode=v.get("paid_mode", "cash"), reference=purchase.invoice_no,
+                                        notes="Paid when the medicines were bought", purchase_ids=[purchase.id])
         log_action(request, "create", purchase, changes={"lines": len(items), "total": str(purchase.total_amount),
                                                           "opening": purchase.is_opening,
                                                           "printed_total": str(purchase.printed_total) if purchase.printed_total is not None else ""})
@@ -202,7 +216,8 @@ class PurchaseViewSet(PharmacyMixin, mixins.ListModelMixin, mixins.RetrieveModel
 
 def purchases_of(branch):
     return (Purchase.objects.filter(branch=branch)
-            .select_related("supplier", "created_by").prefetch_related("items__medicine", "items__batch"))
+            .select_related("supplier", "created_by")
+            .prefetch_related("items__medicine", "items__batch", "payment_allocations__payment"))
 
 
 class PurchaseReturnViewSet(PharmacyMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
@@ -639,3 +654,108 @@ class PharmacyReportViewSet(PharmacyMixin, viewsets.ViewSet):
         log_action(request, "view", object_type="pharmacy.report", changes={"report": pk})
         return Response({"code": pk, "title": report["title"], "date_from": date_from, "date_to": date_to,
                          "columns": data["columns"], "rows": data["rows"], "totals": data["totals"]})
+
+
+
+# --- Supplier accounts: what the clinic owes (medicines bought on credit) -----------------------------------
+def _ageing_json(a):
+    return {k: str(v) for k, v in a.items()}
+
+
+class SupplierAccountViewSet(PharmacyMixin, viewsets.ViewSet):
+    """
+    GET  /supplier-accounts/            every supplier with what is owed, and how late
+    GET  /supplier-accounts/<id>/       one supplier: invoices (paid / due), payments, full ledger
+    POST /supplier-accounts/<id>/opening/   {amount} what was already owed when the software was started
+    Money of suppliers: only people who can receive stock (pharmacy.stock) see it.
+    """
+
+    required_permissions = {"list": "pharmacy.stock", "retrieve": "pharmacy.stock", "opening": "pharmacy.stock"}
+    required_features = {"*": "pharmacy_suppliers"}
+
+    def _supplier(self, request, pk):
+        supplier = Supplier.objects.filter(organization_id=request.user.organization_id, pk=pk).first() if _is_uuid(pk) else None
+        if supplier is None:
+            raise NotFound("Supplier not found.")
+        return supplier
+
+    def list(self, request):
+        rows = payables.all_accounts(request.branch)
+        return Response({
+            "total_owed": str(sum((r["balance"] for r in rows), Decimal("0"))),
+            "total_overdue": str(sum((r["ageing"]["overdue"] for r in rows), Decimal("0"))),
+            "suppliers": [{"id": str(r["supplier"].id), "name": r["supplier"].name, "phone": r["supplier"].phone,
+                           "payment_terms_days": r["supplier"].payment_terms_days, "balance": str(r["balance"]),
+                           "billed": str(r["billed"]), "paid": str(r["paid"]), "ageing": _ageing_json(r["ageing"]),
+                           "last_payment": r["last_payment"]} for r in rows],
+        })
+
+    def retrieve(self, request, pk=None):
+        supplier = self._supplier(request, pk)
+        a = payables.account(request.branch, supplier)
+        return Response({
+            "id": str(supplier.id), "name": supplier.name, "phone": supplier.phone,
+            "payment_terms_days": supplier.payment_terms_days,
+            "opening": str(a["opening"]), "billed": str(a["billed"]), "paid": str(a["paid"]),
+            "returned": str(a["returned"]), "balance": str(a["balance"]), "ageing": _ageing_json(a["ageing"]),
+            "invoices": [{**i, "payable": str(i["payable"]), "paid": str(i["paid"]), "balance": str(i["balance"])} for i in a["invoices"]],
+            "entries": [{"date": e["date"], "kind": e["kind"], "label": e["label"], "debit": str(e["debit"]),
+                         "credit": str(e["credit"]), "balance": str(e["balance"]), "id": e.get("id", ""),
+                         "reversed": bool(e.get("reversed"))} for e in a["entries"]],
+        })
+
+    @action(detail=True, methods=["post"])
+    def opening(self, request, pk=None):
+        supplier = self._supplier(request, pk)
+        amount = request.data.get("amount")
+        try:
+            amount = Decimal(str(amount)).quantize(Decimal("0.01"))
+        except Exception:  # noqa: BLE001 - any bad number
+            raise ValidationError({"amount": "Enter the amount."})
+        row = payables.set_opening_balance(request.branch, request.user, supplier, amount)
+        log_action(request, "update", supplier, changes={"opening_balance": str(row.amount)})
+        return Response({"amount": str(row.amount)})
+
+
+class SupplierPaymentViewSet(PharmacyMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
+    """POST /supplier-payments/ pays a supplier; POST /supplier-payments/<id>/reverse/ undoes a wrong one (reason needed)."""
+
+    required_permissions = {"list": "pharmacy.stock", "create": "pharmacy.stock", "reverse": "pharmacy.stock"}
+    required_features = {"*": "pharmacy_suppliers"}
+    pagination_class = None
+
+    def get_queryset(self):
+        qs = SupplierPayment.objects.filter(branch=self.request.branch).select_related("supplier")
+        if self.request.query_params.get("supplier"):
+            qs = qs.filter(supplier_id=self.request.query_params["supplier"])
+        return qs
+
+    def _json(self, p):
+        return {"id": str(p.id), "supplier": str(p.supplier_id), "supplier_name": p.supplier.name, "payment_date": p.payment_date,
+                "amount": str(p.amount), "mode": p.mode, "reference": p.reference, "notes": p.notes,
+                "is_reversed": p.is_reversed, "reverse_reason": p.reverse_reason}
+
+    def list(self, request, *args, **kwargs):
+        return Response([self._json(p) for p in self.get_queryset()[:200]])
+
+    def create(self, request):
+        data = SupplierPaymentInput(data=request.data)
+        data.is_valid(raise_exception=True)
+        v = data.validated_data
+        supplier = Supplier.objects.filter(organization_id=request.user.organization_id, pk=v["supplier"]).first()
+        if supplier is None:
+            raise ValidationError({"supplier": "Supplier not found."})
+        payment = record_supplier_payment(request.branch, request.user, supplier=supplier, amount=v["amount"], mode=v["mode"],
+                                          payment_date=v.get("payment_date"), reference=v["reference"], notes=v["notes"],
+                                          purchase_ids=v.get("purchase_ids") or None)
+        log_action(request, "create", payment, changes={"supplier": supplier.name, "amount": str(payment.amount), "mode": payment.mode})
+        return Response(self._json(payment), status=http.HTTP_201_CREATED)
+
+    @action(detail=True, methods=["post"])
+    def reverse(self, request, pk=None):
+        payment = self.get_queryset().filter(pk=pk).first() if _is_uuid(pk) else None
+        if payment is None:
+            raise NotFound("Payment not found.")
+        payables.reverse_payment(payment, request.user, str(request.data.get("reason", "")))
+        log_action(request, "update", payment, changes={"reversed": True, "reason": str(request.data.get("reason", ""))[:200]})
+        return Response(self._json(payment))

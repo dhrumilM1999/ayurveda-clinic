@@ -1,7 +1,7 @@
 // Purchase invoice entry (or opening stock): one line per medicine batch. Stock goes up when saved.
 // "Detailed purchase entry" and "Barcodes" (Additional settings) add the extra fields.
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import { Alert, App, Button, Checkbox, Col, DatePicker, Form, Input, InputNumber, Modal, Row, Select } from 'antd';
+import { Alert, App, Button, Checkbox, Col, DatePicker, Form, Input, InputNumber, Modal, Row, Select, Space } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -58,9 +58,10 @@ export function PurchaseModal({ opening = false, onClose }: { opening?: boolean;
   const otherCharges: number = Form.useWatch('other_charges', form) ?? 0;
   const printedTotal: number | null | undefined = Form.useWatch('printed_total', form);
   const [acceptDifference, setAcceptDifference] = useState(false);
+  const supplierPicked = Form.useWatch('supplier', form);
 
   useEffect(() => {
-    form.setFieldsValue({ invoice_date: dayjs(), other_charges: 0 });
+    form.setFieldsValue({ invoice_date: dayjs(), other_charges: 0, paid_now: 0, paid_mode: 'cash' });
     if (!opening && suppliersOn) api.get<Supplier[]>('/suppliers/').then(({ data }) => setSuppliers(data.filter((s) => s.is_active))).catch(() => setSuppliers([]));
   }, [form, opening]);
 
@@ -129,6 +130,8 @@ export function PurchaseModal({ opening = false, onClose }: { opening?: boolean;
         other_charges: opening ? 0 : values.other_charges ?? 0,
         printed_total: opening || !rateOn ? null : values.printed_total ?? null,
         accept_difference: acceptDifference,
+        paid_now: opening || !supplierPicked ? 0 : values.paid_now ?? 0,
+        paid_mode: values.paid_mode ?? 'cash',
         notes: values.notes ?? '',
         items: ready.map((l) => ({
           medicine: l.medicine, batch_no: l.batch_no, barcode: l.barcode, quantity: l.quantity, free_quantity: l.free ?? 0,
@@ -194,6 +197,18 @@ export function PurchaseModal({ opening = false, onClose }: { opening?: boolean;
                   <Form.Item name="other_charges" label={t('pharmacy.otherCharges')}>
                     <InputNumber min={0} precision={2} prefix="₹" style={{ width: '100%' }} />
                   </Form.Item>
+                </Col>
+              )}
+              {suppliersOn && supplierPicked && (
+                <Col xs={24}>
+                  <Space wrap align="end">
+                    <Form.Item name="paid_now" label={t('dues.paidNow')} extra={t('dues.paidNowHelp')} style={{ marginBottom: 8 }}>
+                      <InputNumber min={0} precision={2} prefix="₹" style={{ width: 180 }} />
+                    </Form.Item>
+                    <Form.Item name="paid_mode" label={t('dues.mode')} style={{ marginBottom: 8 }}>
+                      <Select style={{ width: 140 }} options={['cash', 'upi', 'bank', 'cheque', 'other'].map((m) => ({ value: m, label: t(`dues.modes.${m}`) }))} />
+                    </Form.Item>
+                  </Space>
                 </Col>
               )}
               {rateOn && (

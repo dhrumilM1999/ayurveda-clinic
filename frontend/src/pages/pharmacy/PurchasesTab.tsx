@@ -103,6 +103,15 @@ function PurchaseList({ opening, query }: { opening: boolean; query: string }) {
             </>
           ),
         }]),
+        ...(opening || !suppliersOn ? [] : [{
+          title: t('dues.toPay'), key: 'due', width: 150, align: 'right' as const,
+          render: (_: unknown, p: PurchaseRecord) => (p.payment_status ? (
+            <>
+              <Tag bordered={false} color={p.payment_status === 'paid' ? 'green' : p.payment_status === 'partly' ? 'gold' : 'red'}>{t(`dues.status.${p.payment_status}`)}</Tag>
+              {p.payment_status !== 'paid' && <div className="cell-sub">{t('dues.dueAmount', { amount: money(p.balance_due) })}{p.due_date ? ` · ${dayjs(p.due_date).format('DD-MM')}` : ''}</div>}
+            </>
+          ) : null),
+        }]),
         { title: t('pharmacy.enteredBy'), dataIndex: 'created_by_name', width: 160 },
       ]}
     />

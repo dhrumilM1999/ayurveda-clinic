@@ -873,6 +873,11 @@ export interface PurchaseRecord {
   round_off: string;
   total_amount: string;
   printed_total?: string | null;
+  payable?: string | null;
+  paid?: string | null;
+  balance_due?: string | null;
+  due_date?: string | null;
+  payment_status?: '' | 'paid' | 'partly' | 'unpaid';
   notes: string;
   items: PurchaseItemRecord[];
   created_by_name: string;
@@ -1315,4 +1320,21 @@ export interface Investigation {
   reported_on: string | null;
   document: string | null;
   document_title: string;
+}
+
+// --- Supplier dues (medicines bought on credit)
+export interface SupplierAgeing { current: string; d1_30: string; d31_60: string; d60_plus: string; other: string; overdue: string }
+export interface SupplierAccountRow {
+  id: string; name: string; phone: string; payment_terms_days: number | null;
+  balance: string; billed: string; paid: string; ageing: SupplierAgeing; last_payment: string | null;
+}
+export interface SupplierInvoice {
+  id: string; invoice_no: string; invoice_date: string; due_date: string; payable: string; paid: string; balance: string;
+  days_overdue: number; status: 'paid' | 'partly' | 'unpaid';
+}
+export interface SupplierAccount {
+  id: string; name: string; phone: string; payment_terms_days: number | null;
+  opening: string; billed: string; paid: string; returned: string; balance: string; ageing: SupplierAgeing;
+  invoices: SupplierInvoice[];
+  entries: { date: string; kind: string; label: string; debit: string; credit: string; balance: string; id: string; reversed: boolean }[];
 }
