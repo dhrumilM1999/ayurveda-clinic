@@ -5,7 +5,7 @@
 // - feature: the item hides when that module is switched off for the branch (Settings)
 // - multiBranchOnly: the item shows only when "Use more than one branch" is on (Settings)
 import {
-  AppstoreAddOutlined, BugOutlined, CarryOutOutlined, HeartOutlined, ApartmentOutlined, BarChartOutlined, DollarOutlined, WalletOutlined, AuditOutlined, ExperimentOutlined, ShopOutlined, FormOutlined, MedicineBoxOutlined, CalendarOutlined, DashboardOutlined, HomeOutlined,
+  AppstoreAddOutlined, GiftOutlined, BugOutlined, CarryOutOutlined, HeartOutlined, ApartmentOutlined, BarChartOutlined, DollarOutlined, WalletOutlined, AuditOutlined, ExperimentOutlined, ShopOutlined, FormOutlined, MedicineBoxOutlined, CalendarOutlined, DashboardOutlined, HomeOutlined,
   FilePdfOutlined, GlobalOutlined, IdcardOutlined, OrderedListOutlined, SafetyCertificateOutlined, ScheduleOutlined, SettingOutlined, TeamOutlined,
 } from '@ant-design/icons';
 import type { ReactNode } from 'react';
@@ -31,6 +31,7 @@ export const menuItems: MenuItemConfig[] = [
   { key: 'billing', path: '/billing', labelKey: 'menu.billing', icon: <WalletOutlined />, permission: 'billing.view', anyFeature: ['opd_billing', 'pharmacy_billing'] },
   { key: 'therapy', path: '/therapy', labelKey: 'menu.therapy', icon: <HeartOutlined />, permission: 'therapy.view', feature: 'panchakarma' },
   { key: 'pharmacy', path: '/pharmacy', labelKey: 'menu.pharmacy', icon: <ShopOutlined />, permission: 'pharmacy.view', feature: 'pharmacy' },
+  { key: 'products', path: '/products', labelKey: 'menu.products', icon: <GiftOutlined />, permission: 'products.view', feature: 'pharmacy', anyFeature: ['clinic_products'] },
   { key: 'enquiries', path: '/enquiries', labelKey: 'menu.enquiries', icon: <GlobalOutlined />, permission: 'enquiries.view', anyFeature: ['online_enquiry'] },
   { key: 'reports', path: '/reports', labelKey: 'menu.reports', icon: <BarChartOutlined />, permission: 'reports.view' },
   { key: 'queue', path: '/queue', labelKey: 'menu.queue', icon: <OrderedListOutlined />, permission: 'appointments.view', feature: 'appointments' },

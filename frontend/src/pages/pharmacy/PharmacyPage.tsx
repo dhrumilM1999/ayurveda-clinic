@@ -8,6 +8,7 @@ import { useAuth } from '../../auth/AuthContext';
 import { BillsTab } from './BillsTab';
 import { CounterSaleTab } from './CounterSaleTab';
 import { DispenseTab } from './DispenseTab';
+import MedicinesPage from '../medicines/MedicinesPage';
 import { LedgerTab } from './LedgerTab';
 import { PurchasesTab } from './PurchasesTab';
 import { ReportsTab } from './ReportsTab';
@@ -30,6 +31,7 @@ export default function PharmacyPage() {
     ...(billing || hasFeature('pharmacy_sales_returns') ? [{ key: 'sales', label: t('pharmacy.tabs.sales'), children: <SalesTab /> }] : []),
     ...(billing && can('billing.view') ? [{ key: 'bills', label: t('pharmacy.tabs.bills'), children: <BillsTab /> }] : []),
     { key: 'stock', label: t('pharmacy.tabs.stock'), children: <StockTab /> },
+    ...(can('medicines.view') && !hasFeature('separate_medicine_menu') ? [{ key: 'medicines', label: t('pharmacy.tabs.medicines'), children: <MedicinesPage embedded /> }] : []),
     { key: 'purchases', label: t('pharmacy.tabs.purchases'), children: <PurchasesTab /> },
     ...(hasFeature('pharmacy_suppliers') && can('pharmacy.stock') ? [{ key: 'dues', label: t('pharmacy.tabs.dues'), children: <SupplierDuesTab /> }] : []),
     ...(hasFeature('pharmacy_stock_check') ? [{ key: 'check', label: t('pharmacy.tabs.check'), children: <StockCheckTab /> }] : []),

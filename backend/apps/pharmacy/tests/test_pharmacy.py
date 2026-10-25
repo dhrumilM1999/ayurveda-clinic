@@ -230,7 +230,9 @@ def test_alerts_scan_location_ledger(pharmacist, branch_a, meds):
 @pytest.mark.django_db
 def test_permissions_and_switch(org, doctor, receptionist, pharmacist, branch_a, meds):
     assert client_for(receptionist, branch_a).get("/api/v1/stock/").status_code == 403
-    assert receive(client_for(doctor, branch_a), meds, [("Triphala Churna", "X", LATER, "1")]).status_code == 403
+    assert receive(client_for(receptionist, branch_a), meds, [("Triphala Churna", "X", LATER, "1")]).status_code == 403
+    # the doctor runs the pharmacy too (pharmacy permissions are in the Doctor role)
+    assert receive(client_for(doctor, branch_a), meds, [("Triphala Churna", "DX", LATER, "1")]).status_code == 201
     BranchFeatureFlag.objects.create(organization=org, branch=branch_a, code="pharmacy", enabled=False)
     res = client_for(pharmacist, branch_a).get("/api/v1/stock/")
     assert res.status_code == 403 and "switched off" in str(res.data)

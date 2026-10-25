@@ -15,6 +15,7 @@ import ErrorLogPage from './pages/ErrorLogPage';
 import ConsultPage from './pages/consult/ConsultPage';
 import MedicinesPage from './pages/medicines/MedicinesPage';
 import PharmacyPage from './pages/pharmacy/PharmacyPage';
+import ProductsPage from './pages/products/ProductsPage';
 import BranchesPage from './pages/BranchesPage';
 import DashboardPage from './pages/DashboardPage';
 import LoginPage from './pages/LoginPage';
@@ -78,6 +79,7 @@ export default function App() {
               <Route path="consult/:visitId" element={<RequirePermission code="emr.view"><ConsultPage /></RequirePermission>} />
               <Route path="medicines" element={<RequirePermission code="medicines.view"><MedicinesPage /></RequirePermission>} />
               <Route path="billing" element={<RequirePermission code="billing.view"><BillingPage /></RequirePermission>} />
+              <Route path="products" element={<RequirePermission code="products.view"><ProductsPage /></RequirePermission>} />
               <Route path="pharmacy" element={<RequirePermission code="pharmacy.view"><PharmacyPage /></RequirePermission>} />
               <Route path="enquiries" element={<RequirePermission code="enquiries.view"><EnquiriesPage /></RequirePermission>} />
               <Route path="calendar" element={<RequirePermission code="appointments.view"><CalendarPage /></RequirePermission>} />

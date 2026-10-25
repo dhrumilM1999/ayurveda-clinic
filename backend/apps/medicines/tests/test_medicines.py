@@ -88,8 +88,10 @@ def test_branch_price_and_switch_off(pharmacist, branch_a, branch_b, samples, do
 @pytest.mark.django_db
 def test_permissions(doctor, receptionist, branch_a, samples):
     assert client_for(doctor, branch_a).get(URL).status_code == 200
-    assert client_for(doctor, branch_a).post(URL, {"name": "X"}, format="json").status_code == 403
+    # the doctor runs the pharmacy too, so the doctor may edit the medicine list; the front desk may not even see it
+    assert client_for(doctor, branch_a).post(URL, {"name": "X"}, format="json").status_code == 201
     assert client_for(receptionist, branch_a).get(URL).status_code == 403
+    assert client_for(receptionist, branch_a).post(URL, {"name": "Y"}, format="json").status_code == 403
 
 
 @pytest.mark.django_db

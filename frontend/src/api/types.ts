@@ -599,7 +599,7 @@ export interface VisitListItem {
 }
 
 // --- Medicines and prescriptions (Step 5) ---
-export type MedicineKind = 'classical' | 'proprietary' | 'homeopathy';
+export type MedicineKind = 'classical' | 'proprietary' | 'homeopathy' | 'product';
 export type MedicineFlag = 'schedule_e1' | 'contains_metals' | 'pregnancy_caution' | 'child_caution';
 
 export interface Medicine {
@@ -1341,4 +1341,11 @@ export interface SupplierAccount {
   opening: string; billed: string; paid: string; returned: string; balance: string; ageing: SupplierAgeing;
   invoices: SupplierInvoice[];
   entries: { date: string; kind: string; label: string; debit: string; credit: string; balance: string; id: string; reversed: boolean }[];
+}
+
+// --- Clinic products (oils, supplements ...)
+export interface ProductRow {
+  id: string; name: string; name_gu: string; name_hi: string; pack_size: string; sku: string; barcode: string;
+  gst_rate: string; price: string | null; stock: string;
+  batches: { id: string; batch_no: string; expiry_date: string | null; quantity: string; price: string | null }[];
 }

@@ -79,9 +79,10 @@ export function MedicineFormModal({ medicine, onClose }: { medicine: Medicine | 
             { value: 'classical', label: t('medicines.kinds.classical') },
             { value: 'proprietary', label: t('medicines.kinds.proprietary') },
             ...(hasFeature('medicines_homeopathy') || kind === 'homeopathy' ? [{ value: 'homeopathy', label: t('medicines.kinds.homeopathy') }] : []),
+            ...(hasFeature('clinic_products') || kind === 'product' ? [{ value: 'product', label: t('medicines.kinds.product') }] : []),
           ]} />
         </Form.Item>
-        <div className="form-help">{kind === 'classical' ? t('medicines.classicalHelp') : kind === 'homeopathy' ? t('medicines.homeopathyHelp') : t('medicines.proprietaryHelp')}</div>
+        <div className="form-help">{kind === 'classical' ? t('medicines.classicalHelp') : kind === 'homeopathy' ? t('medicines.homeopathyHelp') : kind === 'product' ? t('medicines.productHelp') : t('medicines.proprietaryHelp')}</div>
 
         <div className="section-title">{t('medicines.sections.name')}</div>
         <Row gutter={12}>

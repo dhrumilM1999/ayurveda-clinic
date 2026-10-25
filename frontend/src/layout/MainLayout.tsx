@@ -55,7 +55,10 @@ export default function MainLayout() {
   const visibleItems = menuItems.filter(
     (item) => (!item.permission || can(item.permission)) && (!item.feature || features[item.feature] !== false)
       && (!item.anyFeature || item.anyFeature.some((code) => hasFeature(code)))
-      && (!item.multiBranchOnly || multiBranch),
+      && (!item.multiBranchOnly || multiBranch)
+      // The medicine list is a tab inside Pharmacy, unless "Medicines as its own menu" is on (Additional settings)
+      // or the person cannot open Pharmacy
+      && !(item.key === 'medicines' && features.pharmacy !== false && can('pharmacy.view') && !hasFeature('separate_medicine_menu')),
   );
   const selected = visibleItems.find((item) =>
     item.path === '/' ? location.pathname === '/' : location.pathname.startsWith(item.path),

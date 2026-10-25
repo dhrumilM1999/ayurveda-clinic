@@ -79,7 +79,8 @@
     "therapy": "Panchakarma",
     "pdfSettings": "PDF settings",
     "calendar": "Calendar",
-    "errorLog": "Error log"
+    "errorLog": "Error log",
+    "products": "Products"
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",
@@ -925,7 +926,8 @@
       "all": "All",
       "classical": "Classical",
       "proprietary": "Patent & Proprietary",
-      "homeopathy": "Homeopathy"
+      "homeopathy": "Homeopathy",
+      "product": "Clinic product"
     },
     "flagShort": {
       "schedule_e1": "E1",
@@ -985,7 +987,8 @@
     "sku": "Medicine code (SKU)",
     "skuHelp": "Your own short code; search finds it",
     "notes": "Notes",
-    "notesPlaceholder": "e.g. keep in a cool place"
+    "notesPlaceholder": "e.g. keep in a cool place",
+    "productHelp": "A clinic product is something you sell that is not a medicine (oil, soap, supplement). It is sold from the Products menu, with stock and a GST bill like a medicine."
   },
   "rx": {
     "title": "Prescription",
@@ -1062,7 +1065,8 @@
       "setup": "Racks & suppliers",
       "counter": "Counter sale",
       "reports": "Pharmacy reports",
-      "dues": "Supplier dues"
+      "dues": "Supplier dues",
+      "medicines": "Medicine list"
     },
     "status": {
       "pending": "To give",
@@ -1562,6 +1566,14 @@
       "digital_pad": {
         "label": "Digital pad: handwritten prescription",
         "help": "Shows the Handwriting button in the doctor's check-up: write on the digital pad (or a tablet pen), and the handwriting is saved with the letterhead as one picture. Off: the button is hidden and no new handwriting can be saved; pages already written stay visible. Off by default."
+      },
+      "clinic_products": {
+        "label": "Clinic products",
+        "help": "Sell things that are not medicines (oils, soaps, supplements). Adds a Products menu for the doctor and the front desk, and a product kind in the medicine list. On by default."
+      },
+      "separate_medicine_menu": {
+        "label": "Medicines as their own menu",
+        "help": "Off (usual): the medicine list is a tab inside Pharmacy, so there is one place for medicines and stock. On: Medicines is a separate menu, for a clinic where a different person manages the medicine list."
       }
     },
     "choices": {
@@ -2381,5 +2393,25 @@
       "cheque": "Cheque",
       "other": "Other"
     }
+  },
+  "products": {
+    "title": "Products",
+    "subtitle": "Things the clinic sells that are not medicines: oils, supplements and more.",
+    "search": "Search product name or code",
+    "none": "No products yet. Add one in Pharmacy > Medicine list (kind: Clinic product), then add stock in Pharmacy > Purchases.",
+    "product": "Product",
+    "price": "Price",
+    "stock": "In stock",
+    "out": "Out of stock",
+    "add": "Add",
+    "bill": "Bill",
+    "emptyCart": "Press Add on a product to start a bill.",
+    "total": "Total",
+    "customer": "Customer name (optional)",
+    "phone": "Mobile number (optional)",
+    "payLater": "Pay later",
+    "makeBill": "Make bill {{amount}}",
+    "billMade": "Bill {{number}} made",
+    "newSale": "New sale"
   }
 }

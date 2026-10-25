@@ -358,3 +358,14 @@ are filled in. It is only a suggestion: read it and fix any word before you save
 - To use another model, put `OLLAMA_MODEL=<name>` in `.env` and restart (`stop.bat`, `start.bat`).
 - The instruction given to the AI is `backend/templates/ai/translate_v1.txt` (SAFE TO EDIT, e.g. to add rules for how
   Ayurveda words should be written).
+
+## Change the colour theme (done 2026-10-25: Clinical blue)
+Open `frontend/src/config/clinic.ts`, section `colors`. The theme now is: primary `#2563eb`, menu `#10284a`, page `#f2f5fb`.
+Other ready themes: Fresh green (primary `#16a34a`, menu `#ffffff`), Calm teal (`#0d9488` / `#0b3b3c`), Warm saffron (`#c2410c` / `#3b2314`).
+Save the file and the browser updates by itself.
+
+## Medicines, Pharmacy and Products
+- The medicine list is a **tab inside Pharmacy** ("Medicine list"). One place for medicines and stock.
+- If a different person manages the medicine list: Additional settings > "Medicines as their own menu" (On).
+- The **doctor role runs the pharmacy** (pharmacy and medicine permissions). For a separate pharmacy staff member, give that person the **Pharmacist** role (Staff).
+- **Products** (oils, supplements - not medicines): add them in Pharmacy > Medicine list with kind "Clinic product", add stock in Pharmacy > Purchases, sell from the **Products** menu (doctor and front desk). Switch: Additional settings > "Clinic products".

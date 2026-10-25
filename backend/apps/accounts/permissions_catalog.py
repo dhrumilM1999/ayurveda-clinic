@@ -45,6 +45,8 @@ PERMISSIONS = {
     "pharmacy.view": "See pharmacy stock",
     "pharmacy.dispense": "Dispense medicines",
     "pharmacy.stock": "Add purchases and suppliers, correct stock",
+    "products.view": "See the clinic products and their stock",
+    "products.sell": "Sell clinic products and make the bill",
     "therapy.view": "See therapy sessions",
     "therapy.manage": "Schedule and record therapy sessions",
     "reports.view": "See reports",
@@ -74,7 +76,9 @@ DEFAULT_ROLES = {
             "appointments.view", "appointments.manage",
             "emr.view", "emr.edit",
             "prescriptions.view", "prescriptions.create",
-            "medicines.view", "therapy.view", "therapy.manage",
+            "medicines.view", "medicines.manage", "therapy.view", "therapy.manage",
+            # The doctor runs the pharmacy too (if a separate pharmacist is employed, give that person the Pharmacist role)
+            "pharmacy.view", "pharmacy.dispense", "pharmacy.stock", "products.view", "products.sell",
             # The doctor may collect the fee in the room (the front desk may too): billing.create = take payments
             "billing.view", "billing.charge", "billing.create", "reports.view", "ai.use",
         ],
@@ -88,7 +92,7 @@ DEFAULT_ROLES = {
             "patients.view", "patients.create", "patients.edit", "patients.vitals",
             "appointments.view", "appointments.manage",
             "billing.view", "billing.create", "billing.charge",
-            "enquiries.view", "enquiries.manage",
+            "enquiries.view", "enquiries.manage", "products.view", "products.sell",
             "therapy.view", "therapy.manage",
         ],
     },
@@ -111,6 +115,7 @@ DEFAULT_ROLES = {
             "patients.view", "prescriptions.view",
             "medicines.view", "medicines.manage",
             "pharmacy.view", "pharmacy.dispense", "pharmacy.stock", "billing.view", "billing.create",
+            "products.view", "products.sell",
         ],
     },
 }

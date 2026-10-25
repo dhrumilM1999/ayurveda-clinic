@@ -15,17 +15,17 @@ export const clinicConfig = {
 
   colors: {
     // Main colour: buttons, links, selected items
-    primary: '#1f5c45',
+    primary: '#2563eb',
     // Left menu and login panel (a darker shade of the main colour looks best)
-    sidebar: '#12382a',
-    // Highlight colour: selected menu item, small accents (turmeric gold)
-    accent: '#c98a2b',
+    sidebar: '#10284a',
+    // Highlight colour: selected menu item, small accents (light blue)
+    accent: '#5b9bff',
     // Page background behind the white cards
-    background: '#f6f3ec',
+    background: '#f2f5fb',
     // Main text colour
-    text: '#23302a',
+    text: '#1b2a41',
     // Lines and borders
-    border: '#e6e0d2',
+    border: '#dbe3f0',
     // Status colours
     success: '#2f8a57',
     warning: '#d48a0c',

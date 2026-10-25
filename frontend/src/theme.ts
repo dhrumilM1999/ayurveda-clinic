@@ -59,7 +59,7 @@ export const antTheme: ThemeConfig = {
     fontSizeHeading5: 14,
     borderRadius: clinicConfig.borderRadius,
     controlHeight: 34,
-    boxShadowTertiary: '0 1px 2px rgba(35, 48, 42, 0.04), 0 2px 8px rgba(35, 48, 42, 0.04)',
+    boxShadowTertiary: '0 1px 2px rgba(27, 42, 65, 0.05), 0 2px 8px rgba(27, 42, 65, 0.05)',
   },
   components: {
     Layout: { siderBg: c.sidebar, headerBg: '#ffffff', bodyBg: c.background, headerHeight: 56 },
@@ -70,7 +70,7 @@ export const antTheme: ThemeConfig = {
       darkItemHoverColor: '#ffffff',
       darkItemHoverBg: 'rgba(255, 255, 255, 0.06)',
       darkItemSelectedBg: alpha(c.accent, 0.2),
-      darkItemSelectedColor: '#f6dcae',
+      darkItemSelectedColor: '#cfe0ff',
       itemHeight: 38,
       itemMarginInline: 12,
       itemBorderRadius: 10,
@@ -78,7 +78,7 @@ export const antTheme: ThemeConfig = {
     },
     Card: { borderRadiusLG: 10, paddingLG: 16, headerHeight: 44, headerFontSize: 14 },
     Table: {
-      headerBg: '#faf8f3',
+      headerBg: '#f7f9fd',
       headerColor: alpha(c.text, 0.7),
       headerSplitColor: 'transparent',
       rowHoverBg: alpha(c.primary, 0.035),
