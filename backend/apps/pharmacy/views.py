@@ -21,6 +21,8 @@ from apps.medicines.models import Medicine
 from apps.organizations.services import is_feature_enabled
 from apps.prescriptions.models import Prescription
 
+from apps.prescriptions.packs import packs_needed
+
 from .models import (
     Dispense, Purchase, PurchaseReturn, Rack, StockBatch, StockVerification, StockVerificationItem, Supplier, SupplierPayment,
 )
@@ -498,6 +500,8 @@ class DispensingViewSet(PharmacyMixin, viewsets.ViewSet):
                 "dose": i.dose, "dose_unit": i.dose_unit, "frequency": i.frequency, "timing": i.timing,
                 "anupana": i.anupana, "duration": i.duration, "duration_unit": i.duration_unit,
                 "instructions": i.instructions, "given": money(given.get(i.id)),
+                # whole packs the course needs (dose x times x days / pack size); None = the pharmacist decides
+                "suggested_packs": packs_needed(i),
                 "batches": BatchSerializer(batches.get(i.medicine_id, []), many=True).data,
                 # a stock medicine that is not on the shelf (or only expired) and was not given yet
                 "out_of_stock": bool(i.medicine_id) and not batches.get(i.medicine_id) and not given.get(i.id),

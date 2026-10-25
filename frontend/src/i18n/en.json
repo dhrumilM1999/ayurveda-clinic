@@ -1003,7 +1003,7 @@
     "makeSame": "Make same ({{n}} days)",
     "orChooseDate": "or choose a date:",
     "quantity": "Qty",
-    "quantityHelp": "Worked out from dose x M-N-N x days (e.g. 180 tablets). Type your own if needed.",
+    "quantityHelp": "How many packs to give. It is worked out from: dose each time × times a day (M-N-N) × days, divided by what one pack holds (for example 30 tablets). You can type your own.",
     "quantityPlaceholder": "e.g. 1 bottle",
     "lastPrescription": "Last prescription",
     "continueAll_one": "Continue {{count}} medicine",
@@ -1029,7 +1029,7 @@
     "medicine": "Medicine",
     "dose": "Dose",
     "frequency": "M-N-N",
-    "frequencyHelp": "Morning - Noon - Night. Quick: type 222 for 2-2-2, 101 for 1-0-1",
+    "frequencyHelp": "How many times a day: Morning - Noon - Night. 1-0-1 = morning and night. Quick: type 101. The dose is how much each time.",
     "timing": "When",
     "anupana": "Anupana",
     "duration": "For",
@@ -1049,7 +1049,11 @@
     "dosageCheck": {
       "format": "Please check: write it like 1-0-1 or type 3 digits (101).",
       "high": "Please check: more than 10 at one time?"
-    }
+    },
+    "calc": "{{dose}} {{unit}} each time × {{times}} time(s) a day × {{days}} days = {{total}} {{unit}} in all",
+    "calcPacks": "{{packs}} pack(s), each pack {{size}}",
+    "calcNoPack": "pack size of this medicine is not set, type the quantity yourself",
+    "calcMissing": "Fill dose (with its unit), M-N-N and days: the total and the number of packs are worked out here."
   },
   "pharmacy": {
     "title": "Pharmacy",

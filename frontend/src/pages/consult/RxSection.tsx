@@ -12,7 +12,7 @@ import { api, errorMessage } from '../../api/client';
 import { useLiveLookup } from '../../components/LiveSearch';
 import { useMasterLabel, useMasters } from '../../api/masters';
 import type { Diagnosis, Medicine, Page, Prescription, PrescriptionTemplate, RxLine, RxWarning } from '../../api/types';
-import { autoQuantity, dosageProblem, quickDosage } from '../../utils/dosage';
+import { autoQuantity, coursePlan, dosageProblem, quickDosage } from '../../utils/dosage';
 import { LabelsButton } from '../../components/BillPreview';
 import { MasterSelect } from '../../components/MasterSelect';
 import { MedicineFlags, StockTag, money } from '../medicines/shared';
@@ -35,7 +35,7 @@ function lineFromMedicine(m: Medicine): RxLine {
     medicine_name: m.name,
     dosage_form: m.dosage_form?.label ?? '',
     dose: m.default_dose,
-    dose_unit: m.dose_unit?.label ?? '',
+    dose_unit: m.dose_unit?.label ?? (m.kind === 'homeopathy' ? 'pills (globules)' : ''),
     frequency: m.default_frequency,
     timing: m.default_timing?.label ?? '',
     anupana: m.default_anupana?.label ?? '',
@@ -45,6 +45,7 @@ function lineFromMedicine(m: Medicine): RxLine {
     instructions: '',
     medicine_flags: (['schedule_e1', 'contains_metals', 'pregnancy_caution', 'child_caution'] as const).filter((f) => m[f]),
     stock_available: m.stock_available ?? null,
+    pack_size: m.pack_size, units_per_pack: m.units_per_pack, pack_label: m.pack_type?.label,
   };
 }
 
@@ -260,7 +261,7 @@ export function RxSection({ rx, onChange, warnings, diagnoses, readOnly, daysBar
                 </div>
                 <div className="rx-field">
                   <Tooltip title={t('rx.quantityHelp')}><span>{t('rx.quantity')}</span></Tooltip>
-                  <Input size="small" value={l.quantity} maxLength={40} disabled={readOnly} style={{ width: 104 }}
+                  <Input size="small" value={l.quantity} maxLength={40} disabled={readOnly} style={{ width: 168 }}
                     placeholder={t('rx.quantityPlaceholder')} onChange={(e) => update(i, { quantity: e.target.value })} />
                 </div>
                 <div className="rx-field rx-field-grow">
@@ -269,6 +270,17 @@ export function RxSection({ rx, onChange, warnings, diagnoses, readOnly, daysBar
                     onChange={(e) => update(i, { instructions: e.target.value })} />
                 </div>
               </div>
+              {/* The sum in plain words, so dose, times a day, days and the number of packs are never a mystery */}
+              {(() => {
+                const plan = coursePlan(l);
+                if (!plan) return <div className="rx-calc cell-sub">{t('rx.calcMissing')}</div>;
+                return (
+                  <div className="rx-calc">
+                    {t('rx.calc', { dose: plan.doses, unit: plan.unit, times: plan.perDay, days: plan.days, total: plan.total })}
+                    {plan.packs ? <b> → {t('rx.calcPacks', { packs: plan.packs, size: plan.packText })}</b> : <span className="cell-sub"> · {t('rx.calcNoPack')}</span>}
+                  </div>
+                );
+              })()}
             </div>
           ))}
         </div>

@@ -2029,3 +2029,7 @@ body {
 .login-mobile-soft .software-brand-name-2 { color: #1d4ed8; }
 @media (max-width: 800px) { .login-mobile-soft { display: block; } }
 .software-brand-sider .software-brand-sub { text-transform: none; letter-spacing: 0.2px; font-size: 10.5px; }
+
+/* "4 pills x 1 time a day x 90 days = 360 pills -> 6 packs" under every medicine line */
+.rx-calc { margin: 6px 0 0 30px; font-size: 12.5px; color: var(--clinic-text); }
+.rx-calc b { color: var(--clinic-primary); }

@@ -685,6 +685,10 @@ export interface RxLine {
   medicine_flags?: MedicineFlag[];
   /** Packs the pharmacy can give today (null / missing = not tracked) */
   stock_available?: string | null;
+  /** What one pack of this medicine holds (from the medicine list): used to work out how many packs to give */
+  pack_size?: string;
+  units_per_pack?: string | null;
+  pack_label?: string;
 }
 
 export interface RxWarning {
@@ -917,6 +921,8 @@ export interface DispenseQueueRow {
 
 export interface DispenseLine {
   id: string;
+  /** whole packs the doctor's dose x times x days needs (null = not worked out) */
+  suggested_packs?: number | null;
   medicine: string | null;
   medicine_name: string;
   dosage_form: string;
