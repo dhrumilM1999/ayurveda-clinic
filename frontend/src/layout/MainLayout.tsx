@@ -1,6 +1,6 @@
 // The frame around every screen: left menu, top bar with branch and language switchers.
 import { DownOutlined, EnvironmentOutlined, LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
-import { Alert, Avatar, Badge, Button, Dropdown, Layout, Menu, Segmented, Select } from 'antd';
+import { Alert, Avatar, Badge, Button, Dropdown, Grid, Layout, Menu, Segmented, Select } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -17,6 +17,7 @@ import { addStep } from '../errorLog/tracker';
 import { LANGUAGES, setLanguage } from '../i18n';
 
 const { Header, Sider, Content } = Layout;
+const { useBreakpoint } = Grid;
 
 const SHORT_LANGUAGE: Record<string, string> = { en: 'EN', gu: 'ગુ', hi: 'हि' };
 
@@ -37,6 +38,9 @@ export default function MainLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const screens = useBreakpoint();
+  // On a phone the menu is hidden until the menu button is pressed (it floats over the page, and closes after a choice)
+  const isPhone = screens.sm === false;
   useEffect(() => { addStep('page', location.pathname); }, [location.pathname]);
 
   const onIdle = useCallback(() => logout('idle'), [logout]);
@@ -82,7 +86,7 @@ export default function MainLayout() {
         breakpoint="lg"
         onBreakpoint={(broken) => setCollapsed(broken)}
         width={224}
-        collapsedWidth={76}
+        collapsedWidth={isPhone ? 0 : 76}
       >
         <SoftwareBrand variant={collapsed ? 'mark' : 'sider'} />
         <div className={`app-brand${logoUrl ? ' has-logo' : ''}`}>
@@ -104,6 +108,7 @@ export default function MainLayout() {
           onClick={({ key }) => {
             const item = menuItems.find((m) => m.key === key);
             if (item) navigate(item.path);
+            if (isPhone) setCollapsed(true);
           }}
         />
         {!collapsed && me?.organization && <div className="app-sider-footer">{me.organization.name}</div>}

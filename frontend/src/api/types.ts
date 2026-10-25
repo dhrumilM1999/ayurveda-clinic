@@ -1310,6 +1310,8 @@ export interface HandwrittenPage {
   width_px: number;
   height_px: number;
   doctor_name: string;
+  visit_date?: string;
+  page_no?: number | null;
 }
 
 export interface LabTest { id: string; name: string; name_gu: string; name_hi: string; category: string; is_active: boolean }

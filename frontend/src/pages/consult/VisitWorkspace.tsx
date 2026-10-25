@@ -3,7 +3,7 @@
 //   (e.g. no network) it tries again, and nothing typed is lost.
 // - Undo / Redo: buttons at the top, or Ctrl+Z / Ctrl+Y (Ctrl+Shift+Z) while the check-up is open.
 // SAFE TO EDIT: AUTOSAVE_MS, RETRY_MS, UNDO_STEPS below.
-import {
+import { PrinterOutlined,
   AlertOutlined, CheckCircleOutlined, CloudSyncOutlined, EditOutlined, FileSearchOutlined, RedoOutlined, SaveOutlined, UndoOutlined,
 } from '@ant-design/icons';
 import { Alert, App, Button, Card, Modal, Skeleton, Space, Tag, Tooltip } from 'antd';
@@ -20,6 +20,7 @@ import { useAuth } from '../../auth/AuthContext';
 import { OpdBillModal } from '../billing/OpdBillModal';
 import { PlanTherapyButton } from '../therapy/PlanTherapyButton';
 import { HandwritingModal } from './handwriting/HandwritingModal';
+import { DocumentModal } from '../../components/BillPreview';
 import { PrintMenu } from './PrintMenu';
 import { genderAge } from '../patients/PatientsPage';
 import { VitalsTab } from '../patients/tabs/VitalsTab';
@@ -76,10 +77,14 @@ function loadTemplates() {
   return templatesCache;
 }
 
-export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
+export function VisitWorkspace({ visitId, onChanged, onLoaded, reason, nextPatient }: {
   visitId: string;
   onChanged: () => void;
   onLoaded?: (visit: Visit) => void;
+  /** why the patient came (written by the front desk when booking) */
+  reason?: string;
+  /** the next patient waiting, so the doctor can go on with one press */
+  nextPatient?: { name: string; token: number | null; open: () => void } | null;
 }) {
   const { t } = useTranslation();
   const { message, modal } = App.useApp();
@@ -100,6 +105,7 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
   const [error, setError] = useState<string | null>(null);
   const readOnly = !can('emr.edit');
   const [handwritingOpen, setHandwritingOpen] = useState(false);
+  const [printRx, setPrintRx] = useState(false);
   const canSeeRx = can('prescriptions.view');
   const rxReadOnly = !can('prescriptions.create');
 
@@ -344,6 +350,15 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
 
   const complete = async () => {
     if (!(await save())) return;
+    const d = latest.current.draft;
+    const nothing = !!d && d.complaints.length === 0 && d.diagnoses.length === 0 && !d.history_notes && !d.examination_notes
+      && latest.current.rx.items.length === 0 && d.advice.length === 0 && !d.advice_notes;
+    if (nothing && !(await new Promise<boolean>((resolve) => {
+      modal.confirm({
+        title: t('consult.completeEmptyAsk'), content: t('consult.completeEmptyHelp'), okText: t('consult.completeAnyway'), cancelText: t('common.cancel'),
+        onOk: () => resolve(true), onCancel: () => resolve(false),
+      });
+    }))) return;
     try {
       const { data } = await api.post<Visit>(`/visits/${visitId}/complete/`);
       setVisit(data);
@@ -469,6 +484,16 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
               )}
             </Space>
           </div>
+          {reason && (
+            <div className="visit-reason">
+              <span className="cell-sub">{t('consult.reasonForVisit')}:</span> <b>{reason}</b>
+              {!readOnly && draft && draft.complaints.length === 0 && (
+                <Button size="small" type="link" onClick={() => changeDraft({ complaints: [{ label: reason.slice(0, 200), code: '', duration: null, duration_unit: 'days', severity: '', score: null, notes: '' }] })}>
+                  {t('consult.addAsComplaint')}
+                </Button>
+              )}
+            </div>
+          )}
           {patient && patient.allergies.length > 0 && (
             <Alert type="error" showIcon icon={<AlertOutlined />} className="visit-allergy"
               message={<><b>{t('patients.allergyAlert')}:</b> {patient.allergies.map((a) => a.allergen).join(', ')}</>} />
@@ -480,6 +505,21 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded }: {
             </div>
           )}
         </Card>
+
+        {visit.status === 'completed' && (
+          <Alert type="success" showIcon className="visit-done-bar" message={t('consult.doneBar')}
+            action={(
+              <Space wrap>
+                {rx.id && <Button size="small" icon={<PrinterOutlined />} onClick={() => setPrintRx(true)}>{t('consult.printRx')}</Button>}
+                {nextPatient && (
+                  <Button size="small" type="primary" onClick={nextPatient.open}>
+                    {t('consult.nextPatient', { name: nextPatient.name })}{nextPatient.token ? ` · ${t('consult.tokenN', { n: nextPatient.token })}` : ''}
+                  </Button>
+                )}
+              </Space>
+            )} />
+        )}
+        {printRx && rx.id && <DocumentModal kind="prescription" id={rx.id} title={`${t('consult.printRx')} - ${patient?.full_name ?? ''}`} language={patient?.preferred_language} onClose={() => setPrintRx(false)} />}
 
         <div className="section-nav">
           {sections.map((s) => (

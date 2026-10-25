@@ -22,11 +22,13 @@ from .handwriting import save_handwriting
 from .models import HandwrittenPrescription
 
 
-def page_data(page: HandwrittenPrescription) -> dict:
+def page_data(page: HandwrittenPrescription, page_no: int | None = None) -> dict:
     return {
         "id": str(page.id), "visit": str(page.visit_id), "patient": str(page.patient_id), "paper": page.paper,
         "number": page.number, "created_at": page.created_at, "width_px": page.width_px, "height_px": page.height_px,
-        "doctor_name": page.doctor.full_name,
+        "doctor_name": page.doctor.full_name, "visit_date": page.visit.visit_date,
+        # page 1, 2, 3 of its own check-up (in the order they were written)
+        "page_no": page_no,
     }
 
 
@@ -57,10 +59,19 @@ class HandwrittenPrescriptionViewSet(mixins.ListModelMixin, mixins.RetrieveModel
     def list(self, request, *args, **kwargs):
         if not (request.query_params.get("visit") or request.query_params.get("patient") or request.query_params.get("prescription")):
             raise ValidationError({"visit": "Choose a check-up or a patient."})
-        pages = self.get_queryset()
+        pages = list(self.get_queryset())
+        # Page numbers inside each check-up, oldest first
+        numbers = {}
+        counters = {}
+        for p in sorted(pages, key=lambda x: x.created_at):
+            counters[p.visit_id] = counters.get(p.visit_id, 0) + 1
+            numbers[p.id] = counters[p.visit_id]
+        # ?patient=: the history, latest first. A single check-up is read page 1, 2, 3.
+        if request.query_params.get("patient") and not request.query_params.get("visit"):
+            pages.sort(key=lambda x: x.created_at, reverse=True)
         log_action(request, "view", None, object_type="prescriptions.handwritten", object_repr="list",
                    changes={"count": len(pages)})
-        return Response([page_data(p) for p in pages])
+        return Response([page_data(p, numbers.get(p.id)) for p in pages])
 
     def retrieve(self, request, *args, **kwargs):
         return Response(page_data(self.get_object()))

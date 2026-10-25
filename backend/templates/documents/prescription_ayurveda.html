@@ -157,13 +157,14 @@ Colours are the two lines starting with --green and --red below. Keep everything
         <div class="n">{{ forloop.counter }}.</div>
         <div class="body">
           <div><span class="name">{{ i.name }}</span>{% if i.strength %} {{ i.strength }}{% endif %}{% if i.dose %} — {{ i.dose }}{% endif %}</div>
-          {% if i.times or i.frequency or i.duration or i.timing or i.with_anupana or i.instructions %}
-          <div class="meta">{% if i.times %}<span class="times">{% for n in i.times %}<i>{{ n }}</i>{% endfor %}</span>{% elif i.frequency %}{{ i.frequency }}{% if i.duration or i.timing or i.with_anupana or i.instructions %} · {% endif %}{% endif %}{{ i.duration }}{% if i.duration and i.timing %} · {% endif %}{{ i.timing }}{% if i.with_anupana %}{% if i.duration or i.timing %} · {% endif %}{{ i.with_anupana }}{% endif %}{% if i.instructions %}{% if i.duration or i.timing or i.with_anupana %} · {% endif %}{{ i.instructions }}{% endif %}</div>
+          {% if i.times or i.frequency or i.duration or i.timing or i.with_anupana or i.instructions or i.quantity %}
+          <div class="meta">{% if i.times %}<span class="times">{% for n in i.times %}<i>{{ n }}</i>{% endfor %}</span>{% elif i.frequency %}{{ i.frequency }}{% if i.duration or i.timing or i.with_anupana or i.instructions %} · {% endif %}{% endif %}{{ i.duration }}{% if i.duration and i.timing %} · {% endif %}{{ i.timing }}{% if i.with_anupana %}{% if i.duration or i.timing %} · {% endif %}{{ i.with_anupana }}{% endif %}{% if i.instructions %}{% if i.duration or i.timing or i.with_anupana %} · {% endif %}{{ i.instructions }}{% endif %}{% if i.quantity %}{% if i.duration or i.timing or i.with_anupana or i.instructions or i.times or i.frequency %} · {% endif %}<b>{{ i.quantity }}</b>{% endif %}</div>
           {% endif %}
         </div>
       </div>
       {% endfor %}
       {% if notes %}<div class="after"><div class="how" style="white-space: pre-line">{{ notes }}</div></div>{% endif %}
+      {% if investigations %}<div class="after"><div class="h">{{ w.investigations }}</div><div>{{ investigations|join:" · " }}</div></div>{% endif %}
       {% if advice or advice_notes %}
       <div class="after"><div class="h">{{ cs.advice }}</div>
         {% if advice %}<div>{{ advice|join:" · " }}</div>{% endif %}

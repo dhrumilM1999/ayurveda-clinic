@@ -5,7 +5,8 @@
 import { DeleteOutlined, PrinterOutlined } from '@ant-design/icons';
 import { App, Button, Empty, Image, Popconfirm, Space, Spin, Typography } from 'antd';
 import dayjs from 'dayjs';
-import { useCallback, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from '../../../api/client';
 import type { HandwrittenPage } from '../../../api/types';
@@ -25,12 +26,15 @@ export function PrivateImage({ pageId, kind = 'combined', width }: { pageId: str
   return url ? <Image src={url} width={width} alt="" /> : <Spin size="small" />;
 }
 
-export function HandwrittenPages({ visitId, patientId, prescriptionId, hideWhenEmpty, refreshKey = 0, onChanged }: {
+export function HandwrittenPages({ visitId, patientId, prescriptionId, hideWhenEmpty, refreshKey = 0, onChanged, history }: {
   visitId?: string; patientId?: string; prescriptionId?: string; hideWhenEmpty?: boolean; refreshKey?: number; onChanged?: (count: number) => void;
+  /** the patient's history: latest check-up first, a heading with the date above each check-up's pages */
+  history?: boolean;
 }) {
   const { t } = useTranslation();
   const { message } = App.useApp();
   const { can } = useAuth();
+  const navigate = useNavigate();
   const [pages, setPages] = useState<HandwrittenPage[] | null>(null);
   const [printing, setPrinting] = useState<HandwrittenPage | null>(null);
 
@@ -64,10 +68,18 @@ export function HandwrittenPages({ visitId, patientId, prescriptionId, hideWhenE
     <>
       <div className="hw-pages">
         {pages.map((page, index) => (
-          <figure key={page.id} className="hw-page">
-            <PrivateImage pageId={page.id} width={150} />
+          <Fragment key={page.id}>
+          {history && (index === 0 || pages[index - 1]!.visit !== page.visit) && (
+            <div className="hw-visit-head">
+              <b>{page.visit_date ? dayjs(page.visit_date).format('DD-MM-YYYY') : ''}</b>
+              <span className="cell-sub"> · {page.doctor_name}</span>
+              {can('emr.view') && <a style={{ marginInlineStart: 10 }} onClick={() => navigate(`/consult/${page.visit}`)}>{t('handwriting.openCheckup')}</a>}
+            </div>
+          )}
+          <figure className="hw-page">
+            <PrivateImage pageId={page.id} width={history ? 190 : 150} />
             <figcaption>
-              <Typography.Text strong>{t('handwriting.page', { n: index + 1 })}</Typography.Text>
+              <Typography.Text strong>{t('handwriting.page', { n: page.page_no ?? index + 1 })}</Typography.Text>
               <div className="cell-sub">{dayjs(page.created_at).format('DD-MM-YYYY HH:mm')} · {page.paper.toUpperCase()}</div>
               <Space size={4} style={{ marginTop: 4 }}>
                 <Button size="small" icon={<PrinterOutlined />} onClick={() => setPrinting(page)}>{t('handwriting.print')}</Button>
@@ -79,6 +91,7 @@ export function HandwrittenPages({ visitId, patientId, prescriptionId, hideWhenE
               </Space>
             </figcaption>
           </figure>
+          </Fragment>
         ))}
       </div>
       {printing && <DocumentModal kind="handwritten-rx" id={printing.id} title={t('handwriting.title')} onClose={() => setPrinting(null)} />}

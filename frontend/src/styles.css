@@ -2033,3 +2033,24 @@ body {
 /* "4 pills x 1 time a day x 90 days = 360 pills -> 6 packs" under every medicine line */
 .rx-calc { margin: 6px 0 0 30px; font-size: 12.5px; color: var(--clinic-text); }
 .rx-calc b { color: var(--clinic-primary); }
+.hw-visit-head { flex-basis: 100%; margin: 14px 0 2px; padding-bottom: 4px; border-bottom: 1px solid rgba(0, 0, 0, 0.08); }
+.hw-pages { flex-wrap: wrap; }
+
+/* Phone: nothing may push the page sideways */
+@media (max-width: 700px) {
+  .user-chip-text, .user-chip .anticon-down { display: none; }
+  .user-chip { padding: 2px; }
+  .ant-segmented { max-width: 100%; overflow-x: auto; }
+  .filter-bar > *, .page-toolbar > * { max-width: 100%; }
+  .consult-empty { min-width: 0; padding: 12px; overflow: hidden; }
+  .ant-space { flex-wrap: wrap; }
+  .consult-empty .ant-empty { max-width: 100%; }
+  .app-content { min-width: 0; }
+}
+@media (max-width: 575px) {
+  .app-sider { position: fixed !important; top: 0; left: 0; height: 100vh; z-index: 200; }
+}
+
+/* Reason for the visit (from the booking) and the bar after a check-up is completed */
+.visit-reason { margin-top: 6px; font-size: 13px; }
+.visit-done-bar { margin: 0 0 10px; }

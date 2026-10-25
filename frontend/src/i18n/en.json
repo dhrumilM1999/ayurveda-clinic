@@ -456,7 +456,8 @@
       "consent": "Consent",
       "activity": "Activity",
       "appointments": "Appointments",
-      "visits": "Check-ups"
+      "visits": "Check-ups",
+      "handwriting": "Handwritten prescriptions"
     },
     "fields": {
       "title": "Title",
@@ -828,7 +829,16 @@
     "step2": "Click the patient on the left. The check-up opens and the patient becomes With doctor.",
     "step3": "Write complaints, diagnosis and medicines. Everything saves by itself.",
     "step4": "Press Complete visit. The prescription goes to the pharmacy and the bill is ready.",
-    "manyPatients": "You may keep more than one patient With doctor and go back and forth; each one stays With doctor until you press Complete visit."
+    "manyPatients": "You may keep more than one patient With doctor and go back and forth; each one stays With doctor until you press Complete visit.",
+    "completeEmptyAsk": "Nothing is written in this check-up",
+    "completeEmptyHelp": "No complaint, diagnosis, notes or medicine yet. Complete it anyway? (You can re-open it later.)",
+    "completeAnyway": "Complete anyway",
+    "reasonForVisit": "Reason for visit",
+    "addAsComplaint": "Add as complaint",
+    "doneBar": "Check-up completed. Print the prescription or go on with the next patient.",
+    "printRx": "Print prescription",
+    "nextPatient": "Next patient: {{name}}",
+    "tokenN": "Token {{n}}"
   },
   "templatesAdmin": {
     "title": "Check-up templates",
@@ -2244,7 +2254,9 @@
     "removed": "Page removed.",
     "unsavedAsk": "The handwriting is not saved yet. Close without saving?",
     "discard": "Close without saving",
-    "hint": "Write with the pad pen (set the pad to Mouse mode in iScribe4U), a tablet pen, your finger or a mouse."
+    "hint": "Write with the pad pen (set the pad to Mouse mode in iScribe4U), a tablet pen, your finger or a mouse.",
+    "historyHelp": "Every handwritten prescription page of this patient, latest first. Click a picture to enlarge, or open the check-up.",
+    "openCheckup": "Open check-up"
   },
   "calendar": {
     "title": "Calendar",

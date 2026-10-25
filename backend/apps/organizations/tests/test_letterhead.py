@@ -60,10 +60,12 @@ def test_upload_sets_the_space_prints_behind_prescriptions_and_can_be_removed(or
     assert branch_a.letterhead_image and branch_a.pad_top_mm == res.data["pad_top_mm"]
     assert admin.get(url).status_code == 200 and admin.get(f"/api/v1/branches/{branch_a.id}/").data["has_letterhead_image"] is True
 
-    # A4 gets the picture behind the page; A5 does not (the picture is A4 only)
+    # A4 gets the picture behind the page; A5 gets the same picture, with the free space scaled to A5; A6 never
     pad = pad_for(branch_a, "a4")
     assert pad and pad["image"].startswith("data:image/png;base64,") and pad["top"] == f"{branch_a.pad_top_mm}mm"
-    assert pad_for(branch_a, "a5") is None
+    small = pad_for(branch_a, "a5")
+    assert small["image"] == pad["image"] and float(small["top"][:-2]) == round(branch_a.pad_top_mm * 0.70711, 1)
+    assert pad_for(branch_a, "a6") is None
     branch_a.letterhead_picture_on = False                     # switched off: printing on the clinic's own paper
     assert pad_for(branch_a, "a4") is None
     branch_a.letterhead_picture_on = True
