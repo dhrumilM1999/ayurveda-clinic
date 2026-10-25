@@ -267,7 +267,16 @@
     "printClosedPlaceholder": "e.g. Sunday closed",
     "printServices": "Services band at the bottom",
     "printServicesHelp": "Separate with |   e.g. Consulting | Panchakarma | Medicine | Dietetics",
-    "printQuote": "Quote / shloka at the bottom"
+    "printQuote": "Quote / shloka at the bottom",
+    "letterheadTitle": "Letterhead picture (A4)",
+    "letterheadHelp": "Upload your letterhead file (PDF, PNG or JPG, one A4 page). Prescriptions are then printed on top of it, so the preview and the PDF look exactly like your file. The free space at the top and bottom is found by itself; you can change it below.",
+    "letterheadUpload": "Upload letterhead",
+    "letterheadChange": "Change letterhead",
+    "letterheadRemoveAsk": "Remove the letterhead picture?",
+    "letterheadSaved": "Letterhead saved. Free space: {{top}} mm at the top, {{bottom}} mm at the bottom.",
+    "letterheadOnHelp": "On: the picture is printed on the page (use this for PDF, WhatsApp and plain paper). Off: the picture is not printed (use this when you print on your own pre-printed paper).",
+    "letterheadPrint": "Print the picture",
+    "letterheadDontPrint": "Do not print it"
   },
   "audit": {
     "title": "Audit log",

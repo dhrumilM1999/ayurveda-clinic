@@ -16,6 +16,7 @@ Colours are the two lines starting with --green and --red below. Keep everything
 <style>
   :root { --green: {% if ps.accent_color and ps.accent_color != "#1f5c46" %}{{ ps.accent_color }}{% else %}#1e7a3c{% endif %}; --red: #c8371f; --ink: #1b1b1b; --muted: #555; }
   @page { size: {{ page_width }} {{ page_height }}; margin: {% if pad %}{{ pad.top }} 0 {{ pad.bottom }}{% else %}0{% endif %}; }
+  .lh-bg { position: fixed; z-index: -1; top: -{{ pad.top }}; left: 0; width: {{ page_width }}; height: {{ page_height }}; }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: "Noto Sans", "Noto Sans Gujarati", "Noto Sans Devanagari", sans-serif; color: var(--ink); font-size: 9.5pt; }
   /* On half-A4 (A5) paper the A4 sheet is shrunk to fit (sheet_scale is 0.7071 then, otherwise 1):
@@ -91,6 +92,7 @@ Colours are the two lines starting with --green and --red below. Keep everything
 </style>
 </head>
 <body>
+{% if pad.image %}<img class="lh-bg" src="{{ pad.image }}">{% endif %}
 {% if duplicate and ps.show_duplicate_watermark %}<div class="watermark">{{ w.duplicate }}</div>{% endif %}
 {% if is_cancelled %}<div class="watermark">{{ w.cancelled }}</div>{% endif %}
 <div class="sheet-wrap"><div class="page">

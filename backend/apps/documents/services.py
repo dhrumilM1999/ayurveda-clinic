@@ -86,10 +86,17 @@ def pad_for(branch, size: str):
     """
     Pre-printed pad (Settings -> Branch details): the clinic's own paper already has the letterhead, so the
     print-out leaves blank space at the top / bottom and prints no letterhead. A4 and A5 only.
+    Letterhead picture: the same blank space, and the picture is drawn behind the page (A4 only).
     """
+    pad = {"top": f"{branch.pad_top_mm}mm", "bottom": f"{branch.pad_bottom_mm}mm", "image": ""}
+    # The clinic's letterhead picture (A4 only): drawn behind the page, so the preview and the PDF look like the file
+    if size == "a4" and branch.letterhead_picture_on and branch.letterhead_image:
+        pad["image"] = _data_uri(branch.letterhead_image)
+        if pad["image"]:
+            return pad
     if not branch.print_on_pad or size not in ("a4", "a5"):
         return None
-    return {"top": f"{branch.pad_top_mm}mm", "bottom": f"{branch.pad_bottom_mm}mm"}
+    return pad
 
 
 def letterhead(branch, doctor) -> dict:

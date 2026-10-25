@@ -44,6 +44,10 @@ export interface Branch {
   upi_vpa: string;
   is_active: boolean;
   letterhead_footer?: string;
+  letterhead_picture_on?: boolean;
+  has_letterhead_image?: boolean;
+  pad_top_mm?: number;
+  pad_bottom_mm?: number;
 }
 
 export interface RoomType {

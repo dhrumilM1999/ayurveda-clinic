@@ -281,3 +281,73 @@ class AdditionalChoiceViewSet(viewsets.ViewSet):
         return Response(self._rows(request.user.organization_id))
 
     update = partial_update
+
+
+
+import uuid as _uuid
+
+
+def _is_uuid(raw) -> bool:
+    try:
+        _uuid.UUID(str(raw))
+        return True
+    except ValueError:
+        return False
+
+
+class BranchLetterheadImageView(APIView):
+    """
+    The branch letterhead picture (Settings -> Branch details).
+    GET = the picture, POST (field "file": A4 PDF, PNG or JPG, up to 12 MB) = upload / change (the free writing space
+    at the top and bottom is worked out from the picture), DELETE = remove.
+    """
+
+    permission_classes = [IsAuthenticated, BranchPermission]
+
+    def _branch(self, request, pk):
+        branch = accessible_branches(request.user).filter(pk=pk).first() if _is_uuid(pk) else None
+        if branch is None:
+            raise NotFound("Branch not found.")
+        return branch
+
+    def get(self, request, pk):
+        from django.http import FileResponse
+
+        branch = self._branch(request, pk)
+        if not branch.letterhead_image:
+            raise NotFound("No letterhead picture uploaded.")
+        return FileResponse(branch.letterhead_image.open("rb"), content_type="image/png")
+
+    def post(self, request, pk):
+        from django.core.files.base import ContentFile
+
+        from .letterhead import picture_from_upload, suggest_margins
+
+        if not user_has_perm(request.user, "settings.manage"):
+            self.permission_denied(request)
+        branch = self._branch(request, pk)
+        upload = request.FILES.get("file")
+        if upload is None:
+            raise ValidationError({"file": "Choose the letterhead file."})
+        png = picture_from_upload(upload)
+        top, bottom = suggest_margins(png)
+        if branch.letterhead_image:
+            branch.letterhead_image.delete(save=False)
+        branch.letterhead_image.save("letterhead.png", ContentFile(png), save=False)
+        branch.letterhead_picture_on = True
+        branch.pad_top_mm, branch.pad_bottom_mm = top, bottom
+        branch.updated_by = request.user
+        branch.save(update_fields=["letterhead_image", "letterhead_picture_on", "pad_top_mm", "pad_bottom_mm", "updated_by", "updated_at"])
+        log_action(request, "update", branch, changes={"letterhead_image": "uploaded", "pad_top_mm": top, "pad_bottom_mm": bottom})
+        return Response({"has_letterhead_image": True, "pad_top_mm": top, "pad_bottom_mm": bottom})
+
+    def delete(self, request, pk):
+        if not user_has_perm(request.user, "settings.manage"):
+            self.permission_denied(request)
+        branch = self._branch(request, pk)
+        if branch.letterhead_image:
+            branch.letterhead_image.delete(save=False)
+            branch.updated_by = request.user
+            branch.save(update_fields=["letterhead_image", "updated_by", "updated_at"])
+            log_action(request, "update", branch, changes={"letterhead_image": "removed"})
+        return Response({"has_letterhead_image": False})

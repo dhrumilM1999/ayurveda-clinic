@@ -2003,3 +2003,7 @@ body {
 .errlog-facts { font-size: 12px; border-collapse: collapse; }
 .errlog-facts th { text-align: left; padding: 2px 12px 2px 0; color: rgba(35, 48, 42, 0.6); font-weight: 600; vertical-align: top; white-space: nowrap; }
 .errlog-facts td { padding: 2px 0; word-break: break-all; font-family: Consolas, monospace; }
+
+/* Letterhead picture in Branch details */
+.letterhead-box { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; margin-bottom: 8px; }
+.letterhead-thumb { width: 150px; border: 1px solid rgba(0, 0, 0, 0.15); border-radius: 4px; background: #fff; }

@@ -12,6 +12,8 @@ Keep everything inside {{ }} and {% %}.
 <meta charset="utf-8">
 <style>
   @page { size: {{ page_width }} {{ page_height }}; margin: {% if pad %}{{ pad.top }} {{ page_margin }} {{ pad.bottom }}{% else %}{{ page_margin }}{% endif %}; }
+  /* The clinic's letterhead picture: one A4 picture behind every page (fixed boxes sit inside the page margins, so it is pulled out by the margins) */
+  .lh-bg { position: fixed; z-index: -1; top: -{{ pad.top }}; left: -{{ page_margin }}; width: {{ page_width }}; height: {{ page_height }}; }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: "Noto Sans", "Noto Sans Gujarati", "Noto Sans Devanagari", sans-serif; font-size: {{ ps.base_pt|default:"10" }}pt; color: #1d1d1d; }
   .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 4mm; border-bottom: 0.6mm solid {{ ps.accent_color|default:"#1f5c46" }}; padding-bottom: 2mm; }
@@ -41,6 +43,7 @@ Keep everything inside {{ }} and {% %}.
 </style>
 </head>
 <body>
+{% if pad.image %}<img class="lh-bg" src="{{ pad.image }}">{% endif %}
 {% if duplicate and ps.show_duplicate_watermark %}<div class="watermark">{{ w.duplicate }}</div>{% endif %}
 {% if is_cancelled %}<div class="watermark cancelled">{{ w.cancelled }}</div>{% endif %}
 
