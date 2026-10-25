@@ -15,17 +15,17 @@ export const clinicConfig = {
 
   colors: {
     // Main colour: buttons, links, selected items
-    primary: '#2563eb',
+    primary: '#1d4ed8',
     // Left menu and login panel (a darker shade of the main colour looks best)
-    sidebar: '#10284a',
+    sidebar: '#0b1f3f',
     // Highlight colour: selected menu item, small accents (light blue)
-    accent: '#5b9bff',
+    accent: '#4f8ff7',
     // Page background behind the white cards
-    background: '#f2f5fb',
+    background: '#e9eff9',
     // Main text colour
-    text: '#1b2a41',
+    text: '#0f1b2d',
     // Lines and borders
-    border: '#dbe3f0',
+    border: '#c5d3ea',
     // Status colours
     success: '#2f8a57',
     warning: '#d48a0c',
@@ -41,4 +41,12 @@ export const clinicConfig = {
 
   // Corner roundness of buttons and boxes (in pixels)
   borderRadius: 10,
+};
+
+// The software's own brand (not the clinic's): shown in the app only - menu, login screen and browser tab.
+// It is never printed on prescriptions, bills or other print-outs. Files: frontend/public/brand/.
+export const softwareConfig = {
+  name: 'AyuSutra',
+  nameParts: ['Ayu', 'Sutra'] as [string, string],
+  markPath: '/brand/ayusutra-mark.svg',
 };

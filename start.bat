@@ -35,6 +35,7 @@ docker compose up -d --build
 if errorlevel 1 goto failed
 
 echo.
+if exist "scripts\ollama-ready.bat" start "" /min cmd /c "scripts\ollama-ready.bat"
 echo  Waiting for the app to get ready...
 set /a tries=0
 :waitapp

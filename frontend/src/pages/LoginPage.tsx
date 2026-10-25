@@ -7,6 +7,7 @@ import { api, errorMessage } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 import { LeafArt } from '../components/LeafArt';
 import { BrandLogo } from '../branding/BrandLogo';
+import { SoftwareBrand } from '../components/SoftwareBrand';
 import { useBranding } from '../branding/BrandingContext';
 import { LANGUAGES, setLanguage } from '../i18n';
 
@@ -63,12 +64,13 @@ export default function LoginPage() {
           {!logoUrl && appName}
         </div>
         <div className="login-art-quote">{t('login.quote')}</div>
-        <div className="login-art-foot">{t('login.footer')}</div>
+        <div className="login-art-foot"><SoftwareBrand variant="login" /><div style={{ marginTop: 10 }}>{t('login.footer')}</div></div>
         <LeafArt className="login-art-leaf" />
       </section>
 
       <section className="login-form-side">
         <div className="login-form">
+          <div className="login-mobile-soft"><SoftwareBrand variant="mobile" /></div>
           <div className="login-mobile-brand">
             <BrandLogo variant="mobile" />
             {!logoUrl && appName}

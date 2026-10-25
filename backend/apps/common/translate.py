@@ -28,8 +28,10 @@ def _prompt(text: str, targets: list[str]) -> str:
 
 
 def _ollama(text: str, targets: list[str]) -> dict:
+    # keep_alive: the model stays in memory (so the next answer is quick); num_predict / num_ctx: a short name needs a short answer
     payload = json.dumps({"model": settings.OLLAMA_MODEL, "prompt": _prompt(text, targets), "stream": False, "format": "json",
-                          "options": {"temperature": 0}}).encode()
+                          "keep_alive": settings.OLLAMA_KEEP_ALIVE,
+                          "options": {"temperature": 0, "num_predict": 160, "num_ctx": 1024}}).encode()
     request = urllib.request.Request(f"{settings.OLLAMA_URL}/api/generate", data=payload, headers={"Content-Type": "application/json"})
     try:
         with urllib.request.urlopen(request, timeout=settings.AI_TIMEOUT_SECONDS) as response:

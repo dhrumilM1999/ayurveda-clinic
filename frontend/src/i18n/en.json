@@ -53,7 +53,8 @@
     "orgAdmin": "Organization admin",
     "toggleMenu": "Show or hide menu",
     "noBranch": "You are not assigned to any branch yet. Please ask your admin.",
-    "tagline": "Clinic management"
+    "tagline": "Clinic management",
+    "softwareTagline": "Ayurveda clinic software"
   },
   "menu": {
     "dashboard": "Dashboard",

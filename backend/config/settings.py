@@ -206,7 +206,10 @@ REST_FRAMEWORK = {
 # AI_PROVIDER: ollama (real) | fake (tests) | off. If Ollama is not running the button says "AI is offline".
 AI_PROVIDER = env("AI_PROVIDER", "ollama")
 OLLAMA_URL = env("OLLAMA_URL", "http://host.docker.internal:11434").rstrip("/")
-OLLAMA_MODEL = env("OLLAMA_MODEL", "gemma2:9b")
+# A small model answers a short translation in a few seconds on a PC without a strong graphics card. A bigger one
+# (for example gemma2:9b) is better at Gujarati but slow. "-1" = keep the model loaded in memory all day.
+OLLAMA_MODEL = env("OLLAMA_MODEL", "qwen2.5:3b")
+OLLAMA_KEEP_ALIVE = env("OLLAMA_KEEP_ALIVE", "-1")
 AI_TIMEOUT_SECONDS = int(env("AI_TIMEOUT_SECONDS", "60"))
 
 PUBLIC_APP_URL = env("PUBLIC_APP_URL", "http://localhost:5173").rstrip("/")

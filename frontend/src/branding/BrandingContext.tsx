@@ -3,7 +3,7 @@
 // ASK FIRST before editing. To change the default (when a clinic has not set a logo yet), edit config/clinic.ts.
 import axios from 'axios';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { clinicConfig } from '../config/clinic';
+import { clinicConfig, softwareConfig } from '../config/clinic';
 
 type BrandInfo = { name: string; short_name: string; has_logo: boolean; version: number };
 type Branding = {
@@ -31,7 +31,7 @@ function setFavicon(url: string | null) {
   if (!link) return;
   if (!url) {
     link.type = 'image/svg+xml';
-    link.href = clinicConfig.logoPath;
+    link.href = softwareConfig.markPath;
     return;
   }
   const img = new Image();
@@ -76,8 +76,9 @@ export function BrandingProvider({ children }: { children: ReactNode }) {
   const appName = info?.name || clinicConfig.appName;
   const logoUrl = info?.has_logo ? `/api/v1/branding/logo/?v=${info.version}` : null;
 
-  useEffect(() => { document.title = appName; }, [appName]);
-  useEffect(() => { setFavicon(logoUrl); }, [logoUrl]);
+  // Browser tab: the software's name and mark (the clinic's own name and logo are inside the app)
+  useEffect(() => { document.title = `${appName} · ${softwareConfig.name}`; }, [appName]);
+  useEffect(() => { setFavicon(null); }, []);
 
   const value = useMemo(() => ({ appName, logoUrl, refresh }), [appName, logoUrl, refresh]);
   return <BrandingContext.Provider value={value}>{children}</BrandingContext.Provider>;

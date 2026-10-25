@@ -8,6 +8,7 @@ import { api } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 import { useIdleLogout } from '../auth/useIdleLogout';
 import { BrandLogo } from '../branding/BrandLogo';
+import { SoftwareBrand } from '../components/SoftwareBrand';
 import { useBranding } from '../branding/BrandingContext';
 import { clinicConfig } from '../config/clinic';
 import { menuItems } from '../config/menu';
@@ -83,6 +84,7 @@ export default function MainLayout() {
         width={224}
         collapsedWidth={76}
       >
+        <SoftwareBrand variant={collapsed ? 'mark' : 'sider'} />
         <div className={`app-brand${logoUrl ? ' has-logo' : ''}`}>
           <BrandLogo variant="sider" />
           {!logoUrl && !collapsed && (

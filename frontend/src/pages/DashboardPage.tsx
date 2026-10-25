@@ -84,7 +84,7 @@ export default function DashboardPage() {
   const caseLine = (o: OpdCounts) => (
     <div className="dash-cases">
       <Tag color="blue" icon={<UserAddOutlined />}>{t('dashboard.newCases', { count: o.new_cases })}</Tag>
-      <Tag color="green">{t('dashboard.followUps', { count: o.follow_ups })}</Tag>
+      <Tag color="cyan">{t('dashboard.followUps', { count: o.follow_ups })}</Tag>
       {o.walk_ins > 0 && <Tag>{t('dashboard.walkIns', { count: o.walk_ins })}</Tag>}
       {o.follow_ups_due > 0 && <Tag color="orange">{t('dashboard.followUpsDue', { count: o.follow_ups_due })}</Tag>}
       {o.no_show > 0 && <Tag color="red">{t('dashboard.noShow', { count: o.no_show })}</Tag>}

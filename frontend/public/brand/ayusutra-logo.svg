@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 120" role="img" aria-label="AyuSutra - Ayurveda clinic software">
+  <title>AyuSutra</title>
+  <g transform="translate(6 12)"><svg width="96" height="96" viewBox="0 0 96 96">
+    <defs><linearGradient id="a" x1="12" y1="2" x2="84" y2="96" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#3b78f5"/><stop offset=".55" stop-color="#1d4ed8"/><stop offset="1" stop-color="#0b1f3f"/></linearGradient>
+    <linearGradient id="d" x1="48" y1="10" x2="48" y2="32" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#ffe08a"/><stop offset="1" stop-color="#f59e0b"/></linearGradient></defs>
+    <rect width="96" height="96" rx="24" fill="url(#a)"/>
+    <path d="M46.6 34C31 45 17.5 63 19.5 84.5c15-4.2 25.6-23 27.1-50.5z" fill="#fff"/>
+    <path d="M49.4 34C65 45 78.5 63 76.5 84.5c-15-4.2-25.6-23-27.1-50.5z" fill="#fff" fill-opacity=".82"/>
+    <path d="M30.5 69.5Q48 57.5 65.5 69.5" fill="none" stroke="#1d4ed8" stroke-width="3.6" stroke-linecap="round"/>
+    <path d="M48 8c4.4 6.6 9 11.4 9 16.8a9 9 0 0 1-18 0C39 19.4 43.6 14.6 48 8z" fill="url(#d)"/>
+    <path d="M44.2 25.4c.5 2.6 2.1 4.2 4.5 4.6" fill="none" stroke="#fff" stroke-opacity=".9" stroke-width="1.7" stroke-linecap="round"/>
+  </svg></g>
+  <text x="122" y="70" font-family="'Fraunces Variable','Fraunces',Georgia,serif" font-size="52" font-weight="700" letter-spacing="-1"><tspan fill="#0b1f3f">Ayu</tspan><tspan fill="#1d4ed8">Sutra</tspan></text>
+  <text x="124" y="98" font-family="'Plus Jakarta Sans','Segoe UI',Arial,sans-serif" font-size="12.5" font-weight="600" letter-spacing="3.2" fill="#5b6b86">AYURVEDA CLINIC SOFTWARE</text>
+</svg>

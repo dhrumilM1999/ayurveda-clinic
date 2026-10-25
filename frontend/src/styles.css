@@ -52,7 +52,7 @@ body {
   background: #fff;
   border-radius: 10px;
   border: 1px solid var(--clinic-border);
-  box-shadow: 0 1px 2px rgba(27, 42, 65, 0.04);
+  box-shadow: 0 1px 2px rgba(15, 27, 45, 0.04);
   overflow: hidden;
 }
 .ant-table-wrapper .ant-table-pagination {
@@ -67,7 +67,7 @@ body {
 
 .ant-card {
   border: 1px solid var(--clinic-border);
-  box-shadow: 0 1px 2px rgba(27, 42, 65, 0.04);
+  box-shadow: 0 1px 2px rgba(15, 27, 45, 0.04);
 }
 
 /* Card titles: small, with a coloured bar on the left (like section headings) */
@@ -122,7 +122,7 @@ body {
 .ant-modal .ant-modal-footer {
   margin: 0;
   padding: 10px 18px;
-  background: #f7f9fd;
+  background: #eef3fb;
   border-top: 1px solid var(--clinic-border);
 }
 /* Small "Are you sure?" popups keep their own simple layout */
@@ -143,7 +143,7 @@ body {
   top: 0;
   height: 100vh;
   overflow: auto;
-  background: linear-gradient(180deg, var(--clinic-sidebar) 0%, #0d2b20 100%) !important;
+  background: linear-gradient(180deg, var(--clinic-sidebar) 0%, #06152e 100%) !important;
 }
 .app-sider .ant-layout-sider-children {
   display: flex;
@@ -269,7 +269,7 @@ body {
 }
 .user-chip-role {
   font-size: 11px;
-  color: rgba(27, 42, 65, 0.55);
+  color: rgba(15, 27, 45, 0.55);
   line-height: 1.2;
 }
 
@@ -289,9 +289,9 @@ body {
   border-radius: 12px;
   color: #fff;
   background:
-    radial-gradient(circle at 85% 20%, rgba(201, 138, 43, 0.35), transparent 45%),
+    radial-gradient(circle at 85% 20%, rgba(91, 155, 255, 0.35), transparent 45%),
     linear-gradient(120deg, var(--clinic-primary) 0%, var(--clinic-sidebar) 100%);
-  box-shadow: 0 10px 30px rgba(16, 40, 74, 0.18);
+  box-shadow: 0 10px 30px rgba(11, 31, 63, 0.18);
 }
 .hero-date {
   font-size: 12px;
@@ -333,7 +333,7 @@ body {
 }
 .stat-label {
   font-size: 13px;
-  color: rgba(27, 42, 65, 0.6);
+  color: rgba(15, 27, 45, 0.6);
 }
 .stat-value {
   font-family: var(--clinic-font-heading);
@@ -343,7 +343,7 @@ body {
 }
 .stat-note {
   font-size: 12px;
-  color: rgba(27, 42, 65, 0.45);
+  color: rgba(15, 27, 45, 0.45);
 }
 
 /* ---------- Login ---------- */
@@ -362,7 +362,7 @@ body {
   padding: 48px 56px;
   color: #fff;
   background:
-    radial-gradient(circle at 80% 15%, rgba(201, 138, 43, 0.35), transparent 40%),
+    radial-gradient(circle at 80% 15%, rgba(91, 155, 255, 0.35), transparent 40%),
     radial-gradient(circle at 10% 90%, rgba(255, 255, 255, 0.08), transparent 45%),
     linear-gradient(150deg, var(--clinic-primary) 0%, var(--clinic-sidebar) 70%);
 }
@@ -419,7 +419,7 @@ body {
   margin: 0 0 4px;
 }
 .login-sub {
-  color: rgba(27, 42, 65, 0.6);
+  color: rgba(15, 27, 45, 0.6);
   margin-bottom: 28px;
 }
 .otp-input input {
@@ -475,7 +475,7 @@ body {
 }
 .dup-meta {
   font-size: 12px;
-  color: rgba(27, 42, 65, 0.6);
+  color: rgba(15, 27, 45, 0.6);
 }
 .consent-row {
   display: flex;
@@ -483,19 +483,19 @@ body {
   align-items: flex-start;
   padding: 10px 12px;
   border-radius: 8px;
-  background: #f7f9fd;
+  background: #eef3fb;
   border: 1px solid var(--clinic-border);
 }
 .consent-text {
   font-size: 13px;
   line-height: 1.6;
-  color: rgba(27, 42, 65, 0.75);
+  color: rgba(15, 27, 45, 0.75);
   white-space: pre-line;
 }
 .consent-text-box {
   padding: 10px 12px;
   border-radius: 8px;
-  background: #f7f9fd;
+  background: #eef3fb;
   border: 1px solid var(--clinic-border);
   max-height: 220px;
   overflow: auto;
@@ -522,7 +522,7 @@ body {
   gap: 4px 16px;
   margin-top: 4px;
   font-size: 12.5px;
-  color: rgba(27, 42, 65, 0.7);
+  color: rgba(15, 27, 45, 0.7);
 }
 .uhid-chip {
   font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
@@ -536,7 +536,7 @@ body {
   height: 100%;
   padding: 10px 12px;
   border-radius: 8px;
-  background: #f7f9fd;
+  background: #eef3fb;
   border: 1px solid var(--clinic-border);
 }
 .history-label {
@@ -544,7 +544,7 @@ body {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: rgba(27, 42, 65, 0.55);
+  color: rgba(15, 27, 45, 0.55);
   margin-bottom: 6px;
 }
 .history-text {
@@ -559,12 +559,12 @@ body {
 .vital-tile {
   padding: 10px 12px;
   border-radius: 8px;
-  background: #f7f9fd;
+  background: #eef3fb;
   border: 1px solid var(--clinic-border);
 }
 .vital-label {
   font-size: 12px;
-  color: rgba(27, 42, 65, 0.6);
+  color: rgba(15, 27, 45, 0.6);
 }
 .vital-value {
   font-family: var(--clinic-font-heading);
@@ -574,7 +574,7 @@ body {
 }
 .vital-unit {
   font-size: 12px;
-  color: rgba(27, 42, 65, 0.5);
+  color: rgba(15, 27, 45, 0.5);
 }
 .bmi-live {
   font-family: var(--clinic-font-heading);
@@ -591,7 +591,7 @@ body {
 /* ---------- Appointments ---------- */
 .cell-sub {
   font-size: 12px;
-  color: rgba(27, 42, 65, 0.55);
+  color: rgba(15, 27, 45, 0.55);
 }
 .mono {
   font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
@@ -650,14 +650,14 @@ body {
   color: #fff;
 }
 .slot-booked {
-  background: #eaf0fa;
-  color: rgba(27, 42, 65, 0.35);
+  background: #dfe8f6;
+  color: rgba(15, 27, 45, 0.35);
   text-decoration: line-through;
   cursor: not-allowed;
 }
 .slot-past {
   background: transparent;
-  color: rgba(27, 42, 65, 0.3);
+  color: rgba(15, 27, 45, 0.3);
   border-style: dashed;
   cursor: not-allowed;
 }
@@ -666,13 +666,13 @@ body {
 .notify-box {
   padding: 10px 12px;
   border-radius: 8px;
-  background: #f7f9fd;
+  background: #eef3fb;
   border: 1px solid var(--clinic-border);
 }
 .notify-text {
   font-size: 12.5px;
   line-height: 1.55;
-  color: rgba(27, 42, 65, 0.8);
+  color: rgba(15, 27, 45, 0.8);
 }
 .whatsapp-btn {
   background: #25d366 !important;
@@ -707,7 +707,7 @@ body {
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: rgba(27, 42, 65, 0.5);
+  color: rgba(15, 27, 45, 0.5);
   margin-bottom: 6px;
 }
 .queue-now {
@@ -771,8 +771,8 @@ body {
   box-sizing: border-box;
   color: #fff;
   background:
-    radial-gradient(circle at 90% 0%, rgba(201, 138, 43, 0.28), transparent 40%),
-    linear-gradient(160deg, var(--clinic-sidebar) 0%, #0b241b 100%);
+    radial-gradient(circle at 90% 0%, rgba(91, 155, 255, 0.28), transparent 40%),
+    linear-gradient(160deg, var(--clinic-sidebar) 0%, #06152e 100%);
 }
 .tv-head {
   display: flex;
@@ -839,7 +839,7 @@ body {
   margin: 0 0 1vw;
   font-size: max(20px, 1.7vw);
   font-weight: 600;
-  color: #cfe0ff;
+  color: #d6e4ff;
 }
 .tv-label {
   font-size: max(12px, 0.9vw);
@@ -852,8 +852,8 @@ body {
   padding: 1.2vw;
   margin-bottom: 1.4vw;
   border-radius: 12px;
-  background: rgba(201, 138, 43, 0.18);
-  border: 1px solid rgba(201, 138, 43, 0.45);
+  background: rgba(91, 155, 255, 0.18);
+  border: 1px solid rgba(91, 155, 255, 0.45);
 }
 .tv-now-row {
   display: flex;
@@ -889,7 +889,7 @@ body {
 .tv-next-token {
   min-width: 3.4vw;
   font-weight: 800;
-  color: #cfe0ff;
+  color: #d6e4ff;
 }
 .tv-dim {
   color: rgba(255, 255, 255, 0.45);
@@ -1009,7 +1009,7 @@ body {
 }
 .save-state {
   font-size: 12px;
-  color: rgba(27, 42, 65, 0.5);
+  color: rgba(15, 27, 45, 0.5);
   /* One fixed size, so the buttons beside it never move when the words change (Saved / Unsaved changes / Saving) */
   display: inline-block;
   min-width: 150px;
@@ -1040,7 +1040,7 @@ body {
   font: inherit;
   font-size: 12.5px;
   font-weight: 600;
-  color: rgba(27, 42, 65, 0.8);
+  color: rgba(15, 27, 45, 0.8);
   cursor: pointer;
 }
 .section-btn:hover {
@@ -1072,7 +1072,7 @@ body {
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: rgba(27, 42, 65, 0.7);
+  color: rgba(15, 27, 45, 0.7);
 }
 .section-title::before {
   content: '';
@@ -1093,7 +1093,7 @@ body {
 .chip-picker {
   padding: 8px;
   border-radius: 8px;
-  background: #f7f9fd;
+  background: #eef3fb;
   border: 1px solid var(--clinic-border);
 }
 .chip-list {
@@ -1183,7 +1183,7 @@ body {
   font-size: 12.5px;
 }
 .q-num {
-  color: rgba(27, 42, 65, 0.45);
+  color: rgba(15, 27, 45, 0.45);
 }
 .questionnaire {
   display: grid;
@@ -1196,7 +1196,7 @@ body {
   top: 72px;
   padding: 12px;
   border-radius: 10px;
-  background: #f7f9fd;
+  background: #eef3fb;
   border: 1px solid var(--clinic-border);
 }
 .score-type {
@@ -1223,7 +1223,7 @@ body {
 .dosha-track {
   height: 10px;
   border-radius: 4px;
-  background: rgba(27, 42, 65, 0.07);
+  background: rgba(15, 27, 45, 0.07);
   overflow: hidden;
 }
 .dosha-fill {
@@ -1266,7 +1266,7 @@ body {
   padding: 7px 9px;
   border-radius: 8px;
   border: 1px solid var(--clinic-border);
-  background: #f7f9fd;
+  background: #eef3fb;
   font: inherit;
   cursor: pointer;
 }
@@ -1331,7 +1331,7 @@ body {
   width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: cover;
-  background: #eaf0fa;
+  background: #dfe8f6;
 }
 .visit-photo figcaption {
   display: flex;
@@ -1373,7 +1373,7 @@ body {
 .trend {
   font-size: 12px;
   font-weight: 600;
-  color: rgba(27, 42, 65, 0.6);
+  color: rgba(15, 27, 45, 0.6);
 }
 .trend-better { color: #1f6b42; }
 .trend-worse { color: #a5321f; }
@@ -1437,7 +1437,7 @@ body {
 .form-help {
   margin-bottom: 12px;
   font-size: 12px;
-  color: rgba(27, 42, 65, 0.6);
+  color: rgba(15, 27, 45, 0.6);
 }
 .check-grid {
   display: grid;
@@ -1461,7 +1461,7 @@ body {
   gap: 12px;
   padding: 12px;
   border-radius: 8px;
-  background: #f7f9fd;
+  background: #eef3fb;
   border: 1px solid var(--clinic-border);
 }
 .stat-row .ant-statistic-title {
@@ -1580,7 +1580,7 @@ body {
 .rx-field > span:first-child {
   font-size: 11px;
   font-weight: 600;
-  color: rgba(27, 42, 65, 0.55);
+  color: rgba(15, 27, 45, 0.55);
 }
 .rx-field-grow {
   flex: 1 1 180px;
@@ -1606,7 +1606,7 @@ body {
   margin-bottom: 12px;
 }
 .report-total td {
-  background: #f7f9fd;
+  background: #eef3fb;
 }
 .report-table td {
   white-space: nowrap; /* on a phone the table scrolls sideways instead of breaking dates and amounts */
@@ -1676,7 +1676,7 @@ body {
   margin-top: 12px;
   padding: 12px;
   border-radius: 8px;
-  background: #f7f9fd;
+  background: #eef3fb;
   border: 1px solid var(--clinic-border);
 }
 
@@ -1701,7 +1701,7 @@ body {
   margin-top: 12px;
   padding: 10px 12px;
   border-radius: 10px;
-  background: #f7f9fd;
+  background: #eef3fb;
   border: 1px solid var(--clinic-border);
 }
 
@@ -1724,7 +1724,7 @@ body {
 }
 .summary-label {
   font-size: 12px;
-  color: rgba(27, 42, 65, 0.6);
+  color: rgba(15, 27, 45, 0.6);
 }
 .summary-value {
   font-size: 18px;
@@ -1974,11 +1974,11 @@ body {
 
 /* Check-up screen: the buttons wrap instead of running out of the page; the steps guide in the empty page */
 .visit-actions { justify-content: flex-end; max-width: 100%; }
-.how-steps { max-width: 420px; margin: 14px auto 6px; padding-left: 20px; text-align: left; color: rgba(27, 42, 65, 0.8); line-height: 1.7; }
+.how-steps { max-width: 420px; margin: 14px auto 6px; padding-left: 20px; text-align: left; color: rgba(15, 27, 45, 0.8); line-height: 1.7; }
 .how-note { max-width: 420px; margin: 0 auto; text-align: left; }
 .consult-empty { text-align: center; }
 .row-clickable { cursor: pointer; }
-.row-clickable:hover td { background: rgba(31, 92, 70, 0.05) !important; }
+.row-clickable:hover td { background: rgba(29, 78, 216, 0.06) !important; }
 
 /* Calendar page */
 .cal-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr); gap: 16px; align-items: start; }
@@ -1988,7 +1988,7 @@ body {
 .cal-free { color: #1f7a45; font-weight: 600; }
 .cal-free.none { color: #b3261e; }
 .cal-booked { color: #8a5a00; }
-.cal-closed { color: rgba(27, 42, 65, 0.4); }
+.cal-closed { color: rgba(15, 27, 45, 0.4); }
 .cal-day { background: #fff; border-radius: 10px; padding: 12px 14px; }
 .cal-day-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
 
@@ -1998,10 +1998,10 @@ body {
 
 /* Error log */
 .errlog-detail { padding: 4px 8px 8px; }
-.errlog-pre { background: #f2f5fb; border-radius: 6px; padding: 8px 10px; max-height: 260px; overflow: auto; font-size: 12px; white-space: pre-wrap; margin: 0; }
+.errlog-pre { background: #e9eff9; border-radius: 6px; padding: 8px 10px; max-height: 260px; overflow: auto; font-size: 12px; white-space: pre-wrap; margin: 0; }
 .errlog-trail { margin: 0; padding-left: 20px; font-size: 13px; }
 .errlog-facts { font-size: 12px; border-collapse: collapse; }
-.errlog-facts th { text-align: left; padding: 2px 12px 2px 0; color: rgba(27, 42, 65, 0.6); font-weight: 600; vertical-align: top; white-space: nowrap; }
+.errlog-facts th { text-align: left; padding: 2px 12px 2px 0; color: rgba(15, 27, 45, 0.6); font-weight: 600; vertical-align: top; white-space: nowrap; }
 .errlog-facts td { padding: 2px 0; word-break: break-all; font-family: Consolas, monospace; }
 
 /* Letterhead picture in Branch details */
@@ -2013,3 +2013,19 @@ body {
 @media (max-width: 1000px) { .products-layout { grid-template-columns: 1fr; } }
 .products-cart .cart-line { display: flex; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(0, 0, 0, 0.06); }
 .products-cart .cart-total { display: flex; justify-content: space-between; padding: 10px 0; font-size: 15px; }
+
+/* The software brand (AyuSutra) */
+.software-brand { display: flex; align-items: center; gap: 10px; }
+.software-brand img { display: block; border-radius: 9px; flex: none; }
+.software-brand-name { font-family: var(--clinic-font-heading); font-weight: 700; font-size: 19px; line-height: 1.05; letter-spacing: -0.3px; color: #ffffff; }
+.software-brand-name-2 { color: #7fb0ff; }
+.software-brand-sub { font-size: 9.5px; letter-spacing: 1.6px; text-transform: uppercase; color: rgba(255, 255, 255, 0.55); margin-top: 3px; }
+.software-brand-sider { padding: 16px 18px 6px; }
+.software-brand-mark { justify-content: center; padding: 16px 0 6px; }
+.software-brand-login .software-brand-name { font-size: 26px; }
+.software-brand-login .software-brand-sub { font-size: 10.5px; }
+.login-mobile-soft { display: none; margin-bottom: 14px; }
+.login-mobile-soft .software-brand-name { color: #0b1f3f; }
+.login-mobile-soft .software-brand-name-2 { color: #1d4ed8; }
+@media (max-width: 800px) { .login-mobile-soft { display: block; } }
+.software-brand-sider .software-brand-sub { text-transform: none; letter-spacing: 0.2px; font-size: 10.5px; }
