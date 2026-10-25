@@ -245,6 +245,9 @@ FIELD_ENCRYPTION_KEY = env("FIELD_ENCRYPTION_KEY", "")
 
 # --- External service providers (see CLAUDE.md section 5) --------------------
 SMS_PROVIDER = env("SMS_PROVIDER", "console")
+# Only for SMS_PROVIDER=fast2sms. Route "q" = Quick SMS (no DLT paperwork).
+FAST2SMS_API_KEY = env("FAST2SMS_API_KEY", "")
+FAST2SMS_ROUTE = env("FAST2SMS_ROUTE", "q")
 # WhatsApp: "click_to_chat" builds a wa.me link that staff click to send (free).
 WHATSAPP_PROVIDER = env("WHATSAPP_PROVIDER", "click_to_chat")
 # Payments: "static_upi" shows a UPI QR / link; staff mark the bill paid (free, no gateway).
