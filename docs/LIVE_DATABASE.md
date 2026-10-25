@@ -1,7 +1,8 @@
 # Which database is the app using?
 
-Since 2026-10-25 the app on your PC saves to the **Supabase database** (the "live" copy), not to the database on your PC.
-Everything you enter (patients, bills, check-ups) now goes to Supabase and stays there.
+On 2026-10-25 the app was switched to the **Supabase database** and then put back on the **PC database** (it is the default again).
+A copy of the demo data is also in Supabase. The Supabase connection is saved in `.env.supabase-db`: copy its `POSTGRES_` lines into `.env` and run `docker compose up -d backend` to use Supabase again.
+The rest of this page describes the Supabase case.
 
 ## How to see which one is used
 Open `.env` and look at `POSTGRES_HOST`:
