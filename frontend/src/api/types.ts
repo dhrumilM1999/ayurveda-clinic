@@ -306,6 +306,8 @@ export interface DuplicatePatient {
   age_years: number | null;
   mobile_masked: string;
   city: string;
+  /** same name and same mobile: the same person, registered again */
+  exact?: boolean;
 }
 
 export interface Vital {

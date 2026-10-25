@@ -78,7 +78,7 @@ export default function CalendarPage() {
     return (
       <div className="cal-cell">
         {d.slots > 0 && !date.isBefore(dayjs(), 'day') && <span className={`cal-free${d.free === 0 ? ' none' : ''}`}>{t('calendar.free', { n: d.free })}</span>}
-        {(d.booked > 0 || d.walk_in > 0) && <span className="cal-booked">{t('calendar.patients', { n: d.booked + d.walk_in })}</span>}
+        {(d.booked > 0 || d.walk_in > 0) && <span className="cal-booked">{t('calendar.patients', { count: d.booked + d.walk_in })}</span>}
       </div>
     );
   };

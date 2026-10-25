@@ -174,3 +174,24 @@ def test_patient_history_of_handwriting_is_latest_first_with_page_numbers(org, b
     assert str(history[0]["visit_date"]) == str(visit.visit_date) and str(history[2]["visit_date"]) == str(older.visit_date)
     # one check-up is still read page 1, 2 (oldest first)
     assert [p["page_no"] for p in c.get(URL, {"visit": str(visit.id)}).data] == [1, 2]
+
+
+@pytest.mark.django_db
+def test_handwriting_page_uses_the_clinic_letterhead_picture(org_admin, doctor, branch_a, visit, settings, tmp_path):
+    from apps.organizations.tests.test_letterhead import letterhead_png
+
+    settings.MEDIA_ROOT = tmp_path
+    assert client_for(org_admin, branch_a).post(f"/api/v1/branches/{branch_a.id}/letterhead-image/", {"file": letterhead_png_upload()}, format="multipart").status_code == 200
+    res = save(client_for(doctor, branch_a), visit)
+    assert res.status_code == 201, res.data
+    page = HandwrittenPrescription.objects.get(pk=res.data["id"])
+    picture = Image.open(page.image.open("rb")).convert("RGB")
+    # the strip across the top and the band along the bottom of the letterhead picture are on the saved page
+    assert picture.getpixel((picture.width // 2, 4)) != (255, 255, 255)
+    assert picture.getpixel((picture.width // 2, picture.height - 4)) != (255, 255, 255)
+
+
+def letterhead_png_upload():
+    from apps.organizations.tests.test_letterhead import letterhead_png
+
+    return SimpleUploadedFile("lh.png", letterhead_png(), content_type="image/png")

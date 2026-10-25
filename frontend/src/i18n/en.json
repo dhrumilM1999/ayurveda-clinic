@@ -528,7 +528,11 @@
     },
     "draftRestored": "Your unsaved form was restored.",
     "discardDraft": "Start empty",
-    "draftSaved": "Draft kept in this browser tab"
+    "draftSaved": "Draft kept in this browser tab",
+    "sameAsk": "{{name}} (ID {{id}}) is already registered with this mobile",
+    "sameHelp": "The same name and the same mobile are already in the patient list. Registering again splits the history in two. Open the existing patient, or register anyway if it is a different person.",
+    "registerAnyway": "Register anyway",
+    "openExisting": "Open existing patient"
   },
   "vitals": {
     "record": "Record vitals",
@@ -2265,14 +2269,15 @@
     "next": "Next month",
     "closed": "Closed",
     "free": "{{n}} free",
-    "patients": "{{n}} patients",
     "dayLine": "{{free}} times free, {{booked}} booked, {{walk}} walk-in",
     "pickDoctor": "Choose a doctor to see the times.",
     "noSlots": "The doctor does not sit on this day.",
     "past": "Passed",
     "freeTag": "Free",
     "bookThis": "Book",
-    "walkIns": "Walk-ins today"
+    "walkIns": "Walk-ins today",
+    "patients_one": "{{count}} patient",
+    "patients_other": "{{count}} patients"
   },
   "investigations": {
     "pick": "Search a test (e.g. CBC, sugar, X-ray)",

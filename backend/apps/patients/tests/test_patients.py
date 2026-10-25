@@ -184,6 +184,12 @@ def test_duplicate_check(receptionist, branch_a):
     assert len(by_mobile) == 1 and by_mobile[0]["mobile_masked"] == "98XXXXXX21"
     assert len(by_name) == 1
     assert client.get(f"{URL}duplicates/", {"mobile": "9000000000"}).data == []
+    # "exact" = same name AND same mobile (the same person registered twice); a family sharing one mobile is not exact
+    assert by_mobile[0]["exact"] is False and by_name[0]["exact"] is False
+    both = client.get(f"{URL}duplicates/", {"mobile": "98123 45621", "first_name": "RAMESH", "last_name": "patel"}).data
+    assert both[0]["exact"] is True
+    family = client.get(f"{URL}duplicates/", {"mobile": "9812345621", "first_name": "Sita", "last_name": "Patel"}).data
+    assert family[0]["exact"] is False
 
 
 @pytest.mark.django_db

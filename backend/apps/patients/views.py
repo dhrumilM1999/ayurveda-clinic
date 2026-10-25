@@ -131,7 +131,13 @@ class PatientViewSet(AuditedModelViewSet):
         qs = Patient.objects.filter(condition, organization_id=request.user.organization_id)
         if exclude:
             qs = qs.exclude(pk=exclude)
-        return Response(DuplicateSerializer(qs[:10], many=True).data)
+        found = list(qs[:10])
+        rows = DuplicateSerializer(found, many=True).data
+        # "exact" = the same first name, surname AND mobile: almost certainly the same person registered twice
+        for row, patient in zip(rows, found):
+            row["exact"] = bool(len(mobile) == 10 and first and last and patient.first_name.lower() == first.lower()
+                                and patient.last_name.lower() == last.lower() and mobile in (patient.mobile, patient.alternate_mobile))
+        return Response(rows)
 
     @action(detail=True, methods=["get"])
     def photo(self, request, pk=None):
