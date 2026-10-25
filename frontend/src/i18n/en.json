@@ -1288,7 +1288,15 @@
       "times": "Asked (times)",
       "last": "Last asked"
     },
-    "missingStock": "{{n}} not in stock"
+    "missingStock": "{{n}} not in stock",
+    "printedTotal": "Total on supplier invoice",
+    "printedTotalHelp": "Type the final total printed on the bill. The software checks it against its own total.",
+    "totalDiffers": "The invoice total ({{printed}}) is different from the calculated total ({{calc}}) by {{diff}}. Check the rates, discount, GST and quantities.",
+    "saveAnyway": "The supplier invoice is right, save anyway",
+    "tickSaveAnyway": "The totals differ. Check the lines, or tick 'save anyway'.",
+    "totalMatches": "The total matches the supplier invoice.",
+    "expiryMissing": "{{name}}: please enter the expiry date printed on the pack.",
+    "invoiceSays": "Invoice says {{amount}}"
   },
   "billing": {
     "status": {

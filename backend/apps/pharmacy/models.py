@@ -122,6 +122,9 @@ class Purchase(BranchScopedModel):
     other_charges = models.DecimalField(default=0, **MONEY)
     round_off = models.DecimalField(default=0, **MONEY)
     total_amount = models.DecimalField(default=0, **MONEY)
+    # The total printed on the supplier invoice, as typed by staff. total_amount is what the software calculated;
+    # a difference is shown and must be accepted on purpose (see receive_stock).
+    printed_total = models.DecimalField(null=True, blank=True, **MONEY)
     notes = models.CharField(max_length=300, blank=True)
 
     class Meta:

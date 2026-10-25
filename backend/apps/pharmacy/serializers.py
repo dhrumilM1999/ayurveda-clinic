@@ -95,7 +95,7 @@ class PurchaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Purchase
         fields = ["id", "supplier", "supplier_name", "invoice_no", "invoice_date", "is_opening", "taxable_amount",
-                  "discount_amount", "gst_amount", "other_charges", "round_off", "total_amount", "notes", "items",
+                  "discount_amount", "gst_amount", "other_charges", "round_off", "total_amount", "printed_total", "notes", "items",
                   "created_by_name", "created_at"]
 
 
@@ -133,6 +133,9 @@ class PurchaseInput(serializers.Serializer):
     invoice_date = serializers.DateField(required=False)
     is_opening = serializers.BooleanField(required=False, default=False)
     other_charges = serializers.DecimalField(required=False, default=0, **MONEY)
+    # Total printed on the supplier invoice; a difference from the calculated total is refused unless accepted
+    printed_total = serializers.DecimalField(required=False, allow_null=True, **MONEY)
+    accept_difference = serializers.BooleanField(required=False, default=False)
     notes = serializers.CharField(max_length=300, required=False, allow_blank=True)
     items = PurchaseLineInput(many=True)
 

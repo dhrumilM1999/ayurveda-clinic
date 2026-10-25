@@ -872,6 +872,7 @@ export interface PurchaseRecord {
   other_charges: string;
   round_off: string;
   total_amount: string;
+  printed_total?: string | null;
   notes: string;
   items: PurchaseItemRecord[];
   created_by_name: string;

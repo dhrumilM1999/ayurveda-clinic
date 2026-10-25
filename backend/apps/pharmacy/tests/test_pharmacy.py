@@ -85,7 +85,7 @@ def test_purchase_checks(pharmacist, branch_a, meds):
 def test_opening_stock(pharmacist, branch_a, meds):
     client = client_for(pharmacist, branch_a)
     res = client.post("/api/v1/purchases/", {"is_opening": True, "items": [
-        {"medicine": str(meds["Ashwagandha Churna"].id), "batch_no": "OP1", "quantity": "4", "mrp": "120"}]}, format="json")
+        {"medicine": str(meds["Ashwagandha Churna"].id), "batch_no": "OP1", "quantity": "4", "mrp": "120", "expiry_date": LATER}]}, format="json")
     assert res.status_code == 201, res.data
     assert StockMovement.objects.get(batch__batch_no="OP1").kind == "opening"
 

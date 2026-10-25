@@ -170,6 +170,7 @@ class PurchaseViewSet(PharmacyMixin, mixins.ListModelMixin, mixins.RetrieveModel
                 raise ValidationError({"supplier": "Supplier not found."})
         medicines = {m.id: m for m in Medicine.objects.filter(organization_id=org_id, id__in=[i["medicine"] for i in v["items"]])}
         batches_on = is_feature_enabled(request.branch, "pharmacy_batch_tracking")
+        expiry_on = is_feature_enabled(request.branch, "pharmacy_expiry_tracking")
         prices_on = is_feature_enabled(request.branch, "pharmacy_selling_price")
         items = []
         for line in v["items"]:
@@ -181,6 +182,8 @@ class PurchaseViewSet(PharmacyMixin, mixins.ListModelMixin, mixins.RetrieveModel
                 if batches_on:
                     raise ValidationError({"items": f"{medicine.name}: please enter the batch number."})
                 line["batch_no"] = auto_batch_no(line.get("expiry_date"))
+            if expiry_on and not line.get("expiry_date"):
+                raise ValidationError({"items": f"{medicine.name}: please enter the expiry date printed on the pack."})
             if line.get("mrp") is None:
                 if prices_on:
                     raise ValidationError({"items": f"{medicine.name}: please enter the MRP."})
@@ -189,9 +192,11 @@ class PurchaseViewSet(PharmacyMixin, mixins.ListModelMixin, mixins.RetrieveModel
         purchase = receive_stock(request.branch, request.user, items=items, supplier=supplier,
                                  invoice_no=v.get("invoice_no", ""), invoice_date=v.get("invoice_date"),
                                  notes=v.get("notes", ""), other_charges=v.get("other_charges", 0),
-                                 is_opening=v.get("is_opening", False))
+                                 is_opening=v.get("is_opening", False), printed_total=v.get("printed_total"),
+                                 accept_difference=v.get("accept_difference", False))
         log_action(request, "create", purchase, changes={"lines": len(items), "total": str(purchase.total_amount),
-                                                          "opening": purchase.is_opening})
+                                                          "opening": purchase.is_opening,
+                                                          "printed_total": str(purchase.printed_total) if purchase.printed_total is not None else ""})
         return Response(self.get_serializer(self.get_queryset().get(pk=purchase.pk)).data, status=http.HTTP_201_CREATED)
 
 
