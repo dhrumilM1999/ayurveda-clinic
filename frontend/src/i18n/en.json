@@ -2277,7 +2277,13 @@
     "bookThis": "Book",
     "walkIns": "Walk-ins today",
     "patients_one": "{{count}} patient",
-    "patients_other": "{{count}} patients"
+    "patients_other": "{{count}} patients",
+    "thisMonth": "This month",
+    "nextMonth": "Next month",
+    "lastMonth": "Last month",
+    "monthsAhead": "{{n}} months from now",
+    "monthsAgo": "{{n}} months ago",
+    "today": "Today"
   },
   "investigations": {
     "pick": "Search a test (e.g. CBC, sugar, X-ray)",

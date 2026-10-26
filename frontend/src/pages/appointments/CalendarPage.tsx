@@ -2,7 +2,7 @@
 // many patients are booked; click a day to see its time slots (free or booked, and who) and book a free one.
 // SAFE TO EDIT: the words are in src/i18n/*.json under "calendar".
 import { LeftOutlined, PlusOutlined, RightOutlined } from '@ant-design/icons';
-import { Button, Calendar, Empty, Select, Space, Spin, Table, Tag, Typography } from 'antd';
+import { Button, Calendar, DatePicker, Empty, Select, Space, Spin, Table, Tag, Typography } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -51,6 +51,7 @@ export default function CalendarPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [month, doctor, version]);
 
+  const monthsAway = month.diff(dayjs().startOf('month'), 'month');
   const key = selected.format('YYYY-MM-DD');
   useEffect(() => {
     let current = true;
@@ -97,19 +98,39 @@ export default function CalendarPage() {
             <Select allowClear placeholder={t('appointments.allDoctors')} value={doctor} onChange={setDoctor} style={{ minWidth: 200 }}
               options={doctors.map((d) => ({ value: d.id, label: d.full_name }))} />
           )}
-          <Space.Compact>
-            <Button icon={<LeftOutlined />} onClick={() => setMonth(month.subtract(1, 'month'))} aria-label={t('calendar.prev')} />
-            <Button style={{ minWidth: 150 }} onClick={() => { setMonth(dayjs().startOf('month')); setSelected(dayjs()); }}>{month.format('MMMM YYYY')}</Button>
-            <Button icon={<RightOutlined />} onClick={() => setMonth(month.add(1, 'month'))} aria-label={t('calendar.next')} />
-          </Space.Compact>
+          <Button onClick={() => { setMonth(dayjs().startOf('month')); setSelected(dayjs()); }} disabled={month.isSame(dayjs(), 'month') && selected.isSame(dayjs(), 'day')}>{t('calendar.today')}</Button>
         </Space>
+      </div>
+
+      {/* Which month is this? A big title, and how far from now it is, so going forward or back is never confusing */}
+      <div className="cal-monthbar">
+        <Button size="large" icon={<LeftOutlined />} onClick={() => setMonth(month.subtract(1, 'month'))}>{month.subtract(1, 'month').format('MMM')}</Button>
+        <div className="cal-monthtitle">
+          <DatePicker picker="month" allowClear={false} value={month} format="MMMM YYYY" variant="borderless" className="cal-monthpicker"
+            onChange={(d) => d && setMonth(d.startOf('month'))} suffixIcon={null} inputReadOnly />
+          <Tag color={monthsAway === 0 ? 'blue' : monthsAway > 0 ? 'purple' : 'default'} bordered={false}>
+            {monthsAway === 0 ? t('calendar.thisMonth') : monthsAway === 1 ? t('calendar.nextMonth') : monthsAway === -1 ? t('calendar.lastMonth')
+              : monthsAway > 0 ? t('calendar.monthsAhead', { n: monthsAway }) : t('calendar.monthsAgo', { n: -monthsAway })}
+          </Tag>
+        </div>
+        <Button size="large" onClick={() => setMonth(month.add(1, 'month'))}>{month.add(1, 'month').format('MMM')} <RightOutlined /></Button>
       </div>
 
       <div className="cal-layout">
         <Spin spinning={loading}>
-          <Calendar className="cal-grid" value={selected} fullscreen headerRender={() => null}
-            onSelect={(d) => { setSelected(d); if (!d.isSame(month, 'month')) setMonth(d.startOf('month')); }}
-            cellRender={(date, info) => (info.type === 'date' ? cell(date) : info.originNode)} />
+          {/* The grid shows the chosen month (value={month}); the selected day is drawn by our own cell */}
+          <Calendar className="cal-grid" value={month} fullscreen headerRender={() => null}
+            onSelect={(d, meta) => { if (meta.source === 'date' && d.isSame(month, 'month')) setSelected(d); }}
+            fullCellRender={(date, info) => {
+              if (info.type !== 'date') return info.originNode;
+              const inMonth = date.isSame(month, 'month');
+              return (
+                <div className={`cal-daycell${inMonth ? '' : ' cal-out'}${date.isSame(selected, 'day') ? ' cal-picked' : ''}${date.isSame(dayjs(), 'day') ? ' cal-today' : ''}`}>
+                  <div className="cal-daynum">{date.date()}</div>
+                  {inMonth && cell(date)}
+                </div>
+              );
+            }} />
         </Spin>
 
         <div className="cal-day">

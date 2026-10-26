@@ -2054,3 +2054,19 @@ body {
 /* Reason for the visit (from the booking) and the bar after a check-up is completed */
 .visit-reason { margin-top: 6px; font-size: 13px; }
 .visit-done-bar { margin: 0 0 10px; }
+
+/* Calendar: a big month title, and only the days of that month */
+.cal-monthbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.cal-monthtitle { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.cal-monthpicker { font-family: var(--clinic-font-heading); font-size: 26px; font-weight: 600; width: 230px; text-align: center; padding: 0; cursor: pointer; }
+.cal-monthpicker input { font-family: var(--clinic-font-heading); font-size: 26px !important; font-weight: 600; text-align: center; cursor: pointer; color: var(--clinic-text); }
+.cal-daycell { min-height: 92px; padding: 6px 8px; border-top: 2px solid rgba(15, 27, 45, 0.08); cursor: pointer; border-radius: 0 0 8px 8px; transition: background 0.15s ease; }
+.cal-daycell:hover { background: rgba(29, 78, 216, 0.06); }
+.cal-daynum { text-align: right; font-weight: 600; font-size: 13px; }
+.cal-daycell.cal-out { visibility: hidden; }
+.cal-daycell.cal-today .cal-daynum { color: #fff; }
+.cal-daycell.cal-today .cal-daynum::before { content: ''; }
+.cal-daycell.cal-today .cal-daynum { display: inline-block; float: right; background: var(--clinic-primary); border-radius: 999px; padding: 0 8px; }
+.cal-daycell.cal-picked { background: rgba(29, 78, 216, 0.1); border-top-color: var(--clinic-primary); box-shadow: inset 0 0 0 1px rgba(29, 78, 216, 0.3); }
+.cal-cell { clear: both; }
+@media (max-width: 700px) { .cal-monthpicker, .cal-monthpicker input { font-size: 20px !important; width: 170px; } }

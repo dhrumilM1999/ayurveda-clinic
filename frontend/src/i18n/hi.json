@@ -2277,7 +2277,13 @@
     "bookThis": "बुक करें",
     "walkIns": "आज के वॉक-इन",
     "patients_one": "{{count}} मरीज़",
-    "patients_other": "{{count}} मरीज़"
+    "patients_other": "{{count}} मरीज़",
+    "thisMonth": "यह महीना",
+    "nextMonth": "अगला महीना",
+    "lastMonth": "पिछला महीना",
+    "monthsAhead": "{{n}} महीने बाद",
+    "monthsAgo": "{{n}} महीने पहले",
+    "today": "आज"
   },
   "investigations": {
     "pick": "टेस्ट खोजें (जैसे सीबीसी, शुगर, एक्स-रे)",

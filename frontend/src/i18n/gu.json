@@ -2277,7 +2277,13 @@
     "bookThis": "બુક કરો",
     "walkIns": "આજના વૉક-ઇન",
     "patients_one": "{{count}} દર્દી",
-    "patients_other": "{{count}} દર્દી"
+    "patients_other": "{{count}} દર્દી",
+    "thisMonth": "આ મહિનો",
+    "nextMonth": "આવતો મહિનો",
+    "lastMonth": "ગયો મહિનો",
+    "monthsAhead": "{{n}} મહિના પછી",
+    "monthsAgo": "{{n}} મહિના પહેલાં",
+    "today": "આજે"
   },
   "investigations": {
     "pick": "ટેસ્ટ શોધો (જેમ કે સીબીસી, સુગર, એક્સ-રે)",
