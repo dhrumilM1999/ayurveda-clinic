@@ -21,6 +21,11 @@ MAX_DAYS = 3 * 366  # longer reports would be slow; P2 will build them in the ba
 NOTES = {
     "gst": "Prices include GST. GST is shown as CGST + SGST (same state). Please confirm with your CA before filing.",
     "follow_ups": "Patients whose follow-up date has passed and who have not had a check-up since (any branch).",
+    "gst_payable": "Tax on sales (CGST + SGST) minus credit notes, against the GST paid on supplier purchases. A guide only - your CA files the return. Purchase returns and IGST are not included.",
+    "fy_summary": "Pick a financial year (1 April to 31 March) to see every month. Sales are after returns and credit notes.",
+    "sales_register": "Every bill and credit note (credit notes in minus). Give this to your CA with the GST summary.",
+    "purchase_register": "Every supplier invoice entered. Opening stock is not counted as a purchase.",
+    "dues": "Bills where the patient has not paid everything yet.",
     "by_doctor": "Pharmacy bills count for the doctor of the prescription. Billed = bills minus returns / cancellations.",
 }
 

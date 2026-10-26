@@ -1,4 +1,4 @@
-// Reports: collection, income by doctor / branch, new vs repeat patients, missed follow-ups, GST summary.
+// Reports: collection, income by doctor / branch, patients, follow-ups, GST summary, GST to pay, month-wise financial year, sales / purchase registers, bills not paid.
 // Pick a report, the dates and the branch; the table and the totals come from /reports/<code>/.
 // "Excel" and "PDF" download the same report (every download is written to the audit log).
 // Each report shows only to staff who may see its data (e.g. money reports need "See bills").
@@ -11,7 +11,8 @@ import { Link } from 'react-router-dom';
 import { api, errorMessage } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 
-type ReportCode = 'collection' | 'by_doctor' | 'by_branch' | 'patients' | 'follow_ups' | 'gst';
+type ReportCode = 'collection' | 'by_doctor' | 'by_branch' | 'patients' | 'follow_ups' | 'gst'
+  | 'gst_payable' | 'fy_summary' | 'sales_register' | 'purchase_register' | 'dues';
 type Cell = string | number | null;
 type Row = Record<string, Cell>;
 interface ReportData {
@@ -31,7 +32,19 @@ const REPORTS: { code: ReportCode; needs: string; grouped?: boolean; headline: s
   { code: 'patients', needs: 'appointments.view', grouped: true, headline: ['patients', 'new', 'repeat', 'repeat_percent'] },
   { code: 'follow_ups', needs: 'patients.view', headline: [] },
   { code: 'gst', needs: 'billing.view', headline: ['net_taxable', 'net_tax'] },
+  { code: 'gst_payable', needs: 'billing.view', headline: ['output', 'input', 'payable'] },
+  { code: 'fy_summary', needs: 'billing.view', headline: ['sales', 'gst', 'received', 'payable'] },
+  { code: 'sales_register', needs: 'billing.view', headline: ['taxable', 'total'] },
+  { code: 'purchase_register', needs: 'pharmacy.stock', headline: ['taxable', 'gst', 'total'] },
+  { code: 'dues', needs: 'billing.view', headline: ['total', 'paid', 'due'] },
 ];
+
+// Financial year: 1 April - 31 March. Returns the first day of the year that contains the date.
+const fyStart = (d: Dayjs) => (d.month() >= 3 ? d.month(3).startOf('month') : d.subtract(1, 'year').month(3).startOf('month'));
+const fyLabel = (start: Dayjs) => `${start.year()}-${String((start.year() + 1) % 100).padStart(2, '0')}`;
+
+// Quarters of the financial year: Apr-Jun, Jul-Sep, Oct-Dec, Jan-Mar
+const quarterStart = (d: Dayjs) => fyStart(d).add(Math.floor(d.diff(fyStart(d), 'month') / 3) * 3, 'month');
 
 /** 1,23,456.50 (Indian grouping) */
 const rupees = (v: Cell) => `₹ ${Number(v ?? 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -55,6 +68,11 @@ export default function ReportsPage() {
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState<'xlsx' | 'pdf' | null>(null);
 
+  // The last 6 financial years to pick from; shown selected when the dates are exactly one whole year
+  const fyOptions = Array.from({ length: 6 }, (_, i) => fyStart(dayjs()).subtract(i, 'year'))
+    .map((st) => ({ value: String(st.year()), label: t('reports.range.fyOption', { label: fyLabel(st) }) }));
+  const fyValue = range[0].month() === 3 && range[0].date() === 1 && range[1].isSame(range[0].add(1, 'year').subtract(1, 'day'), 'day')
+    ? String(range[0].year()) : undefined;
   const info = REPORTS.find((r) => r.code === code) ?? REPORTS[0];
   const choosable = branchesFor(info.needs);
   const params = useMemo(() => ({
@@ -102,7 +120,7 @@ export default function ReportsPage() {
   }
 
   const label = (key: string) => {
-    if (key === 'period') return t(group === 'month' ? 'reports.cols.month' : 'reports.cols.date');
+    if (key === 'period') return t(data?.columns.find((c) => c.key === 'period')?.type === 'month' ? 'reports.cols.month' : 'reports.cols.date');
     if (key === 'name') return t(code === 'by_branch' ? 'reports.cols.branch' : 'reports.cols.doctor');
     return t(`reports.cols.${key}`);
   };
@@ -131,10 +149,10 @@ export default function ReportsPage() {
     { label: t('reports.range.yesterday'), value: [dayjs().subtract(1, 'day'), dayjs().subtract(1, 'day')] },
     { label: t('reports.range.thisMonth'), value: [dayjs().startOf('month'), dayjs()] },
     { label: t('reports.range.lastMonth'), value: [dayjs().subtract(1, 'month').startOf('month'), dayjs().subtract(1, 'month').endOf('month')] },
-    {
-      label: t('reports.range.thisYear'), // financial year: 1 April - 31 March
-      value: [dayjs().month() >= 3 ? dayjs().month(3).startOf('month') : dayjs().subtract(1, 'year').month(3).startOf('month'), dayjs()],
-    },
+    { label: t('reports.range.thisQuarter'), value: [quarterStart(dayjs()), dayjs()] },
+    { label: t('reports.range.lastQuarter'), value: [quarterStart(dayjs()).subtract(3, 'month'), quarterStart(dayjs()).subtract(1, 'day')] },
+    { label: t('reports.range.thisFy'), value: [fyStart(dayjs()), dayjs()] },
+    { label: t('reports.range.lastFy'), value: [fyStart(dayjs()).subtract(1, 'year'), fyStart(dayjs()).subtract(1, 'day')] },
   ];
 
   return (
@@ -162,6 +180,9 @@ export default function ReportsPage() {
       <Space wrap style={{ marginBottom: 8 }}>
         <DatePicker.RangePicker value={range} format="DD-MM-YYYY" allowClear={false} presets={presets}
           onChange={(v) => v?.[0] && v[1] && setRange([v[0], v[1]])} />
+        <Select style={{ minWidth: 150 }} placeholder={t('reports.range.year')} value={fyValue}
+          onChange={(v: string) => { const st = dayjs(`${v}-04-01`); setRange([st, st.add(1, 'year').subtract(1, 'day')]); if (info.grouped) setGroup('month'); }}
+          options={fyOptions} />
         {info.grouped && (
           <Segmented value={group} onChange={(v) => setGroup(v as 'day' | 'month')}
             options={[{ value: 'day', label: t('reports.group.day') }, { value: 'month', label: t('reports.group.month') }]} />

@@ -1869,7 +1869,12 @@
       "by_branch": "Income by branch",
       "patients": "New vs repeat patients",
       "follow_ups": "Missed follow-ups",
-      "gst": "GST summary"
+      "gst": "GST summary",
+      "fy_summary": "Month-wise (financial year)",
+      "gst_payable": "GST to pay",
+      "sales_register": "Sales register",
+      "purchase_register": "Purchase register",
+      "dues": "Bills not paid"
     },
     "help": {
       "collection": "Money received each day or month: cash, UPI and card, minus refunds. Same figures as the day closing.",
@@ -1877,14 +1882,26 @@
       "by_branch": "The same figures for each branch, to compare them.",
       "patients": "Patients seen: new cases (first check-up ever with the clinic) and follow-ups (seen before).",
       "follow_ups": "The follow-up date has passed and the patient has not come back. Call or message them.",
-      "gst": "Taxable value and GST for each HSN / SAC code and rate, minus credit notes. Confirm with your CA before filing."
+      "gst": "Taxable value and GST for each HSN / SAC code and rate, minus credit notes. Confirm with your CA before filing.",
+      "fy_summary": "Every month of the financial year (1 April to 31 March): sales, GST, money received, purchases and the GST to pay. Choose the year above.",
+      "gst_payable": "GST charged on sales (minus credit notes) against the GST paid on supplier purchases, for each rate. A guide only: your CA files the return.",
+      "sales_register": "Every bill and credit note in order (credit notes in minus). Give this to your CA with the GST summary.",
+      "purchase_register": "Every supplier invoice with the supplier GSTIN. Opening stock is not counted as a purchase.",
+      "dues": "Bills where the patient has not paid everything yet. Phone numbers are hidden in part."
     },
     "range": {
       "today": "Today",
       "yesterday": "Yesterday",
       "thisMonth": "This month",
       "lastMonth": "Last month",
-      "thisYear": "This financial year"
+      "thisYear": "This financial year",
+      "year": "Financial year",
+      "thisFy": "This financial year",
+      "lastFy": "Last financial year",
+      "thisQuarter": "This quarter",
+      "lastQuarter": "Last quarter",
+      "fyOption": "FY {{label}}",
+      "customDates": "Pick dates"
     },
     "group": {
       "day": "Day-wise",
@@ -1927,7 +1944,25 @@
       "credit_taxable": "Credit notes: taxable",
       "credit_tax": "Credit notes: GST",
       "net_taxable": "Net taxable",
-      "net_tax": "Net GST"
+      "net_tax": "Net GST",
+      "sales": "Sales (taxable)",
+      "output": "GST on sales",
+      "buy": "Purchases (taxable)",
+      "input": "GST on purchases",
+      "payable": "GST to pay (+) / extra credit (-)",
+      "gst": "GST on sales",
+      "number": "Number",
+      "kind": "Type",
+      "party": "Customer",
+      "status": "Status",
+      "supplier": "Supplier",
+      "gstin": "Supplier GSTIN",
+      "invoice_no": "Invoice no.",
+      "discount": "Discount",
+      "other": "Other charges / round off",
+      "total": "Total",
+      "paid": "Paid",
+      "days": "Days old"
     }
   },
   "therapy": {

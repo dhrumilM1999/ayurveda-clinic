@@ -39,6 +39,11 @@ REPORTS = {
     "patients": {"title": "New vs repeat patients", "needs": "appointments.view", "grouped": True},
     "follow_ups": {"title": "Missed follow-ups", "needs": "patients.view", "grouped": False},
     "gst": {"title": "GST summary", "needs": "billing.view", "grouped": False},
+    "gst_payable": {"title": "GST to pay (sales vs purchases)", "needs": "billing.view", "grouped": False},
+    "fy_summary": {"title": "Month-wise summary", "needs": "billing.view", "grouped": False},
+    "sales_register": {"title": "Sales register", "needs": "billing.view", "grouped": False},
+    "purchase_register": {"title": "Purchase register", "needs": "pharmacy.stock", "grouped": False},
+    "dues": {"title": "Bills not fully paid", "needs": "billing.view", "grouped": False},
 }
 
 
@@ -263,6 +268,13 @@ def gst(branches, date_from, date_to, grouping=None):
 
 BUILDERS = {"collection": collection, "by_doctor": by_doctor, "by_branch": by_branch, "patients": patients,
             "follow_ups": follow_ups, "gst": gst}
+
+# The financial-year and GST reports live in reports_fy.py (it imports helpers from this file, so it is added here)
+from . import reports_fy  # noqa: E402
+
+BUILDERS.update({"gst_payable": reports_fy.gst_payable, "fy_summary": reports_fy.fy_summary,
+                 "sales_register": reports_fy.sales_register, "purchase_register": reports_fy.purchase_register,
+                 "dues": reports_fy.dues})
 
 
 def build(code, branches, date_from, date_to, grouping="day"):

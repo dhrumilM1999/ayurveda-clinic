@@ -151,3 +151,22 @@ def test_bad_dates_are_refused(branch_a, branch_admin):
     assert client.get(url("collection", date_from=TODAY, date_to=TODAY - timedelta(days=1))).status_code == 400
     assert client.get(url("collection", date_from=TODAY - timedelta(days=2000))).status_code == 400
     assert client.get("/api/v1/reports/nothing/").status_code == 400
+
+
+@pytest.mark.django_db
+def test_financial_year_and_register_reports(branch_a, branch_admin, billed_day):
+    client = client_for(branch_admin, branch_a)
+    month = client.get(url("fy_summary")).data
+    assert month["totals"]["bills"] == 2 and Decimal(month["totals"]["received"]) == 500
+    assert month["columns"][0]["type"] == "month"
+    register = client.get(url("sales_register")).data
+    assert [r["kind"] for r in register["rows"]] == ["Bill", "Bill"]
+    assert Decimal(register["totals"]["total"]) == 800
+    dues = client.get(url("dues")).data
+    assert len(dues["rows"]) == 1 and Decimal(dues["totals"]["due"]) == 300
+    assert dues["rows"][0]["phone"] != "9812345621"  # masked
+    assert client.get(url("gst_payable")).status_code == 200
+    assert client.get(url("purchase_register")).status_code == 200
+    for code in ("fy_summary", "sales_register", "gst_payable", "purchase_register", "dues"):
+        assert client.get(url(code, export="xlsx")).content[:2] == b"PK"
+        assert client.get(url(code, export="pdf")).content[:4] == b"%PDF"
