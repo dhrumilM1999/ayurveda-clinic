@@ -126,7 +126,19 @@
     "stillDue": "Still to collect",
     "stillDueNote_one": "{{count}} bill of today not fully paid",
     "stillDueNote_other": "{{count}} bills of today not fully paid",
-    "opdCollectionNoteCombined": "Consultation, services and medicines on the one bill, received today"
+    "opdCollectionNoteCombined": "Consultation, services and medicines on the one bill, received today",
+    "shortcuts": {
+      "newPatient": "New patient",
+      "appointments": "Appointments",
+      "queue": "Queue",
+      "checkup": "Check-up",
+      "billing": "Billing",
+      "pharmacy": "Pharmacy",
+      "products": "Products",
+      "therapy": "Panchakarma",
+      "calendar": "Calendar",
+      "reports": "Reports"
+    }
   },
   "branches": {
     "title": "Branches",

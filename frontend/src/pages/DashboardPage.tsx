@@ -4,6 +4,7 @@
 // - Pharmacy stock alerts when that extra is switched on.
 // The numbers come from /dashboard/today/ and refresh every minute.
 import {
+  BarChartOutlined, CarryOutOutlined, FileTextOutlined, GiftOutlined, HeartOutlined, OrderedListOutlined, ScheduleOutlined,
   CheckCircleOutlined, ClockCircleOutlined, MedicineBoxOutlined, ShopOutlined, TeamOutlined, UserAddOutlined,
   UserOutlined, WalletOutlined, WarningOutlined,
 } from '@ant-design/icons';
@@ -23,6 +24,22 @@ import { AlertTiles } from './pharmacy/StockTab';
 
 const c = clinicConfig.colors;
 const REFRESH_SECONDS = 60;
+
+// Big shortcut buttons at the top. SAFE TO EDIT: add, remove or re-order a line (permission = who sees it,
+// feature = the extra that must be on). Texts are in the i18n files under dashboard.shortcuts.
+type Shortcut = { key: string; path: string; icon: ReactNode; color: string; permission: string; feature?: string };
+const SHORTCUTS: Shortcut[] = [
+  { key: 'newPatient', path: '/patients/new', icon: <UserAddOutlined />, color: '#2f6fb0', permission: 'patients.create' },
+  { key: 'appointments', path: '/appointments', icon: <ScheduleOutlined />, color: '#7a52b3', permission: 'appointments.view', feature: 'appointments' },
+  { key: 'queue', path: '/queue', icon: <OrderedListOutlined />, color: '#d4851c', permission: 'appointments.view', feature: 'appointments' },
+  { key: 'checkup', path: '/consult', icon: <MedicineBoxOutlined />, color: '#1f8a70', permission: 'emr.view' },
+  { key: 'billing', path: '/billing', icon: <FileTextOutlined />, color: '#2f6fb0', permission: 'billing.view' },
+  { key: 'pharmacy', path: '/pharmacy', icon: <ShopOutlined />, color: '#b5497a', permission: 'pharmacy.view', feature: 'pharmacy' },
+  { key: 'products', path: '/products', icon: <GiftOutlined />, color: '#c2412d', permission: 'products.view', feature: 'pharmacy' },
+  { key: 'therapy', path: '/therapy', icon: <HeartOutlined />, color: '#1f8a70', permission: 'therapy.view', feature: 'panchakarma' },
+  { key: 'calendar', path: '/calendar', icon: <CarryOutOutlined />, color: '#7a52b3', permission: 'appointments.view', feature: 'appointments' },
+  { key: 'reports', path: '/reports', icon: <BarChartOutlined />, color: '#d4851c', permission: 'reports.view' },
+];
 
 type Tile = { key: string; icon: ReactNode; color: string; value: ReactNode; note: string; link?: string };
 
@@ -100,6 +117,15 @@ export default function DashboardPage() {
           {t('dashboard.workingIn', { branch: branch?.name, role: branch?.role?.name ?? t('layout.orgAdmin') })}
         </div>
         <LeafArt className="hero-leaf" />
+      </div>
+
+      <div className="shortcut-grid">
+        {SHORTCUTS.filter((x) => can(x.permission) && (!x.feature || features[x.feature] !== false)).map((x) => (
+          <Link key={x.key} to={x.path} className="shortcut" style={{ ['--sc' as string]: x.color }}>
+            <span className="shortcut-icon">{x.icon}</span>
+            <span className="shortcut-label">{t(`dashboard.shortcuts.${x.key}`)}</span>
+          </Link>
+        ))}
       </div>
 
       {mine && (

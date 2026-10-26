@@ -1,3 +1,6 @@
+/* Satoshi font (free for commercial use, licence in public/fonts). One file holds every weight. */
+@font-face { font-family: 'Satoshi'; src: url('/fonts/Satoshi-Variable.woff2') format('woff2'); font-weight: 300 900; font-style: normal; font-display: swap; }
+
 /* SAFE TO EDIT: extra styles. Colours and fonts come from src/config/clinic.ts
    and are used here as var(--clinic-...). */
 
@@ -2070,3 +2073,13 @@ body {
 .cal-daycell.cal-picked { background: rgba(29, 78, 216, 0.1); border-top-color: var(--clinic-primary); box-shadow: inset 0 0 0 1px rgba(29, 78, 216, 0.3); }
 .cal-cell { clear: both; }
 @media (max-width: 700px) { .cal-monthpicker, .cal-monthpicker input { font-size: 20px !important; width: 170px; } }
+
+
+/* Dashboard shortcut buttons */
+.shortcut-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.shortcut { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 16px 8px 14px; background: #fff; border: 1px solid var(--clinic-border); border-radius: 14px; color: var(--clinic-text); text-align: center; transition: transform .12s, box-shadow .12s, border-color .12s; }
+.shortcut:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(20, 40, 80, .1); border-color: var(--sc); color: var(--clinic-text); }
+.shortcut-icon { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; font-size: 22px; color: var(--sc); background: color-mix(in srgb, var(--sc) 12%, #fff); }
+.shortcut-label { font-weight: 600; font-size: 14px; line-height: 1.2; }
+@media (max-width: 576px) { .shortcut-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; } .shortcut { padding: 12px 4px; } .shortcut-label { font-size: 12px; } }
+@media (min-width: 992px) { .shortcut-grid { grid-template-columns: repeat(5, 1fr); } }

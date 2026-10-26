@@ -126,7 +126,19 @@
     "stillDue": "अभी लेना बाकी",
     "stillDueNote_one": "आज का {{count}} बिल पूरा नहीं चुका",
     "stillDueNote_other": "आज के {{count}} बिल पूरे नहीं चुके",
-    "opdCollectionNoteCombined": "एक ही बिल पर परामर्श, सेवाएँ और दवाइयाँ, आज प्राप्त"
+    "opdCollectionNoteCombined": "एक ही बिल पर परामर्श, सेवाएँ और दवाइयाँ, आज प्राप्त",
+    "shortcuts": {
+      "newPatient": "नया मरीज़",
+      "appointments": "अपॉइंटमेंट",
+      "queue": "कतार",
+      "checkup": "जाँच",
+      "billing": "बिलिंग",
+      "pharmacy": "फ़ार्मेसी",
+      "products": "प्रोडक्ट्स",
+      "therapy": "पंचकर्म",
+      "calendar": "कैलेंडर",
+      "reports": "रिपोर्ट"
+    }
   },
   "branches": {
     "title": "ब्रांच",

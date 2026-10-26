@@ -1,4 +1,4 @@
-{% load humanize_money %}{% comment %}
+{% load print_fonts %}{% load humanize_money %}{% comment %}
 SAFE TO EDIT: the medicine label (one label per page, for label printers).
 - format: compact (50 x 25 mm), standard (75 x 50 mm), detailed (100 x 70 mm). Sizes are in apps/pharmacy/labels.py.
 - show.label_... : the label fields switched on in Additional settings. Keep the {% if %} checks.
@@ -9,9 +9,10 @@ You may change the wording, colours and font sizes. Keep everything inside {{ }}
 <head>
 <meta charset="utf-8">
 <style>
+  {% font_face %}
   @page { size: {{ width }} {{ height }}; margin: 1.5mm; }
   * { box-sizing: border-box; }
-  body { margin: 0; font-family: "Noto Sans", "Noto Sans Gujarati", "Noto Sans Devanagari", sans-serif; color: #111; }
+  body { margin: 0; font-family: "Satoshi", "Noto Sans", "Noto Sans Gujarati", "Noto Sans Devanagari", sans-serif; color: #111; }
   .label { page-break-after: always; height: 100%; overflow: hidden; display: flex; flex-direction: column; gap: 0.6mm; }
   .label:last-child { page-break-after: auto; }
   .top { display: flex; justify-content: space-between; gap: 2mm; font-size: 6pt; color: #333; border-bottom: 0.3mm solid {{ ps.accent_color|default:"#1f5c46" }}; padding-bottom: 0.5mm; }
