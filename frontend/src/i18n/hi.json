@@ -137,8 +137,25 @@
       "products": "प्रोडक्ट्स",
       "therapy": "पंचकर्म",
       "calendar": "कैलेंडर",
-      "reports": "रिपोर्ट"
-    }
+      "reports": "रिपोर्ट",
+      "availability": "मेरा समय"
+    },
+    "shortcutsHelp": {
+      "newPatient": "मरीज़ का पंजीकरण",
+      "appointments": "विज़िट बुक और मैनेज करें",
+      "queue": "अभी कौन इंतज़ार में है",
+      "checkup": "जाँच शुरू करें",
+      "billing": "बिल बनाएँ और देखें",
+      "pharmacy": "दवा और स्टॉक",
+      "products": "क्लिनिक के प्रोडक्ट बेचें",
+      "therapy": "थेरेपी प्लान और सेशन",
+      "reports": "पैसे, GST और मरीज़",
+      "availability": "जाँच का समय तय करें"
+    },
+    "quickActions": "त्वरित कार्य",
+    "pillAppointments": "अपॉइंटमेंट",
+    "pillWaiting": "इंतज़ार में",
+    "pillInConsult": "जाँच में"
   },
   "branches": {
     "title": "ब्रांच",

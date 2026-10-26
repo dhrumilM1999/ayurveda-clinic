@@ -18,7 +18,6 @@ import type { DashboardToday, OpdCounts } from '../api/types';
 import { useAuth } from '../auth/AuthContext';
 import { LeafArt } from '../components/LeafArt';
 import { clinicConfig } from '../config/clinic';
-import { alpha } from '../theme';
 import { money } from './medicines/shared';
 import { AlertTiles } from './pharmacy/StockTab';
 
@@ -36,6 +35,7 @@ const SHORTCUTS: Shortcut[] = [
   { key: 'billing', path: '/billing', icon: <FileTextOutlined />, color: '#2f6fb0', permission: 'billing.view' },
   { key: 'pharmacy', path: '/pharmacy', icon: <ShopOutlined />, color: '#b5497a', permission: 'pharmacy.view', feature: 'pharmacy' },
   { key: 'products', path: '/products', icon: <GiftOutlined />, color: '#c2412d', permission: 'products.view', feature: 'pharmacy' },
+  { key: 'availability', path: '/schedules', icon: <ClockCircleOutlined />, color: '#7a52b3', permission: 'schedules.view' },
   { key: 'therapy', path: '/therapy', icon: <HeartOutlined />, color: '#1f8a70', permission: 'therapy.view', feature: 'panchakarma' },
   { key: 'reports', path: '/reports', icon: <BarChartOutlined />, color: '#d4851c', permission: 'reports.view' },
 ];
@@ -48,8 +48,9 @@ function Tiles({ tiles, xl }: { tiles: Tile[]; xl?: number }) {
     <Row gutter={[12, 12]}>
       {tiles.map((tile) => (
         <Col xs={12} md={xl ? 12 : 8} xl={xl ?? 24 / Math.min(tiles.length, 6)} key={tile.key}>
-          <Card className="stat-card" hoverable={!!tile.link}>
-            <div className="stat-icon" style={{ background: alpha(tile.color, 0.12), color: tile.color }}>{tile.icon}</div>
+          <Card className="stat-card stat-dark" hoverable={!!tile.link}
+            style={{ background: `linear-gradient(135deg, ${tile.color} 0%, #0c1c33 135%)` }}>
+            <div className="stat-icon" style={{ background: 'rgba(255,255,255,0.16)', color: '#fff' }}>{tile.icon}</div>
             <div>
               <div className="stat-label">
                 {tile.link ? <Link to={tile.link} style={{ color: 'inherit' }}>{t(`dashboard.${tile.key}`)}</Link> : t(`dashboard.${tile.key}`)}
@@ -115,14 +116,23 @@ export default function DashboardPage() {
         <div className="hero-sub">
           {t('dashboard.workingIn', { branch: branch?.name, role: branch?.role?.name ?? t('layout.orgAdmin') })}
         </div>
+        {(mine ?? clinic) && (
+          <div className="hero-pills">
+            <span><b>{(mine ?? clinic)!.booked}</b> {t('dashboard.pillAppointments')}</span>
+            <span><b>{(mine ?? clinic)!.waiting}</b> {t('dashboard.pillWaiting')}</span>
+            <span><b>{(mine ?? clinic)!.with_doctor}</b> {t('dashboard.pillInConsult')}</span>
+          </div>
+        )}
         <LeafArt className="hero-leaf" />
       </div>
 
+      <div className="section-title">{t('dashboard.quickActions')}</div>
       <div className="shortcut-grid">
         {SHORTCUTS.filter((x) => can(x.permission) && (!x.feature || features[x.feature] !== false)).map((x) => (
           <Link key={x.key} to={x.path} className="shortcut" style={{ ['--sc' as string]: x.color }}>
             <span className="shortcut-icon">{x.icon}</span>
             <span className="shortcut-label">{t(`dashboard.shortcuts.${x.key}`)}</span>
+            <span className="shortcut-desc">{t(`dashboard.shortcutsHelp.${x.key}`)}</span>
           </Link>
         ))}
       </div>

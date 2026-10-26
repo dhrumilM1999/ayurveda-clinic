@@ -137,8 +137,25 @@
       "products": "Products",
       "therapy": "Panchakarma",
       "calendar": "Calendar",
-      "reports": "Reports"
-    }
+      "reports": "Reports",
+      "availability": "My availability"
+    },
+    "shortcutsHelp": {
+      "newPatient": "Register a patient",
+      "appointments": "Book and manage visits",
+      "queue": "Who is waiting now",
+      "checkup": "Start a check-up",
+      "billing": "Create and manage bills",
+      "pharmacy": "Medicines and stock",
+      "products": "Sell clinic products",
+      "therapy": "Therapy plans and sessions",
+      "reports": "Money, GST and patients",
+      "availability": "Set consultation hours"
+    },
+    "quickActions": "Quick actions",
+    "pillAppointments": "appointments",
+    "pillWaiting": "waiting",
+    "pillInConsult": "in check-up"
   },
   "branches": {
     "title": "Branches",

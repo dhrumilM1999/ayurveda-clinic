@@ -137,8 +137,25 @@
       "products": "પ્રોડક્ટ્સ",
       "therapy": "પંચકર્મ",
       "calendar": "કેલેન્ડર",
-      "reports": "રિપોર્ટ"
-    }
+      "reports": "રિપોર્ટ",
+      "availability": "મારો સમય"
+    },
+    "shortcutsHelp": {
+      "newPatient": "દર્દીની નોંધણી",
+      "appointments": "વિઝિટ બુક અને મેનેજ કરો",
+      "queue": "અત્યારે કોણ રાહ જુએ છે",
+      "checkup": "તપાસ શરૂ કરો",
+      "billing": "બિલ બનાવો અને જુઓ",
+      "pharmacy": "દવા અને સ્ટોક",
+      "products": "ક્લિનિકની પ્રોડક્ટ વેચો",
+      "therapy": "થેરાપી પ્લાન અને સેશન",
+      "reports": "પૈસા, GST અને દર્દીઓ",
+      "availability": "તપાસનો સમય નક્કી કરો"
+    },
+    "quickActions": "ઝડપી કામ",
+    "pillAppointments": "એપોઇન્ટમેન્ટ",
+    "pillWaiting": "રાહ જુએ છે",
+    "pillInConsult": "તપાસમાં"
   },
   "branches": {
     "title": "બ્રાંચ",
