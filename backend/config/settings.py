@@ -256,6 +256,10 @@ FAST2SMS_API_KEY = env("FAST2SMS_API_KEY", "")
 FAST2SMS_ROUTE = env("FAST2SMS_ROUTE", "q")
 # WhatsApp: "click_to_chat" builds a wa.me link that staff click to send (free).
 WHATSAPP_PROVIDER = env("WHATSAPP_PROVIDER", "click_to_chat")
+# Low-stock alert: a medicine with this many packs or fewer is "low" (unless it has its own level), and the
+# owner's WhatsApp number for the "send stock alert" button (free link, the person presses Send). Empty = no link.
+STOCK_LOW_DEFAULT = int(env("STOCK_LOW_DEFAULT", "5"))
+STOCK_ALERT_WHATSAPP = env("STOCK_ALERT_WHATSAPP", "")
 # Payments: "static_upi" shows a UPI QR / link; staff mark the bill paid (free, no gateway).
 PAYMENT_PROVIDER = env("PAYMENT_PROVIDER", "static_upi")
 

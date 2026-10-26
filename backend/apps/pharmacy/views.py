@@ -35,7 +35,7 @@ from .serializers import (
     VerificationItemSerializer, VerificationSerializer,
 )
 from .services import (
-    WALK_IN, alert_counts, complete_verification, correct_stock, counter_sell, dispense_status, dispensed_quantities,
+    WALK_IN, alert_counts, stock_alert_message, complete_verification, correct_stock, counter_sell, dispense_status, dispensed_quantities,
     ledger, locations_for, receive_stock, return_to_supplier, scan, sell, set_location, set_reorder_level,
     needed_medicines, start_verification, stock_by_medicine, stock_summary, suggested_batches, take_back,
 )
@@ -250,11 +250,11 @@ class StockViewSet(PharmacyMixin, viewsets.ViewSet):
     """Stock of this branch: summary, alerts, batches, barcode scan, corrections, locations, ledger."""
 
     required_permissions = {
-        "list": "pharmacy.view", "alerts": "pharmacy.view", "needed": "pharmacy.view", "batches": "pharmacy.view", "scan": "pharmacy.view",
+        "list": "pharmacy.view", "alerts": "pharmacy.view", "alert_message": "pharmacy.view", "needed": "pharmacy.view", "batches": "pharmacy.view", "scan": "pharmacy.view",
         "movements": "pharmacy.view", "adjust": "pharmacy.stock", "reorder_level": "pharmacy.stock",
         "location": "pharmacy.stock", "labels": "pharmacy.view",
     }
-    required_features = {"alerts": "pharmacy_stock_alerts", "needed": "pharmacy_stock_alerts", "scan": "pharmacy_barcode", "location": "pharmacy_racks",
+    required_features = {"alerts": "pharmacy_stock_alerts", "alert_message": "pharmacy_stock_alerts", "needed": "pharmacy_stock_alerts", "scan": "pharmacy_barcode", "location": "pharmacy_racks",
                          "labels": "pharmacy_stock_labels"}
 
     def list(self, request):
@@ -275,6 +275,11 @@ class StockViewSet(PharmacyMixin, viewsets.ViewSet):
     @action(detail=False, methods=["get"])
     def alerts(self, request):
         return Response(alert_counts(request.branch))
+
+    @action(detail=False, methods=["get"], url_path="alert-message")
+    def alert_message(self, request):
+        """Text + WhatsApp link of the stock alert (out of stock and low) for the owner."""
+        return Response(stock_alert_message(request.branch))
 
     @action(detail=False, methods=["get"])
     def needed(self, request):

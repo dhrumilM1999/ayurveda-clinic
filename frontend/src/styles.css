@@ -2083,3 +2083,5 @@ body {
 .shortcut-label { font-weight: 600; font-size: 14px; line-height: 1.2; }
 @media (max-width: 576px) { .shortcut-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; } .shortcut { padding: 12px 4px; } .shortcut-label { font-size: 12px; } }
 @media (min-width: 992px) { .shortcut-grid { grid-template-columns: repeat(5, 1fr); } }
+
+.alert-whatsapp { align-self: center; margin-left: auto; color: #1a8f4c; border-color: #1a8f4c; }

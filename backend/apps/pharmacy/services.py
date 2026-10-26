@@ -12,6 +12,7 @@ StockMovement line (the stock ledger).
 from datetime import timedelta
 from decimal import ROUND_HALF_UP, Decimal
 
+from django.conf import settings
 from django.db import transaction
 from django.db.models import Q, Sum
 from django.utils import timezone
@@ -591,6 +592,8 @@ def stock_summary(branch, search="", show="all", rack_id=None):
     for m in medicines.order_by("name"):
         s = sums.get(m.id, {"available": ZERO, "usable": ZERO, "nearest": None, "near_qty": ZERO})
         level = levels.get(m.id)
+        # A medicine with no level of its own is "low" when 5 packs or fewer are left (settings.STOCK_LOW_DEFAULT)
+        limit = level if level is not None else settings.STOCK_LOW_DEFAULT
         loc = locations.get(m.id)
         row = {
             "medicine": m, "available": s["available"], "usable": s["usable"], "nearest_expiry": s["nearest"],
@@ -598,7 +601,7 @@ def stock_summary(branch, search="", show="all", rack_id=None):
             "location": loc.label if loc else "", "rack_id": loc.rack_id if loc else None,
             "shelf": loc.shelf if loc else "", "bin": loc.bin if loc else "",
             "out": s["usable"] <= 0,
-            "low": level is not None and 0 < s["usable"] <= level,
+            "low": 0 < s["usable"] <= limit,
             "expired": s["available"] > s["usable"],
             "expiring": s["near_qty"] > 0,
         }
@@ -628,6 +631,28 @@ def needed_medicines(branch, days: int = 30) -> list[dict]:
             .order_by("-times", "medicine__name"))
     return [{"medicine": str(r["medicine_id"]), "name": r["medicine__name"], "times": r["times"], "last_at": r["last_at"]}
             for r in rows]
+
+
+def stock_alert_message(branch) -> dict:
+    """The text for the owner: what is out of stock and what is low. Plus a WhatsApp link (STOCK_ALERT_WHATSAPP in
+    .env) - free "click to chat": WhatsApp opens with the message typed, the person only presses Send."""
+    from apps.notifications.whatsapp import get_whatsapp_provider
+
+    rows = stock_summary(branch)
+    out = [r for r in rows if r["out"]]
+    low = [r for r in rows if r["low"]]
+    lines = [f"Stock alert - {branch.name} ({timezone.localdate():%d-%m-%Y})"]
+    if out:
+        lines.append(f"OUT OF STOCK ({len(out)}):")
+        lines += [f"- {r['medicine'].name}" for r in out[:30]]
+    if low:
+        lines.append(f"LOW - {settings.STOCK_LOW_DEFAULT} packs or fewer ({len(low)}):")
+        lines += [f"- {r['medicine'].name}: {r['usable'].normalize():f} left" for r in low[:30]]
+    if not out and not low:
+        lines.append("All medicines are in stock.")
+    message = "\n".join(lines)
+    link = get_whatsapp_provider().prepare(settings.STOCK_ALERT_WHATSAPP, message)[1] if settings.STOCK_ALERT_WHATSAPP else ""
+    return {"message": message, "link": link, "out": len(out), "low": len(low)}
 
 
 def alert_counts(branch) -> dict:

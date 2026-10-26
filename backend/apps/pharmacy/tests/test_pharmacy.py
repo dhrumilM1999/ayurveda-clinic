@@ -245,3 +245,16 @@ def test_stock_is_per_branch(pharmacist, org, roles, branch_a, branch_b, meds):
     receive(client_for(pharmacist, branch_a), meds, [("Triphala Churna", "B1", LATER, "5")])
     other = make_user(org, "pharma_b", {branch_b: roles["pharmacist"]})
     assert client_for(other, branch_b).get("/api/v1/stock/").data == []
+
+
+@pytest.mark.django_db
+def test_five_packs_or_fewer_is_low_and_the_whatsapp_message(pharmacist, branch_a, meds, settings):
+    settings.STOCK_ALERT_WHATSAPP = "9725619634"
+    client = client_for(pharmacist, branch_a)
+    receive(client, meds, [("Triphala Churna", "B1", str(TODAY + timedelta(days=300)), "5"),
+                           ("Brahmi Ghrita", "B2", str(TODAY + timedelta(days=300)), "6")])
+    # no own level set: 5 packs is low (the default), 6 is fine
+    assert client.get("/api/v1/stock/alerts/").data["low"] == 1
+    data = client.get("/api/v1/stock/alert-message/").data
+    assert "Triphala Churna: 5 left" in data["message"] and "Brahmi" not in data["message"]
+    assert data["link"].startswith("https://wa.me/919725619634?text=")

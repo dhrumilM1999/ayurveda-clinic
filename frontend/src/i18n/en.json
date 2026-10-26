@@ -1197,7 +1197,9 @@
       "low": "Low stock",
       "expiring": "Near expiry",
       "expired": "Expired in stock",
-      "needed": "Asked for, not in stock"
+      "needed": "Asked for, not in stock",
+      "whatsapp": "Send stock alert on WhatsApp",
+      "copied": "Alert text copied. Paste it in WhatsApp."
     },
     "checkStatus": {
       "open": "Counting",

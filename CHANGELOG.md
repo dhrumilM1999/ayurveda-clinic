@@ -582,3 +582,10 @@ Built from docs/FEATURES.md section G as a **first draft for the owner to correc
 - 35 automated backend tests (login, OTP, rate limit, branch access, permissions, audit, soft delete).
   The frontend passes the type check, the build and the translation check.
 - Guide files in `docs/`.
+
+## Stock alert on WhatsApp, practice robot, reports, Satoshi font
+- Medicines with 5 packs or fewer are "low" (change STOCK_LOW_DEFAULT in .env). The Stock screen has a button
+  "Send stock alert on WhatsApp": it opens WhatsApp with the message typed (number: STOCK_ALERT_WHATSAPP in .env); you press Send.
+- `start-bot.bat`: a practice robot that sees today's sample patients like a real clinic day (check-in, fee, check-up, prescription, medicines).
+- Reports: financial year picker, month-wise summary, GST to pay, sales and purchase registers, bills not paid.
+- Satoshi font in the app and on all print-outs; dashboard shortcut buttons.
