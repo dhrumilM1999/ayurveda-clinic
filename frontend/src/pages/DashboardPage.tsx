@@ -4,7 +4,7 @@
 // - Pharmacy stock alerts when that extra is switched on.
 // The numbers come from /dashboard/today/ and refresh every minute.
 import {
-  BarChartOutlined, CarryOutOutlined, FileTextOutlined, GiftOutlined, HeartOutlined, OrderedListOutlined, ScheduleOutlined,
+  BarChartOutlined, FileTextOutlined, GiftOutlined, HeartOutlined, OrderedListOutlined, ScheduleOutlined,
   CheckCircleOutlined, ClockCircleOutlined, MedicineBoxOutlined, ShopOutlined, TeamOutlined, UserAddOutlined,
   UserOutlined, WalletOutlined, WarningOutlined,
 } from '@ant-design/icons';
@@ -37,7 +37,6 @@ const SHORTCUTS: Shortcut[] = [
   { key: 'pharmacy', path: '/pharmacy', icon: <ShopOutlined />, color: '#b5497a', permission: 'pharmacy.view', feature: 'pharmacy' },
   { key: 'products', path: '/products', icon: <GiftOutlined />, color: '#c2412d', permission: 'products.view', feature: 'pharmacy' },
   { key: 'therapy', path: '/therapy', icon: <HeartOutlined />, color: '#1f8a70', permission: 'therapy.view', feature: 'panchakarma' },
-  { key: 'calendar', path: '/calendar', icon: <CarryOutOutlined />, color: '#7a52b3', permission: 'appointments.view', feature: 'appointments' },
   { key: 'reports', path: '/reports', icon: <BarChartOutlined />, color: '#d4851c', permission: 'reports.view' },
 ];
 

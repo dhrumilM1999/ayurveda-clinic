@@ -2085,3 +2085,5 @@ body {
 @media (min-width: 992px) { .shortcut-grid { grid-template-columns: repeat(5, 1fr); } }
 
 .alert-whatsapp { align-self: center; margin-left: auto; color: #1a8f4c; border-color: #1a8f4c; }
+
+.view-switch { margin-bottom: 14px; }

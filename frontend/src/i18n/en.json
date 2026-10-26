@@ -679,7 +679,9 @@
       "cancelled": "Cancelled",
       "no_show": "Did not come"
     },
-    "clickToStart": "Doctor: click a patient to start the check-up. The patient becomes With doctor."
+    "clickToStart": "Doctor: click a patient to start the check-up. The patient becomes With doctor.",
+    "viewList": "List",
+    "viewCalendar": "Calendar"
   },
   "queue": {
     "title": "Queue",
