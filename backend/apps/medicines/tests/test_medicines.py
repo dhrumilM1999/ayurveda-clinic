@@ -39,6 +39,13 @@ def test_search_by_synonym_and_gujarati(pharmacist, branch_a, samples):
 
 
 @pytest.mark.django_db
+def test_search_forgives_the_last_letter_of_a_long_word(pharmacist, branch_a, samples):
+    client = client_for(pharmacist, branch_a)
+    assert client.get(URL, {"q": "Ashwagandhaa"}).data["count"] >= 1  # one letter too many
+    assert client.get(URL, {"q": "Triphalaa"}).data["count"] >= 1
+
+
+@pytest.mark.django_db
 def test_search_puts_names_that_start_with_the_text_first(pharmacist, branch_a, samples):
     client = client_for(pharmacist, branch_a)
     names = [m["name"] for m in client.get(URL, {"q": "tri"}).data["results"]]

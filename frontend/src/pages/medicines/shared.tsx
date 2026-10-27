@@ -8,6 +8,7 @@ export const FLAG_COLORS: Record<MedicineFlag, string> = {
   contains_metals: 'volcano',
   pregnancy_caution: 'magenta',
   child_caution: 'purple',
+  sugar_caution: 'gold',
 };
 export const FLAGS = Object.keys(FLAG_COLORS) as MedicineFlag[];
 

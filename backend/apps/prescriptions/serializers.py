@@ -41,7 +41,7 @@ class PrescriptionItemSerializer(serializers.ModelSerializer):
         m = obj.medicine
         if m is None:
             return []
-        return [f for f in ("schedule_e1", "contains_metals", "pregnancy_caution", "child_caution") if getattr(m, f)]
+        return [f for f in ("schedule_e1", "contains_metals", "pregnancy_caution", "child_caution", "sugar_caution") if getattr(m, f)]
 
 
 class LineInput(serializers.Serializer):

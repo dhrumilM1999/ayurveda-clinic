@@ -49,6 +49,7 @@ PERMISSIONS = {
     "products.sell": "Sell clinic products and make the bill",
     "therapy.view": "See therapy sessions",
     "therapy.manage": "Schedule and record therapy sessions",
+    "therapy.perform": "Carry out therapy sessions (can be chosen as the therapist)",
     "reports.view": "See reports",
     "enquiries.view": "See online enquiries (website, phone)",
     "enquiries.manage": "Follow up, record and close enquiries",
@@ -103,7 +104,7 @@ DEFAULT_ROLES = {
         "permissions": [
             "dashboard.view", "rooms.view",
             "patients.view", "appointments.view",
-            "therapy.view", "therapy.manage",
+            "therapy.view", "therapy.manage", "therapy.perform",
         ],
     },
     "pharmacist": {

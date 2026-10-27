@@ -240,3 +240,9 @@ def test_a_session_of_a_later_day_cannot_be_started_or_finished_today(on, org, r
         res = c.post(f"/api/v1/therapy-sessions/{s['id']}/{step}/")
         assert res.status_code == 400 and "later day" in str(res.data)
     assert TherapySession.objects.get(pk=s["id"]).status == "scheduled"
+
+
+@pytest.mark.django_db
+def test_only_people_who_do_therapy_are_listed_as_therapists(on, org, roles, branch_a, doctor, therapist, receptionist):
+    names = {x["name"] for x in client_for(receptionist, branch_a).get("/api/v1/therapy-sessions/options/").data["therapists"]}
+    assert names == {therapist.full_name}  # not the receptionist who books, not the doctor

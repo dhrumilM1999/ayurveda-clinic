@@ -1007,19 +1007,22 @@
       "schedule_e1": "E1",
       "contains_metals": "Metals",
       "pregnancy_caution": "Pregnancy",
-      "child_caution": "Child"
+      "child_caution": "Child",
+      "sugar_caution": "Sugar"
     },
     "flagLabel": {
       "schedule_e1": "Schedule E1",
       "contains_metals": "Contains metals / bhasma",
       "pregnancy_caution": "Pregnancy caution",
-      "child_caution": "Child caution"
+      "child_caution": "Child caution",
+      "sugar_caution": "Contains sugar / jaggery / honey base"
     },
     "flagHelp": {
       "schedule_e1": "Contains a Schedule E1 (poisonous) ingredient: only on prescription",
       "contains_metals": "Rasa / bhasma preparation: avoid long use without monitoring",
       "pregnancy_caution": "Warn when the patient is pregnant or breastfeeding",
-      "child_caution": "Warn for children under 12"
+      "child_caution": "Warn for children under 12",
+      "sugar_caution": "Warn when the patient is diabetic"
     },
     "fields": {
       "name": "Name",

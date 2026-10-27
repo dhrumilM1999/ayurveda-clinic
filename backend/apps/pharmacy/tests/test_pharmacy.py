@@ -258,3 +258,11 @@ def test_five_packs_or_fewer_is_low_and_the_whatsapp_message(pharmacist, branch_
     data = client.get("/api/v1/stock/alert-message/").data
     assert "Triphala Churna: 5 left" in data["message"] and "Brahmi" not in data["message"]
     assert data["link"].startswith("https://wa.me/919725619634?text=")
+
+
+@pytest.mark.django_db
+def test_pharmacist_sees_the_doctors_safety_warnings_when_dispensing(org, roles, branch_a, pharmacist, final_rx, meds):
+    Medicine.objects.filter(pk=meds["Triphala Churna"].pk).update(contains_metals=True)
+    data = client_for(pharmacist, branch_a).get(f"/api/v1/dispensing/{final_rx.id}/").data
+    assert [w["rule"] for w in data["warnings"]] == ["metals"]
+    assert data["warnings"][0]["medicine"] == "Triphala Churna"

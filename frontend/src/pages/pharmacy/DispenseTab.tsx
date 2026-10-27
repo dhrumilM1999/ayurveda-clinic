@@ -1,6 +1,6 @@
 // Today's final prescriptions of this branch -> give medicines (and, when switched on in Additional settings:
 // make the bill, take payment, print, discounts, loose sale, barcode scan, rack location).
-import { CheckCircleFilled, EnvironmentOutlined, LeftOutlined, ReloadOutlined, RightOutlined } from '@ant-design/icons';
+import { CheckCircleFilled, EnvironmentOutlined, ExclamationCircleFilled, LeftOutlined, ReloadOutlined, RightOutlined, WarningFilled } from '@ant-design/icons';
 import {
   Alert, App, Button, Checkbox, DatePicker, Input, InputNumber, Modal, Result, Segmented, Select, Space, Spin, Table,
   Tag, Typography,
@@ -317,6 +317,16 @@ export function SellModal({ prescriptionId, onClose }: { prescriptionId: string;
               </Space>
             )}
           </div>
+          {detail.warnings?.length > 0 && (
+            <div className="rx-warnings" style={{ marginBottom: 12 }}>
+              {detail.warnings.map((w, i) => (
+                <div key={i} className={`rx-warning rx-${w.level}`}>
+                  {w.level === 'danger' ? <ExclamationCircleFilled /> : <WarningFilled />}
+                  <b>{w.medicine}:</b> <span>{w.message}</span>
+                </div>
+              ))}
+            </div>
+          )}
           {detail.allergies.length > 0 && (
             <Alert type="error" showIcon style={{ marginBottom: 12 }} message={<><b>{t('patients.allergyAlert')}:</b> {detail.allergies.join(', ')}</>} />
           )}

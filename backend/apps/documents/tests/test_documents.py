@@ -249,3 +249,14 @@ def test_ayurveda_case_sheet_fits_seven_medicines_on_one_page(doctor, branch_a, 
 
     walk(document.pages[0]._page_box)
     assert sign_top is not None and content_bottom <= sign_top
+
+
+@pytest.mark.django_db(transaction=True)
+def test_certificate_number_works_outside_a_test_transaction(doctor, branch_a, visit):
+    """Tests normally run inside one big transaction, which hides a missing transaction.atomic. This one does not."""
+    client = client_for(doctor, branch_a)
+    res = client.post("/api/v1/certificates/", {
+        "patient": str(visit.patient_id), "doctor": str(doctor.id), "kind": "medical", "diagnosis": "Fever",
+        "rest_from": str(TODAY), "rest_to": str(TODAY + timedelta(days=1))}, format="json")
+    assert res.status_code == 201, res.data
+    assert res.data["number"].endswith("00001")

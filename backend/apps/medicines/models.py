@@ -65,6 +65,7 @@ class Medicine(OrgScopedModel):
     contains_metals = models.BooleanField("Contains metals / bhasma", default=False)
     pregnancy_caution = models.BooleanField(default=False)
     child_caution = models.BooleanField(default=False)
+    sugar_caution = models.BooleanField("Contains sugar / jaggery / honey base", default=False)
     safety_notes = models.CharField(max_length=300, blank=True)
 
     is_sample = models.BooleanField(default=False, help_text="Sample entry - pharmacist to verify")

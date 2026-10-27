@@ -1007,19 +1007,22 @@
       "schedule_e1": "E1",
       "contains_metals": "ધાતુ",
       "pregnancy_caution": "ગર્ભાવસ્થા",
-      "child_caution": "બાળક"
+      "child_caution": "બાળક",
+      "sugar_caution": "સાકર"
     },
     "flagLabel": {
       "schedule_e1": "શેડ્યૂલ E1",
       "contains_metals": "ધાતુ / ભસ્મ ધરાવે છે",
       "pregnancy_caution": "ગર્ભાવસ્થામાં સાવધાની",
-      "child_caution": "બાળકોમાં સાવધાની"
+      "child_caution": "બાળકોમાં સાવધાની",
+      "sugar_caution": "સાકર / ગોળ / મધ વાળું"
     },
     "flagHelp": {
       "schedule_e1": "શેડ્યૂલ E1 (ઝેરી) ઘટક: ફક્ત પ્રિસ્ક્રિપ્શન પર",
       "contains_metals": "રસ / ભસ્મ ઔષધ: દેખરેખ વગર લાંબો ઉપયોગ ટાળો",
       "pregnancy_caution": "દર્દી ગર્ભવતી કે સ્તનપાન કરાવતી હોય ત્યારે ચેતવણી",
-      "child_caution": "12 વર્ષથી નાના બાળકો માટે ચેતવણી"
+      "child_caution": "12 વર્ષથી નાના બાળકો માટે ચેતવણી",
+      "sugar_caution": "દર્દીને ડાયાબિટીસ હોય ત્યારે ચેતવણી"
     },
     "fields": {
       "name": "નામ",

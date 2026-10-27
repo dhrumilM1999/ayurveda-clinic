@@ -38,10 +38,19 @@ def _friendly(exc, context):
     return response
 
 
+def _plain(value) -> str:
+    """Plain words from an error answer: {"date": [ErrorDetail("Already booked")]} -> "date: Already booked"."""
+    if isinstance(value, dict):
+        return "; ".join(f"{key}: {_plain(item)}" if key != "detail" else _plain(item) for key, item in value.items())
+    if isinstance(value, (list, tuple)):
+        return " ".join(_plain(item) for item in value)
+    return str(value)
+
+
 def _message_of(data) -> str:
     if isinstance(data, dict) and isinstance(data.get("detail"), str):
         return data["detail"]
-    return str(data)
+    return _plain(data)
 
 
 def friendly_exception_handler(exc, context):

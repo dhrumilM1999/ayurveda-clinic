@@ -25,7 +25,9 @@ MASTER_FIELDS = {  # field -> dropdown list
     "default_timing": "medicine_timing", "default_anupana": "anupana",
     "category": "product_category", "pack_type": "pack_type",
 }
-FLAG_FIELDS = ["schedule_e1", "contains_metals", "pregnancy_caution", "child_caution", "allow_loose"]
+FLAG_FIELDS = ["schedule_e1", "contains_metals", "pregnancy_caution", "child_caution", "sugar_caution", "allow_loose"]
+# Dosage forms made with sugar, jaggery or honey: a warning for diabetic patients
+SUGAR_FORMS = {"lehya", "asava", "arishta"}
 NUMBER_FIELDS = ["gst_rate", "mrp", "selling_price", "units_per_pack"]
 
 
@@ -45,8 +47,11 @@ def search_filter(text: str) -> Q:
     """Find by name in any language, synonyms, composition or manufacturer."""
     q = Q()
     for word in text.split():
+        # Spelling varies (Rasnasaptaka / Rasnasaptak): a long word also matches without its last letter
+        stem = word[:-1] if len(word) >= 7 else word
         q &= (
-            Q(name__icontains=word) | Q(name_gu__icontains=word) | Q(name_hi__icontains=word)
+            Q(name__icontains=stem) | Q(synonyms__icontains=stem)
+            | Q(name__icontains=word) | Q(name_gu__icontains=word) | Q(name_hi__icontains=word)
             | Q(synonyms__icontains=word) | Q(composition__icontains=word) | Q(manufacturer__icontains=word)
             | Q(generic_name__icontains=word) | Q(barcode=word) | Q(sku__iexact=word)
         )
@@ -133,7 +138,7 @@ def import_template_csv() -> str:
         "reference": "AFI Part I", "hsn_code": "3004", "pack_size": "100 g", "default_dose": "3",
         "default_frequency": "0-0-1", "dosage_form": "churna", "dose_unit": "g", "default_timing": "bedtime",
         "default_anupana": "warm_water", "gst_rate": "12", "mrp": "90", "schedule_e1": "no",
-        "contains_metals": "no", "pregnancy_caution": "no", "child_caution": "no",
+        "contains_metals": "no", "pregnancy_caution": "no", "child_caution": "no", "sugar_caution": "no",
     }
     writer.writerow([example.get(c, "") for c in IMPORT_COLUMNS])
     return out.getvalue()
@@ -263,6 +268,7 @@ def add_sample_medicines(organization) -> int:
             mrp=mrp, pack_size=pack, hsn_code="3004", gst_rate=12,
             schedule_e1="E1" in flag_set, contains_metals="M" in flag_set,
             pregnancy_caution="P" in flag_set, child_caution="C" in flag_set, is_sample=True,
+            sugar_caution=form in SUGAR_FORMS or "S" in flag_set,
         )
         save_medicine(medicine, None, is_new=True)
         added[name] = medicine

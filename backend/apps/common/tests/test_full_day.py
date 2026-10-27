@@ -126,3 +126,13 @@ def test_a_whole_clinic_day(org, branch_a, doctor, receptionist, pharmacist, bra
     assert Decimal(summary["received"]["cash"]) == fee and Decimal(summary["received"]["upi"]) == Decimal("224")
     today = owner.get(API + "dashboard/today/").data
     assert today  # the dashboard loads for the owner
+
+
+def test_error_log_message_is_plain_words():
+    from rest_framework.exceptions import ErrorDetail
+
+    from apps.common.exception_handler import _message_of
+
+    data = {"date": [ErrorDetail("This patient already has an appointment.", code="invalid")]}
+    assert _message_of(data) == "date: This patient already has an appointment."
+    assert _message_of({"detail": "Not found."}) == "Not found."

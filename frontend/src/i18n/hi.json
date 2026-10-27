@@ -1007,19 +1007,22 @@
       "schedule_e1": "E1",
       "contains_metals": "धातु",
       "pregnancy_caution": "गर्भावस्था",
-      "child_caution": "बच्चा"
+      "child_caution": "बच्चा",
+      "sugar_caution": "शक्कर"
     },
     "flagLabel": {
       "schedule_e1": "शेड्यूल E1",
       "contains_metals": "धातु / भस्म युक्त",
       "pregnancy_caution": "गर्भावस्था में सावधानी",
-      "child_caution": "बच्चों में सावधानी"
+      "child_caution": "बच्चों में सावधानी",
+      "sugar_caution": "शक्कर / गुड़ / शहद वाली"
     },
     "flagHelp": {
       "schedule_e1": "शेड्यूल E1 (विषैला) घटक: केवल पर्चे पर",
       "contains_metals": "रस / भस्म औषधि: निगरानी के बिना लंबा उपयोग न करें",
       "pregnancy_caution": "मरीज़ गर्भवती या स्तनपान कराती हो तो चेतावनी",
-      "child_caution": "12 साल से छोटे बच्चों के लिए चेतावनी"
+      "child_caution": "12 साल से छोटे बच्चों के लिए चेतावनी",
+      "sugar_caution": "मरीज़ को मधुमेह हो तो चेतावनी"
     },
     "fields": {
       "name": "नाम",

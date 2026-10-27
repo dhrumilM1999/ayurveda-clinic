@@ -9,7 +9,6 @@ from datetime import datetime, timedelta
 
 from django.utils import timezone
 
-from django.db.models import Q
 from rest_framework.exceptions import ValidationError
 
 from apps.accounts.models import User
@@ -19,16 +18,18 @@ from .models import BUSY_STATUSES, TherapySession, TherapyType
 
 
 def therapists_in_branch(branch):
-    """Active staff of the branch whose role may record therapy (therapists, doctors, admins)."""
-    candidates = User.objects.filter(organization_id=branch.organization_id, is_active=True).filter(
-        Q(is_org_admin=True) | Q(branch_roles__branch=branch, branch_roles__is_deleted=False)).distinct()
-    return [u for u in candidates if u.is_org_admin or _has_therapy_role(u, branch)]
+    """Active staff whose role in this branch has "therapy.perform" (the Therapist role; give it to a doctor or
+    admin role on the Roles screen if they do therapy too). Staff who only book sessions are not listed."""
+    candidates = User.objects.filter(organization_id=branch.organization_id, is_active=True,
+                                     branch_roles__branch=branch, branch_roles__is_deleted=False).distinct()
+    return [u for u in candidates if _has_therapy_role(u, branch)]
 
 
 def _has_therapy_role(user, branch) -> bool:
-    from apps.accounts.services import branch_permissions
+    from apps.accounts.models import UserBranchRole
 
-    return "therapy.manage" in branch_permissions(user, branch)
+    role = UserBranchRole.objects.filter(user=user, branch=branch, is_deleted=False, role__is_deleted=False).select_related("role").first()
+    return bool(role and "therapy.perform" in role.role.permissions)
 
 
 def _minutes(t) -> int:

@@ -2,6 +2,17 @@
 
 What changed in each step, in plain words.
 
+## Full-day QA with real-life patients: fixes and safety improvements (2026-10-27)
+
+- **Certificates could not be made** (server error). Fixed: the certificate number is now taken inside one transaction. A new test runs it the way the real server does.
+- **Therapist list:** only people whose role has the new permission **"Carry out therapy sessions" (therapy.perform)** can be chosen as the therapist. The Therapist role has it; the receptionist, doctor and owner do not (give it on the Roles screen if the doctor does therapy too).
+- **Pharmacy dispense window** now shows the doctor's safety warnings again (pregnancy, child, metals, E1, allergy), so the pharmacist sees them too.
+- **New medicine flag "Sugar / jaggery / honey base"** (set for lehya, asava and arishta): a warning when the patient is diabetic. Set on the Medicines screen like the other flags.
+- **Medicine search forgives the last letter** (Rasnasaptaka finds Rasnasaptak Kwatha).
+- **More starting diagnoses and complaints:** Mutrashmari (kidney stone), Mutrakrichchra, Manyastambha, Vatarakta, and more; complaints Flank pain, Blood in urine, Nausea, Swelling, Morning stiffness. They are added automatically on start.
+- **Check-up screen on a phone** was two columns that scrolled sideways: now the list sits on top and the check-up below it.
+- **Error log** shows plain words (not "ErrorDetail(...)") for refused requests.
+
 ## Late appointments and therapy sessions can be moved or cancelled (2026-10-27)
 
 - **Appointments:** a booked appointment whose day or time has gone by shows an orange "Time passed" tag, with **Reschedule** and **Cancel** buttons right on the row (on a phone they are in the ... menu). An appointment marked "Did not come" can now also be rescheduled (it becomes "Booked" again) or cancelled.

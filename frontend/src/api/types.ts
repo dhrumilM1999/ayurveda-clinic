@@ -602,7 +602,7 @@ export interface VisitListItem {
 
 // --- Medicines and prescriptions (Step 5) ---
 export type MedicineKind = 'classical' | 'proprietary' | 'homeopathy' | 'product';
-export type MedicineFlag = 'schedule_e1' | 'contains_metals' | 'pregnancy_caution' | 'child_caution';
+export type MedicineFlag = 'schedule_e1' | 'contains_metals' | 'pregnancy_caution' | 'child_caution' | 'sugar_caution';
 
 export interface Medicine {
   id: string;
@@ -638,6 +638,7 @@ export interface Medicine {
   contains_metals: boolean;
   pregnancy_caution: boolean;
   child_caution: boolean;
+  sugar_caution: boolean;
   safety_notes: string;
   is_sample: boolean;
   is_active: boolean;
@@ -955,6 +956,7 @@ export interface DispenseDetail {
   notes: string;
   status: DispenseStatus;
   allergies: string[];
+  warnings: RxWarning[];
   sales: { id: string; invoice: string | null; number: string; total: string }[];
   lines: DispenseLine[];
 }
