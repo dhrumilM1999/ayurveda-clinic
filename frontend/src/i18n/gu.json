@@ -1070,7 +1070,7 @@
     "continueAll_one": "{{count}} દવા ચાલુ રાખો",
     "continueAll_other": "બધી {{count}} દવા ચાલુ રાખો",
     "continueOne": "ચાલુ રાખો",
-    "alreadyAdded": "ઉમેરાઈ",
+    "alreadyAdded": "{{name}} આ પ્રિસ્ક્રિપ્શનમાં પહેલેથી છે",
     "continued_one": "{{count}} દવા ચાલુ - માત્રા અને દિવસ તપાસો",
     "continued_other": "{{count}} દવા ચાલુ - માત્રા અને દિવસ તપાસો",
     "applyTemplate": "ટેમ્પ્લેટ લાગુ કરો",
@@ -1744,7 +1744,8 @@
     "billColumn": "OPD બિલ",
     "visitBill": "OPD બિલ",
     "next": "આગળ: OPD બિલ",
-    "billConsultation": "કન્સલ્ટેશનનું બિલ બનાવો"
+    "billConsultation": "કન્સલ્ટેશનનું બિલ બનાવો",
+    "lateRevisit": "છેલ્લી મુલાકાત {{date}}: {{days}} દિવસ પહેલાં (ફોલો-અપ ફી ફક્ત {{limit}} દિવસ સુધી), તેથી નવા કેસની ફી લાગુ"
   },
   "labels": {
     "button": "લેબલ",

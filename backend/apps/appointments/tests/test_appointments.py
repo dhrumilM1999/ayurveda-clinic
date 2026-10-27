@@ -301,7 +301,7 @@ def test_undo_walks_back_one_step_at_a_time(org, receptionist, doctor, branch_a,
 @pytest.mark.django_db
 def test_undo_cancel_and_no_show_and_booking(org, receptionist, doctor, branch_a, schedule, patient):
     client = client_for(receptionist, branch_a)
-    appt = today_appointment(org, branch_a, patient, doctor)
+    appt = today_appointment(org, branch_a, patient, doctor, start=time(0, 1))  # early, so "did not come" is allowed at any hour
     client.post(f"{URL}{appt.id}/cancel/", {"reason": "oops"}, format="json")
     assert client.post(f"{URL}{appt.id}/undo/").data["status"] == "booked"
     client.post(f"{URL}{appt.id}/no-show/")
@@ -346,3 +346,16 @@ def test_calendar_shows_free_and_booked_slots_per_day(receptionist, doctor, bran
     # a day the doctor does not sit: no slots; a cancelled booking is not counted
     Appointment.objects.all().update(status="cancelled")
     assert client.get(URL + "calendar/", {"from": str(tomorrow_day), "to": str(tomorrow_day)}).data["days"][0]["booked"] == 0
+
+
+@pytest.mark.django_db
+def test_did_not_come_only_after_the_appointment_time(org, receptionist, doctor, branch_a, schedule, patient):
+    client = client_for(receptionist, branch_a)
+    now = timezone.localtime()
+    later = today_appointment(org, branch_a, patient, doctor)
+    Appointment.objects.filter(pk=later.pk).update(start_time=(now + timedelta(hours=3)).time() if now.hour < 20 else time(23, 59))
+    if now.hour < 20:  # (late in the evening nothing can be "later today")
+        res = client.post(f"{URL}{later.id}/no-show/")
+        assert res.status_code == 400 and "time has not come" in str(res.data)
+    Appointment.objects.filter(pk=later.pk).update(start_time=time(0, 1))
+    assert client.post(f"{URL}{later.id}/no-show/").status_code == 200
