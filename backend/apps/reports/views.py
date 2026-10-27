@@ -15,7 +15,7 @@ from apps.documents.print_settings import page_settings
 
 from .exports import to_excel, to_pdf
 from .reports import REPORTS, build
-from .services import money_today, next_patients, opd_counts
+from .services import attention, money_today, next_patients, opd_counts
 
 MAX_DAYS = 3 * 366  # longer reports would be slow; P2 will build them in the background
 NOTES = {
@@ -47,6 +47,13 @@ class TodayDashboardView(APIView):
             if user.is_doctor:
                 data["my_opd"] = opd_counts(branch, day, doctor=user)
                 data["next_patients"] = next_patients(branch, day, user)
+        if "opd" in data:
+            from apps.organizations.services import is_feature_enabled
+
+            data["attention"] = attention(
+                branch, day, timezone.localtime().time(),
+                with_bills=user_has_perm(user, "billing.view", branch) and is_feature_enabled(branch, "opd_billing"),
+                with_therapy=user_has_perm(user, "therapy.view", branch) and is_feature_enabled(branch, "panchakarma"))
         if user_has_perm(user, "billing.view", branch):
             data["money"] = {k: str(v) if not isinstance(v, int) else v for k, v in money_today(branch, day).items()}
         return Response(data)

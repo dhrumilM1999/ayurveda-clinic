@@ -171,7 +171,18 @@
       "Thank you for caring for your community today."
     ],
     "giveMedicines": "Give medicines & bill",
-    "nextQuote": "Another thought"
+    "nextQuote": "Another thought",
+    "attention": {
+      "title": "Needs your attention",
+      "upcoming": "Coming up next",
+      "timePassed": "Time passed, not arrived",
+      "all": "All appointments",
+      "decide": "Move or cancel",
+      "noUpcoming": "No more appointments today",
+      "noneLate": "Nobody is late",
+      "toBill": "{{count}} seen, not billed yet",
+      "therapyLate": "{{count}} therapy session(s) late"
+    }
   },
   "branches": {
     "title": "Branches",

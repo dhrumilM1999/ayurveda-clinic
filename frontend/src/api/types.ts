@@ -1155,8 +1155,17 @@ export interface DashboardToday {
   opd?: OpdCounts;
   my_opd?: OpdCounts;
   next_patients?: { appointment: string; token_number: number | null; patient: string; uhid: string; status: string; reason: string }[];
+  attention?: {
+    upcoming: AttentionRow[];
+    time_passed: number;
+    time_passed_list: AttentionRow[];
+    to_bill?: number;
+    therapy_overdue?: number;
+  };
   money?: { opd: string; pharmacy: string; total: string; due_today: string; unpaid_bills: number; bills_today: number };
 }
+
+export interface AttentionRow { appointment: string; time: string; patient: string; uhid: string; doctor: string; reason: string }
 
 export interface OpdCounts {
   booked: number;

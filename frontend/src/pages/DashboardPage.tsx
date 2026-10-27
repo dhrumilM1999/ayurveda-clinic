@@ -75,6 +75,52 @@ function opdTiles(t: (k: string, o?: Record<string, unknown>) => string, o: OpdC
   ];
 }
 
+/** What needs a decision now: the next appointments, late patients, patients seen but not billed, late therapy. */
+function AttentionPanel({ a, canBill, canTherapy }: { a: NonNullable<DashboardToday['attention']>; canBill: boolean; canTherapy: boolean }) {
+  const { t } = useTranslation();
+  const hhmm = (x: string) => dayjs(`2000-01-01 ${x}`).format('h:mm A');
+  const rows = (list: typeof a.upcoming) => list.map((r) => (
+    <div key={r.appointment} className="dash-next-row">
+      <span className="token-chip">{hhmm(r.time)}</span>
+      <div style={{ minWidth: 0 }}>
+        <b>{r.patient}</b> <span className="cell-sub mono">{r.uhid}</span>
+        <div className="cell-sub">{[r.doctor, r.reason].filter(Boolean).join(' · ')}</div>
+      </div>
+    </div>
+  ));
+  const flags = [
+    ...(a.to_bill ? [{ key: 'toBill', n: a.to_bill, to: '/appointments', color: '#c0392b' }] : []),
+    ...(a.therapy_overdue && canTherapy ? [{ key: 'therapyLate', n: a.therapy_overdue, to: '/therapy', color: '#d4730c' }] : []),
+  ];
+  return (
+    <>
+      <div className="section-title">{t('dashboard.attention.title')}</div>
+      <Row gutter={[12, 12]}>
+        <Col xs={24} lg={12}>
+          <Card size="small" title={t('dashboard.attention.upcoming')} className="dash-next"
+            extra={<Link to="/appointments">{t('dashboard.attention.all')}</Link>}>
+            {a.upcoming.length ? rows(a.upcoming) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('dashboard.attention.noUpcoming')} />}
+          </Card>
+        </Col>
+        <Col xs={24} lg={12}>
+          <Card size="small" className="dash-next"
+            title={<>{t('dashboard.attention.timePassed')} {a.time_passed > 0 && <Tag color="orange" className="tag-tight">{a.time_passed}</Tag>}</>}
+            extra={a.time_passed > 0 ? <Link to="/appointments">{t('dashboard.attention.decide')}</Link> : null}>
+            {a.time_passed ? rows(a.time_passed_list) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('dashboard.attention.noneLate')} />}
+          </Card>
+        </Col>
+      </Row>
+      {flags.length > 0 && (canBill || canTherapy) && (
+        <div className="dash-cases" style={{ marginTop: 12 }}>
+          {flags.map((f) => (
+            <Link key={f.key} to={f.to}><Tag color={f.color === '#c0392b' ? 'red' : 'orange'}>{t(`dashboard.attention.${f.key}`, { count: f.n })}</Tag></Link>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
 export default function DashboardPage() {
   const { t } = useTranslation();
   const { me, branch, can, features, hasFeature } = useAuth();
@@ -147,6 +193,8 @@ export default function DashboardPage() {
           </Link>
         ))}
       </div>
+
+      {data?.attention && <AttentionPanel a={data.attention} canBill={can('billing.view')} canTherapy={can('therapy.view')} />}
 
       {mine && (
         <>
