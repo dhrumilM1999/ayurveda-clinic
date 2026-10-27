@@ -260,3 +260,17 @@ def test_certificate_number_works_outside_a_test_transaction(doctor, branch_a, v
         "rest_from": str(TODAY), "rest_to": str(TODAY + timedelta(days=1))}, format="json")
     assert res.status_code == 201, res.data
     assert res.data["number"].endswith("00001")
+
+
+@pytest.mark.django_db
+def test_ayurveda_case_sheet_words_follow_the_patients_language(doctor, branch_a, visit, rx):
+    from django.template.loader import render_to_string
+
+    from apps.documents.services import case_sheet_context, page_context, prescription_context
+
+    for lang, words in (("gu", ("તકલીફો", "નિદાન", "અગ્નિ", "નામ.")), ("hi", ("तकलीफ़ें", "निदान", "अग्नि", "नाम."))):
+        context = {**prescription_context(rx, lang), **case_sheet_context(rx, lang), **page_context("a4")}
+        html = render_to_string("documents/prescription_ayurveda.html", context)
+        for text in words:
+            assert text in html
+        assert ">Symptoms<" not in html and "<b>Name.</b>" not in html

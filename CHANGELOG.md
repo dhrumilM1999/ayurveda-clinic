@@ -11,6 +11,7 @@ What changed in each step, in plain words.
 - **Medicine search forgives the last letter** (Rasnasaptaka finds Rasnasaptak Kwatha).
 - **More starting diagnoses and complaints:** Mutrashmari (kidney stone), Mutrakrichchra, Manyastambha, Vatarakta, and more; complaints Flank pain, Blood in urine, Nausea, Swelling, Morning stiffness. They are added automatically on start.
 - **Check-up screen on a phone** was two columns that scrolled sideways: now the list sits on top and the check-up below it.
+- **Prescription (Ayurveda case sheet design) in Gujarati and Hindi:** Symptoms, Diagnosis, Advice / Pathya, Next visit, Name, Age/Sex, Date, Wt. and the lines Agni ... Srotas are printed in the patient's language (edit them in `backend/apps/documents/words.py`).
 - **Error log** shows plain words (not "ErrorDetail(...)") for refused requests.
 
 ## Late appointments and therapy sessions can be moved or cancelled (2026-10-27)
