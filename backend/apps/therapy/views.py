@@ -150,6 +150,8 @@ class TherapySessionViewSet(ModuleSwitch, AuditedModelViewSet):
         session = self.get_object()
         if session.status in ("done", "cancelled"):
             raise ValidationError({"detail": f"This session is already {session.get_status_display().lower()}."})
+        if status in ("in_progress", "done") and session.date > timezone.localdate():
+            raise ValidationError({"detail": "This session is on a later day. It can be started on that day."})
         if status in ("scheduled", "in_progress", "done"):
             check_free(request.branch, session.date, session.start_time, session.end_time, session.therapist, session.room,
                        exclude_id=session.pk)

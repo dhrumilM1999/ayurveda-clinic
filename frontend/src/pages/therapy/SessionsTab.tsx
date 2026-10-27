@@ -135,8 +135,8 @@ export default function SessionsTab() {
                     <Button size="small" icon={<UndoOutlined />} onClick={() => act(r, 'undo')}>{t('undo.button')}</Button>
                   </Tooltip>
                 )}
-                {r.status === 'scheduled' && <Button size="small" icon={<PlayCircleOutlined />} onClick={() => act(r, 'start')}>{t('therapy.start')}</Button>}
-                {(r.status === 'scheduled' || r.status === 'in_progress') && (
+                {r.status === 'scheduled' && !dayjs(r.date).isAfter(dayjs(), 'day') && <Button size="small" icon={<PlayCircleOutlined />} onClick={() => act(r, 'start')}>{t('therapy.start')}</Button>}
+                {(r.status === 'scheduled' || r.status === 'in_progress') && !dayjs(r.date).isAfter(dayjs(), 'day') && (
                   <Button size="small" type="primary" icon={<CheckOutlined />} onClick={() => openRecord(r)}>{t('therapy.finish')}</Button>
                 )}
                 {(r.status === 'scheduled' || r.status === 'in_progress') && (

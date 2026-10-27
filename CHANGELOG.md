@@ -6,6 +6,7 @@ What changed in each step, in plain words.
 
 - **Appointments:** a booked appointment whose day or time has gone by shows an orange "Time passed" tag, with **Reschedule** and **Cancel** buttons right on the row (on a phone they are in the ... menu). An appointment marked "Did not come" can now also be rescheduled (it becomes "Booked" again) or cancelled.
 - **Dashboard "Needs your attention"** (front desk and doctor): the next 5 appointments, patients whose time passed and who have not arrived (with a link to move or cancel), how many seen patients are not billed yet, and late therapy sessions. Pharmacist and therapist do not see it.
+- **Check-up:** typing a complaint, diagnosis or advice that is already in the list (double Enter) is ignored. **Therapy:** a session of a later day cannot be started or finished today (the buttons are hidden and the server refuses).
 - **Walk-ins** are listed by the time they were entered (not at the bottom). **Billing day summary** shows what was returned on cancelled bills next to the bills total.
 - **Therapy sessions:** a session whose time has gone by, or which was marked "Did not come", has **Reschedule** (new day, time, therapist, room) and **Cancel**. The busy-therapist / busy-room check still applies. Nothing is deleted; every move is in the audit log.
 
