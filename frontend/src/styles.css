@@ -2112,5 +2112,5 @@ body {
 .hero-leaf, .login-art-leaf { display: none; }
 .shortcut:hover { transform: none; box-shadow: none; }
 .shortcut-icon { box-shadow: none; }
-.shortcut-icon { color: var(--clinic-primary); background: #fdeee6; }
+.shortcut-icon { color: var(--clinic-primary); background: color-mix(in srgb, var(--clinic-primary) 12%, #fff); }
 .shortcut:hover { border-color: var(--clinic-primary); }
