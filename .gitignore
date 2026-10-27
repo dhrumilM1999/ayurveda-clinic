@@ -27,8 +27,10 @@ Thumbs.db
 backups/
 backend/.venv/
 
-# Demo videos are not needed in Git (stopped; kept on the PC only)
-demo-video/
+# Demo videos are too big for Git (keep them on the PC or in Google Drive); captions are committed.
+# Exception: the short animated intro (about 14 MB, made-up screens only, no real patient data).
+demo-video/*.mp4
+!demo-video/Ayurveda_Clinic_Intro_MultiLanguage.mp4
 
 # Compiled TypeScript output (the app is built by Vite; never commit these)
 frontend/src/**/*.js
