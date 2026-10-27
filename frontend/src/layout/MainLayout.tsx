@@ -7,9 +7,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 import { useIdleLogout } from '../auth/useIdleLogout';
-import { BrandLogo } from '../branding/BrandLogo';
 import { SoftwareBrand } from '../components/SoftwareBrand';
-import { useBranding } from '../branding/BrandingContext';
 import { clinicConfig } from '../config/clinic';
 import { menuItems } from '../config/menu';
 import { ErrorBoundary } from '../errorLog/ErrorBoundary';
@@ -33,7 +31,6 @@ function initials(name: string) {
 
 export default function MainLayout() {
   const { t, i18n } = useTranslation();
-  const { appName, logoUrl } = useBranding();
   const { me, branch, features, hasFeature, can, switchBranch, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
@@ -89,15 +86,6 @@ export default function MainLayout() {
         collapsedWidth={isPhone ? 0 : 76}
       >
         <SoftwareBrand variant={collapsed ? 'mark' : 'sider'} />
-        <div className={`app-brand${logoUrl ? ' has-logo' : ''}`}>
-          <BrandLogo variant="sider" />
-          {!logoUrl && !collapsed && (
-            <div>
-              <div className="app-brand-name">{appName}</div>
-              <div className="app-brand-sub">{t('layout.tagline')}</div>
-            </div>
-          )}
-        </div>
         <div className="app-sider-divider" />
         <Menu
           theme="dark"

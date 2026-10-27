@@ -2018,7 +2018,7 @@ body {
 .products-cart .cart-line { display: flex; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(0, 0, 0, 0.06); }
 .products-cart .cart-total { display: flex; justify-content: space-between; padding: 10px 0; font-size: 15px; }
 
-/* The software brand (AyuSutra) */
+/* The software brand (Nidana) */
 .software-brand { display: flex; align-items: center; gap: 10px; }
 .software-brand img { display: block; border-radius: 9px; flex: none; }
 .software-brand-name { font-family: var(--clinic-font-heading); font-weight: 700; font-size: 19px; line-height: 1.05; letter-spacing: -0.3px; color: #ffffff; }

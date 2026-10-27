@@ -46,7 +46,7 @@ export const clinicConfig = {
 // The software's own brand (not the clinic's): shown in the app only - menu, login screen and browser tab.
 // It is never printed on prescriptions, bills or other print-outs. Files: frontend/public/brand/.
 export const softwareConfig = {
-  name: 'AyuSutra',
-  nameParts: ['Ayu', 'Sutra'] as [string, string],
-  markPath: '/brand/ayusutra-mark.svg',
+  name: 'Nidana',
+  nameParts: ['Nida', 'na'] as [string, string],
+  markPath: '/brand/nidana-mark.svg',
 };
