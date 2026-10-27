@@ -7,6 +7,7 @@ GET /documents/<kind>/<id>/   kind: prescription (id = prescription), follow-up-
                               ?detail=1 (prescription only: the detailed prescription with the full check-up)
 Every view / print / share is written to the audit log.
 """
+from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 from rest_framework import mixins, status as http, viewsets
@@ -225,9 +226,11 @@ class CertificateViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixin
         from apps.billing.services import next_number
 
         today = timezone.localdate()
-        number, _ = next_number(self.request.branch, "MC", today)
-        cert = serializer.save(organization_id=self.request.branch.organization_id, branch=self.request.branch,
-                               number=number, issued_on=today, created_by=self.request.user, updated_by=self.request.user)
+        # The number is taken inside one transaction so two certificates never share a number
+        with transaction.atomic():
+            number, _ = next_number(self.request.branch, "MC", today)
+            cert = serializer.save(organization_id=self.request.branch.organization_id, branch=self.request.branch,
+                                   number=number, issued_on=today, created_by=self.request.user, updated_by=self.request.user)
         log_action(self.request, "create", cert, changes={"patient": str(cert.patient_id), "kind": cert.kind, "number": number})
 
     @action(detail=True, methods=["post"])

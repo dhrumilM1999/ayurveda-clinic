@@ -10,7 +10,8 @@ Rules:
   4. Child caution + patient under 12 years                                       -> DANGER
   5. Patient's allergy text appears in the medicine name / synonyms / composition -> DANGER
   6. The same medicine twice                                                       -> warning
-  7. Long course (over 90 days) of a metal / E1 medicine                          -> warning
+  7. Sugar / jaggery / honey base + diabetic patient                              -> warning
+  8. Long course (over 90 days) of a metal / E1 medicine                          -> warning
 """
 
 DAYS = {"days": 1, "weeks": 7, "months": 30}
@@ -23,6 +24,7 @@ def _patient_facts(patient):
         "age": patient.age_years,
         "female": patient.gender == "female",
         "pregnant": bool(conditions & {"pregnant", "breastfeeding"}),
+        "diabetic": "diabetes" in conditions,
         "allergens": allergens,
     }
 
@@ -65,6 +67,9 @@ def check_prescription(patient, lines: list[dict]) -> list[dict]:
                 add("warning", "pregnancy_check", name, "Pregnancy caution: please confirm the patient is not pregnant.")
         if medicine.child_caution and facts["age"] is not None and facts["age"] < 12:
             add("danger", "child", name, f"Child caution: the patient is {facts['age']} years old.")
+
+        if medicine.sugar_caution and facts["diabetic"]:
+            add("warning", "sugar", name, "Made with sugar / jaggery / honey: the patient is diabetic, check the sugar.")
 
         text = " ".join([medicine.name, medicine.synonyms, medicine.composition]).lower()
         for allergen in facts["allergens"]:

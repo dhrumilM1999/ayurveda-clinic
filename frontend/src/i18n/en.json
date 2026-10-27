@@ -171,7 +171,18 @@
       "Thank you for caring for your community today."
     ],
     "giveMedicines": "Give medicines & bill",
-    "nextQuote": "Another thought"
+    "nextQuote": "Another thought",
+    "attention": {
+      "title": "Needs your attention",
+      "upcoming": "Coming up next",
+      "timePassed": "Time passed, not arrived",
+      "all": "All appointments",
+      "decide": "Move or cancel",
+      "noUpcoming": "No more appointments today",
+      "noneLate": "Nobody is late",
+      "toBill": "{{count}} seen, not billed yet",
+      "therapyLate": "{{count}} therapy session(s) late"
+    }
   },
   "branches": {
     "title": "Branches",
@@ -714,7 +725,8 @@
     },
     "clickToStart": "Doctor: click a patient to start the check-up. The patient becomes With doctor.",
     "viewList": "List",
-    "viewCalendar": "Calendar"
+    "viewCalendar": "Calendar",
+    "timePassed": "Time passed"
   },
   "queue": {
     "title": "Queue",
@@ -995,19 +1007,22 @@
       "schedule_e1": "E1",
       "contains_metals": "Metals",
       "pregnancy_caution": "Pregnancy",
-      "child_caution": "Child"
+      "child_caution": "Child",
+      "sugar_caution": "Sugar"
     },
     "flagLabel": {
       "schedule_e1": "Schedule E1",
       "contains_metals": "Contains metals / bhasma",
       "pregnancy_caution": "Pregnancy caution",
-      "child_caution": "Child caution"
+      "child_caution": "Child caution",
+      "sugar_caution": "Contains sugar / jaggery / honey base"
     },
     "flagHelp": {
       "schedule_e1": "Contains a Schedule E1 (poisonous) ingredient: only on prescription",
       "contains_metals": "Rasa / bhasma preparation: avoid long use without monitoring",
       "pregnancy_caution": "Warn when the patient is pregnant or breastfeeding",
-      "child_caution": "Warn for children under 12"
+      "child_caution": "Warn for children under 12",
+      "sugar_caution": "Warn when the patient is diabetic"
     },
     "fields": {
       "name": "Name",
@@ -1412,7 +1427,8 @@
       "cashHelp": "Cash received minus cash refunds",
       "due": "Still to collect",
       "gst": "GST",
-      "refunded": "refunded"
+      "refunded": "refunded",
+      "returned": "returned {{amount}}"
     },
     "print": "Print",
     "preview": "Bill preview",
@@ -2125,7 +2141,13 @@
       "loadedN": "{{n}} therapies added.",
       "empty": "No therapies yet. Add the starting list (Abhyanga, Shirodhara, Virechana ...) and change it as you like."
     },
-    "off": "Panchakarma and therapy is switched off for this branch. Switch it on in Settings, Modules."
+    "off": "Panchakarma and therapy is switched off for this branch. Switch it on in Settings, Modules.",
+    "timePassed": "Time passed",
+    "reschedule": "Reschedule",
+    "rescheduleTitle": "Move session: {{name}}",
+    "rescheduleHelp": "This session was not done. Pick a new day and time, or cancel it.",
+    "rescheduled": "Session moved",
+    "keepTherapist": "Keep the same therapist and room"
   },
   "undo": {
     "button": "Undo",

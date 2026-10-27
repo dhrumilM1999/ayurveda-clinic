@@ -152,4 +152,23 @@ CASE_SHEET_LINES = [
 # A short line is drawn above this line (it must match a label above exactly)
 CASE_SHEET_SPLIT_BEFORE = "Dosha"
 # Headings of the case sheet (printed as written)
-CASE_SHEET_WORDS = {"symptoms": "Symptoms", "diagnosis": "Diagnosis", "advice": "Advice / Pathya", "next_visit": "Next visit"}
+CASE_SHEET_WORDS_BY_LANGUAGE = {
+    "en": {"symptoms": "Symptoms", "diagnosis": "Diagnosis", "advice": "Advice / Pathya", "next_visit": "Next visit",
+           "name": "Name.", "age_sex": "Age/Sex.", "date": "Date.", "weight": "Wt."},
+    "gu": {"symptoms": "તકલીફો", "diagnosis": "નિદાન", "advice": "સલાહ / પથ્ય", "next_visit": "આગલી મુલાકાત",
+           "name": "નામ.", "age_sex": "ઉંમર/જાતિ.", "date": "તારીખ.", "weight": "વજન."},
+    "hi": {"symptoms": "तकलीफ़ें", "diagnosis": "निदान", "advice": "सलाह / पथ्य", "next_visit": "अगली मुलाक़ात",
+           "name": "नाम.", "age_sex": "आयु/लिंग.", "date": "दिनांक.", "weight": "वज़न."},
+}
+CASE_SHEET_WORDS = CASE_SHEET_WORDS_BY_LANGUAGE["en"]
+
+# The Ayurveda case-sheet line labels (CASE_SHEET_LINES above) in Gujarati and Hindi. A label that is not here is
+# printed as written, so a line you add yourself still works.
+CASE_SHEET_LABELS = {
+    "gu": {"Agni": "અગ્નિ", "Koshta": "કોષ્ઠ", "Sama / Nirama": "સામ / નિરામ", "Mutra": "મૂત્ર", "Purisha": "પુરીષ",
+           "Artava": "આર્તવ", "Sweda": "સ્વેદ", "Udgara": "ઉદ્ગાર", "Nidra": "નિદ્રા", "Svapna": "સ્વપ્ન",
+           "Occupation": "વ્યવસાય", "Dosha": "દોષ", "Dushya": "દૂષ્ય", "Srotas": "સ્રોતસ"},
+    "hi": {"Agni": "अग्नि", "Koshta": "कोष्ठ", "Sama / Nirama": "सम / निराम", "Mutra": "मूत्र", "Purisha": "पुरीष",
+           "Artava": "आर्तव", "Sweda": "स्वेद", "Udgara": "उद्गार", "Nidra": "निद्रा", "Svapna": "स्वप्न",
+           "Occupation": "व्यवसाय", "Dosha": "दोष", "Dushya": "दूष्य", "Srotas": "स्रोतस"},
+}

@@ -86,7 +86,7 @@ TRANSITIONS = {
     "start": ({"checked_in"}, "in_consultation", "consultation_started_at"),
     "complete": ({"checked_in", "in_consultation"}, "completed", "completed_at"),
     "no_show": ({"booked"}, "no_show", None),
-    "cancel": ({"booked", "checked_in"}, "cancelled", "cancelled_at"),
+    "cancel": ({"booked", "checked_in", "no_show"}, "cancelled", "cancelled_at"),
 }
 
 TODAY_ONLY = {"check_in", "start", "complete"}

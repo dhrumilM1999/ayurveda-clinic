@@ -44,7 +44,7 @@ function SummaryCards({ day, series }: { day: Dayjs; series?: string }) {
   }, [day, series]);
   if (!s) return null;
   const tiles = [
-    { label: t('billing.summary.bills'), value: `${s.invoice_count}`, sub: money(s.billed) },
+    { label: t('billing.summary.bills'), value: `${s.invoice_count}`, sub: Number(s.credited) > 0 ? `${money(s.billed)} · ${t('billing.summary.returned', { amount: money(s.credited) })}` : money(s.billed) },
     { label: t('billing.modes.cash'), value: money(s.received.cash), sub: Number(s.refunds.cash) ? `- ${money(s.refunds.cash)} ${t('billing.summary.refunded')}` : '' },
     { label: t('billing.modes.upi'), value: money(s.received.upi), sub: Number(s.refunds.upi) ? `- ${money(s.refunds.upi)} ${t('billing.summary.refunded')}` : '' },
     { label: t('billing.modes.card'), value: money(s.received.card), sub: Number(s.refunds.card) ? `- ${money(s.refunds.card)} ${t('billing.summary.refunded')}` : '' },

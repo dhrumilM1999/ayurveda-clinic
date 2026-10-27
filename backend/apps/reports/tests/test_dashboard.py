@@ -55,3 +55,28 @@ def test_money_today_by_opd_and_pharmacy(branch_a, receptionist, opd_day):
 def test_pharmacist_sees_no_opd_numbers(branch_a, pharmacist):
     data = client_for(pharmacist, branch_a).get(URL).data
     assert "opd" not in data and "money" in data
+
+
+@pytest.mark.django_db
+def test_front_desk_sees_what_needs_attention(org, branch_a, doctor, receptionist, opd_day):
+    late = Patient.objects.create(organization=org, uhid="D-3", first_name="Late", last_name="Q", gender="male", mobile="9800000103")
+    soon = Patient.objects.create(organization=org, uhid="D-4", first_name="Soon", last_name="R", gender="male", mobile="9800000104")
+    Appointment.objects.create(organization=org, branch=branch_a, patient=late, doctor=doctor, date=TODAY,
+                               start_time=time(0, 1), end_time=time(0, 16), status="booked")
+    Appointment.objects.create(organization=org, branch=branch_a, patient=soon, doctor=doctor, date=TODAY,
+                               start_time=time(23, 58), end_time=time(23, 59), status="booked")
+    client = client_for(receptionist, branch_a)
+    attention = client.get(URL).data["attention"]
+    assert attention["time_passed"] == 1 and attention["time_passed_list"][0]["patient"].startswith("Late")
+    assert [r["patient"][:4] for r in attention["upcoming"]] == ["Soon"]
+    assert attention["to_bill"] == 2  # Asha (waiting) and Ravi (seen) have no bill yet
+    appointment = Appointment.objects.get(token_number=1)
+    client.post("/api/v1/opd-bills/charge/", {"appointment": str(appointment.id), "lines": [
+        {"kind": "consultation", "description": "OPD consultation", "unit_price": "300"}],
+        "payment": {"mode": "cash", "amount": "300"}}, format="json")
+    assert client.get(URL).data["attention"]["to_bill"] == 1
+
+
+@pytest.mark.django_db
+def test_pharmacist_gets_no_attention_panel(branch_a, pharmacist):
+    assert "attention" not in client_for(pharmacist, branch_a).get(URL).data

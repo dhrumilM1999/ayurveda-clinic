@@ -43,7 +43,7 @@ function lineFromMedicine(m: Medicine): RxLine {
     duration_unit: 'days',
     quantity: '',
     instructions: '',
-    medicine_flags: (['schedule_e1', 'contains_metals', 'pregnancy_caution', 'child_caution'] as const).filter((f) => m[f]),
+    medicine_flags: (['schedule_e1', 'contains_metals', 'pregnancy_caution', 'child_caution', 'sugar_caution'] as const).filter((f) => m[f]),
     stock_available: m.stock_available ?? null,
     pack_size: m.pack_size, units_per_pack: m.units_per_pack, pack_label: m.pack_type?.label,
   };

@@ -101,6 +101,13 @@ def test_safety_rules(org, doctor, branch_a, meds, roles):
     assert ("duplicate", "warning") in rules(adult_man, ["Triphala Churna", "Triphala Churna"])
     assert rules(make_patient(org, age=50), ["Triphala Churna"]) == set()
 
+    # an arishta / lehya (sugar, jaggery or honey base) warns only for a diabetic patient
+    diabetic = make_patient(org, age=60)
+    assert ("sugar", "warning") not in rules(diabetic, ["Abhayarishta"])
+    PatientCondition.objects.create(organization=org, patient=diabetic,
+                                    condition=MasterValue.objects.get(organization=org, category="medical_condition", code="diabetes"))
+    assert ("sugar", "warning") in rules(diabetic, ["Abhayarishta"])
+
 
 @pytest.mark.django_db
 def test_completing_visit_makes_prescription_final(doctor, branch_a, visit, meds):

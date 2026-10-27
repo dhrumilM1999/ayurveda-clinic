@@ -1921,6 +1921,12 @@ body {
 
 /* Doctor's appointment list (Check-up screen): day picker, filters, tags */
 .consult { grid-template-columns: 290px minmax(0, 1fr); }
+/* Phone / small tablet: the list sits on top (a short scrolling box), the check-up below it.
+   This must come after the 290px rule above, or the screen stays two columns and scrolls sideways. */
+@media (max-width: 900px) {
+  .consult { grid-template-columns: minmax(0, 1fr); }
+  .consult-list { position: static; max-height: 300px; }
+}
 .consult-day { display: flex; align-items: center; gap: 4px; }
 .consult-item-tags { display: flex; flex-wrap: wrap; gap: 2px 0; margin-top: 3px; }
 .consult-item-tags .ant-tag { margin-inline-end: 4px; font-size: 11px; line-height: 18px; padding-inline: 5px; }

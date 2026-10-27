@@ -1,6 +1,6 @@
 // Appointments of one day in the current branch: book, walk-in, check in, reschedule, cancel.
 import { CalendarOutlined, LeftOutlined, PlusOutlined, ReloadOutlined, RightOutlined, UnorderedListOutlined, UserAddOutlined } from '@ant-design/icons';
-import { App, Button, DatePicker, Segmented, Select, Space, Table, Typography } from 'antd';
+import { App, Button, DatePicker, Grid, Segmented, Select, Space, Table, Tag, Typography } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -13,7 +13,7 @@ import { useAuth } from '../../auth/AuthContext';
 import { OpdBillButton } from '../billing/OpdBillModal';
 import { AppointmentActions } from './AppointmentActions';
 import { BookAppointmentModal } from './BookAppointmentModal';
-import { PatientCell, StatusTag, fmtTime } from './shared';
+import { PatientCell, StatusTag, fmtTime, isTimePassed } from './shared';
 import { LiveSearch } from '../../components/LiveSearch';
 import { ListEmpty } from '../../components/ListEmpty';
 
@@ -29,6 +29,7 @@ const FILTER_STATUSES: Record<Filter, AppointmentStatus[] | null> = {
 
 function AppointmentsList() {
   const { t } = useTranslation();
+  const wide = !!Grid.useBreakpoint().md;
   const { message } = App.useApp();
   const { can, multiDoctor } = useAuth();
   const navigate = useNavigate();
@@ -51,7 +52,7 @@ function AppointmentsList() {
   const dayKey = day.format('YYYY-MM-DD');
 
   const { rows, loading, reload, failed } = useList<Appointment>('/appointments/', {
-    date: dayKey, doctor, q: query || undefined, ordering: 'start_time',
+    date: dayKey, doctor, q: query || undefined, ordering: 'time_order',
   }, 200); // one day fits on one page
 
   useEffect(() => {
@@ -166,7 +167,12 @@ function AppointmentsList() {
               </>
             ),
           },
-          { title: t('common.status'), dataIndex: 'status', width: 120, render: (s: AppointmentStatus) => <StatusTag status={s} /> },
+          { title: t('common.status'), dataIndex: 'status', width: 120, render: (s: AppointmentStatus, r: Appointment) => (
+            <Space direction="vertical" size={2} align="start">
+              <StatusTag status={s} />
+              {isTimePassed(r) && <Tag color="orange" style={{ marginInlineEnd: 0 }}>{t('appointments.timePassed')}</Tag>}
+            </Space>
+          ) },
           {
             title: t('opd.billColumn'), key: 'bill', width: 130,
             render: (_: unknown, r: Appointment) => (['cancelled', 'no_show', 'booked'].includes(r.status) && !r.opd_bill
@@ -175,7 +181,7 @@ function AppointmentsList() {
           },
           {
             // fixed: the buttons stay visible on small screens
-            title: '', key: 'actions', width: 150, align: 'right' as const, fixed: 'right' as const,
+            title: '', key: 'actions', width: wide ? 330 : 150, align: 'right' as const, fixed: 'right' as const,
             render: (_: unknown, r: Appointment) => <AppointmentActions appointment={r} onChanged={reload} />,
           },
         ]}

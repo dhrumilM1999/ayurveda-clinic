@@ -92,7 +92,9 @@ export function ChipPicker({ category, selected, onAdd, placeholder }: {
     const text = search.trim();
     if (!text) return;
     const match = values.find((v) => label(v).toLowerCase() === text.toLowerCase());
-    onAdd(match ? label(match) : text, match?.code ?? '');
+    const finalText = match ? label(match) : text;
+    // The same thing twice (a double Enter, or typing what is already there) is ignored
+    if (!selected.some((x) => x.toLowerCase() === finalText.toLowerCase())) onAdd(finalText, match?.code ?? '');
     setSearch('');
   };
 

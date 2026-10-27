@@ -45,6 +45,34 @@ def next_patients(branch, day, doctor, limit=5) -> list[dict]:
              "uhid": a.patient.uhid, "status": a.status, "reason": a.reason} for a in rows]
 
 
+def attention(branch, day, now_time, with_bills=False, with_therapy=False) -> dict:
+    """What the front desk should look at now: the next appointments, patients who did not come on time,
+    patients seen but not billed, and therapy sessions that were not done on time."""
+    today = Appointment.objects.filter(branch=branch, date=day).select_related("patient", "doctor")
+    booked = today.filter(status="booked").exclude(start_time__isnull=True)
+    late = booked.filter(start_time__lt=now_time).order_by("start_time")
+    upcoming = booked.filter(start_time__gte=now_time).order_by("start_time")[:5]
+
+    def row(a):
+        return {"appointment": str(a.id), "time": a.start_time.strftime("%H:%M"), "patient": a.patient.full_name,
+                "uhid": a.patient.uhid, "doctor": a.doctor.full_name, "reason": a.reason}
+
+    data = {"upcoming": [row(a) for a in upcoming], "time_passed": late.count(), "time_passed_list": [row(a) for a in late[:5]]}
+    if with_bills:
+        seen = today.filter(status__in=["checked_in", "in_consultation", "completed"])
+        billed = Invoice.objects.filter(branch=branch, series="OP").exclude(status="cancelled").filter(
+            Q(appointment__in=seen) | Q(visit__appointment__in=seen))
+        billed_ids = set(billed.values_list("appointment_id", flat=True)) | set(billed.values_list("visit__appointment_id", flat=True))
+        data["to_bill"] = seen.exclude(id__in=billed_ids).count()
+    if with_therapy:
+        from apps.therapy.models import TherapySession
+
+        sessions = TherapySession.objects.filter(branch=branch, date=day)
+        data["therapy_overdue"] = (sessions.filter(status="scheduled", end_time__lt=now_time).count()
+                                   + sessions.filter(status="missed").count())
+    return data
+
+
 def money_today(branch, day) -> dict:
     payments = Payment.objects.filter(branch=branch, paid_at__date=day)
     received = {series: payments.filter(invoice__series=series).aggregate(s=Sum("amount"))["s"] or Decimal("0")

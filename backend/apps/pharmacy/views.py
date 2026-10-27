@@ -22,6 +22,7 @@ from apps.organizations.services import is_feature_enabled
 from apps.prescriptions.models import Prescription
 
 from apps.prescriptions.packs import packs_needed
+from apps.prescriptions.services import warnings_for
 
 from .models import (
     Dispense, Purchase, PurchaseReturn, Rack, StockBatch, StockVerification, StockVerificationItem, Supplier, SupplierPayment,
@@ -490,6 +491,8 @@ class DispensingViewSet(PharmacyMixin, viewsets.ViewSet):
         return Response({
             "id": str(rx.id), "patient_detail": patient_summary(rx.patient), "doctor_name": rx.doctor.full_name,
             "notes": rx.notes, "status": dispense_status(rx), "allergies": allergies,
+            # the doctor's safety warnings (pregnancy, child, metals, E1...) again, for the pharmacist
+            "warnings": warnings_for(rx),
             "sales": [{"id": str(d.id), "invoice": str(inv.id) if inv else None, "number": inv.number if inv else "",
                        "total": str(d.total_amount)}
                       for d, inv in ((d, invoice_for_dispense(d)) for d in rx.dispenses.all())],

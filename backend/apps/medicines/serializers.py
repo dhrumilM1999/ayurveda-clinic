@@ -26,7 +26,7 @@ class MedicineSerializer(serializers.ModelSerializer):
             "composition", "reference", "pack_type", "units_per_pack", "allow_loose", "selling_price", "barcode",
             "strength", "sku", "notes", "manufacturer", "classical_equivalent", "classical_equivalent_name", "ayush_licence_no", "hsn_code",
             "gst_rate", "mrp", "pack_size", "default_dose", "dose_unit", "default_frequency", "default_timing",
-            "default_anupana", "schedule_e1", "contains_metals", "pregnancy_caution", "child_caution",
+            "default_anupana", "schedule_e1", "contains_metals", "pregnancy_caution", "child_caution", "sugar_caution",
             "safety_notes", "is_sample", "is_active", "version", "branch_price", "branch_active", "stock_available", "updated_at",
         ]
         read_only_fields = ["id", "is_sample", "version", "updated_at"]

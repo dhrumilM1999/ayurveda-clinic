@@ -72,7 +72,9 @@ def test_plan_with_sessions_and_progress(on, org, roles, branch_a, doctor, thera
         "therapist": str(therapist.id), "room": str(room.id)}, format="json")
     assert res.status_code == 201 and len(res.data) == 2 and res.data[0]["end_time"] == "10:45:00"
     assert [r["session_no"] for r in res.data] == [1, 2]
-    # The therapist records the first session
+    # The therapist records the sessions on their day (a later day is refused: see the test below)
+    TherapySession.objects.filter(pk=res.data[0]["id"]).update(date=date.today())
+    TherapySession.objects.filter(pk=res.data[1]["id"]).update(date=date.today(), start_time=time(12, 0), end_time=time(12, 45))
     t = client_for(therapist, branch_a)
     sid = res.data[0]["id"]
     done = t.post(f"/api/v1/therapy-sessions/{sid}/complete/", {"material_used": "Sesame oil", "quantity_ml": 150,
@@ -199,3 +201,48 @@ def test_undo_a_therapy_session_step_by_step(on, org, roles, branch_a, doctor, t
     # too late
     TherapySession.objects.filter(pk=sid).update(updated_at=timezone.now() - timedelta(minutes=61))
     assert t.post(f"/api/v1/therapy-sessions/{sid}/undo/").status_code == 400
+
+
+@pytest.mark.django_db
+def test_a_missed_session_can_be_moved_to_a_new_day(on, org, roles, branch_a, doctor, therapist, room, patient, abhyanga):
+    c = client_for(doctor, branch_a)
+    plan = make_plan(c, patient, abhyanga, sessions=2)
+    url = f"/api/v1/therapy-plans/{plan['id']}/schedule/"
+    item = plan["items"][0]["id"]
+    a = c.post(url, {"item": item, "dates": [str(DAY)], "start_time": "09:00", "therapist": str(therapist.id),
+                     "room": str(room.id)}, format="json").data[0]
+    b = c.post(url, {"item": item, "dates": [str(DAY)], "start_time": "11:00", "therapist": str(therapist.id)}, format="json").data[0]
+    assert c.post(f"/api/v1/therapy-sessions/{a['id']}/missed/").status_code == 200
+    new_day = DAY + timedelta(days=2)
+    # the therapist is busy with the other session at 11:00
+    res = c.post(f"/api/v1/therapy-sessions/{a['id']}/reschedule/", {"date": str(DAY), "start_time": "11:10"}, format="json")
+    assert res.status_code == 400 and "already booked" in str(res.data["therapist"])
+    # a day that has passed is refused
+    res = c.post(f"/api/v1/therapy-sessions/{a['id']}/reschedule/",
+                 {"date": str(date.today() - timedelta(days=1)), "start_time": "10:00"}, format="json")
+    assert res.status_code == 400 and "passed" in str(res.data["date"])
+    res = c.post(f"/api/v1/therapy-sessions/{a['id']}/reschedule/", {"date": str(new_day), "start_time": "10:00"}, format="json")
+    assert res.status_code == 200, res.data
+    assert res.data["status"] == "scheduled" and res.data["date"] == str(new_day) and res.data["start_time"].startswith("10:00")
+    assert str(res.data["therapist"]) == str(therapist.id)  # kept
+    # a session that is done or cancelled cannot be moved
+    assert c.post(f"/api/v1/therapy-sessions/{b['id']}/cancel/").status_code == 200
+    assert c.post(f"/api/v1/therapy-sessions/{b['id']}/reschedule/", {"date": str(new_day), "start_time": "15:00"}, format="json").status_code == 400
+
+
+@pytest.mark.django_db
+def test_a_session_of_a_later_day_cannot_be_started_or_finished_today(on, org, roles, branch_a, doctor, therapist, patient, abhyanga):
+    c = client_for(doctor, branch_a)
+    plan = make_plan(c, patient, abhyanga, sessions=1)
+    s = c.post(f"/api/v1/therapy-plans/{plan['id']}/schedule/", {"item": plan["items"][0]["id"], "dates": [str(DAY)],
+                                                               "start_time": "09:00"}, format="json").data[0]
+    for step in ("start", "complete"):
+        res = c.post(f"/api/v1/therapy-sessions/{s['id']}/{step}/")
+        assert res.status_code == 400 and "later day" in str(res.data)
+    assert TherapySession.objects.get(pk=s["id"]).status == "scheduled"
+
+
+@pytest.mark.django_db
+def test_only_people_who_do_therapy_are_listed_as_therapists(on, org, roles, branch_a, doctor, therapist, receptionist):
+    names = {x["name"] for x in client_for(receptionist, branch_a).get("/api/v1/therapy-sessions/options/").data["therapists"]}
+    assert names == {therapist.full_name}  # not the receptionist who books, not the doctor
