@@ -69,7 +69,7 @@ function Tiles({ tiles, xl }: { tiles: Tile[]; xl?: number }) {
 function opdTiles(t: (k: string, o?: Record<string, unknown>) => string, o: OpdCounts, mine: boolean): Tile[] {
   return [
     { key: 'waiting', icon: <ClockCircleOutlined />, color: c.accent, value: o.waiting, note: t('dashboard.waitingNote'), link: '/queue' },
-    { key: mine ? 'withMe' : 'withDoctor', icon: <UserOutlined />, color: '#3d6fb6', value: o.with_doctor, note: t('dashboard.withDoctorNote'), link: '/consult' },
+    { key: mine ? 'withMe' : 'withDoctor', icon: <UserOutlined />, color: c.primary, value: o.with_doctor, note: t('dashboard.withDoctorNote'), link: '/consult' },
     { key: 'seen', icon: <CheckCircleOutlined />, color: c.primary, value: o.seen, note: t('dashboard.seenNote') },
     { key: 'booked', icon: <TeamOutlined />, color: '#8a4fa8', value: o.booked, note: t('dashboard.bookedNote', { n: o.not_arrived }), link: '/appointments' },
   ];
@@ -195,7 +195,7 @@ export default function DashboardPage() {
               ? [{ key: 'opdCollection', icon: <WalletOutlined />, color: c.primary, value: money(m.opd), note: t(hasFeature('combined_opd_bill') ? 'dashboard.opdCollectionNoteCombined' : 'dashboard.opdCollectionNote'), link: '/billing' }] : []),
             ...(features.pharmacy !== false && hasFeature('pharmacy_billing')
               ? [{ key: 'pharmacyCollection', icon: <ShopOutlined />, color: '#8a4fa8', value: money(m.pharmacy), note: t('dashboard.pharmacyCollectionNote'), link: '/billing' }] : []),
-            { key: 'totalCollection', icon: <WalletOutlined />, color: '#3d6fb6', value: money(m.total), note: t('dashboard.totalCollectionNote') },
+            { key: 'totalCollection', icon: <WalletOutlined />, color: c.primary, value: money(m.total), note: t('dashboard.totalCollectionNote') },
             {
               key: 'stillDue', icon: <WarningOutlined />, color: Number(m.due_today) > 0 ? '#c0392b' : c.accent,
               value: money(m.due_today), note: t('dashboard.stillDueNote', { count: m.unpaid_bills }), link: '/billing',

@@ -146,7 +146,7 @@ body {
   top: 0;
   height: 100vh;
   overflow: auto;
-  background: linear-gradient(180deg, var(--clinic-sidebar) 0%, #06152e 100%) !important;
+  background: var(--clinic-sidebar) !important;
 }
 .app-sider .ant-layout-sider-children {
   display: flex;
@@ -202,7 +202,7 @@ body {
 .app-sider-divider {
   height: 1px;
   margin: 0 20px 12px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0));
+  background: rgba(255, 255, 255, 0.12);
 }
 .app-sider-footer {
   padding: 16px 20px 20px;
@@ -291,10 +291,7 @@ body {
   margin-bottom: 18px;
   border-radius: 18px;
   color: #fff;
-  background:
-    radial-gradient(circle at 88% 15%, color-mix(in srgb, var(--clinic-accent) 40%, transparent), transparent 45%),
-    linear-gradient(120deg, color-mix(in srgb, var(--clinic-sidebar) 70%, #000) 0%, var(--clinic-sidebar) 55%, color-mix(in srgb, var(--clinic-primary) 70%, var(--clinic-sidebar)) 100%);
-  box-shadow: 0 10px 30px rgba(11, 31, 63, 0.22);
+  background: var(--clinic-sidebar);
 }
 .hero-date {
   font-size: 12px;
@@ -364,10 +361,7 @@ body {
   justify-content: space-between;
   padding: 48px 56px;
   color: #fff;
-  background:
-    radial-gradient(circle at 80% 15%, rgba(91, 155, 255, 0.35), transparent 40%),
-    radial-gradient(circle at 10% 90%, rgba(255, 255, 255, 0.08), transparent 45%),
-    linear-gradient(150deg, var(--clinic-primary) 0%, var(--clinic-sidebar) 70%);
+  background: var(--clinic-sidebar);
 }
 .login-art-brand {
   display: flex;
@@ -773,9 +767,7 @@ body {
   padding: 2.2vw 2.6vw;
   box-sizing: border-box;
   color: #fff;
-  background:
-    radial-gradient(circle at 90% 0%, rgba(91, 155, 255, 0.28), transparent 40%),
-    linear-gradient(160deg, var(--clinic-sidebar) 0%, #06152e 100%);
+  background: var(--clinic-sidebar);
 }
 .tv-head {
   display: flex;
@@ -1357,7 +1349,7 @@ body {
   color: #fff;
 }
 .kind-before { background: #8a6d3b; }
-.kind-progress { background: #3d6fb6; }
+.kind-progress { background: var(--clinic-primary); }
 .kind-after { background: #2f8a57; }
 
 /* Symptom-score progress */
@@ -2022,7 +2014,7 @@ body {
 .software-brand { display: flex; align-items: center; gap: 10px; }
 .software-brand img { display: block; border-radius: 9px; flex: none; }
 .software-brand-name { font-family: var(--clinic-font-heading); font-weight: 700; font-size: 19px; line-height: 1.05; letter-spacing: -0.3px; color: #ffffff; }
-.software-brand-name-2 { color: #7fb0ff; }
+.software-brand-name-2 { color: #c9a227; }
 .software-brand-sub { font-size: 9.5px; letter-spacing: 1.6px; text-transform: uppercase; color: rgba(255, 255, 255, 0.55); margin-top: 3px; }
 .software-brand-sider { padding: 16px 18px 6px; }
 .software-brand-mark { justify-content: center; padding: 16px 0 6px; }
@@ -2030,7 +2022,7 @@ body {
 .software-brand-login .software-brand-sub { font-size: 10.5px; }
 .login-mobile-soft { display: none; margin-bottom: 14px; }
 .login-mobile-soft .software-brand-name { color: #0b1f3f; }
-.login-mobile-soft .software-brand-name-2 { color: #1d4ed8; }
+.login-mobile-soft .software-brand-name-2 { color: #374151; }
 @media (max-width: 800px) { .login-mobile-soft { display: block; } }
 .software-brand-sider .software-brand-sub { text-transform: none; letter-spacing: 0.2px; font-size: 10.5px; }
 
@@ -2112,3 +2104,13 @@ body {
 .pharm-subtabs button.active { background: var(--clinic-primary); border-color: var(--clinic-primary); color: #fff; }
 @media (max-width: 576px) { .pharm-groups { width: 100%; } .pharm-groups .ant-segmented-item { flex: 1; } .pharm-groups .ant-segmented-item-label { padding: 4px 6px; } }
 @media (max-width: 700px) { .hero-logo { display: none; } .hero-quote { max-width: 100%; } }
+
+/* Flat look: solid colours, thin lines, no glow */
+.hero-quote { font-style: normal; }
+.hero-pills span { background: transparent; }
+.hero-logo { box-shadow: none; }
+.hero-leaf, .login-art-leaf { display: none; }
+.shortcut:hover { transform: none; box-shadow: none; }
+.shortcut-icon { box-shadow: none; }
+.shortcut-icon { color: var(--clinic-primary); background: #eceef1; }
+.shortcut:hover { border-color: var(--clinic-primary); }

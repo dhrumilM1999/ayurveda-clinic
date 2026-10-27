@@ -4,18 +4,18 @@
 
 // SAFE TO EDIT: the colours (main colour, menu, highlight, page background, text, lines)
 const DEFAULT_COLORS = {
-    // Main colour: buttons, links, selected items
-    primary: '#1d4ed8',
-    // Left menu and login panel (a darker shade of the main colour looks best)
-    sidebar: '#0b1f3f',
-    // Highlight colour: selected menu item, small accents (light blue)
-    accent: '#4f8ff7',
+    // Main colour: buttons, links, selected items (charcoal slate)
+    primary: '#374151',
+    // Left menu, login panel and the greeting box (flat dark charcoal)
+    sidebar: '#1f2430',
+    // Highlight colour: small accents (muted gold)
+    accent: '#c9a227',
     // Page background behind the white cards
-    background: '#e9eff9',
+    background: '#f4f4f2',
     // Main text colour
-    text: '#0f1b2d',
+    text: '#1c1f26',
     // Lines and borders
-    border: '#c5d3ea',
+    border: '#dcdcd6',
     // Status colours
     success: '#2f8a57',
     warning: '#d48a0c',
