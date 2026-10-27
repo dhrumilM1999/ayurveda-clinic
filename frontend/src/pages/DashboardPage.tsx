@@ -70,7 +70,7 @@ function opdTiles(t: (k: string, o?: Record<string, unknown>) => string, o: OpdC
   return [
     { key: 'waiting', icon: <ClockCircleOutlined />, color: c.accent, value: o.waiting, note: t('dashboard.waitingNote'), link: '/queue' },
     { key: mine ? 'withMe' : 'withDoctor', icon: <UserOutlined />, color: c.primary, value: o.with_doctor, note: t('dashboard.withDoctorNote'), link: '/consult' },
-    { key: 'seen', icon: <CheckCircleOutlined />, color: c.primary, value: o.seen, note: t('dashboard.seenNote') },
+    { key: 'seen', icon: <CheckCircleOutlined />, color: c.success, value: o.seen, note: t('dashboard.seenNote') },
     { key: 'booked', icon: <TeamOutlined />, color: '#8a4fa8', value: o.booked, note: t('dashboard.bookedNote', { n: o.not_arrived }), link: '/appointments' },
   ];
 }

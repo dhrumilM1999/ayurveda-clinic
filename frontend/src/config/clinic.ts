@@ -4,20 +4,20 @@
 
 // SAFE TO EDIT: the colours (main colour, menu, highlight, page background, text, lines)
 const DEFAULT_COLORS = {
-    // Main colour: buttons, links, selected items (charcoal slate)
-    primary: '#374151',
+    // Main colour: buttons, links, selected items (ember orange)
+    primary: '#e0560f',
     // Left menu, login panel and the greeting box (flat dark charcoal)
     sidebar: '#1f2430',
-    // Highlight colour: small accents (muted gold)
-    accent: '#c9a227',
+    // Small accents: the bar before section titles, the avatar
+    accent: '#e0560f',
     // Page background behind the white cards
     background: '#f4f4f2',
     // Main text colour
     text: '#1c1f26',
     // Lines and borders
     border: '#dcdcd6',
-    // Status colours
-    success: '#2f8a57',
+    // Status colours (success is the second colour: teal)
+    success: '#0f8f84',
     warning: '#d48a0c',
     error: '#c2412d',
 };
@@ -70,7 +70,7 @@ export const clinicConfig = {
 // The software's own brand (not the clinic's): shown in the app only - menu, login screen and browser tab.
 // It is never printed on prescriptions, bills or other print-outs. Files: frontend/public/brand/.
 export const softwareConfig = {
-  name: 'Nidana',
-  nameParts: ['Nida', 'na'] as [string, string],
-  markPath: '/brand/nidana-mark.svg',
+  name: 'Vedora',
+  nameParts: ['Ved', 'ora'] as [string, string],
+  markPath: '/brand/vedora-mark.svg',
 };

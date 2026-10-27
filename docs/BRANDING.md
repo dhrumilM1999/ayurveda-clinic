@@ -1,6 +1,6 @@
-# Nidana: the software's brand
+# Vedora: the software's brand
 
-**Name:** Nidana (Nidana is the Ayurveda word for finding the cause of an illness; the mark is a lotus with a pulse line, not letters). **Tagline:** Ayurveda clinic software.
+**Name:** Vedora (Vedora is the Ayurveda word for finding the cause of an illness; the mark is a lotus with a pulse line, not letters). **Tagline:** Ayurveda clinic software.
 It is the name of the *software*. The clinic's own name and logo (for example Vednath) stay the clinic's: they are on the prescriptions, bills and the menu.
 
 ## Where it is shown, and where it is not
@@ -12,9 +12,9 @@ A white letter **A** made of two leaves (the plant), with a golden **drop of med
 
 | File | Use |
 |---|---|
-| `frontend/public/brand/nidana-mark.svg` | the square mark (tab icon, menu, app icon) |
-| `frontend/public/brand/nidana-logo.svg` | mark + name, for light backgrounds |
-| `frontend/public/brand/nidana-logo-white.svg` | mark + name, for dark backgrounds |
+| `frontend/public/brand/vedora-mark.svg` | the square mark (tab icon, menu, app icon) |
+| `frontend/public/brand/vedora-logo.svg` | mark + name, for light backgrounds |
+| `frontend/public/brand/vedora-logo-white.svg` | mark + name, for dark backgrounds |
 | `docs/brand/*.png` | the same as pictures (mark 1024 px, logos 3120 px) for a website, a visiting card or social media |
 
 ## Colours
@@ -32,4 +32,4 @@ Font of the name: Fraunces (bold). Text font in the app: Plus Jakarta Sans.
 - Replace the three files in `frontend/public/brand/` with your own (keep the file names).
 - The words "Ayurveda clinic software" (English, Gujarati, Hindi): `frontend/src/i18n/*.json`, key `layout.softwareTagline`.
 
-> Before using the name publicly (website, selling to other clinics), search that nobody else uses "Nidana" and register the trademark. The name here is a suggestion.
+> Before using the name publicly (website, selling to other clinics), search that nobody else uses "Vedora" and register the trademark. The name here is a suggestion.

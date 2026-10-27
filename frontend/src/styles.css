@@ -2010,11 +2010,11 @@ body {
 .products-cart .cart-line { display: flex; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(0, 0, 0, 0.06); }
 .products-cart .cart-total { display: flex; justify-content: space-between; padding: 10px 0; font-size: 15px; }
 
-/* The software brand (Nidana) */
+/* The software brand (Vedora) */
 .software-brand { display: flex; align-items: center; gap: 10px; }
 .software-brand img { display: block; border-radius: 9px; flex: none; }
 .software-brand-name { font-family: var(--clinic-font-heading); font-weight: 700; font-size: 19px; line-height: 1.05; letter-spacing: -0.3px; color: #ffffff; }
-.software-brand-name-2 { color: #c9a227; }
+.software-brand-name-2 { color: #ff7a33; }
 .software-brand-sub { font-size: 9.5px; letter-spacing: 1.6px; text-transform: uppercase; color: rgba(255, 255, 255, 0.55); margin-top: 3px; }
 .software-brand-sider { padding: 16px 18px 6px; }
 .software-brand-mark { justify-content: center; padding: 16px 0 6px; }
@@ -2022,7 +2022,7 @@ body {
 .software-brand-login .software-brand-sub { font-size: 10.5px; }
 .login-mobile-soft { display: none; margin-bottom: 14px; }
 .login-mobile-soft .software-brand-name { color: #0b1f3f; }
-.login-mobile-soft .software-brand-name-2 { color: #374151; }
+.login-mobile-soft .software-brand-name-2 { color: #e0560f; }
 @media (max-width: 800px) { .login-mobile-soft { display: block; } }
 .software-brand-sider .software-brand-sub { text-transform: none; letter-spacing: 0.2px; font-size: 10.5px; }
 
@@ -2112,5 +2112,5 @@ body {
 .hero-leaf, .login-art-leaf { display: none; }
 .shortcut:hover { transform: none; box-shadow: none; }
 .shortcut-icon { box-shadow: none; }
-.shortcut-icon { color: var(--clinic-primary); background: #eceef1; }
+.shortcut-icon { color: var(--clinic-primary); background: #fdeee6; }
 .shortcut:hover { border-color: var(--clinic-primary); }

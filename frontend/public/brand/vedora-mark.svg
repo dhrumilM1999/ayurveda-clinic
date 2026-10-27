@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Vedora">
+  <title>Vedora</title>
+  <rect width="100" height="100" rx="26" fill="#e0560f"/>
+  <path d="M47 80C26 67 20 44 27 22C45 32 55 52 47 80Z" fill="#ffffff"/>
+  <path d="M53 80C74 67 80 44 73 22C55 32 45 52 53 80Z" fill="#1f2430"/>
+</svg>
