@@ -71,7 +71,10 @@ export const clinicConfig = {
 // The software's own brand (not the clinic's): shown in the app only - menu, login screen and browser tab.
 // It is never printed on prescriptions, bills or other print-outs. Files: frontend/public/brand/.
 export const softwareConfig = {
-  name: 'Vedora',
-  nameParts: ['Ved', 'ora'] as [string, string],
-  markPath: '/brand/vedora-mark.svg',
+  name: 'Klinvexa',
+  nameParts: ['Klin', 'vexa'] as [string, string],
+  markPath: '/brand/klinvexa-mark.svg',
+  // the full logo (wordmark): one for light screens, one for dark screens (menu, login panel)
+  logoPath: '/brand/klinvexa-logo.svg',
+  logoWhitePath: '/brand/klinvexa-logo-white.svg',
 };

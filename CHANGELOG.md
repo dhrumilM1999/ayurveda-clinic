@@ -589,4 +589,4 @@ Built from docs/FEATURES.md section G as a **first draft for the owner to correc
 - `start-bot.bat`: a practice robot that sees today's sample patients like a real clinic day (check-in, fee, check-up, prescription, medicines).
 - Reports: financial year picker, month-wise summary, GST to pay, sales and purchase registers, bills not paid.
 - Satoshi font in the app and on all print-outs; dashboard shortcut buttons.
-- Software brand renamed from AyuSutra to **Vedora**, new lotus + pulse mark (no letters). The clinic logo is no longer in the menu (it stays on the dashboard greeting box and on print-outs). See docs/BRANDING.md.
+- Software brand renamed from AyuSutra to **Klinvexa**, new lotus + pulse mark (no letters). The clinic logo is no longer in the menu (it stays on the dashboard greeting box and on print-outs). See docs/BRANDING.md.
