@@ -28,6 +28,9 @@ const PALETTES: Record<string, Partial<typeof DEFAULT_COLORS>> = {
   saffron: { primary: '#c2571a', sidebar: '#3b2314', accent: '#e8a33d', background: '#f7f1e8', text: '#2b1d12', border: '#e3d6c3' },
   maroon: { primary: '#8b2c3b', sidebar: '#3a1219', accent: '#d9a441', background: '#f8f1ee', text: '#2a1518', border: '#e6d3cd' },
   charcoal: { primary: '#374151', sidebar: '#1f2430', accent: '#c9a227', background: '#f4f4f2', text: '#1c1f26', border: '#dcdcd6' },
+  ember: { primary: '#e0560f', sidebar: '#1f2430', accent: '#e0560f', background: '#f4f4f2', text: '#1c1f26', border: '#dcdcd6' },
+  teal: { primary: '#0f8f84', sidebar: '#1f2430', accent: '#0f8f84', background: '#f4f4f2', text: '#1c1f26', border: '#dcdcd6' },
+  crimson: { primary: '#c42a4d', sidebar: '#1f2430', accent: '#c42a4d', background: '#f4f4f2', text: '#1c1f26', border: '#dcdcd6' },
   plum: { primary: '#6d3fa0', sidebar: '#2a1745', accent: '#b18ae0', background: '#f3eff8', text: '#20152e', border: '#d9cfe8' },
 };
 function pickColors() {
