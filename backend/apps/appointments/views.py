@@ -46,7 +46,7 @@ class AppointmentViewSet(AuditedModelViewSet):
     branch_scoped = True
     http_method_names = ["get", "post", "patch", "head", "options"]
     filterset_fields = ["date", "doctor", "status", "patient", "kind"]
-    ordering_fields = ["date", "start_time", "token_number", "created_at"]
+    ordering_fields = ["date", "start_time", "time_order", "token_number", "created_at"]
 
     def check_permissions(self, request):
         super().check_permissions(request)
@@ -56,7 +56,7 @@ class AppointmentViewSet(AuditedModelViewSet):
 
     def get_queryset(self):
         from django.db.models import Count, IntegerField, OuterRef, Subquery
-        from django.db.models.functions import Coalesce
+        from django.db.models.functions import Coalesce, TruncTime
 
         from apps.emr.models import Visit
 
@@ -65,6 +65,8 @@ class AppointmentViewSet(AuditedModelViewSet):
         earlier = (Visit.objects.filter(patient=OuterRef("patient"), visit_date__lt=OuterRef("date"), is_deleted=False)
                    .order_by().values("patient").annotate(n=Count("id")).values("n"))
         qs = qs.annotate(previous_visits=Coalesce(Subquery(earlier, output_field=IntegerField()), 0))
+        # time_order: a booked appointment sorts by its slot, a walk-in (no slot) by the time it was entered
+        qs = qs.annotate(time_order=Coalesce("start_time", TruncTime("created_at", tzinfo=timezone.get_current_timezone())))
         params = self.request.query_params
         if params.get("date_from"):
             qs = qs.filter(date__gte=parse_day(params["date_from"]))

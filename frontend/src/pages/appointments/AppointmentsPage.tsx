@@ -52,7 +52,7 @@ function AppointmentsList() {
   const dayKey = day.format('YYYY-MM-DD');
 
   const { rows, loading, reload, failed } = useList<Appointment>('/appointments/', {
-    date: dayKey, doctor, q: query || undefined, ordering: 'start_time',
+    date: dayKey, doctor, q: query || undefined, ordering: 'time_order',
   }, 200); // one day fits on one page
 
   useEffect(() => {

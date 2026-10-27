@@ -1413,7 +1413,8 @@
       "cashHelp": "મળેલ રોકડ ઓછા રોકડ રિફંડ",
       "due": "હજી લેવાના બાકી",
       "gst": "GST",
-      "refunded": "પરત"
+      "refunded": "પરત",
+      "returned": "પરત {{amount}}"
     },
     "print": "છાપો",
     "preview": "બિલ પ્રિવ્યૂ",

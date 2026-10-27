@@ -381,3 +381,20 @@ def test_did_not_come_appointment_can_be_cancelled(org, receptionist, doctor, br
     assert client.post(f"{URL}{past.id}/cancel/", {"reason": "Patient called"}, format="json").status_code == 200
     past.refresh_from_db()
     assert past.status == "cancelled"
+
+
+@pytest.mark.django_db
+def test_walk_in_is_listed_by_the_time_it_was_entered(org, receptionist, doctor, branch_a, schedule, patient):
+    client = client_for(receptionist, branch_a)
+    today = timezone.localdate()
+    now = timezone.localtime()
+    far = (now + timedelta(hours=3)).time() if now.hour < 20 else time(23, 30)
+    booked = Appointment.objects.create(organization=org, branch=branch_a, patient=patient, doctor=doctor, date=today,
+                                        start_time=far, end_time=far, status="booked")
+    other = Patient.objects.create(organization=org, uhid="77", first_name="Walk", last_name="In", gender="male",
+                                   mobile="9876500077")
+    res = client.post(URL, {"patient": str(other.id), "doctor": str(doctor.id), "kind": "walk_in"}, format="json")
+    assert res.status_code == 201, res.data
+    ids = [r["id"] for r in client.get(URL, {"date": str(today), "ordering": "time_order"}).data["results"]]
+    # the walk-in arrived now, before the later booked slot
+    assert ids.index(res.data["id"]) < ids.index(str(booked.id))
