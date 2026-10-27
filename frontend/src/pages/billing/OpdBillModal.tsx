@@ -165,7 +165,9 @@ export function OpdBillModal({ target, onClose }: { target: OpdBillTarget; onClo
             {c && (
               <Space size={6} wrap>
                 <Tag color={c.visit_kind === 'new' ? 'blue' : 'green'}>{t(`opd.kind.${c.visit_kind}`)}</Tag>
-                {c.last_visit && <span className="cell-sub">{t('opd.lastVisit', { date: dayjs(c.last_visit).format('DD-MM-YYYY') })}</span>}
+                {c.last_visit && (c.visit_kind === 'new'
+                  ? <span className="cell-sub">{t('opd.lateRevisit', { date: dayjs(c.last_visit).format('DD-MM-YYYY'), days: dayjs().diff(dayjs(c.last_visit), 'day'), limit: c.follow_up_days })}</span>
+                  : <span className="cell-sub">{t('opd.lastVisit', { date: dayjs(c.last_visit).format('DD-MM-YYYY') })}</span>)}
               </Space>
             )}
           </div>

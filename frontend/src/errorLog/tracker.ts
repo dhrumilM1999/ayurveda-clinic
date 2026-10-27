@@ -139,6 +139,8 @@ export function installGlobalHandlers() {
     const reason = e.reason as { isAxiosError?: boolean; name?: string; message?: string; stack?: string } | undefined;
     // A failed API call is already in the log (server side), or was reported as "network" by the API client
     if (reason?.isAxiosError || reason?.name === 'CanceledError') return;
+    // A form that was saved with a required field empty: the screen already shows the red message (it is not a bug)
+    if (reason && typeof reason === 'object' && 'errorFields' in reason) return;
     const message = reason?.message ?? String(reason);
     addStep('error', message);
     sendReport({ kind: 'js', message, details: reason?.stack ?? '' });

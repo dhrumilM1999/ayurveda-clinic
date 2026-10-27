@@ -111,7 +111,9 @@ export function RxSection({ rx, onChange, warnings, diagnoses, readOnly, daysBar
       })]);
     } else {
       const medicine = options.find((m) => m.id === id);
-      if (medicine) setItems([...items, withDays(lineFromMedicine(medicine))]);
+      // The same medicine twice is almost always a slip: say so, do not add it again
+      if (medicine && items.some((l) => l.medicine === medicine.id)) message.warning(t('rx.alreadyAdded', { name: medicine.name }));
+      else if (medicine) setItems([...items, withDays(lineFromMedicine(medicine))]);
     }
     setSearch('');
   };

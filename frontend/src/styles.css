@@ -2050,6 +2050,10 @@ body {
 /* Reason for the visit (from the booking) and the bar after a check-up is completed */
 .visit-reason { margin-top: 6px; font-size: 13px; }
 .visit-done-bar { margin: 0 0 10px; }
+/* The message and the buttons wrap onto two lines when the screen is narrow (the message must never shrink to one letter) */
+.visit-done-bar.ant-alert { flex-wrap: wrap; row-gap: 8px; }
+.visit-done-bar .ant-alert-content { flex: 1 1 260px; min-width: 260px; }
+.visit-done-bar .ant-alert-action { flex: 0 1 auto; margin-inline-start: 0; }
 
 /* Calendar: a big month title, and only the days of that month */
 .cal-monthbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }

@@ -139,7 +139,7 @@ export default function DashboardPage() {
 
       <div className="section-title">{t('dashboard.quickActions')}</div>
       <div className="shortcut-grid">
-        {SHORTCUTS.filter((x) => can(x.permission) && (!x.feature || features[x.feature] !== false)).map((x) => (
+        {SHORTCUTS.filter((x) => can(x.permission) && (!x.feature || features[x.feature] !== false) && (x.key !== 'availability' || me?.user.is_doctor)).map((x) => (
           <Link key={x.key} to={x.path} className="shortcut" style={{ ['--sc' as string]: x.color }}>
             <span className="shortcut-icon">{x.icon}</span>
             <span className="shortcut-label">{t(`dashboard.shortcuts.${x.key}`)}</span>

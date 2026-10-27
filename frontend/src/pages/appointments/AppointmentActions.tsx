@@ -108,7 +108,7 @@ export function AppointmentActions({ appointment: a, onChanged }: { appointment:
     ...(a.status === 'booked' ? [{ key: 'reschedule', label: t('appointments.reschedule') }] : []),
     ...(a.undo_to && a.status === 'booked' ? [{ key: 'undo-booking', label: undoLabel }] : []),
     ...(a.status === 'checked_in' ? [{ key: 'complete', label: t('appointments.complete') }] : []),
-    ...(a.status === 'booked' && !dayjs(a.date).isAfter(dayjs(), 'day') ? [{ key: 'no-show', label: t('appointments.markNoShow') }] : []),
+    ...(a.status === 'booked' && !dayjs(a.date).isAfter(dayjs(), 'day') && !(dayjs(a.date).isSame(dayjs(), 'day') && a.start_time && a.start_time.slice(0, 5) > dayjs().format('HH:mm')) ? [{ key: 'no-show', label: t('appointments.markNoShow') }] : []),
     { key: 'whatsapp', label: t('appointments.whatsapp') },
     ...(['booked', 'checked_in'].includes(a.status) ? [{ key: 'cancel', label: t('appointments.cancel'), danger: true }] : []),
   ];

@@ -99,6 +99,8 @@ def change_status(appointment: Appointment, action: str, user, cancel_reason: st
         raise ValidationError({"detail": f"Not possible: the appointment is '{appointment.get_status_display()}'."})
     if action in TODAY_ONLY and appointment.date != timezone.localdate():
         raise ValidationError({"detail": "This can only be done on the day of the appointment."})
+    if action == "no_show" and appointment.start_time and appointment.date == timezone.localdate()             and appointment.start_time > timezone.localtime().time():
+        raise ValidationError({"detail": "The appointment time has not come yet, so the patient cannot be marked as not come."})
     old_status = appointment.status
     fields = ["status", "updated_by", "updated_at"]
     appointment.status = new_status
