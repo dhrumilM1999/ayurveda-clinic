@@ -59,13 +59,27 @@ def shift(path, dx):
     return re.sub(r"([ML])(-?[0-9.]+) (-?[0-9.]+)", lambda m: f"{m.group(1)}{float(m.group(2)) + dx:.1f} {m.group(3)}", path)
 
 
-def k_parts(x):
-    """K: stem + leg (dark) and the upper arm cut away from the stem (arm colour). Returns (dark, arm)."""
-    w, sx = 160, x + 81 + STEM
-    stem = f"M{x + 81} 0V{-CAP}H{sx}V0Z"
-    leg = bar(sx - 60, CAP * 0.36, x + 650 - w, 0, w)
-    arm = bar(sx + 56, CAP * 0.50, x + 662 - w, CAP, w)
-    return stem + leg, arm
+def _poly_d(poly):
+    from shapely.geometry import Polygon  # noqa: F401  (the pieces are plain polygons)
+    out = ""
+    for g in getattr(poly, "geoms", [poly]):
+        if g.geom_type != "Polygon" or g.area < 50:
+            continue
+        pts = list(g.exterior.coords)[:-1]
+        out += "M" + "L".join(f"{px:.1f} {-py:.1f}" for px, py in pts) + "Z"
+    return out
+
+
+def k_parts(x, gap=26):
+    """The K is Satoshi's own K, with its upper arm cut away from the rest by a thin even gap (one clean diagonal cut).
+    Needs the 'shapely' package (only for building the logo). Returns (stem + leg, arm)."""
+    from shapely.geometry import Polygon
+
+    k = Polygon([(209, 731), (81, 731), (81, 0), (209, 0), (209, 156), (330, 311), (511, 0), (659, 0), (414, 419),
+                 (656, 731), (505, 731), (209, 347)])
+    # the area of the arm, with the cut line running from the stem, over the elbow, to the right
+    arm_area = Polygon([(209, 360), (300, 330), (414, 405), (760, 405), (760, 800), (209, 800)])
+    return shift(_poly_d(k.difference(arm_area.buffer(gap, join_style=2))), x), shift(_poly_d(k.intersection(arm_area)), x)
 
 
 def i_parts(x):
