@@ -292,8 +292,8 @@ body {
   border-radius: 18px;
   color: #fff;
   background:
-    radial-gradient(circle at 88% 15%, rgba(61, 140, 255, 0.35), transparent 45%),
-    linear-gradient(120deg, #07111f 0%, #0d2540 55%, #123a63 100%);
+    radial-gradient(circle at 88% 15%, color-mix(in srgb, var(--clinic-accent) 40%, transparent), transparent 45%),
+    linear-gradient(120deg, color-mix(in srgb, var(--clinic-sidebar) 70%, #000) 0%, var(--clinic-sidebar) 55%, color-mix(in srgb, var(--clinic-primary) 70%, var(--clinic-sidebar)) 100%);
   box-shadow: 0 10px 30px rgba(11, 31, 63, 0.22);
 }
 .hero-date {

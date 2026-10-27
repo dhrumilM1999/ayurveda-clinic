@@ -30,14 +30,14 @@ const REFRESH_SECONDS = 60;
 // feature = the extra that must be on). Texts are in the i18n files under dashboard.shortcuts.
 type Shortcut = { key: string; path: string; icon: ReactNode; color: string; permission: string; feature?: string };
 const SHORTCUTS: Shortcut[] = [
-  { key: 'newPatient', path: '/patients/new', icon: <UserAddOutlined />, color: '#2f6fb0', permission: 'patients.create' },
-  { key: 'appointments', path: '/appointments', icon: <ScheduleOutlined />, color: '#7a52b3', permission: 'appointments.view', feature: 'appointments' },
+  { key: 'newPatient', path: '/patients/new', icon: <UserAddOutlined />, color: c.primary, permission: 'patients.create' },
+  { key: 'appointments', path: '/appointments', icon: <ScheduleOutlined />, color: c.accent, permission: 'appointments.view', feature: 'appointments' },
   { key: 'queue', path: '/queue', icon: <OrderedListOutlined />, color: '#d4851c', permission: 'appointments.view', feature: 'appointments' },
   { key: 'checkup', path: '/consult', icon: <MedicineBoxOutlined />, color: '#1f8a70', permission: 'emr.view' },
-  { key: 'billing', path: '/billing', icon: <FileTextOutlined />, color: '#2f6fb0', permission: 'billing.view' },
+  { key: 'billing', path: '/billing', icon: <FileTextOutlined />, color: c.primary, permission: 'billing.view' },
   { key: 'pharmacy', path: '/pharmacy', icon: <ShopOutlined />, color: '#b5497a', permission: 'pharmacy.view', feature: 'pharmacy' },
   { key: 'products', path: '/products', icon: <GiftOutlined />, color: '#c2412d', permission: 'products.view', feature: 'pharmacy' },
-  { key: 'availability', path: '/schedules', icon: <ClockCircleOutlined />, color: '#7a52b3', permission: 'schedules.view' },
+  { key: 'availability', path: '/schedules', icon: <ClockCircleOutlined />, color: c.accent, permission: 'schedules.view' },
   { key: 'therapy', path: '/therapy', icon: <HeartOutlined />, color: '#1f8a70', permission: 'therapy.view', feature: 'panchakarma' },
   { key: 'reports', path: '/reports', icon: <BarChartOutlined />, color: '#d4851c', permission: 'reports.view' },
 ];
