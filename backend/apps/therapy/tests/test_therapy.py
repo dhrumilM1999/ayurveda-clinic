@@ -199,3 +199,30 @@ def test_undo_a_therapy_session_step_by_step(on, org, roles, branch_a, doctor, t
     # too late
     TherapySession.objects.filter(pk=sid).update(updated_at=timezone.now() - timedelta(minutes=61))
     assert t.post(f"/api/v1/therapy-sessions/{sid}/undo/").status_code == 400
+
+
+@pytest.mark.django_db
+def test_a_missed_session_can_be_moved_to_a_new_day(on, org, roles, branch_a, doctor, therapist, room, patient, abhyanga):
+    c = client_for(doctor, branch_a)
+    plan = make_plan(c, patient, abhyanga, sessions=2)
+    url = f"/api/v1/therapy-plans/{plan['id']}/schedule/"
+    item = plan["items"][0]["id"]
+    a = c.post(url, {"item": item, "dates": [str(DAY)], "start_time": "09:00", "therapist": str(therapist.id),
+                     "room": str(room.id)}, format="json").data[0]
+    b = c.post(url, {"item": item, "dates": [str(DAY)], "start_time": "11:00", "therapist": str(therapist.id)}, format="json").data[0]
+    assert c.post(f"/api/v1/therapy-sessions/{a['id']}/missed/").status_code == 200
+    new_day = DAY + timedelta(days=2)
+    # the therapist is busy with the other session at 11:00
+    res = c.post(f"/api/v1/therapy-sessions/{a['id']}/reschedule/", {"date": str(DAY), "start_time": "11:10"}, format="json")
+    assert res.status_code == 400 and "already booked" in str(res.data["therapist"])
+    # a day that has passed is refused
+    res = c.post(f"/api/v1/therapy-sessions/{a['id']}/reschedule/",
+                 {"date": str(date.today() - timedelta(days=1)), "start_time": "10:00"}, format="json")
+    assert res.status_code == 400 and "passed" in str(res.data["date"])
+    res = c.post(f"/api/v1/therapy-sessions/{a['id']}/reschedule/", {"date": str(new_day), "start_time": "10:00"}, format="json")
+    assert res.status_code == 200, res.data
+    assert res.data["status"] == "scheduled" and res.data["date"] == str(new_day) and res.data["start_time"].startswith("10:00")
+    assert str(res.data["therapist"]) == str(therapist.id)  # kept
+    # a session that is done or cancelled cannot be moved
+    assert c.post(f"/api/v1/therapy-sessions/{b['id']}/cancel/").status_code == 200
+    assert c.post(f"/api/v1/therapy-sessions/{b['id']}/reschedule/", {"date": str(new_day), "start_time": "15:00"}, format="json").status_code == 400

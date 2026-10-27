@@ -1,7 +1,7 @@
 // The day's therapy sessions: who comes when, with which therapist and room. The therapist starts a session and records
 // the oil used and how the patient felt. SAFE TO EDIT: the words are in src/i18n/*.json under "therapy".
 import { CheckOutlined, CloseOutlined, LeftOutlined, PlayCircleOutlined, ReloadOutlined, RightOutlined, UndoOutlined, UserDeleteOutlined } from '@ant-design/icons';
-import { App, Button, DatePicker, Form, Input, InputNumber, Modal, Popconfirm, Select, Space, Table, Tooltip, Typography } from 'antd';
+import { App, Button, DatePicker, Form, Input, InputNumber, Modal, Popconfirm, Select, Space, Table, Tag, TimePicker, Tooltip, Typography } from 'antd';
 import dayjs from 'dayjs';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -24,6 +24,7 @@ export default function SessionsTab() {
   const [options, setOptions] = useState<TherapyOptions>({ therapists: [], rooms: [] });
   const [loading, setLoading] = useState(false);
   const [recording, setRecording] = useState<TherapySession | null>(null);
+  const [moving, setMoving] = useState<TherapySession | null>(null);
   const [saving, setSaving] = useState(false);
   const [form] = Form.useForm();
 
@@ -54,6 +55,10 @@ export default function SessionsTab() {
       message.error(errorMessage(err, t('common.saveFailed')));
     }
   };
+
+  // Booked, but the day or time has gone by and it was never started: it must be moved or cancelled
+  const timePassed = (r: TherapySession) => r.status === 'scheduled'
+    && dayjs(`${r.date} ${r.end_time}`).isBefore(dayjs());
 
   const openRecord = (row: TherapySession) => {
     setRecording(row);
@@ -112,8 +117,19 @@ export default function SessionsTab() {
           { title: t('common.status'), width: 130, render: (_, r) => <SessionStatusTag status={r.status} /> },
           {
             title: '', width: 330, align: 'right',
-            render: (_, r) => canManage && (r.status === 'scheduled' || r.status === 'in_progress' || r.undo_to) ? (
+            render: (_, r) => canManage && (r.status === 'scheduled' || r.status === 'in_progress' || r.status === 'missed' || r.undo_to) ? (
               <Space size={4} style={{ justifyContent: 'flex-end' }}>
+                {timePassed(r) && <Tag color="orange" style={{ marginInlineEnd: 0 }}>{t('therapy.timePassed')}</Tag>}
+                {(r.status === 'missed' || timePassed(r)) && (
+                  <>
+                    <Button size="small" type="primary" ghost onClick={() => setMoving(r)}>{t('therapy.reschedule')}</Button>
+                    {r.status === 'missed' && (
+                      <Popconfirm title={t('therapy.cancelAsk')} onConfirm={() => act(r, 'cancel')}>
+                        <Button size="small" danger>{t('therapy.cancel')}</Button>
+                      </Popconfirm>
+                    )}
+                  </>
+                )}
                 {r.undo_to && (
                   <Tooltip title={t('undo.to', { status: t(`therapy.status.${r.undo_to}`) })}>
                     <Button size="small" icon={<UndoOutlined />} onClick={() => act(r, 'undo')}>{t('undo.button')}</Button>
@@ -136,6 +152,8 @@ export default function SessionsTab() {
           },
         ]}
       />
+
+      <MoveModal session={moving} options={options} onClose={() => setMoving(null)} onMoved={() => { setMoving(null); load(); }} />
 
       <Modal open={!!recording} title={t('therapy.record.title')} onCancel={() => setRecording(null)} onOk={saveRecord}
         okText={t('therapy.record.save')} confirmLoading={saving} destroyOnHidden>
@@ -160,5 +178,67 @@ export default function SessionsTab() {
         )}
       </Modal>
     </>
+  );
+}
+
+/** Move a session that was not done to a new day and time (same therapist and room unless changed). */
+function MoveModal({ session, options, onClose, onMoved }: {
+  session: TherapySession | null; options: TherapyOptions; onClose: () => void; onMoved: () => void;
+}) {
+  const { t } = useTranslation();
+  const { message } = App.useApp();
+  const name = useTherapyName();
+  const [form] = Form.useForm();
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!session) return;
+    const today = dayjs();
+    form.setFieldsValue({
+      date: dayjs(session.date).isBefore(today, 'day') ? today : dayjs(session.date),
+      start_time: dayjs(session.start_time, 'HH:mm'),
+      therapist: session.therapist ?? undefined, room: session.room ?? undefined,
+    });
+  }, [session, form]);
+
+  const save = async () => {
+    if (!session) return;
+    const v = await form.validateFields();
+    setSaving(true);
+    try {
+      await api.post(`/therapy-sessions/${session.id}/reschedule/`, {
+        date: v.date.format('YYYY-MM-DD'), start_time: v.start_time.format('HH:mm'),
+        therapist: v.therapist ?? null, room: v.room ?? null,
+      });
+      message.success(t('therapy.rescheduled'));
+      onMoved();
+    } catch (err) {
+      message.error(errorMessage(err, t('common.saveFailed')));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Modal open={!!session} title={session ? t('therapy.rescheduleTitle', { name: name(session) }) : ''} onCancel={onClose} onOk={save}
+      okText={t('therapy.reschedule')} confirmLoading={saving} destroyOnHidden>
+      {session && <div className="cell-sub" style={{ marginBottom: 12 }}><b>{session.patient_detail.full_name}</b> · {t('therapy.rescheduleHelp')}</div>}
+      <Form form={form} layout="vertical">
+        <Space align="start" wrap>
+          <Form.Item name="date" label={t('appointments.date')} rules={[{ required: true, message: t('common.required') }]}>
+            <DatePicker format="DD-MM-YYYY" allowClear={false} disabledDate={(d) => d.isBefore(dayjs(), 'day')} />
+          </Form.Item>
+          <Form.Item name="start_time" label={t('therapy.book.time')} rules={[{ required: true, message: t('common.required') }]}>
+            <TimePicker format="HH:mm" minuteStep={5} allowClear={false} />
+          </Form.Item>
+        </Space>
+        <Form.Item name="therapist" label={t('therapy.book.therapist')}>
+          <Select allowClear placeholder={t('therapy.anyone')} options={options.therapists.map((x) => ({ value: x.id, label: x.name }))} />
+        </Form.Item>
+        <Form.Item name="room" label={t('therapy.book.room')}>
+          <Select allowClear placeholder={t('therapy.noRoom')} options={options.rooms.map((x) => ({ value: x.id, label: x.name }))} />
+        </Form.Item>
+      </Form>
+    </Modal>
   );
 }

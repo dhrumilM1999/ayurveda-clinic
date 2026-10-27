@@ -222,3 +222,12 @@ class ScheduleSerializer(serializers.Serializer):
     end_time = serializers.TimeField(required=False)
     therapist = serializers.UUIDField(required=False, allow_null=True)
     room = serializers.UUIDField(required=False, allow_null=True)
+
+
+class SessionRescheduleSerializer(serializers.Serializer):
+    """Move one session: the new day and time. Leave therapist / room out to keep them; send null to clear them."""
+
+    date = serializers.DateField()
+    start_time = serializers.TimeField()
+    therapist = serializers.UUIDField(required=False, allow_null=True)
+    room = serializers.UUIDField(required=False, allow_null=True)

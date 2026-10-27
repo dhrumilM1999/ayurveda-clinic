@@ -1,7 +1,7 @@
 // The buttons on one appointment row: the next step (Check in / Start / Done) and a "more" menu
 // (Reschedule, Cancel, Did not come, WhatsApp). Used on the Appointments screen and the patient file.
 import { MoreOutlined, UndoOutlined } from '@ant-design/icons';
-import { App, Button, DatePicker, Dropdown, Form, Input, Modal, Space, Tooltip } from 'antd';
+import { App, Button, DatePicker, Dropdown, Form, Input, Grid, Modal, Space, Tooltip } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -10,7 +10,7 @@ import { api, errorMessage } from '../../api/client';
 import type { Appointment, PatientNotification, Slot } from '../../api/types';
 import { useAuth } from '../../auth/AuthContext';
 import { OpdBillModal } from '../billing/OpdBillModal';
-import { NotificationResult, SlotPicker, fmtTime } from './shared';
+import { NotificationResult, SlotPicker, fmtTime, isTimePassed } from './shared';
 
 type Step = 'check-in' | 'start' | 'complete' | 'no-show';
 
@@ -25,9 +25,14 @@ export function AppointmentActions({ appointment: a, onChanged }: { appointment:
   const [notice, setNotice] = useState<{ title: string; notification?: PatientNotification; thenBill?: boolean } | null>(null);
   const [billOpen, setBillOpen] = useState(false);
   const canBill = can('billing.charge') || can('billing.create');
+  const screens = Grid.useBreakpoint();
 
   if (!can('appointments.manage') && !can('emr.edit')) return null;
   const isToday = a.date === dayjs().format('YYYY-MM-DD');
+  // Booked, but the day or the time has gone by and the patient never came: staff must decide (move it or cancel it)
+  const timePassed = isTimePassed(a);
+  // On a phone the two buttons would cover the patient name, so they stay in the ... menu there
+  const needsDecision = (timePassed || a.status === 'no_show') && !!screens.md;
 
   const run = async (step: Step) => {
     setBusy(true);
@@ -105,12 +110,12 @@ export function AppointmentActions({ appointment: a, onChanged }: { appointment:
   const menu = [
     ...(canCheckup ? [{ key: 'checkup', label: t('consult.openCheckup') }] : []),
     ...(canBill && !['cancelled', 'no_show'].includes(a.status) ? [{ key: 'bill', label: t('opd.titlePlain') }] : []),
-    ...(a.status === 'booked' ? [{ key: 'reschedule', label: t('appointments.reschedule') }] : []),
+    ...(['booked', 'no_show'].includes(a.status) ? [{ key: 'reschedule', label: t('appointments.reschedule') }] : []),
     ...(a.undo_to && a.status === 'booked' ? [{ key: 'undo-booking', label: undoLabel }] : []),
     ...(a.status === 'checked_in' ? [{ key: 'complete', label: t('appointments.complete') }] : []),
     ...(a.status === 'booked' && !dayjs(a.date).isAfter(dayjs(), 'day') && !(dayjs(a.date).isSame(dayjs(), 'day') && a.start_time && a.start_time.slice(0, 5) > dayjs().format('HH:mm')) ? [{ key: 'no-show', label: t('appointments.markNoShow') }] : []),
     { key: 'whatsapp', label: t('appointments.whatsapp') },
-    ...(['booked', 'checked_in'].includes(a.status) ? [{ key: 'cancel', label: t('appointments.cancel'), danger: true }] : []),
+    ...(['booked', 'checked_in', 'no_show'].includes(a.status) ? [{ key: 'cancel', label: t('appointments.cancel'), danger: true }] : []),
   ];
 
   const onMenu = ({ key }: { key: string }) => {
@@ -133,6 +138,12 @@ export function AppointmentActions({ appointment: a, onChanged }: { appointment:
   return (
     <>
       <Space size={4}>
+        {needsDecision && (
+          <>
+            <Button size="small" type="primary" ghost onClick={() => setRescheduleOpen(true)}>{t('appointments.reschedule')}</Button>
+            <Button size="small" danger onClick={() => setCancelOpen(true)}>{t('common.cancel')}</Button>
+          </>
+        )}
         {main && (
           <Button size="small" type={main.step === 'check-in' ? 'primary' : 'default'} loading={busy} onClick={() => run(main!.step)}>
             {main.label}

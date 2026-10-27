@@ -714,7 +714,8 @@
     },
     "clickToStart": "Doctor: click a patient to start the check-up. The patient becomes With doctor.",
     "viewList": "List",
-    "viewCalendar": "Calendar"
+    "viewCalendar": "Calendar",
+    "timePassed": "Time passed"
   },
   "queue": {
     "title": "Queue",
@@ -2125,7 +2126,13 @@
       "loadedN": "{{n}} therapies added.",
       "empty": "No therapies yet. Add the starting list (Abhyanga, Shirodhara, Virechana ...) and change it as you like."
     },
-    "off": "Panchakarma and therapy is switched off for this branch. Switch it on in Settings, Modules."
+    "off": "Panchakarma and therapy is switched off for this branch. Switch it on in Settings, Modules.",
+    "timePassed": "Time passed",
+    "reschedule": "Reschedule",
+    "rescheduleTitle": "Move session: {{name}}",
+    "rescheduleHelp": "This session was not done. Pick a new day and time, or cancel it.",
+    "rescheduled": "Session moved",
+    "keepTherapist": "Keep the same therapist and room"
   },
   "undo": {
     "button": "Undo",

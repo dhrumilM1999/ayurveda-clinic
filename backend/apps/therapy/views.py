@@ -10,7 +10,7 @@ from apps.organizations.models import Room
 from apps.organizations.services import is_feature_enabled
 
 from .models import TherapyPlan, TherapyPlanItem, TherapySession, TherapyType
-from .serializers import ScheduleSerializer, TherapyPlanSerializer, TherapySessionSerializer, TherapyTypeSerializer
+from .serializers import ScheduleSerializer, SessionRescheduleSerializer, TherapyPlanSerializer, TherapySessionSerializer, TherapyTypeSerializer
 from .services import check_free, end_for, load_sample_therapies, refresh_plan_status, therapists_in_branch, undo_last_step
 
 FEATURE = "panchakarma"
@@ -137,7 +137,7 @@ class TherapySessionViewSet(ModuleSwitch, AuditedModelViewSet):
     ordering_fields = ["date", "start_time"]
     pagination_class = None
     required_permissions = {"start": "therapy.manage", "complete": "therapy.manage", "missed": "therapy.manage",
-                            "cancel": "therapy.manage", "undo": "therapy.manage", "options": "therapy.view"}
+                            "cancel": "therapy.manage", "reschedule": "therapy.manage", "undo": "therapy.manage", "options": "therapy.view"}
 
     def create(self, request, *args, **kwargs):
         raise ValidationError({"detail": "Book sessions from the plan (POST /therapy-plans/<id>/schedule/)."})
@@ -186,6 +186,46 @@ class TherapySessionViewSet(ModuleSwitch, AuditedModelViewSet):
     @action(detail=True, methods=["post"])
     def cancel(self, request, pk=None):
         return self._set(request, "cancelled")
+
+    @action(detail=True, methods=["post"])
+    def reschedule(self, request, pk=None):
+        """Move a session that was not done (still booked, or marked 'did not come') to a new day and time."""
+        session = self.get_object()
+        if session.status not in ("scheduled", "missed"):
+            raise ValidationError({"detail": f"This session is {session.get_status_display().lower()} and cannot be moved."})
+        if session.plan.status in ("cancelled", "completed"):
+            raise ValidationError({"detail": "This therapy plan is closed."})
+        serializer = SessionRescheduleSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        new = serializer.validated_data
+        if new["date"] < timezone.localdate():
+            raise ValidationError({"date": "The date has already passed."})
+        duration = (session.end_time.hour * 60 + session.end_time.minute) - (session.start_time.hour * 60 + session.start_time.minute)
+        end = end_for(new["start_time"], max(duration, 5))
+        therapist, room = session.therapist, session.room
+        if "therapist" in new:
+            therapist = None
+            if new["therapist"]:
+                therapist = next((u for u in therapists_in_branch(request.branch) if u.id == new["therapist"]), None)
+                if therapist is None:
+                    raise ValidationError({"therapist": "This person cannot be booked for therapy in this branch."})
+        if "room" in new:
+            room = None
+            if new["room"]:
+                room = Room.objects.filter(pk=new["room"], branch=request.branch, organization_id=request.user.organization_id,
+                                           is_active=True).first()
+                if room is None:
+                    raise ValidationError({"room": "Room not found in this branch."})
+        check_free(request.branch, new["date"], new["start_time"], end, therapist, room, exclude_id=session.pk)
+        before = {"date": str(session.date), "start_time": session.start_time.strftime("%H:%M"), "status": session.status}
+        session.date, session.start_time, session.end_time = new["date"], new["start_time"], end
+        session.therapist, session.room, session.status = therapist, room, "scheduled"
+        session.updated_by = request.user
+        session.save()
+        refresh_plan_status(session.plan)
+        log_action(request, "update", session, changes={"rescheduled": {"from": before, "to": {
+            "date": str(session.date), "start_time": session.start_time.strftime("%H:%M"), "status": "scheduled"}}})
+        return Response(self.get_serializer(session).data)
 
     @action(detail=True, methods=["post"])
     def undo(self, request, pk=None):

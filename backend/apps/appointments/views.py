@@ -147,8 +147,8 @@ class AppointmentViewSet(AuditedModelViewSet):
     @action(detail=True, methods=["post"])
     def reschedule(self, request, pk=None):
         appointment = self.get_object()
-        if appointment.status != "booked":
-            raise ValidationError({"detail": "Only booked appointments (patient not yet arrived) can be moved."})
+        if appointment.status not in ("booked", "no_show"):
+            raise ValidationError({"detail": "Only booked appointments (patient not yet arrived) or ones marked 'did not come' can be moved."})
         serializer = RescheduleSerializer(data=request.data, context={"appointment": appointment})
         serializer.is_valid(raise_exception=True)
         new = serializer.validated_data
@@ -159,6 +159,7 @@ class AppointmentViewSet(AuditedModelViewSet):
                 appointment.start_time = new["start_time"]
                 appointment.end_time = new["end_time"]
                 appointment.reschedule_count += 1
+                appointment.status = "booked"  # a "did not come" appointment becomes a booked one again
                 appointment.updated_by = request.user
                 appointment.save()
         except IntegrityError:

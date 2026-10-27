@@ -359,3 +359,25 @@ def test_did_not_come_only_after_the_appointment_time(org, receptionist, doctor,
         assert res.status_code == 400 and "time has not come" in str(res.data)
     Appointment.objects.filter(pk=later.pk).update(start_time=time(0, 1))
     assert client.post(f"{URL}{later.id}/no-show/").status_code == 200
+
+
+@pytest.mark.django_db
+def test_did_not_come_appointment_can_be_moved_to_a_new_day(org, receptionist, doctor, branch_a, schedule, patient):
+    client = client_for(receptionist, branch_a)
+    past = Appointment.objects.create(organization=org, branch=branch_a, patient=patient, doctor=doctor,
+                                      date=timezone.localdate(), start_time=time(0, 1), end_time=time(0, 16), status="no_show")
+    new_day = tomorrow()
+    res = client.post(f"{URL}{past.id}/reschedule/", {"date": str(new_day), "start_time": "10:00"}, format="json")
+    assert res.status_code == 200, res.data
+    past.refresh_from_db()
+    assert past.status == "booked" and past.date == new_day and past.reschedule_count == 1
+
+
+@pytest.mark.django_db
+def test_did_not_come_appointment_can_be_cancelled(org, receptionist, doctor, branch_a, schedule, patient):
+    client = client_for(receptionist, branch_a)
+    past = Appointment.objects.create(organization=org, branch=branch_a, patient=patient, doctor=doctor,
+                                      date=timezone.localdate(), start_time=time(0, 1), end_time=time(0, 16), status="no_show")
+    assert client.post(f"{URL}{past.id}/cancel/", {"reason": "Patient called"}, format="json").status_code == 200
+    past.refresh_from_db()
+    assert past.status == "cancelled"

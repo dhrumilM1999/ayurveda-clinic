@@ -22,6 +22,13 @@ export const STATUS_COLORS: Record<AppointmentStatus, string> = {
   no_show: 'default',
 };
 
+/** Booked, but the day or the time has gone by and the patient never arrived: staff must move it or cancel it. */
+export function isTimePassed(a: { status: AppointmentStatus; date: string; start_time: string | null }) {
+  if (a.status !== 'booked') return false;
+  if (dayjs(a.date).isBefore(dayjs(), 'day')) return true;
+  return dayjs(a.date).isSame(dayjs(), 'day') && !!a.start_time && a.start_time.slice(0, 5) < dayjs().format('HH:mm');
+}
+
 export function StatusTag({ status }: { status: AppointmentStatus }) {
   const { t } = useTranslation();
   return <Tag color={STATUS_COLORS[status]} style={{ marginInlineEnd: 0 }}>{t(`appointments.status.${status}`)}</Tag>;
