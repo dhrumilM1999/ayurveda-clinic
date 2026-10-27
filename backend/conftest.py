@@ -12,6 +12,15 @@ from apps.organizations.models import Branch, Organization
 PASSWORD = "Test@Clinic2026"
 
 
+def pytest_configure(config):
+    """Tests create and delete data: never let them touch a cloud (live) database. Use run-tests.bat."""
+    from django.conf import settings
+
+    host = settings.DATABASES["default"]["HOST"]
+    if host not in ("db", "localhost", "127.0.0.1"):
+        raise RuntimeError(f"Tests refused: the database is {host}, not the local one. Run run-tests.bat instead.")
+
+
 @pytest.fixture(autouse=True)
 def _test_settings(settings):
     settings.SMS_PROVIDER = "fake"

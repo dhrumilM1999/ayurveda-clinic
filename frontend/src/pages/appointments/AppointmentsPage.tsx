@@ -1,10 +1,11 @@
 // Appointments of one day in the current branch: book, walk-in, check in, reschedule, cancel.
-import { LeftOutlined, PlusOutlined, ReloadOutlined, RightOutlined, UserAddOutlined } from '@ant-design/icons';
+import { CalendarOutlined, LeftOutlined, PlusOutlined, ReloadOutlined, RightOutlined, UnorderedListOutlined, UserAddOutlined } from '@ant-design/icons';
 import { App, Button, DatePicker, Segmented, Select, Space, Table, Typography } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import CalendarPage from './CalendarPage';
 import { api, errorMessage } from '../../api/client';
 import type { Appointment, AppointmentDoctor, AppointmentStatus } from '../../api/types';
 import { useList } from '../../api/useList';
@@ -26,7 +27,7 @@ const FILTER_STATUSES: Record<Filter, AppointmentStatus[] | null> = {
   cancelled: ['cancelled', 'no_show'],
 };
 
-export default function AppointmentsPage() {
+function AppointmentsList() {
   const { t } = useTranslation();
   const { message } = App.useApp();
   const { can, multiDoctor } = useAuth();
@@ -187,6 +188,23 @@ export default function AppointmentsPage() {
         defaultDoctor={doctor}
         onClose={(changed) => { setBooking(null); if (changed) reload(); }}
       />
+    </>
+  );
+}
+
+// One screen for both views of the same appointments: a list of the day, or the month calendar (?view=calendar)
+export default function AppointmentsPage() {
+  const { t } = useTranslation();
+  const [params, setParams] = useSearchParams();
+  const view = params.get('view') === 'calendar' ? 'calendar' : 'list';
+  return (
+    <>
+      <Segmented className="view-switch" value={view} onChange={(v) => setParams(v === 'calendar' ? { view: 'calendar' } : {}, { replace: true })}
+        options={[
+          { value: 'list', label: t('appointments.viewList'), icon: <UnorderedListOutlined /> },
+          { value: 'calendar', label: t('appointments.viewCalendar'), icon: <CalendarOutlined /> },
+        ]} />
+      {view === 'calendar' ? <CalendarPage /> : <AppointmentsList />}
     </>
   );
 }

@@ -21,7 +21,7 @@ def test_additional_features_are_off_by_default(org, org_admin, branch_a):
     # one OPD bill" are on
     assert {r["code"] for r in response.data if r["enabled"]} == basics | {"opd_billing", "pharmacy_billing", "combined_opd_bill", "pharmacy_stock_alerts", "pharmacy_opening_stock",
                                                                          "pharmacy_sales_returns", "pharmacy_supplier_returns", "pharmacy_stock_check",
-                                                                         "pharmacy_stock_ledger", "pharmacy_reports"}
+                                                                         "pharmacy_stock_ledger", "pharmacy_reports", "clinic_products"}
     assert not is_feature_enabled(branch_a, "pharmacy_racks")
 
 

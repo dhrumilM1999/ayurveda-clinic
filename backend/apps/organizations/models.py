@@ -70,6 +70,10 @@ class Branch(OrgScopedModel):
     print_on_pad = models.BooleanField("Print prescriptions on our pre-printed pad", default=False)
     pad_top_mm = models.PositiveSmallIntegerField("Blank space at the top (mm)", default=45)
     pad_bottom_mm = models.PositiveSmallIntegerField("Blank space at the bottom (mm)", default=20)
+    # The clinic's letterhead as an A4 picture (uploaded as PDF / PNG / JPG). When it is on, prescriptions are printed
+    # on top of it (preview and PDF look exactly like the file) and keep the pad_top_mm / pad_bottom_mm space free.
+    letterhead_image = models.ImageField(upload_to="letterheads/", blank=True)
+    letterhead_picture_on = models.BooleanField("Print the letterhead picture on prescriptions", default=True)
     # Look of the prescription. "ayurveda_pad" = one A4 case sheet like a classic Ayurveda pad: logo and doctor at
     # the top, timings bar, लक्षण / निदान, the Agni ... Srotas list on the left, Rx on the right, quote and services
     # band and address at the bottom. The texts below are printed on it (Settings -> Branch details).

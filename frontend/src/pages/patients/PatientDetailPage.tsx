@@ -14,6 +14,7 @@ import { genderAge } from './PatientsPage';
 import { ActivityTab } from './tabs/ActivityTab';
 import { AppointmentsTab } from './tabs/AppointmentsTab';
 import { VisitsTab } from './tabs/VisitsTab';
+import { HandwrittenPages } from '../consult/handwriting/HandwrittenPages';
 import { ConsentTab } from './tabs/ConsentTab';
 import { DocumentsTab } from './tabs/DocumentsTab';
 import { MedicalTab } from './tabs/MedicalTab';
@@ -49,6 +50,7 @@ export default function PatientDetailPage() {
     { key: 'overview', label: t('patients.tabs.overview'), children: <OverviewTab patient={patient} /> },
     { key: 'medical', label: t('patients.tabs.medical'), children: <MedicalTab patient={patient} /> },
     ...(can('emr.view') ? [{ key: 'visits', label: t('patients.tabs.visits'), children: <VisitsTab patientId={patient.id} /> }] : []),
+    ...(can('prescriptions.view') ? [{ key: 'handwriting', label: t('patients.tabs.handwriting'), children: <><Typography.Paragraph type="secondary">{t('handwriting.historyHelp')}</Typography.Paragraph><HandwrittenPages patientId={patient.id} history /></> }] : []),
     ...(canSeeVitals ? [{ key: 'vitals', label: t('patients.tabs.vitals'), children: <VitalsTab patientId={patient.id} /> }] : []),
     ...(canDocuments ? [{ key: 'documents', label: t('patients.tabs.documents'), children: <DocumentsTab patientId={patient.id} /> }] : []),
     ...(can('appointments.view') && features.appointments !== false

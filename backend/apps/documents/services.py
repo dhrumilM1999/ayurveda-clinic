@@ -82,14 +82,28 @@ def verify_url(doc: IssuedDocument) -> str:
     return f"{settings.PUBLIC_APP_URL}/verify/{doc.token}"
 
 
+A5_SCALE = 0.70711  # A5 is A4 scaled down to this
+
+
 def pad_for(branch, size: str):
     """
     Pre-printed pad (Settings -> Branch details): the clinic's own paper already has the letterhead, so the
     print-out leaves blank space at the top / bottom and prints no letterhead. A4 and A5 only.
+    Letterhead picture: the same blank space, and the picture is drawn behind the page (A4, and A5 scaled).
     """
+    pad = {"top": f"{branch.pad_top_mm}mm", "bottom": f"{branch.pad_bottom_mm}mm", "image": ""}
+    # The clinic's letterhead picture (A4 or A5, which is the same page at 70.7 %): drawn behind the page, so the preview
+    # and the PDF look like the file. On A5 the free space at the top and bottom shrinks the same way.
+    if size in ("a4", "a5") and branch.letterhead_picture_on and branch.letterhead_image:
+        pad["image"] = _data_uri(branch.letterhead_image)
+        if pad["image"]:
+            if size == "a5":
+                pad["top"] = f"{round(branch.pad_top_mm * A5_SCALE, 1)}mm"
+                pad["bottom"] = f"{round(branch.pad_bottom_mm * A5_SCALE, 1)}mm"
+            return pad
     if not branch.print_on_pad or size not in ("a4", "a5"):
         return None
-    return {"top": f"{branch.pad_top_mm}mm", "bottom": f"{branch.pad_bottom_mm}mm"}
+    return pad
 
 
 def letterhead(branch, doctor) -> dict:

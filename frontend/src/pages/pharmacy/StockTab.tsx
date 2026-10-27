@@ -1,7 +1,7 @@
 // Stock of this branch: one row per medicine (available, near expiry, minimum level), batches inside with
 // corrections, stock history. Extras (Additional settings): alerts, rack location, barcode search,
 // opening stock, returns to the supplier, detailed batch prices.
-import { EditOutlined, EnvironmentOutlined, HistoryOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
+import { EditOutlined, EnvironmentOutlined, HistoryOutlined, PlusOutlined, ReloadOutlined, WhatsAppOutlined } from '@ant-design/icons';
 import { App, Button, Form, Input, InputNumber, Modal, Segmented, Select, Space, Spin, Table, Tag, Tooltip } from 'antd';
 import dayjs from 'dayjs';
 import { useCallback, useEffect, useState } from 'react';
@@ -23,6 +23,7 @@ export function AlertTiles({ onPick, active }: { onPick?: (show: Show) => void; 
   const { t } = useTranslation();
   const [alerts, setAlerts] = useState<StockAlerts | null>(null);
   useEffect(() => { api.get<StockAlerts>('/stock/alerts/').then(({ data }) => setAlerts(data)).catch(() => setAlerts(null)); }, []);
+  const { message } = App.useApp();
   const [neededOpen, setNeededOpen] = useState(false);
   const [needed, setNeeded] = useState<NeededMedicine[]>([]);
   if (!alerts) return null;
@@ -31,6 +32,13 @@ export function AlertTiles({ onPick, active }: { onPick?: (show: Show) => void; 
   ];
   const openNeeded = () => {
     api.get<NeededMedicine[]>('/stock/needed/').then(({ data }) => { setNeeded(data); setNeededOpen(true); }).catch(() => undefined);
+  };
+  // Free WhatsApp: opens WhatsApp with the message typed for the owner; the person only presses Send
+  const sendWhatsApp = () => {
+    api.get<{ link: string; message: string }>('/stock/alert-message/').then(({ data }) => {
+      if (data.link) window.open(data.link, '_blank', 'noopener');
+      else navigator.clipboard?.writeText(data.message).then(() => message.info(t('pharmacy.alerts.copied')));
+    }).catch(() => message.error(t('common.loadFailed')));
   };
   return (
     <div className="alert-tiles">
@@ -45,6 +53,9 @@ export function AlertTiles({ onPick, active }: { onPick?: (show: Show) => void; 
         <span className="alert-count num">{alerts.needed}</span>
         <span className="alert-label">{t('pharmacy.alerts.needed')}</span>
       </button>
+      {(alerts.out > 0 || alerts.low > 0) && (
+        <Button className="alert-whatsapp" icon={<WhatsAppOutlined />} onClick={sendWhatsApp}>{t('pharmacy.alerts.whatsapp')}</Button>
+      )}
       <Modal open={neededOpen} onCancel={() => setNeededOpen(false)} footer={null} title={t('pharmacy.needed.title')} destroyOnHidden>
         <div className="cell-sub" style={{ marginBottom: 8 }}>{t('pharmacy.needed.help')}</div>
         <Table<NeededMedicine> size="small" rowKey="medicine" dataSource={needed} pagination={false}

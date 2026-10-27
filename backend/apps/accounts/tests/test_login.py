@@ -12,6 +12,12 @@ VERIFY = "/api/v1/auth/verify-otp/"
 ME = "/api/v1/auth/me/"
 
 
+@pytest.fixture(autouse=True)
+def otp_switched_on(settings):
+    """The OTP rules below are tested with the OTP switch on; the default (off) is tested at the end of this file."""
+    settings.LOGIN_OTP_ENABLED = True
+
+
 def login(api, username, password=PASSWORD):
     return api.post(LOGIN, {"username": username, "password": password}, format="json")
 
@@ -108,3 +114,12 @@ def test_me_lists_only_my_branches_with_permissions(api, receptionist, branch_a,
 def test_api_needs_login(api):
     assert api.get(ME).status_code == 401
     assert api.get("/api/v1/rooms/").status_code == 401
+
+
+@pytest.mark.django_db
+def test_otp_is_off_by_default_so_doctor_and_owner_log_in_with_the_password_only(api, doctor, org_admin, settings):
+    settings.LOGIN_OTP_ENABLED = False
+    for name in ("owner", "doc"):
+        res = login(api, name)
+        assert res.status_code == 200 and res.data["otp_required"] is False and res.data["access"]
+    assert login(api, "doc", "wrong-password").status_code == 401   # the password still protects the account

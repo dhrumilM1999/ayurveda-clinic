@@ -2,6 +2,8 @@
 Functions other modules use to ask "can this user do X in this branch?".
 ASK FIRST before editing.
 """
+from django.conf import settings
+
 from apps.organizations.models import Branch
 
 from .models import Role, UserBranchRole
@@ -50,7 +52,9 @@ def user_has_perm(user, code: str, branch=None) -> bool:
 
 
 def user_requires_2fa(user) -> bool:
-    """Doctors and admins must enter an OTP at login."""
+    """Doctors and admins must enter an OTP at login, but only when LOGIN_OTP_ENABLED is on (it is off for now)."""
+    if not settings.LOGIN_OTP_ENABLED:
+        return False
     if user.is_org_admin:
         return True
     return Role.objects.filter(

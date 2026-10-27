@@ -122,6 +122,11 @@ class Purchase(BranchScopedModel):
     other_charges = models.DecimalField(default=0, **MONEY)
     round_off = models.DecimalField(default=0, **MONEY)
     total_amount = models.DecimalField(default=0, **MONEY)
+    # The total printed on the supplier invoice, as typed by staff. total_amount is what the software calculated;
+    # a difference is shown and must be accepted on purpose (see receive_stock).
+    printed_total = models.DecimalField(null=True, blank=True, **MONEY)
+    # False = bought before "Supplier dues" existed: it is not counted as money still to pay (see payables.py)
+    in_dues = models.BooleanField(default=True)
     notes = models.CharField(max_length=300, blank=True)
 
     class Meta:
@@ -163,6 +168,46 @@ class PurchaseReturnItem(OrgScopedModel):
     batch = models.ForeignKey(StockBatch, on_delete=models.PROTECT, related_name="+")
     quantity = models.DecimalField(**QTY)
     rate = models.DecimalField(**MONEY)
+    amount = models.DecimalField(**MONEY)
+
+
+# --- Paying the suppliers (medicines bought on credit) -------------------------------------------
+class SupplierOpening(BranchScopedModel):
+    """What the clinic already owed a supplier on the day it started using the software."""
+
+    supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT, related_name="openings")
+    amount = models.DecimalField(default=0, **MONEY)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["branch", "supplier"], condition=Q(is_deleted=False), name="uniq_supplier_opening"),
+        ]
+
+
+class SupplierPayment(BranchScopedModel):
+    """Money paid to a supplier. Never deleted: a wrong one is reversed (is_reversed) and then ignored in the balance."""
+
+    MODES = [("cash", "Cash"), ("upi", "UPI"), ("bank", "Bank transfer"), ("cheque", "Cheque"), ("other", "Other")]
+    supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT, related_name="payments")
+    payment_date = models.DateField(db_index=True)
+    amount = models.DecimalField(**MONEY)
+    mode = models.CharField(max_length=10, choices=MODES, default="cash")
+    reference = models.CharField(max_length=60, blank=True)  # UPI ref / cheque no.
+    notes = models.CharField(max_length=300, blank=True)
+    is_reversed = models.BooleanField(default=False, db_index=True)
+    reversed_at = models.DateTimeField(null=True, blank=True)
+    reversed_by = models.ForeignKey("accounts.User", null=True, blank=True, on_delete=models.PROTECT, related_name="+")
+    reverse_reason = models.CharField(max_length=200, blank=True)
+
+    class Meta:
+        ordering = ["-payment_date", "-created_at"]
+
+
+class SupplierPaymentAllocation(OrgScopedModel):
+    """Which purchase invoice a payment (or a part of it) paid. A rest not allocated clears the opening balance."""
+
+    payment = models.ForeignKey(SupplierPayment, on_delete=models.PROTECT, related_name="allocations")
+    purchase = models.ForeignKey(Purchase, on_delete=models.PROTECT, related_name="payment_allocations")
     amount = models.DecimalField(**MONEY)
 
 

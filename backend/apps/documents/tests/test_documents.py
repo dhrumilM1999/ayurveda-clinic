@@ -70,7 +70,7 @@ def test_pre_printed_pad_leaves_space_and_skips_letterhead(org_admin, branch_a, 
     assert res.status_code == 200, res.data
     assert client.patch(f"/api/v1/branches/{branch_a.id}/", {"pad_top_mm": 500}, format="json").status_code == 400
     branch_a.refresh_from_db()
-    assert pad_for(branch_a, "a5") == {"top": "50mm", "bottom": "25mm"}
+    assert pad_for(branch_a, "a5") == {"top": "50mm", "bottom": "25mm", "image": ""}
     assert pad_for(branch_a, "a6") is None  # follow-up cards are never on the pad
     context = {**prescription_context(rx, "en"), **page_context("a5")}
     on_pad = render_to_string("documents/prescription.html", {**context, "pad": pad_for(branch_a, "a5")})

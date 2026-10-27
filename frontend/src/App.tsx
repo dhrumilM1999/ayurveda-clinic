@@ -15,6 +15,7 @@ import ErrorLogPage from './pages/ErrorLogPage';
 import ConsultPage from './pages/consult/ConsultPage';
 import MedicinesPage from './pages/medicines/MedicinesPage';
 import PharmacyPage from './pages/pharmacy/PharmacyPage';
+import ProductsPage from './pages/products/ProductsPage';
 import BranchesPage from './pages/BranchesPage';
 import DashboardPage from './pages/DashboardPage';
 import LoginPage from './pages/LoginPage';
@@ -34,7 +35,6 @@ import ReportsPage from './pages/ReportsPage';
 import VerifyPage from './pages/VerifyPage';
 import EnquiriesPage from './pages/enquiry/EnquiriesPage';
 import TherapyPage from './pages/therapy/TherapyPage';
-import CalendarPage from './pages/appointments/CalendarPage';
 import EnquiryFormPage from './pages/enquiry/EnquiryFormPage';
 import StaffPage from './pages/StaffPage';
 import TemplatesPage from './pages/TemplatesPage';
@@ -78,9 +78,10 @@ export default function App() {
               <Route path="consult/:visitId" element={<RequirePermission code="emr.view"><ConsultPage /></RequirePermission>} />
               <Route path="medicines" element={<RequirePermission code="medicines.view"><MedicinesPage /></RequirePermission>} />
               <Route path="billing" element={<RequirePermission code="billing.view"><BillingPage /></RequirePermission>} />
+              <Route path="products" element={<RequirePermission code="products.view"><ProductsPage /></RequirePermission>} />
               <Route path="pharmacy" element={<RequirePermission code="pharmacy.view"><PharmacyPage /></RequirePermission>} />
               <Route path="enquiries" element={<RequirePermission code="enquiries.view"><EnquiriesPage /></RequirePermission>} />
-              <Route path="calendar" element={<RequirePermission code="appointments.view"><CalendarPage /></RequirePermission>} />
+              <Route path="calendar" element={<Navigate to="/appointments?view=calendar" replace />} />
               <Route path="therapy" element={<RequirePermission code="therapy.view"><TherapyPage /></RequirePermission>} />
               <Route path="reports" element={<RequirePermission code="reports.view"><ReportsPage /></RequirePermission>} />
               <Route path="queue" element={<RequirePermission code="appointments.view"><QueuePage /></RequirePermission>} />

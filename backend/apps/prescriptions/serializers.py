@@ -14,13 +14,17 @@ class PrescriptionItemSerializer(serializers.ModelSerializer):
     medicine_flags = serializers.SerializerMethodField()
     # Packs of this medicine the branch can give today (None = not a stock medicine / pharmacy module off)
     stock_available = serializers.SerializerMethodField()
+    # What one pack of the medicine holds: the screen works out how many packs the course needs
+    pack_size = serializers.CharField(source="medicine.pack_size", read_only=True, default="")
+    units_per_pack = serializers.DecimalField(source="medicine.units_per_pack", max_digits=10, decimal_places=2, read_only=True, default=None)
+    pack_label = serializers.SerializerMethodField()
 
     class Meta:
         model = PrescriptionItem
         fields = [
             "id", "medicine", "medicine_name", "medicine_kind", "medicine_version", "dosage_form", "dose",
             "dose_unit", "frequency", "timing", "anupana", "duration", "duration_unit", "quantity",
-            "instructions", "medicine_flags", "stock_available",
+            "instructions", "medicine_flags", "stock_available", "pack_size", "units_per_pack", "pack_label",
         ]
 
     def get_stock_available(self, obj):
@@ -28,6 +32,10 @@ class PrescriptionItemSerializer(serializers.ModelSerializer):
         if stock is None or obj.medicine_id is None:
             return None
         return str(stock.get(obj.medicine_id, 0))
+
+    def get_pack_label(self, obj):
+        m = obj.medicine
+        return m.pack_type.label if m is not None and m.pack_type_id else ""
 
     def get_medicine_flags(self, obj):
         m = obj.medicine

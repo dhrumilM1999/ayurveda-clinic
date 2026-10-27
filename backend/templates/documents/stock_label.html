@@ -1,4 +1,4 @@
-{% comment %}
+{% load print_fonts %}{% comment %}
 SAFE TO EDIT: the look of the pharmacy stock labels (stuck on medicine packs; no patient details).
 - One label per page, for label printers. Sizes: compact 50x25 mm, standard 75x50 mm.
 - Which fields show follows Additional settings (batch, expiry, selling price).
@@ -9,9 +9,10 @@ Keep everything inside {{ }} and {% %}.
 <head>
 <meta charset="utf-8">
 <style>
+  {% font_face %}
   @page { size: {{ width }} {{ height }}; margin: 1.5mm 2mm; }
   * { box-sizing: border-box; }
-  body { margin: 0; font-family: "Noto Sans", sans-serif; color: #000; font-size: {% if format == "compact" %}6.5pt{% else %}8pt{% endif %}; line-height: {% if format == "compact" %}1.1{% else %}1.2{% endif %}; }
+  body { margin: 0; font-family: "Satoshi", "Noto Sans", sans-serif; color: #000; font-size: {% if format == "compact" %}6.5pt{% else %}8pt{% endif %}; line-height: {% if format == "compact" %}1.1{% else %}1.2{% endif %}; }
   .label { page-break-after: always; height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
   .label:last-child { page-break-after: auto; }
   .name { font-weight: 700; font-size: 1.35em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

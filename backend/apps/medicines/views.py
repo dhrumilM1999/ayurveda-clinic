@@ -17,7 +17,7 @@ from .services import import_medicines, import_template_csv, read_rows, save_med
 class MedicineViewSet(AuditedModelViewSet):
     """
     The medicine list (shared by all branches). Each branch sees its own price and on/off switch.
-    ?q=   search any name / synonym / composition      ?kind=classical|proprietary|homeopathy
+    ?q=   search any name / synonym / composition      ?kind=classical|proprietary|homeopathy|product
     ?for_rx=1  only medicines in use in this branch (for the prescription screen)
     """
 
@@ -49,6 +49,8 @@ class MedicineViewSet(AuditedModelViewSet):
             ranked = True
         if not is_feature_enabled(self.request.branch, "medicines_homeopathy"):
             qs = qs.exclude(kind="homeopathy")  # optional extra: Additional settings -> Homeopathy medicines
+        if not is_feature_enabled(self.request.branch, "clinic_products"):
+            qs = qs.exclude(kind="product")  # optional extra: Additional settings -> Clinic products
         if params.get("for_rx") == "1":
             off = BranchMedicine.objects.filter(branch=self.request.branch, is_active=False).values("medicine_id")
             qs = qs.filter(is_active=True).exclude(id__in=off)

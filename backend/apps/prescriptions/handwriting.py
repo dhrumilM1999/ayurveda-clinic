@@ -79,12 +79,18 @@ def build_combined(handwriting: HandwrittenPrescription) -> bytes:
                 issued_on=handwriting.visit.visit_date, series="RX")
     handwriting.number = doc.number
     lang = language_of(handwriting.patient, None, ps)
+    # The clinic's own letterhead picture (Settings -> Branch details) is used when it is switched on; otherwise the
+    # software draws its own letterhead
+    from apps.documents.services import pad_for
+
+    pad = pad_for(branch, size)
+    pad = pad if pad and pad.get("image") else None
     context = {
         **handwritten_rx_context(handwriting, lang),
         "number": doc.number, "duplicate": False, "qr": _qr(verify_url(doc)), "is_cancelled": False,
         # The saved picture is the digital copy: it ALWAYS carries the letterhead. (Printing later on the clinic pre-printed
         # pad still leaves the letterhead out, see documents/views.py.)
-        "pad": None,
+        "pad": pad,
     }
     pdf = HTML(string=render_html("prescription_handwritten.html", size, context, ps)).write_pdf()
     png, width, height = render_picture(pdf)

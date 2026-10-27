@@ -80,6 +80,9 @@ ADDITIONAL_FEATURES = {
                      "requires": "medicine_labels"},
     # Prescription
     "digital_pad": {"group": "prescription", "label": "Digital pad: handwritten prescription", "default": False},
+    # Pharmacy and products
+    "clinic_products": {"group": "pharmacy", "label": "Clinic products (sell oils, supplements and other things that are not medicines)", "default": True},
+    "separate_medicine_menu": {"group": "pharmacy", "label": "Show the Medicines list as its own menu (otherwise it is a tab inside Pharmacy)", "default": False},
     # Billing
     "combined_opd_bill": {"group": "billing", "label": "Medicines on the OPD bill (one combined bill)",
                           "default": True, "requires": "pharmacy_billing"},

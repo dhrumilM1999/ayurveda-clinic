@@ -1,4 +1,4 @@
-{% comment %}
+{% load print_fonts %}{% comment %}
 SAFE TO EDIT: the look of the Reports PDF (collection, income, patients, follow-ups, GST).
 - Colours, font sizes and margins are in the <style> part.
 - The figures come from backend/apps/reports/reports.py (ASK FIRST there).
@@ -8,9 +8,10 @@ Keep everything inside {{ }} and {% %}.
 <head>
 <meta charset="utf-8">
 <style>
+  {% font_face %}
   @page { size: {{ page_size }}; margin: 10mm; @bottom-right { content: "Page " counter(page) " of " counter(pages); font-size: 8pt; color: #777; } }
   * { box-sizing: border-box; }
-  body { margin: 0; font-family: "Noto Sans", "Noto Sans Gujarati", "Noto Sans Devanagari", sans-serif; font-size: {{ ps.base_pt|default:"9" }}pt; color: #1d1d1d; }
+  body { margin: 0; font-family: "Satoshi", "Noto Sans", "Noto Sans Gujarati", "Noto Sans Devanagari", sans-serif; font-size: {{ ps.base_pt|default:"9" }}pt; color: #1d1d1d; }
   .head { border-bottom: 0.6mm solid {{ ps.accent_color|default:"#1f5c46" }}; padding-bottom: 2mm; margin-bottom: 3mm; display: flex; justify-content: space-between; align-items: flex-end; }
   .org { font-size: 14pt; font-weight: 700; color: {{ ps.accent_color|default:"#1f5c46" }}; }
   .title { font-size: 12pt; font-weight: 700; margin-top: 1mm; }

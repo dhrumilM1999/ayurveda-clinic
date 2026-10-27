@@ -44,6 +44,10 @@ export interface Branch {
   upi_vpa: string;
   is_active: boolean;
   letterhead_footer?: string;
+  letterhead_picture_on?: boolean;
+  has_letterhead_image?: boolean;
+  pad_top_mm?: number;
+  pad_bottom_mm?: number;
 }
 
 export interface RoomType {
@@ -302,6 +306,8 @@ export interface DuplicatePatient {
   age_years: number | null;
   mobile_masked: string;
   city: string;
+  /** same name and same mobile: the same person, registered again */
+  exact?: boolean;
 }
 
 export interface Vital {
@@ -595,7 +601,7 @@ export interface VisitListItem {
 }
 
 // --- Medicines and prescriptions (Step 5) ---
-export type MedicineKind = 'classical' | 'proprietary' | 'homeopathy';
+export type MedicineKind = 'classical' | 'proprietary' | 'homeopathy' | 'product';
 export type MedicineFlag = 'schedule_e1' | 'contains_metals' | 'pregnancy_caution' | 'child_caution';
 
 export interface Medicine {
@@ -681,6 +687,10 @@ export interface RxLine {
   medicine_flags?: MedicineFlag[];
   /** Packs the pharmacy can give today (null / missing = not tracked) */
   stock_available?: string | null;
+  /** What one pack of this medicine holds (from the medicine list): used to work out how many packs to give */
+  pack_size?: string;
+  units_per_pack?: string | null;
+  pack_label?: string;
 }
 
 export interface RxWarning {
@@ -872,6 +882,12 @@ export interface PurchaseRecord {
   other_charges: string;
   round_off: string;
   total_amount: string;
+  printed_total?: string | null;
+  payable?: string | null;
+  paid?: string | null;
+  balance_due?: string | null;
+  due_date?: string | null;
+  payment_status?: '' | 'paid' | 'partly' | 'unpaid';
   notes: string;
   items: PurchaseItemRecord[];
   created_by_name: string;
@@ -907,6 +923,8 @@ export interface DispenseQueueRow {
 
 export interface DispenseLine {
   id: string;
+  /** whole packs the doctor's dose x times x days needs (null = not worked out) */
+  suggested_packs?: number | null;
   medicine: string | null;
   medicine_name: string;
   dosage_form: string;
@@ -1294,6 +1312,8 @@ export interface HandwrittenPage {
   width_px: number;
   height_px: number;
   doctor_name: string;
+  visit_date?: string;
+  page_no?: number | null;
 }
 
 export interface LabTest { id: string; name: string; name_gu: string; name_hi: string; category: string; is_active: boolean }
@@ -1314,4 +1334,28 @@ export interface Investigation {
   reported_on: string | null;
   document: string | null;
   document_title: string;
+}
+
+// --- Supplier dues (medicines bought on credit)
+export interface SupplierAgeing { current: string; d1_30: string; d31_60: string; d60_plus: string; other: string; overdue: string }
+export interface SupplierAccountRow {
+  id: string; name: string; phone: string; payment_terms_days: number | null;
+  balance: string; billed: string; paid: string; ageing: SupplierAgeing; last_payment: string | null;
+}
+export interface SupplierInvoice {
+  id: string; invoice_no: string; invoice_date: string; due_date: string; payable: string; paid: string; balance: string;
+  days_overdue: number; status: 'paid' | 'partly' | 'unpaid';
+}
+export interface SupplierAccount {
+  id: string; name: string; phone: string; payment_terms_days: number | null;
+  opening: string; billed: string; paid: string; returned: string; balance: string; ageing: SupplierAgeing;
+  invoices: SupplierInvoice[];
+  entries: { date: string; kind: string; label: string; debit: string; credit: string; balance: string; id: string; reversed: boolean }[];
+}
+
+// --- Clinic products (oils, supplements ...)
+export interface ProductRow {
+  id: string; name: string; name_gu: string; name_hi: string; pack_size: string; sku: string; barcode: string;
+  gst_rate: string; price: string | null; stock: string;
+  batches: { id: string; batch_no: string; expiry_date: string | null; quantity: string; price: string | null }[];
 }

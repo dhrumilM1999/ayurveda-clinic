@@ -53,7 +53,8 @@
     "orgAdmin": "Organization admin",
     "toggleMenu": "Show or hide menu",
     "noBranch": "You are not assigned to any branch yet. Please ask your admin.",
-    "tagline": "Clinic management"
+    "tagline": "Clinic management",
+    "softwareTagline": "Ayurveda clinic software"
   },
   "menu": {
     "dashboard": "Dashboard",
@@ -79,7 +80,8 @@
     "therapy": "Panchakarma",
     "pdfSettings": "PDF settings",
     "calendar": "Calendar",
-    "errorLog": "Error log"
+    "errorLog": "Error log",
+    "products": "Products"
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",
@@ -124,7 +126,52 @@
     "stillDue": "Still to collect",
     "stillDueNote_one": "{{count}} bill of today not fully paid",
     "stillDueNote_other": "{{count}} bills of today not fully paid",
-    "opdCollectionNoteCombined": "Consultation, services and medicines on the one bill, received today"
+    "opdCollectionNoteCombined": "Consultation, services and medicines on the one bill, received today",
+    "shortcuts": {
+      "newPatient": "New patient",
+      "appointments": "Appointments",
+      "queue": "Queue",
+      "checkup": "Check-up",
+      "billing": "Billing",
+      "pharmacy": "Pharmacy",
+      "products": "Products",
+      "therapy": "Panchakarma",
+      "calendar": "Calendar",
+      "reports": "Reports",
+      "availability": "My availability"
+    },
+    "shortcutsHelp": {
+      "newPatient": "Register a patient",
+      "appointments": "Book and manage visits",
+      "queue": "Who is waiting now",
+      "checkup": "Start a check-up",
+      "billing": "Create and manage bills",
+      "pharmacy": "Medicines and stock",
+      "products": "Sell clinic products",
+      "therapy": "Therapy plans and sessions",
+      "reports": "Money, GST and patients",
+      "availability": "Set consultation hours"
+    },
+    "quickActions": "Quick actions",
+    "pillAppointments": "appointments",
+    "pillWaiting": "waiting",
+    "pillInConsult": "in check-up",
+    "quotes": [
+      "Every patient you listen to today leaves a little lighter.",
+      "Small, steady care heals more than big, rare effort.",
+      "Good health is the quiet wealth of every home.",
+      "Your calm voice is already half the medicine.",
+      "Today is a fine day to help someone feel better.",
+      "Balance in food, sleep and mind is the heart of Ayurveda.",
+      "Healing begins the moment someone feels heard.",
+      "Be kind to every patient: you may be the best part of their day.",
+      "Patience and care make the best medicine.",
+      "A healthy day begins with a smile at the door.",
+      "Prevention is the gentlest cure.",
+      "Thank you for caring for your community today."
+    ],
+    "giveMedicines": "Give medicines & bill",
+    "nextQuote": "Another thought"
   },
   "branches": {
     "title": "Branches",
@@ -267,7 +314,16 @@
     "printClosedPlaceholder": "e.g. Sunday closed",
     "printServices": "Services band at the bottom",
     "printServicesHelp": "Separate with |   e.g. Consulting | Panchakarma | Medicine | Dietetics",
-    "printQuote": "Quote / shloka at the bottom"
+    "printQuote": "Quote / shloka at the bottom",
+    "letterheadTitle": "Letterhead picture (A4)",
+    "letterheadHelp": "Upload your letterhead file (PDF, PNG or JPG, one A4 page). Prescriptions are then printed on top of it, so the preview and the PDF look exactly like your file. The free space at the top and bottom is found by itself; you can change it below.",
+    "letterheadUpload": "Upload letterhead",
+    "letterheadChange": "Change letterhead",
+    "letterheadRemoveAsk": "Remove the letterhead picture?",
+    "letterheadSaved": "Letterhead saved. Free space: {{top}} mm at the top, {{bottom}} mm at the bottom.",
+    "letterheadOnHelp": "On: the picture is printed on the page (use this for PDF, WhatsApp and plain paper). Off: the picture is not printed (use this when you print on your own pre-printed paper).",
+    "letterheadPrint": "Print the picture",
+    "letterheadDontPrint": "Do not print it"
   },
   "audit": {
     "title": "Audit log",
@@ -445,7 +501,8 @@
       "consent": "Consent",
       "activity": "Activity",
       "appointments": "Appointments",
-      "visits": "Check-ups"
+      "visits": "Check-ups",
+      "handwriting": "Handwritten prescriptions"
     },
     "fields": {
       "title": "Title",
@@ -516,7 +573,11 @@
     },
     "draftRestored": "Your unsaved form was restored.",
     "discardDraft": "Start empty",
-    "draftSaved": "Draft kept in this browser tab"
+    "draftSaved": "Draft kept in this browser tab",
+    "sameAsk": "{{name}} (ID {{id}}) is already registered with this mobile",
+    "sameHelp": "The same name and the same mobile are already in the patient list. Registering again splits the history in two. Open the existing patient, or register anyway if it is a different person.",
+    "registerAnyway": "Register anyway",
+    "openExisting": "Open existing patient"
   },
   "vitals": {
     "record": "Record vitals",
@@ -651,7 +712,9 @@
       "cancelled": "Cancelled",
       "no_show": "Did not come"
     },
-    "clickToStart": "Doctor: click a patient to start the check-up. The patient becomes With doctor."
+    "clickToStart": "Doctor: click a patient to start the check-up. The patient becomes With doctor.",
+    "viewList": "List",
+    "viewCalendar": "Calendar"
   },
   "queue": {
     "title": "Queue",
@@ -817,7 +880,16 @@
     "step2": "Click the patient on the left. The check-up opens and the patient becomes With doctor.",
     "step3": "Write complaints, diagnosis and medicines. Everything saves by itself.",
     "step4": "Press Complete visit. The prescription goes to the pharmacy and the bill is ready.",
-    "manyPatients": "You may keep more than one patient With doctor and go back and forth; each one stays With doctor until you press Complete visit."
+    "manyPatients": "You may keep more than one patient With doctor and go back and forth; each one stays With doctor until you press Complete visit.",
+    "completeEmptyAsk": "Nothing is written in this check-up",
+    "completeEmptyHelp": "No complaint, diagnosis, notes or medicine yet. Complete it anyway? (You can re-open it later.)",
+    "completeAnyway": "Complete anyway",
+    "reasonForVisit": "Reason for visit",
+    "addAsComplaint": "Add as complaint",
+    "doneBar": "Check-up completed. Print the prescription or go on with the next patient.",
+    "printRx": "Print prescription",
+    "nextPatient": "Next patient: {{name}}",
+    "tokenN": "Token {{n}}"
   },
   "templatesAdmin": {
     "title": "Check-up templates",
@@ -916,7 +988,8 @@
       "all": "All",
       "classical": "Classical",
       "proprietary": "Patent & Proprietary",
-      "homeopathy": "Homeopathy"
+      "homeopathy": "Homeopathy",
+      "product": "Clinic product"
     },
     "flagShort": {
       "schedule_e1": "E1",
@@ -976,7 +1049,8 @@
     "sku": "Medicine code (SKU)",
     "skuHelp": "Your own short code; search finds it",
     "notes": "Notes",
-    "notesPlaceholder": "e.g. keep in a cool place"
+    "notesPlaceholder": "e.g. keep in a cool place",
+    "productHelp": "A clinic product is something you sell that is not a medicine (oil, soap, supplement). It is sold from the Products menu, with stock and a GST bill like a medicine."
   },
   "rx": {
     "title": "Prescription",
@@ -990,7 +1064,7 @@
     "makeSame": "Make same ({{n}} days)",
     "orChooseDate": "or choose a date:",
     "quantity": "Qty",
-    "quantityHelp": "Worked out from dose x M-N-N x days (e.g. 180 tablets). Type your own if needed.",
+    "quantityHelp": "How many packs to give. It is worked out from: dose each time × times a day (M-N-N) × days, divided by what one pack holds (for example 30 tablets). You can type your own.",
     "quantityPlaceholder": "e.g. 1 bottle",
     "lastPrescription": "Last prescription",
     "continueAll_one": "Continue {{count}} medicine",
@@ -1016,7 +1090,7 @@
     "medicine": "Medicine",
     "dose": "Dose",
     "frequency": "M-N-N",
-    "frequencyHelp": "Morning - Noon - Night. Quick: type 222 for 2-2-2, 101 for 1-0-1",
+    "frequencyHelp": "How many times a day: Morning - Noon - Night. 1-0-1 = morning and night. Quick: type 101. The dose is how much each time.",
     "timing": "When",
     "anupana": "Anupana",
     "duration": "For",
@@ -1036,7 +1110,11 @@
     "dosageCheck": {
       "format": "Please check: write it like 1-0-1 or type 3 digits (101).",
       "high": "Please check: more than 10 at one time?"
-    }
+    },
+    "calc": "{{dose}} {{unit}} each time × {{times}} time(s) a day × {{days}} days = {{total}} {{unit}} in all",
+    "calcPacks": "{{packs}} pack(s), each pack {{size}}",
+    "calcNoPack": "pack size of this medicine is not set, type the quantity yourself",
+    "calcMissing": "Fill dose (with its unit), M-N-N and days: the total and the number of packs are worked out here."
   },
   "pharmacy": {
     "title": "Pharmacy",
@@ -1052,7 +1130,9 @@
       "ledger": "Stock ledger",
       "setup": "Racks & suppliers",
       "counter": "Counter sale",
-      "reports": "Pharmacy reports"
+      "reports": "Pharmacy reports",
+      "dues": "Supplier dues",
+      "medicines": "Medicine list"
     },
     "status": {
       "pending": "To give",
@@ -1152,7 +1232,9 @@
       "low": "Low stock",
       "expiring": "Near expiry",
       "expired": "Expired in stock",
-      "needed": "Asked for, not in stock"
+      "needed": "Asked for, not in stock",
+      "whatsapp": "Send stock alert on WhatsApp",
+      "copied": "Alert text copied. Paste it in WhatsApp."
     },
     "checkStatus": {
       "open": "Counting",
@@ -1288,7 +1370,21 @@
       "times": "Asked (times)",
       "last": "Last asked"
     },
-    "missingStock": "{{n}} not in stock"
+    "missingStock": "{{n}} not in stock",
+    "printedTotal": "Total on supplier invoice",
+    "printedTotalHelp": "Type the final total printed on the bill. The software checks it against its own total.",
+    "totalDiffers": "The invoice total ({{printed}}) is different from the calculated total ({{calc}}) by {{diff}}. Check the rates, discount, GST and quantities.",
+    "saveAnyway": "The supplier invoice is right, save anyway",
+    "tickSaveAnyway": "The totals differ. Check the lines, or tick 'save anyway'.",
+    "totalMatches": "The total matches the supplier invoice.",
+    "expiryMissing": "{{name}}: please enter the expiry date printed on the pack.",
+    "invoiceSays": "Invoice says {{amount}}",
+    "groups": {
+      "sell": "Sell",
+      "stock": "Stock",
+      "buy": "Buy",
+      "reports": "Reports"
+    }
   },
   "billing": {
     "status": {
@@ -1544,6 +1640,14 @@
       "digital_pad": {
         "label": "Digital pad: handwritten prescription",
         "help": "Shows the Handwriting button in the doctor's check-up: write on the digital pad (or a tablet pen), and the handwriting is saved with the letterhead as one picture. Off: the button is hidden and no new handwriting can be saved; pages already written stay visible. Off by default."
+      },
+      "clinic_products": {
+        "label": "Clinic products",
+        "help": "Sell things that are not medicines (oils, soaps, supplements). Adds a Products menu for the doctor and the front desk, and a product kind in the medicine list. On by default."
+      },
+      "separate_medicine_menu": {
+        "label": "Medicines as their own menu",
+        "help": "Off (usual): the medicine list is a tab inside Pharmacy, so there is one place for medicines and stock. On: Medicines is a separate menu, for a clinic where a different person manages the medicine list."
       }
     },
     "choices": {
@@ -1820,7 +1924,12 @@
       "by_branch": "Income by branch",
       "patients": "New vs repeat patients",
       "follow_ups": "Missed follow-ups",
-      "gst": "GST summary"
+      "gst": "GST summary",
+      "fy_summary": "Month-wise (financial year)",
+      "gst_payable": "GST to pay",
+      "sales_register": "Sales register",
+      "purchase_register": "Purchase register",
+      "dues": "Bills not paid"
     },
     "help": {
       "collection": "Money received each day or month: cash, UPI and card, minus refunds. Same figures as the day closing.",
@@ -1828,14 +1937,26 @@
       "by_branch": "The same figures for each branch, to compare them.",
       "patients": "Patients seen: new cases (first check-up ever with the clinic) and follow-ups (seen before).",
       "follow_ups": "The follow-up date has passed and the patient has not come back. Call or message them.",
-      "gst": "Taxable value and GST for each HSN / SAC code and rate, minus credit notes. Confirm with your CA before filing."
+      "gst": "Taxable value and GST for each HSN / SAC code and rate, minus credit notes. Confirm with your CA before filing.",
+      "fy_summary": "Every month of the financial year (1 April to 31 March): sales, GST, money received, purchases and the GST to pay. Choose the year above.",
+      "gst_payable": "GST charged on sales (minus credit notes) against the GST paid on supplier purchases, for each rate. A guide only: your CA files the return.",
+      "sales_register": "Every bill and credit note in order (credit notes in minus). Give this to your CA with the GST summary.",
+      "purchase_register": "Every supplier invoice with the supplier GSTIN. Opening stock is not counted as a purchase.",
+      "dues": "Bills where the patient has not paid everything yet. Phone numbers are hidden in part."
     },
     "range": {
       "today": "Today",
       "yesterday": "Yesterday",
       "thisMonth": "This month",
       "lastMonth": "Last month",
-      "thisYear": "This financial year"
+      "thisYear": "This financial year",
+      "year": "Financial year",
+      "thisFy": "This financial year",
+      "lastFy": "Last financial year",
+      "thisQuarter": "This quarter",
+      "lastQuarter": "Last quarter",
+      "fyOption": "FY {{label}}",
+      "customDates": "Pick dates"
     },
     "group": {
       "day": "Day-wise",
@@ -1878,7 +1999,25 @@
       "credit_taxable": "Credit notes: taxable",
       "credit_tax": "Credit notes: GST",
       "net_taxable": "Net taxable",
-      "net_tax": "Net GST"
+      "net_tax": "Net GST",
+      "sales": "Sales (taxable)",
+      "output": "GST on sales",
+      "buy": "Purchases (taxable)",
+      "input": "GST on purchases",
+      "payable": "GST to pay (+) / extra credit (-)",
+      "gst": "GST on sales",
+      "number": "Number",
+      "kind": "Type",
+      "party": "Customer",
+      "status": "Status",
+      "supplier": "Supplier",
+      "gstin": "Supplier GSTIN",
+      "invoice_no": "Invoice no.",
+      "discount": "Discount",
+      "other": "Other charges / round off",
+      "total": "Total",
+      "paid": "Paid",
+      "days": "Days old"
     }
   },
   "therapy": {
@@ -2209,7 +2348,9 @@
     "removed": "Page removed.",
     "unsavedAsk": "The handwriting is not saved yet. Close without saving?",
     "discard": "Close without saving",
-    "hint": "Write with the pad pen (set the pad to Mouse mode in iScribe4U), a tablet pen, your finger or a mouse."
+    "hint": "Write with the pad pen (set the pad to Mouse mode in iScribe4U), a tablet pen, your finger or a mouse.",
+    "historyHelp": "Every handwritten prescription page of this patient, latest first. Click a picture to enlarge, or open the check-up.",
+    "openCheckup": "Open check-up"
   },
   "calendar": {
     "title": "Calendar",
@@ -2218,14 +2359,21 @@
     "next": "Next month",
     "closed": "Closed",
     "free": "{{n}} free",
-    "patients": "{{n}} patients",
     "dayLine": "{{free}} times free, {{booked}} booked, {{walk}} walk-in",
     "pickDoctor": "Choose a doctor to see the times.",
     "noSlots": "The doctor does not sit on this day.",
     "past": "Passed",
     "freeTag": "Free",
     "bookThis": "Book",
-    "walkIns": "Walk-ins today"
+    "walkIns": "Walk-ins today",
+    "patients_one": "{{count}} patient",
+    "patients_other": "{{count}} patients",
+    "thisMonth": "This month",
+    "nextMonth": "Next month",
+    "lastMonth": "Last month",
+    "monthsAhead": "{{n}} months from now",
+    "monthsAgo": "{{n}} months ago",
+    "today": "Today"
   },
   "investigations": {
     "pick": "Search a test (e.g. CBC, sugar, X-ray)",
@@ -2302,5 +2450,86 @@
       "home": "Go to start"
     },
     "developer": "Developer details"
+  },
+  "dues": {
+    "help": "Medicines bought on credit: what you owe each distributor, what is late, and the payments you made. Press a supplier to see the invoices and pay.",
+    "totalOwed": "Total to pay",
+    "totalOverdue": "Late (past due date)",
+    "none": "Nothing is owed to any supplier yet. Buy medicines under a supplier (Purchases) and they appear here.",
+    "owed": "To pay",
+    "overdue": "Late",
+    "notDue": "Not yet due",
+    "lastPayment": "Last payment",
+    "terms": "Credit days",
+    "days": "{{n}} days",
+    "billed": "Billed",
+    "paid": "Paid",
+    "returned": "Sent back",
+    "stillDue": "Still due",
+    "invoices": "Invoices",
+    "noInvoices": "No invoices.",
+    "ledger": "Account (every entry)",
+    "entry": "Entry",
+    "bill": "Bill",
+    "credit": "Paid / credit",
+    "balance": "Balance",
+    "dueOn": "Due on",
+    "lateDays": "{{n}} days late",
+    "pay": "Pay supplier",
+    "payTo": "Pay {{name}}",
+    "amount": "Amount",
+    "owedNow": "owed {{amount}}",
+    "mode": "How paid",
+    "reference": "UPI / cheque no.",
+    "whichInvoices": "Which invoices?",
+    "whichInvoicesHelp": "Leave empty to pay the oldest invoices first.",
+    "oldestFirst": "Oldest first",
+    "noNumber": "(no number)",
+    "note": "Note",
+    "paymentSaved": "Payment saved.",
+    "reverse": "Reverse",
+    "reversed": "reversed",
+    "reversePayment": "Reverse this payment",
+    "reverseHelp": "Use this for a payment entered by mistake. It stays in the account, marked reversed, and the amount is owed again.",
+    "reason": "Why is it reversed?",
+    "openingBalance": "Opening balance",
+    "openingHelp": "What you already owed this supplier on the day you started using the software.",
+    "overdueAlert": "{{amount}} is past its due date.",
+    "paidNow": "Paid now",
+    "paidNowHelp": "Money paid to the supplier today; the rest stays to pay.",
+    "toPay": "To pay",
+    "dueAmount": "{{amount}} due",
+    "status": {
+      "paid": "Paid",
+      "partly": "Part paid",
+      "unpaid": "Not paid"
+    },
+    "modes": {
+      "cash": "Cash",
+      "upi": "UPI",
+      "bank": "Bank transfer",
+      "cheque": "Cheque",
+      "other": "Other"
+    }
+  },
+  "products": {
+    "title": "Products",
+    "subtitle": "Things the clinic sells that are not medicines: oils, supplements and more.",
+    "search": "Search product name or code",
+    "none": "No products yet. Add one in Pharmacy > Medicine list (kind: Clinic product), then add stock in Pharmacy > Purchases.",
+    "product": "Product",
+    "price": "Price",
+    "stock": "In stock",
+    "out": "Out of stock",
+    "add": "Add",
+    "bill": "Bill",
+    "emptyCart": "Press Add on a product to start a bill.",
+    "total": "Total",
+    "customer": "Customer name (optional)",
+    "phone": "Mobile number (optional)",
+    "payLater": "Pay later",
+    "makeBill": "Make bill {{amount}}",
+    "billMade": "Bill {{number}} made",
+    "newSale": "New sale"
   }
 }

@@ -12,6 +12,7 @@ StockMovement line (the stock ledger).
 from datetime import timedelta
 from decimal import ROUND_HALF_UP, Decimal
 
+from django.conf import settings
 from django.db import transaction
 from django.db.models import Q, Sum
 from django.utils import timezone
@@ -53,11 +54,13 @@ def _locked_batch(branch, batch_id) -> StockBatch:
 # --- Stock in: purchase invoice / opening stock -----------------------------------------------
 @transaction.atomic
 def receive_stock(branch, user, *, items, supplier=None, invoice_no="", invoice_date=None, notes="",
-                  other_charges=ZERO, is_opening=False) -> Purchase:
+                  other_charges=ZERO, is_opening=False, printed_total=None, accept_difference=False) -> Purchase:
     """
     items: [{"medicine", "batch_no", "mfg_date", "expiry_date", "quantity", "free_quantity", "purchase_rate",
              "discount_percent", "gst_rate", "mrp", "selling_price", "barcode"}]
     A batch number already in stock gets the quantity added (and the latest prices / dates).
+    printed_total: the total printed on the supplier invoice. If it differs from the calculated total by more than
+    Rs 1 the purchase is refused until accept_difference=True (a wrong rate, GST or quantity is then not missed).
     """
     today = timezone.localdate()
     # The same supplier invoice entered twice (a double click, or a retry) would double the stock: refuse it
@@ -65,6 +68,10 @@ def receive_stock(branch, user, *, items, supplier=None, invoice_no="", invoice_
             branch=branch, supplier=supplier, invoice_no__iexact=invoice_no.strip()).exists():
         raise ValidationError({"invoice_no": f"Invoice {invoice_no.strip()} of this supplier is already entered. "
                                              "To correct stock use a stock correction."})
+    # No invoice number to compare: the same lines entered again within minutes by the same person is a double click
+    if not invoice_no.strip() and _same_purchase_just_entered(branch, user, supplier, is_opening, items):
+        raise ValidationError({"items": "The same purchase was just saved a moment ago. Check the Purchases list "
+                                        "before entering it again (this stops the stock being added twice)."})
     purchase = Purchase.objects.create(
         organization_id=branch.organization_id, branch=branch, supplier=supplier, invoice_no=invoice_no,
         invoice_date=invoice_date or today, is_opening=is_opening, notes=notes[:300], other_charges=other_charges,
@@ -130,8 +137,33 @@ def receive_stock(branch, user, *, items, supplier=None, invoice_no="", invoice_
     purchase.taxable_amount, purchase.discount_amount, purchase.gst_amount = totals["taxable"], totals["discount"], totals["gst"]
     purchase.round_off = total - exact
     purchase.total_amount = total
+    if printed_total is not None:
+        difference = Decimal(printed_total) - total
+        if abs(difference) > RUPEE and not accept_difference:
+            raise ValidationError({"printed_total": (
+                f"The total on the supplier invoice (Rs {Decimal(printed_total):.2f}) differs from the total calculated here "
+                f"(Rs {total:.2f}) by Rs {abs(difference):.2f}. Check the rates, discount, GST and quantities. "
+                "If the invoice itself is right, tick 'Save anyway'.")})
+        purchase.printed_total = Decimal(printed_total)
     purchase.save()
     return purchase
+
+
+SAME_PURCHASE_MINUTES = 5
+
+
+def _same_purchase_just_entered(branch, user, supplier, is_opening, items) -> bool:
+    """True when this person saved a purchase with exactly these medicines, batches and quantities a minute ago."""
+    wanted = sorted((str(i["medicine"].id), str(i["batch_no"]).lower(), f"{Decimal(i['quantity']):.3f}", f"{Decimal(i.get('free_quantity') or 0):.3f}")
+                    for i in items)
+    since = timezone.now() - timedelta(minutes=SAME_PURCHASE_MINUTES)
+    recent = Purchase.objects.filter(branch=branch, created_by=user, supplier=supplier, is_opening=is_opening,
+                                     invoice_no="", created_at__gte=since).prefetch_related("items__batch")
+    for purchase in recent:
+        have = sorted((str(p.medicine_id), p.batch.batch_no.lower(), f"{p.quantity:.3f}", f"{p.free_quantity:.3f}") for p in purchase.items.all())
+        if have == wanted:
+            return True
+    return False
 
 
 # --- Purchase return ------------------------------------------------------------------------
@@ -356,6 +388,21 @@ def sell(prescription, branch, user, lines: list[dict], *, notes="", payment=Non
 
 
 WALK_IN = "Walk-in customer"
+DOUBLE_CLICK_SECONDS = 15
+
+
+def _refuse_double_click(branch, user, lines):
+    """The same counter sale (same batches, same quantities) by the same person seconds ago is a double click."""
+    def signature(rows):
+        return sorted((str(r["batch"]), f"{Decimal(r['quantity'] or 0):.3f}", f"{Decimal(r.get('loose_units') or 0):.3f}") for r in rows)
+
+    since = timezone.now() - timedelta(seconds=DOUBLE_CLICK_SECONDS)
+    wanted = signature([{"batch": line["batch_id"], "quantity": line.get("quantity"), "loose_units": line.get("loose_units")} for line in lines])
+    for recent in Dispense.objects.filter(branch=branch, created_by=user, prescription__isnull=True, created_at__gte=since).prefetch_related("items"):
+        have = signature([{"batch": i.batch_id, "quantity": i.quantity if not i.loose_units else 0, "loose_units": i.loose_units} for i in recent.items.all()])
+        if have == wanted:
+            raise ValidationError({"items": "The same sale was just made a few seconds ago (it looks like a double click). "
+                                            "Check Sales before selling the same again."})
 
 
 @transaction.atomic
@@ -367,6 +414,7 @@ def counter_sell(branch, user, lines: list[dict], *, customer_name="", customer_
     """
     if not lines:
         raise ValidationError({"items": "Scan or choose at least one medicine."})
+    _refuse_double_click(branch, user, lines)
     name = customer_name.strip()[:200]
     record = Dispense.objects.create(
         organization_id=branch.organization_id, branch=branch, customer_name=name,
@@ -544,6 +592,8 @@ def stock_summary(branch, search="", show="all", rack_id=None):
     for m in medicines.order_by("name"):
         s = sums.get(m.id, {"available": ZERO, "usable": ZERO, "nearest": None, "near_qty": ZERO})
         level = levels.get(m.id)
+        # A medicine with no level of its own is "low" when 5 packs or fewer are left (settings.STOCK_LOW_DEFAULT)
+        limit = level if level is not None else settings.STOCK_LOW_DEFAULT
         loc = locations.get(m.id)
         row = {
             "medicine": m, "available": s["available"], "usable": s["usable"], "nearest_expiry": s["nearest"],
@@ -551,7 +601,7 @@ def stock_summary(branch, search="", show="all", rack_id=None):
             "location": loc.label if loc else "", "rack_id": loc.rack_id if loc else None,
             "shelf": loc.shelf if loc else "", "bin": loc.bin if loc else "",
             "out": s["usable"] <= 0,
-            "low": level is not None and 0 < s["usable"] <= level,
+            "low": 0 < s["usable"] <= limit,
             "expired": s["available"] > s["usable"],
             "expiring": s["near_qty"] > 0,
         }
@@ -581,6 +631,28 @@ def needed_medicines(branch, days: int = 30) -> list[dict]:
             .order_by("-times", "medicine__name"))
     return [{"medicine": str(r["medicine_id"]), "name": r["medicine__name"], "times": r["times"], "last_at": r["last_at"]}
             for r in rows]
+
+
+def stock_alert_message(branch) -> dict:
+    """The text for the owner: what is out of stock and what is low. Plus a WhatsApp link (STOCK_ALERT_WHATSAPP in
+    .env) - free "click to chat": WhatsApp opens with the message typed, the person only presses Send."""
+    from apps.notifications.whatsapp import get_whatsapp_provider
+
+    rows = stock_summary(branch)
+    out = [r for r in rows if r["out"]]
+    low = [r for r in rows if r["low"]]
+    lines = [f"Stock alert - {branch.name} ({timezone.localdate():%d-%m-%Y})"]
+    if out:
+        lines.append(f"OUT OF STOCK ({len(out)}):")
+        lines += [f"- {r['medicine'].name}" for r in out[:30]]
+    if low:
+        lines.append(f"LOW - {settings.STOCK_LOW_DEFAULT} packs or fewer ({len(low)}):")
+        lines += [f"- {r['medicine'].name}: {r['usable'].normalize():f} left" for r in low[:30]]
+    if not out and not low:
+        lines.append("All medicines are in stock.")
+    message = "\n".join(lines)
+    link = get_whatsapp_provider().prepare(settings.STOCK_ALERT_WHATSAPP, message)[1] if settings.STOCK_ALERT_WHATSAPP else ""
+    return {"message": message, "link": link, "out": len(out), "low": len(low)}
 
 
 def alert_counts(branch) -> dict:

@@ -16,7 +16,9 @@ from django.db.models import Q
 from apps.common.models import BranchScopedModel, OrgScopedModel
 
 # "homeopathy" is an optional extra: shown only when "Homeopathy medicines" is on in Additional settings
-KIND_CHOICES = [("classical", "Classical"), ("proprietary", "Patent & Proprietary"), ("homeopathy", "Homeopathy")]
+# "product" = something the clinic sells that is not a medicine (oils, soaps, supplements): sold in Products, shown when "Clinic products" is on
+KIND_CHOICES = [("classical", "Classical"), ("proprietary", "Patent & Proprietary"), ("homeopathy", "Homeopathy"),
+                ("product", "Clinic product")]
 
 
 class Medicine(OrgScopedModel):

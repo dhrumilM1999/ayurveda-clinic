@@ -4,6 +4,7 @@
 // - Pharmacy stock alerts when that extra is switched on.
 // The numbers come from /dashboard/today/ and refresh every minute.
 import {
+  BarChartOutlined, FileTextOutlined, GiftOutlined, HeartOutlined, OrderedListOutlined, ScheduleOutlined,
   CheckCircleOutlined, ClockCircleOutlined, MedicineBoxOutlined, ShopOutlined, TeamOutlined, UserAddOutlined,
   UserOutlined, WalletOutlined, WarningOutlined,
 } from '@ant-design/icons';
@@ -16,6 +17,7 @@ import { api } from '../api/client';
 import type { DashboardToday, OpdCounts } from '../api/types';
 import { useAuth } from '../auth/AuthContext';
 import { LeafArt } from '../components/LeafArt';
+import { useBranding } from '../branding/BrandingContext';
 import { clinicConfig } from '../config/clinic';
 import { alpha } from '../theme';
 import { money } from './medicines/shared';
@@ -23,6 +25,22 @@ import { AlertTiles } from './pharmacy/StockTab';
 
 const c = clinicConfig.colors;
 const REFRESH_SECONDS = 60;
+
+// Big shortcut buttons at the top. SAFE TO EDIT: add, remove or re-order a line (permission = who sees it,
+// feature = the extra that must be on). Texts are in the i18n files under dashboard.shortcuts.
+type Shortcut = { key: string; path: string; icon: ReactNode; color: string; permission: string; feature?: string };
+const SHORTCUTS: Shortcut[] = [
+  { key: 'newPatient', path: '/patients/new', icon: <UserAddOutlined />, color: c.primary, permission: 'patients.create' },
+  { key: 'appointments', path: '/appointments', icon: <ScheduleOutlined />, color: c.accent, permission: 'appointments.view', feature: 'appointments' },
+  { key: 'queue', path: '/queue', icon: <OrderedListOutlined />, color: '#d4851c', permission: 'appointments.view', feature: 'appointments' },
+  { key: 'checkup', path: '/consult', icon: <MedicineBoxOutlined />, color: '#1f8a70', permission: 'emr.view' },
+  { key: 'billing', path: '/billing', icon: <FileTextOutlined />, color: c.primary, permission: 'billing.view' },
+  { key: 'pharmacy', path: '/pharmacy', icon: <ShopOutlined />, color: '#b5497a', permission: 'pharmacy.view', feature: 'pharmacy' },
+  { key: 'products', path: '/products', icon: <GiftOutlined />, color: '#c2412d', permission: 'products.view', feature: 'pharmacy' },
+  { key: 'availability', path: '/schedules', icon: <ClockCircleOutlined />, color: c.accent, permission: 'schedules.view' },
+  { key: 'therapy', path: '/therapy', icon: <HeartOutlined />, color: '#1f8a70', permission: 'therapy.view', feature: 'panchakarma' },
+  { key: 'reports', path: '/reports', icon: <BarChartOutlined />, color: '#d4851c', permission: 'reports.view' },
+];
 
 type Tile = { key: string; icon: ReactNode; color: string; value: ReactNode; note: string; link?: string };
 
@@ -51,8 +69,8 @@ function Tiles({ tiles, xl }: { tiles: Tile[]; xl?: number }) {
 function opdTiles(t: (k: string, o?: Record<string, unknown>) => string, o: OpdCounts, mine: boolean): Tile[] {
   return [
     { key: 'waiting', icon: <ClockCircleOutlined />, color: c.accent, value: o.waiting, note: t('dashboard.waitingNote'), link: '/queue' },
-    { key: mine ? 'withMe' : 'withDoctor', icon: <UserOutlined />, color: '#3d6fb6', value: o.with_doctor, note: t('dashboard.withDoctorNote'), link: '/consult' },
-    { key: 'seen', icon: <CheckCircleOutlined />, color: c.primary, value: o.seen, note: t('dashboard.seenNote') },
+    { key: mine ? 'withMe' : 'withDoctor', icon: <UserOutlined />, color: c.primary, value: o.with_doctor, note: t('dashboard.withDoctorNote'), link: '/consult' },
+    { key: 'seen', icon: <CheckCircleOutlined />, color: c.success, value: o.seen, note: t('dashboard.seenNote') },
     { key: 'booked', icon: <TeamOutlined />, color: '#8a4fa8', value: o.booked, note: t('dashboard.bookedNote', { n: o.not_arrived }), link: '/appointments' },
   ];
 }
@@ -61,6 +79,11 @@ export default function DashboardPage() {
   const { t } = useTranslation();
   const { me, branch, can, features, hasFeature } = useAuth();
   const navigate = useNavigate();
+  const { logoUrl } = useBranding();
+  // A positive thought: a new one each day; the button shows the next one
+  const quotes = t('dashboard.quotes', { returnObjects: true }) as unknown as string[];
+  const [quoteNo, setQuoteNo] = useState(0);
+  const quote = Array.isArray(quotes) && quotes.length ? quotes[(dayjs().diff(dayjs().startOf('year'), 'day') + quoteNo) % quotes.length] : '';
   const [data, setData] = useState<DashboardToday | null>(null);
   const showStockAlerts = can('pharmacy.view') && features.pharmacy !== false && hasFeature('pharmacy_stock_alerts');
 
@@ -84,7 +107,7 @@ export default function DashboardPage() {
   const caseLine = (o: OpdCounts) => (
     <div className="dash-cases">
       <Tag color="blue" icon={<UserAddOutlined />}>{t('dashboard.newCases', { count: o.new_cases })}</Tag>
-      <Tag color="green">{t('dashboard.followUps', { count: o.follow_ups })}</Tag>
+      <Tag color="cyan">{t('dashboard.followUps', { count: o.follow_ups })}</Tag>
       {o.walk_ins > 0 && <Tag>{t('dashboard.walkIns', { count: o.walk_ins })}</Tag>}
       {o.follow_ups_due > 0 && <Tag color="orange">{t('dashboard.followUpsDue', { count: o.follow_ups_due })}</Tag>}
       {o.no_show > 0 && <Tag color="red">{t('dashboard.noShow', { count: o.no_show })}</Tag>}
@@ -99,7 +122,30 @@ export default function DashboardPage() {
         <div className="hero-sub">
           {t('dashboard.workingIn', { branch: branch?.name, role: branch?.role?.name ?? t('layout.orgAdmin') })}
         </div>
-        <LeafArt className="hero-leaf" />
+        {(mine ?? clinic) && (
+          <div className="hero-pills">
+            <span><b>{(mine ?? clinic)!.booked}</b> {t('dashboard.pillAppointments')}</span>
+            <span><b>{(mine ?? clinic)!.waiting}</b> {t('dashboard.pillWaiting')}</span>
+            <span><b>{(mine ?? clinic)!.with_doctor}</b> {t('dashboard.pillInConsult')}</span>
+          </div>
+        )}
+        {quote && (
+          <button type="button" className="hero-quote" title={t('dashboard.nextQuote')} onClick={() => setQuoteNo((n) => n + 1)}>
+            “{quote}”
+          </button>
+        )}
+        {logoUrl ? <div className="hero-logo"><img src={logoUrl} alt={clinicConfig.appName} /></div> : <LeafArt className="hero-leaf" />}
+      </div>
+
+      <div className="section-title">{t('dashboard.quickActions')}</div>
+      <div className="shortcut-grid">
+        {SHORTCUTS.filter((x) => can(x.permission) && (!x.feature || features[x.feature] !== false)).map((x) => (
+          <Link key={x.key} to={x.path} className="shortcut" style={{ ['--sc' as string]: x.color }}>
+            <span className="shortcut-icon">{x.icon}</span>
+            <span className="shortcut-label">{t(`dashboard.shortcuts.${x.key}`)}</span>
+            <span className="shortcut-desc">{t(`dashboard.shortcutsHelp.${x.key}`)}</span>
+          </Link>
+        ))}
       </div>
 
       {mine && (
@@ -149,7 +195,7 @@ export default function DashboardPage() {
               ? [{ key: 'opdCollection', icon: <WalletOutlined />, color: c.primary, value: money(m.opd), note: t(hasFeature('combined_opd_bill') ? 'dashboard.opdCollectionNoteCombined' : 'dashboard.opdCollectionNote'), link: '/billing' }] : []),
             ...(features.pharmacy !== false && hasFeature('pharmacy_billing')
               ? [{ key: 'pharmacyCollection', icon: <ShopOutlined />, color: '#8a4fa8', value: money(m.pharmacy), note: t('dashboard.pharmacyCollectionNote'), link: '/billing' }] : []),
-            { key: 'totalCollection', icon: <WalletOutlined />, color: '#3d6fb6', value: money(m.total), note: t('dashboard.totalCollectionNote') },
+            { key: 'totalCollection', icon: <WalletOutlined />, color: c.primary, value: money(m.total), note: t('dashboard.totalCollectionNote') },
             {
               key: 'stillDue', icon: <WarningOutlined />, color: Number(m.due_today) > 0 ? '#c0392b' : c.accent,
               value: money(m.due_today), note: t('dashboard.stillDueNote', { count: m.unpaid_bills }), link: '/billing',

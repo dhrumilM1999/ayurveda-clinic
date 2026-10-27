@@ -116,7 +116,7 @@ export function DispenseTab() {
 type Choice = { give: boolean; batch?: string; quantity: number; loose: boolean; units: number; discount: number };
 type Done = { dispense: string; invoice: string | null; number: string; total_amount: string; invoice_status: string };
 
-function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClose: (done: boolean) => void }) {
+export function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClose: (done: boolean) => void }) {
   const { t } = useTranslation();
   const { message, modal } = App.useApp();
   const { can, hasFeature } = useAuth();
@@ -139,9 +139,10 @@ function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClos
   useEffect(() => {
     api.get<DispenseDetail>(`/dispensing/${prescriptionId}/`).then(({ data }) => {
       setDetail(data);
-      // Suggest: earliest-expiry batch (FEFO), 1 pack, for lines not given yet
+      // Suggest: earliest-expiry batch (FEFO) and the packs the doctor's dose x times x days needs (else 1), for lines not given yet
       setChoices(Object.fromEntries(data.lines.map((l) => [l.id, {
-        give: !!l.batches.length && !l.given, batch: l.batches[0]?.id, quantity: 1, loose: false, units: 0, discount: 0,
+        give: !!l.batches.length && !l.given, batch: l.batches[0]?.id, loose: false, units: 0, discount: 0,
+        quantity: Math.max(1, Math.min(l.suggested_packs ?? 1, Number(l.batches[0]?.quantity ?? 1) || 1)),
       }])));
     }).catch((err) => { message.error(errorMessage(err, t('common.loadFailed'))); onClose(false); });
   // Load once per prescription (the list behind refreshes every 30 s; that must not reset the choices)

@@ -92,7 +92,26 @@ function PurchaseList({ opening, query }: { opening: boolean; query: string }) {
         ]),
         { title: t('pharmacy.medicines'), key: 'n', width: 110, align: 'center' as const, render: (_: unknown, p: PurchaseRecord) => p.items.length },
         ...(opening || !details || !rateOn ? [] : [{ title: 'GST', dataIndex: 'gst_amount', width: 110, align: 'right' as const, render: (v: string) => <span className="num">{money(v)}</span> }]),
-        ...(!rateOn ? [] : [{ title: t('pharmacy.purchaseTotal'), dataIndex: 'total_amount', width: 130, align: 'right' as const, render: (v: string) => <b className="num">{money(v)}</b> }]),
+        ...(!rateOn ? [] : [{
+          title: t('pharmacy.purchaseTotal'), dataIndex: 'total_amount', width: 150, align: 'right' as const,
+          render: (v: string, p: PurchaseRecord) => (
+            <>
+              <b className="num">{money(v)}</b>
+              {p.printed_total != null && Math.abs(Number(p.printed_total) - Number(v)) > 1 && (
+                <div className="cell-sub" style={{ color: '#b7791f' }}>{t('pharmacy.invoiceSays', { amount: money(p.printed_total) })}</div>
+              )}
+            </>
+          ),
+        }]),
+        ...(opening || !suppliersOn ? [] : [{
+          title: t('dues.toPay'), key: 'due', width: 150, align: 'right' as const,
+          render: (_: unknown, p: PurchaseRecord) => (p.payment_status ? (
+            <>
+              <Tag bordered={false} color={p.payment_status === 'paid' ? 'green' : p.payment_status === 'partly' ? 'gold' : 'red'}>{t(`dues.status.${p.payment_status}`)}</Tag>
+              {p.payment_status !== 'paid' && <div className="cell-sub">{t('dues.dueAmount', { amount: money(p.balance_due) })}{p.due_date ? ` · ${dayjs(p.due_date).format('DD-MM')}` : ''}</div>}
+            </>
+          ) : null),
+        }]),
         { title: t('pharmacy.enteredBy'), dataIndex: 'created_by_name', width: 160 },
       ]}
     />

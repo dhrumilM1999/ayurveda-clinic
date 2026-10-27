@@ -16,11 +16,12 @@ import { FLAGS, MedicineFlags, money, useMedicineName } from './shared';
 import { LiveSearch } from '../../components/LiveSearch';
 import { ListEmpty } from '../../components/ListEmpty';
 
-export default function MedicinesPage() {
+export default function MedicinesPage({ embedded = false }: { embedded?: boolean }) {
   const { t } = useTranslation();
   const { message } = App.useApp();
   const { can, hasFeature } = useAuth();
   const homeopathy = hasFeature('medicines_homeopathy'); // optional extra: Additional settings
+  const products = hasFeature('clinic_products'); // clinic products (oils, supplements), Additional settings
   const masterLabel = useMasterLabel();
   const medicineName = useMedicineName();
   const manage = can('medicines.manage');
@@ -48,7 +49,7 @@ export default function MedicinesPage() {
     <>
       <div className="page-toolbar">
         <div>
-          <Typography.Title level={3} style={{ margin: 0 }}>{t('medicines.title')}</Typography.Title>
+          {!embedded && <Typography.Title level={3} style={{ margin: 0 }}>{t('medicines.title')}</Typography.Title>}
           <div className="cell-sub">{t('medicines.subtitle', { n: total })}</div>
         </div>
         {manage && (
@@ -69,6 +70,7 @@ export default function MedicinesPage() {
             { value: 'classical', label: t('medicines.kinds.classical') },
             { value: 'proprietary', label: t('medicines.kinds.proprietary') },
             ...(homeopathy ? [{ value: 'homeopathy', label: t('medicines.kinds.homeopathy') }] : []),
+            ...(products ? [{ value: 'product', label: t('medicines.kinds.product') }] : []),
           ]}
         />
         <MasterSelect category="dosage_form" placeholder={t('medicines.allForms')} value={form} onChange={setForm} style={{ width: 200 }} />
@@ -90,7 +92,7 @@ export default function MedicinesPage() {
                 <Typography.Text strong>{medicineName(m)}</Typography.Text>
                 {m.is_sample && <Tag color="orange" className="tag-tight">{t('medicines.sample')}</Tag>}
                 <div className="cell-sub">
-                  {[m.kind === 'proprietary' ? m.manufacturer : m.kind === 'homeopathy' ? m.strength : m.reference, m.pack_size].filter(Boolean).join(' · ')}
+                  {[m.kind === 'proprietary' || m.kind === 'product' ? m.manufacturer : m.kind === 'homeopathy' ? m.strength : m.reference, m.pack_size].filter(Boolean).join(' · ')}
                   {m.classical_equivalent_name && ` · = ${m.classical_equivalent_name}`}
                 </div>
               </div>
@@ -98,7 +100,7 @@ export default function MedicinesPage() {
           },
           {
             title: t('medicines.kind'), dataIndex: 'kind', width: 120,
-            render: (k: MedicineKind) => <Tag color={k === 'classical' ? 'green' : 'blue'} className="tag-tight">{t(`medicines.kinds.${k}`)}</Tag>,
+            render: (k: MedicineKind) => <Tag color={k === 'classical' ? 'green' : k === 'product' ? 'gold' : 'blue'} className="tag-tight">{t(`medicines.kinds.${k}`)}</Tag>,
           },
           { title: t('medicines.form'), key: 'form', width: 200, ellipsis: true, render: (_: unknown, m: Medicine) => [masterLabel(m.dosage_form), m.strength].filter(Boolean).join(' · ') || '—' },
           { title: t('medicines.safety'), key: 'flags', width: 250, render: (_: unknown, m: Medicine) => (FLAGS.some((f) => m[f]) ? <MedicineFlags medicine={m} /> : <span className="cell-sub">—</span>) },

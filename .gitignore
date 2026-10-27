@@ -33,3 +33,6 @@ demo-video/
 # Compiled TypeScript output (the app is built by Vite; never commit these)
 frontend/src/**/*.js
 *.tsbuildinfo
+backend/audit_archive/
+.env.local-db
+.env.supabase-db

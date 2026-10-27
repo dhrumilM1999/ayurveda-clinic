@@ -1,14 +1,13 @@
 // The frame around every screen: left menu, top bar with branch and language switchers.
 import { DownOutlined, EnvironmentOutlined, LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
-import { Alert, Avatar, Badge, Button, Dropdown, Layout, Menu, Segmented, Select } from 'antd';
+import { Alert, Avatar, Badge, Button, Dropdown, Grid, Layout, Menu, Segmented, Select } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 import { useIdleLogout } from '../auth/useIdleLogout';
-import { BrandLogo } from '../branding/BrandLogo';
-import { useBranding } from '../branding/BrandingContext';
+import { SoftwareBrand } from '../components/SoftwareBrand';
 import { clinicConfig } from '../config/clinic';
 import { menuItems } from '../config/menu';
 import { ErrorBoundary } from '../errorLog/ErrorBoundary';
@@ -16,6 +15,7 @@ import { addStep } from '../errorLog/tracker';
 import { LANGUAGES, setLanguage } from '../i18n';
 
 const { Header, Sider, Content } = Layout;
+const { useBreakpoint } = Grid;
 
 const SHORT_LANGUAGE: Record<string, string> = { en: 'EN', gu: 'ગુ', hi: 'हि' };
 
@@ -31,11 +31,13 @@ function initials(name: string) {
 
 export default function MainLayout() {
   const { t, i18n } = useTranslation();
-  const { appName, logoUrl } = useBranding();
   const { me, branch, features, hasFeature, can, switchBranch, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const screens = useBreakpoint();
+  // On a phone the menu is hidden until the menu button is pressed (it floats over the page, and closes after a choice)
+  const isPhone = screens.sm === false;
   useEffect(() => { addStep('page', location.pathname); }, [location.pathname]);
 
   const onIdle = useCallback(() => logout('idle'), [logout]);
@@ -55,7 +57,10 @@ export default function MainLayout() {
   const visibleItems = menuItems.filter(
     (item) => (!item.permission || can(item.permission)) && (!item.feature || features[item.feature] !== false)
       && (!item.anyFeature || item.anyFeature.some((code) => hasFeature(code)))
-      && (!item.multiBranchOnly || multiBranch),
+      && (!item.multiBranchOnly || multiBranch)
+      // The medicine list is a tab inside Pharmacy, unless "Medicines as its own menu" is on (Additional settings)
+      // or the person cannot open Pharmacy
+      && !(item.key === 'medicines' && features.pharmacy !== false && can('pharmacy.view') && !hasFeature('separate_medicine_menu')),
   );
   const selected = visibleItems.find((item) =>
     item.path === '/' ? location.pathname === '/' : location.pathname.startsWith(item.path),
@@ -78,17 +83,9 @@ export default function MainLayout() {
         breakpoint="lg"
         onBreakpoint={(broken) => setCollapsed(broken)}
         width={224}
-        collapsedWidth={76}
+        collapsedWidth={isPhone ? 0 : 76}
       >
-        <div className={`app-brand${logoUrl ? ' has-logo' : ''}`}>
-          <BrandLogo variant="sider" />
-          {!logoUrl && !collapsed && (
-            <div>
-              <div className="app-brand-name">{appName}</div>
-              <div className="app-brand-sub">{t('layout.tagline')}</div>
-            </div>
-          )}
-        </div>
+        <SoftwareBrand variant={collapsed ? 'mark' : 'sider'} />
         <div className="app-sider-divider" />
         <Menu
           theme="dark"
@@ -99,6 +96,7 @@ export default function MainLayout() {
           onClick={({ key }) => {
             const item = menuItems.find((m) => m.key === key);
             if (item) navigate(item.path);
+            if (isPhone) setCollapsed(true);
           }}
         />
         {!collapsed && me?.organization && <div className="app-sider-footer">{me.organization.name}</div>}

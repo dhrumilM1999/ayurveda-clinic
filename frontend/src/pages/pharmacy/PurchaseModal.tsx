@@ -1,7 +1,7 @@
 // Purchase invoice entry (or opening stock): one line per medicine batch. Stock goes up when saved.
 // "Detailed purchase entry" and "Barcodes" (Additional settings) add the extra fields.
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import { App, Button, Col, DatePicker, Form, Input, InputNumber, Modal, Row, Select } from 'antd';
+import { Alert, App, Button, Checkbox, Col, DatePicker, Form, Input, InputNumber, Modal, Row, Select, Space } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -56,9 +56,12 @@ export function PurchaseModal({ opening = false, onClose }: { opening?: boolean;
   const [lines, setLines] = useState<Line[]>([emptyLine()]);
   const [saving, setSaving] = useState(false);
   const otherCharges: number = Form.useWatch('other_charges', form) ?? 0;
+  const printedTotal: number | null | undefined = Form.useWatch('printed_total', form);
+  const [acceptDifference, setAcceptDifference] = useState(false);
+  const supplierPicked = Form.useWatch('supplier', form);
 
   useEffect(() => {
-    form.setFieldsValue({ invoice_date: dayjs(), other_charges: 0 });
+    form.setFieldsValue({ invoice_date: dayjs(), other_charges: 0, paid_now: 0, paid_mode: 'cash' });
     if (!opening && suppliersOn) api.get<Supplier[]>('/suppliers/').then(({ data }) => setSuppliers(data.filter((s) => s.is_active))).catch(() => setSuppliers([]));
   }, [form, opening]);
 
@@ -96,11 +99,25 @@ export function PurchaseModal({ opening = false, onClose }: { opening?: boolean;
   const exact = totals.taxable + totals.gst + (otherCharges || 0);
   const grand = Math.round(exact);
   const ready = lines.filter((l) => l.medicine && (!batches || l.batch_no.trim()) && l.quantity && (!prices || l.mrp !== undefined));
+  // The expiry printed on the pack is needed for every batch while expiry tracking is on (never guessed)
+  const missingExpiry = expiryOn ? ready.filter((l) => !l.expiry) : [];
+  // The total printed on the supplier invoice against the total calculated here (Rs 1 of rounding is fine)
+  const showTotalCheck = !opening && rateOn && printedTotal !== null && printedTotal !== undefined;
+  const difference = showTotalCheck ? Math.round((printedTotal! - grand) * 100) / 100 : 0;
+  const differs = showTotalCheck && Math.abs(difference) > 1;
 
   const save = async () => {
     const values = await form.validateFields();
     if (!ready.length) {
       message.warning(t('pharmacy.addLineFirst'));
+      return;
+    }
+    if (missingExpiry.length) {
+      message.warning(t('pharmacy.expiryMissing', { name: missingExpiry[0]!.medicine_name }));
+      return;
+    }
+    if (differs && !acceptDifference) {
+      message.warning(t('pharmacy.tickSaveAnyway'));
       return;
     }
     setSaving(true);
@@ -111,6 +128,10 @@ export function PurchaseModal({ opening = false, onClose }: { opening?: boolean;
         invoice_no: opening ? '' : values.invoice_no ?? '',
         invoice_date: values.invoice_date?.format('YYYY-MM-DD'),
         other_charges: opening ? 0 : values.other_charges ?? 0,
+        printed_total: opening || !rateOn ? null : values.printed_total ?? null,
+        accept_difference: acceptDifference,
+        paid_now: opening || !supplierPicked ? 0 : values.paid_now ?? 0,
+        paid_mode: values.paid_mode ?? 'cash',
         notes: values.notes ?? '',
         items: ready.map((l) => ({
           medicine: l.medicine, batch_no: l.batch_no, barcode: l.barcode, quantity: l.quantity, free_quantity: l.free ?? 0,
@@ -178,10 +199,37 @@ export function PurchaseModal({ opening = false, onClose }: { opening?: boolean;
                   </Form.Item>
                 </Col>
               )}
+              {suppliersOn && supplierPicked && (
+                <Col xs={24}>
+                  <Space wrap align="end">
+                    <Form.Item name="paid_now" label={t('dues.paidNow')} extra={t('dues.paidNowHelp')} style={{ marginBottom: 8 }}>
+                      <InputNumber min={0} precision={2} prefix="₹" style={{ width: 180 }} />
+                    </Form.Item>
+                    <Form.Item name="paid_mode" label={t('dues.mode')} style={{ marginBottom: 8 }}>
+                      <Select style={{ width: 140 }} options={['cash', 'upi', 'bank', 'cheque', 'other'].map((m) => ({ value: m, label: t(`dues.modes.${m}`) }))} />
+                    </Form.Item>
+                  </Space>
+                </Col>
+              )}
+              {rateOn && (
+                <Col xs={12} md={6}>
+                  <Form.Item name="printed_total" label={t('pharmacy.printedTotal')} extra={t('pharmacy.printedTotalHelp')}
+                    rules={[{ required: true, message: t('common.required') }]}>
+                    <InputNumber min={0} precision={2} prefix="₹" style={{ width: '100%' }}
+                      onChange={() => setAcceptDifference(false)} />
+                  </Form.Item>
+                </Col>
+              )}
             </>
           )}
         </Row>
       </Form>
+      {differs && (
+        <Alert type="warning" showIcon style={{ marginBottom: 10 }}
+          message={t('pharmacy.totalDiffers', { diff: money(Math.abs(difference)), calc: money(grand), printed: money(printedTotal) })}
+          description={<Checkbox checked={acceptDifference} onChange={(e) => setAcceptDifference(e.target.checked)}>{t('pharmacy.saveAnyway')}</Checkbox>} />
+      )}
+      {showTotalCheck && !differs && <Alert type="success" showIcon style={{ marginBottom: 10 }} message={t('pharmacy.totalMatches')} />}
 
       <div className="section-toolbar">
         <div className="section-title" style={{ margin: 0 }}>{t('pharmacy.lines', { n: lines.length })}</div>
@@ -201,7 +249,7 @@ export function PurchaseModal({ opening = false, onClose }: { opening?: boolean;
                   onChange={(e) => update(l.key, { barcode: e.target.value.trim() })} />)}
                 {details && expiryOn && field(t('pharmacy.mfg'), <DatePicker size="small" picker="month" format="MM-YYYY" value={l.mfg ?? null} style={{ width: 104 }}
                   onChange={(d) => update(l.key, { mfg: d })} />)}
-                {expiryOn && field(t('pharmacy.expiry'), <DatePicker size="small" picker="month" format="MM-YYYY" value={l.expiry ?? null} style={{ width: 104 }}
+                {expiryOn && field(`${t('pharmacy.expiry')} *`, <DatePicker size="small" picker="month" format="MM-YYYY" value={l.expiry ?? null} style={{ width: 104 }}
                   disabledDate={(d) => d.isBefore(dayjs(), 'month')} onChange={(d) => update(l.key, { expiry: d })} />)}
                 <Button size="small" type="text" icon={<DeleteOutlined />} disabled={lines.length === 1} aria-label={t('common.remove')}
                   style={{ alignSelf: 'flex-end' }} onClick={() => setLines((ls) => ls.filter((x) => x.key !== l.key))} />

@@ -157,7 +157,13 @@ export default function ConsultPage() {
       <section className="consult-main">
         {visitId ? (
           <VisitWorkspace key={visitId} visitId={visitId} onChanged={loadList}
-            onLoaded={(v) => setCurrentAppointment(v.appointment)} />
+            onLoaded={(v) => setCurrentAppointment(v.appointment)}
+            reason={rows.find((a) => a.id === currentAppointment)?.reason || undefined}
+            nextPatient={(() => {
+              // the next one who is already waiting (the longest first), not the one on screen
+              const next = sorted.find((a) => a.status === 'checked_in' && a.id !== currentAppointment);
+              return next ? { name: next.patient_detail.full_name, token: next.token_number, open: () => open({ appointment: next.id }, next.id) } : null;
+            })()} />
         ) : (
           <div className="consult-empty">
             <Empty description={t('consult.choosePatient')} />

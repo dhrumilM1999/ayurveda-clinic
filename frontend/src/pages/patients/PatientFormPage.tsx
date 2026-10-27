@@ -30,7 +30,7 @@ export default function PatientFormPage() {
   const { id } = useParams();
   const isEdit = !!id;
   const { t, i18n } = useTranslation();
-  const { message } = App.useApp();
+  const { message, modal } = App.useApp();
   const navigate = useNavigate();
   const { can } = useAuth();
   const masterLabel = useMasterLabel();
@@ -194,6 +194,24 @@ export default function PatientFormPage() {
       });
     } else {
       HISTORY_FIELDS.forEach((f) => delete payload[f]);
+    }
+
+    // The same name and the same mobile already registered: almost surely the same person (the history would split in two)
+    if (!isEdit) {
+      try {
+        const digits = String(values.mobile ?? '').replace(/\D/g, '').slice(-10);
+        const { data: found } = await api.get<DuplicatePatient[]>('/patients/duplicates/', {
+          params: { mobile: digits, first_name: values.first_name, last_name: values.last_name },
+        });
+        const same = found.find((d) => d.exact);
+        if (same && !(await new Promise<boolean>((resolve) => {
+          modal.confirm({
+            title: t('patients.sameAsk', { name: same.full_name, id: same.uhid }), content: t('patients.sameHelp'),
+            okText: t('patients.registerAnyway'), cancelText: t('patients.openExisting'),
+            onOk: () => resolve(true), onCancel: () => { resolve(false); navigate(`/patients/${same.id}`); },
+          });
+        }))) return;
+      } catch { /* the check is a help: if it cannot run, registering goes on */ }
     }
 
     setSaving(true);

@@ -29,3 +29,13 @@ By default the **consultation, services and medicines are on ONE bill per visit*
 
 ## Mistakes
 Wrong click? See `docs/MISTAKE_PROTECTION.md`: **Undo** next to appointments and sessions, **Re-open check-up**, **Return** a sale, **Cancel** a bill with a credit note. Nothing is ever deleted.
+
+## Dose, times a day, days and packs (prescription)
+- **Dose** = how much each time (2 tablets, 1 teaspoon, 10 ml). Choose the unit next to it.
+- **M-N-N** = how many times a day: Morning - Noon - Night. `1-0-1` = morning and night (2 times a day). Quick: type `101`.
+- **For** = how many days (or weeks / months). The "Medicine days" buttons fill it for every medicine.
+- The screen writes the sum under each medicine: `2 tablets each time x 2 times a day x 90 days = 360 tablets in all -> 6 packs, each pack 60 tablets`.
+- **Qty** is filled for you as `6 packs (360 tablets)` using the pack size saved in the medicine list (`60 tablets`, `450 ml`, `100 g` or "units per pack"). Packs are always rounded up to a whole pack. You can type your own quantity (for example `1 bottle`).
+- A medicine whose pack size is not saved shows only the total (`360 tablets`) and asks you to type the quantity. Save the pack size once in Pharmacy > Medicine list and it works for every prescription.
+- At the pharmacy counter the number of packs to give is already filled from the same sum.
+- A spoon of liquid is counted as 5 ml (tablespoon 15 ml); a spoon of powder (churna) as about 3 g (tablespoon 10 g). Homeopathy bottles: the sum shows the pills; type "1 bottle".

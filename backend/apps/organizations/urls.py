@@ -2,7 +2,7 @@ from django.urls import path
 from rest_framework.routers import DefaultRouter
 
 from .views import (
-    AdditionalChoiceViewSet, AdditionalFeatureViewSet, BranchViewSet, CurrentOrganizationView, FeatureFlagViewSet,
+    AdditionalChoiceViewSet, AdditionalFeatureViewSet, BranchLetterheadImageView, BranchViewSet, CurrentOrganizationView, FeatureFlagViewSet,
     OrganizationLogoView, PublicBrandingLogoView, PublicBrandingView, RoomTypeViewSet, RoomViewSet,
 )
 
@@ -19,4 +19,5 @@ urlpatterns = [
     path("branding/logo/", PublicBrandingLogoView.as_view(), name="public-branding-logo"),
     path("organization/", CurrentOrganizationView.as_view(), name="current-organization"),
     path("organization/logo/", OrganizationLogoView.as_view(), name="organization-logo"),
+    path("branches/<str:pk>/letterhead-image/", BranchLetterheadImageView.as_view(), name="branch-letterhead-image"),
 ] + router.urls

@@ -85,7 +85,7 @@ def test_purchase_checks(pharmacist, branch_a, meds):
 def test_opening_stock(pharmacist, branch_a, meds):
     client = client_for(pharmacist, branch_a)
     res = client.post("/api/v1/purchases/", {"is_opening": True, "items": [
-        {"medicine": str(meds["Ashwagandha Churna"].id), "batch_no": "OP1", "quantity": "4", "mrp": "120"}]}, format="json")
+        {"medicine": str(meds["Ashwagandha Churna"].id), "batch_no": "OP1", "quantity": "4", "mrp": "120", "expiry_date": LATER}]}, format="json")
     assert res.status_code == 201, res.data
     assert StockMovement.objects.get(batch__batch_no="OP1").kind == "opening"
 
@@ -230,7 +230,9 @@ def test_alerts_scan_location_ledger(pharmacist, branch_a, meds):
 @pytest.mark.django_db
 def test_permissions_and_switch(org, doctor, receptionist, pharmacist, branch_a, meds):
     assert client_for(receptionist, branch_a).get("/api/v1/stock/").status_code == 403
-    assert receive(client_for(doctor, branch_a), meds, [("Triphala Churna", "X", LATER, "1")]).status_code == 403
+    assert receive(client_for(receptionist, branch_a), meds, [("Triphala Churna", "X", LATER, "1")]).status_code == 403
+    # the doctor runs the pharmacy too (pharmacy permissions are in the Doctor role)
+    assert receive(client_for(doctor, branch_a), meds, [("Triphala Churna", "DX", LATER, "1")]).status_code == 201
     BranchFeatureFlag.objects.create(organization=org, branch=branch_a, code="pharmacy", enabled=False)
     res = client_for(pharmacist, branch_a).get("/api/v1/stock/")
     assert res.status_code == 403 and "switched off" in str(res.data)
@@ -243,3 +245,16 @@ def test_stock_is_per_branch(pharmacist, org, roles, branch_a, branch_b, meds):
     receive(client_for(pharmacist, branch_a), meds, [("Triphala Churna", "B1", LATER, "5")])
     other = make_user(org, "pharma_b", {branch_b: roles["pharmacist"]})
     assert client_for(other, branch_b).get("/api/v1/stock/").data == []
+
+
+@pytest.mark.django_db
+def test_five_packs_or_fewer_is_low_and_the_whatsapp_message(pharmacist, branch_a, meds, settings):
+    settings.STOCK_ALERT_WHATSAPP = "9725619634"
+    client = client_for(pharmacist, branch_a)
+    receive(client, meds, [("Triphala Churna", "B1", str(TODAY + timedelta(days=300)), "5"),
+                           ("Brahmi Ghrita", "B2", str(TODAY + timedelta(days=300)), "6")])
+    # no own level set: 5 packs is low (the default), 6 is fine
+    assert client.get("/api/v1/stock/alerts/").data["low"] == 1
+    data = client.get("/api/v1/stock/alert-message/").data
+    assert "Triphala Churna: 5 left" in data["message"] and "Brahmi" not in data["message"]
+    assert data["link"].startswith("https://wa.me/919725619634?text=")

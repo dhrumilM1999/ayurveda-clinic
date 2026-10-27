@@ -42,6 +42,10 @@ if APP_ENV == "production" and SECRET_KEY.startswith("dev-only"):
     raise ImproperlyConfigured("Set a real DJANGO_SECRET_KEY in .env before running in production.")
 
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,backend")
+# On a development PC the clinic's own network address (for example 192.168.1.50 when a phone opens the app) changes
+# with the router, so any address is accepted while DEBUG is on. A live server (DEBUG off) uses only the list above.
+if DEBUG:
+    ALLOWED_HOSTS = ["*"]
 CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS", "http://localhost:5173,http://localhost:8000")
 
 INSTALLED_APPS = [
@@ -202,7 +206,10 @@ REST_FRAMEWORK = {
 # AI_PROVIDER: ollama (real) | fake (tests) | off. If Ollama is not running the button says "AI is offline".
 AI_PROVIDER = env("AI_PROVIDER", "ollama")
 OLLAMA_URL = env("OLLAMA_URL", "http://host.docker.internal:11434").rstrip("/")
-OLLAMA_MODEL = env("OLLAMA_MODEL", "gemma2:9b")
+# A small model answers a short translation in a few seconds on a PC without a strong graphics card. A bigger one
+# (for example gemma2:9b) is better at Gujarati but slow. "-1" = keep the model loaded in memory all day.
+OLLAMA_MODEL = env("OLLAMA_MODEL", "qwen2.5:3b")
+OLLAMA_KEEP_ALIVE = env("OLLAMA_KEEP_ALIVE", "-1")
 AI_TIMEOUT_SECONDS = int(env("AI_TIMEOUT_SECONDS", "60"))
 
 PUBLIC_APP_URL = env("PUBLIC_APP_URL", "http://localhost:5173").rstrip("/")
@@ -225,6 +232,9 @@ SIMPLE_JWT = {
 CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
 
 # --- Login security ----------------------------------------------------------
+# Login one-time password (OTP) for doctors and admins. OFF for now: everyone logs in with username + password.
+# To switch it on later (needs a working SMS provider, see docs/SMALL_CHANGES.md): LOGIN_OTP_ENABLED=true in .env
+LOGIN_OTP_ENABLED = env_bool("LOGIN_OTP_ENABLED", False)
 OTP_LENGTH = 6
 OTP_VALID_MINUTES = env_int("OTP_VALID_MINUTES", 5)
 OTP_MAX_ATTEMPTS = env_int("OTP_MAX_ATTEMPTS", 5)
@@ -241,8 +251,15 @@ FIELD_ENCRYPTION_KEY = env("FIELD_ENCRYPTION_KEY", "")
 
 # --- External service providers (see CLAUDE.md section 5) --------------------
 SMS_PROVIDER = env("SMS_PROVIDER", "console")
+# Only for SMS_PROVIDER=fast2sms. Route "q" = Quick SMS (no DLT paperwork).
+FAST2SMS_API_KEY = env("FAST2SMS_API_KEY", "")
+FAST2SMS_ROUTE = env("FAST2SMS_ROUTE", "q")
 # WhatsApp: "click_to_chat" builds a wa.me link that staff click to send (free).
 WHATSAPP_PROVIDER = env("WHATSAPP_PROVIDER", "click_to_chat")
+# Low-stock alert: a medicine with this many packs or fewer is "low" (unless it has its own level), and the
+# owner's WhatsApp number for the "send stock alert" button (free link, the person presses Send). Empty = no link.
+STOCK_LOW_DEFAULT = int(env("STOCK_LOW_DEFAULT", "5"))
+STOCK_ALERT_WHATSAPP = env("STOCK_ALERT_WHATSAPP", "")
 # Payments: "static_upi" shows a UPI QR / link; staff mark the bill paid (free, no gateway).
 PAYMENT_PROVIDER = env("PAYMENT_PROVIDER", "static_upi")
 
@@ -271,3 +288,8 @@ LOGGING = {
 
 # Shown in the Error log so a developer knows which version the problem happened in. Set in .env (for example a date or git id).
 APP_VERSION = env("APP_VERSION", "dev")
+
+# Audit log: rows older than this many days are saved to AUDIT_ARCHIVE_DIR and removed (manage.py purge_audit_log).
+# The database refuses anything shorter than 90 days. Keep the archive folder in your backups.
+AUDIT_RETENTION_DAYS = max(90, env_int("AUDIT_RETENTION_DAYS", 90))
+AUDIT_ARCHIVE_DIR = env("AUDIT_ARCHIVE_DIR", str(BASE_DIR / "audit_archive"))

@@ -2,6 +2,14 @@
 
 What changed in each step, in plain words.
 
+## Pharmacy: safer stock-in and supplier dues (2026-10-25)
+
+- **Expiry date is required** for every batch while expiry tracking is on.
+- **Total on the supplier invoice:** type it when you enter a purchase; the software compares it with its own total and shows the difference. More than Rs 1 difference must be accepted with "save anyway"; the purchase list shows what the invoice says.
+- **Double clicks:** the same purchase (no invoice number) within 5 minutes, or the same counter sale within 15 seconds, is refused.
+- **Supplier dues (new tab):** for medicines bought on credit. Shows what you owe each distributor, what is late (credit days from the supplier), payments (cash / UPI / bank / cheque), part payments, "paid now" while buying, goods sent back as credit, the opening balance, and a full account per supplier. A wrong payment is reversed (never deleted). Only people who can receive stock see it.
+- Guide: `docs/PHARMACY_FLOW_AND_SPEC_CHECK.md`.
+
 ## Error log, calendar, lab tests (2026-10-24)
 
 - **Error log** (new menu item for the owner): every server error, screen crash, lost connection and refused action, with who, where, how many times, a short code and the steps the person took before it. "Copy for Claude" copies it in plain text. See `docs/ERROR_LOG.md`.
@@ -574,3 +582,11 @@ Built from docs/FEATURES.md section G as a **first draft for the owner to correc
 - 35 automated backend tests (login, OTP, rate limit, branch access, permissions, audit, soft delete).
   The frontend passes the type check, the build and the translation check.
 - Guide files in `docs/`.
+
+## Stock alert on WhatsApp, practice robot, reports, Satoshi font
+- Medicines with 5 packs or fewer are "low" (change STOCK_LOW_DEFAULT in .env). The Stock screen has a button
+  "Send stock alert on WhatsApp": it opens WhatsApp with the message typed (number: STOCK_ALERT_WHATSAPP in .env); you press Send.
+- `start-bot.bat`: a practice robot that sees today's sample patients like a real clinic day (check-in, fee, check-up, prescription, medicines).
+- Reports: financial year picker, month-wise summary, GST to pay, sales and purchase registers, bills not paid.
+- Satoshi font in the app and on all print-outs; dashboard shortcut buttons.
+- Software brand renamed from AyuSutra to **Klinvexa**, new lotus + pulse mark (no letters). The clinic logo is no longer in the menu (it stays on the dashboard greeting box and on print-outs). See docs/BRANDING.md.
