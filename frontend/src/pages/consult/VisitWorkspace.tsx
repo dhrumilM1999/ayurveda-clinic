@@ -3,7 +3,7 @@
 //   (e.g. no network) it tries again, and nothing typed is lost.
 // - Undo / Redo: buttons at the top, or Ctrl+Z / Ctrl+Y (Ctrl+Shift+Z) while the check-up is open.
 // SAFE TO EDIT: AUTOSAVE_MS, RETRY_MS, UNDO_STEPS below.
-import { PrinterOutlined,
+import { MedicineBoxOutlined, PrinterOutlined,
   AlertOutlined, CheckCircleOutlined, CloudSyncOutlined, EditOutlined, FileSearchOutlined, RedoOutlined, SaveOutlined, UndoOutlined,
 } from '@ant-design/icons';
 import { Alert, App, Button, Card, Modal, Skeleton, Space, Tag, Tooltip } from 'antd';
@@ -22,6 +22,7 @@ import { PlanTherapyButton } from '../therapy/PlanTherapyButton';
 import { HandwritingModal } from './handwriting/HandwritingModal';
 import { DocumentModal } from '../../components/BillPreview';
 import { PrintMenu } from './PrintMenu';
+import { SellModal } from '../pharmacy/DispenseTab';
 import { genderAge } from '../patients/PatientsPage';
 import { VitalsTab } from '../patients/tabs/VitalsTab';
 import {
@@ -88,7 +89,7 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded, reason, nextPatie
 }) {
   const { t } = useTranslation();
   const { message, modal } = App.useApp();
-  const { can, hasFeature, multiBranch, multiDoctor } = useAuth();
+  const { can, features, hasFeature, multiBranch, multiDoctor } = useAuth();
   const [billOpen, setBillOpen] = useState(false); // OPD bill popup (services & charges for this check-up)
   const templateName = useTemplateName();
   const prakritiName = usePrakritiName();
@@ -106,6 +107,7 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded, reason, nextPatie
   const readOnly = !can('emr.edit');
   const [handwritingOpen, setHandwritingOpen] = useState(false);
   const [printRx, setPrintRx] = useState(false);
+  const [giving, setGiving] = useState(false); // the doctor gives the medicines and makes the bill from this screen
   const canSeeRx = can('prescriptions.view');
   const rxReadOnly = !can('prescriptions.create');
 
@@ -511,6 +513,9 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded, reason, nextPatie
             action={(
               <Space wrap>
                 {rx.id && <Button size="small" icon={<PrinterOutlined />} onClick={() => setPrintRx(true)}>{t('consult.printRx')}</Button>}
+                {rx.id && can('pharmacy.dispense') && features.pharmacy !== false && (
+                  <Button size="small" type="primary" ghost icon={<MedicineBoxOutlined />} onClick={() => setGiving(true)}>{t('dashboard.giveMedicines')}</Button>
+                )}
                 {nextPatient && (
                   <Button size="small" type="primary" onClick={nextPatient.open}>
                     {t('consult.nextPatient', { name: nextPatient.name })}{nextPatient.token ? ` · ${t('consult.tokenN', { n: nextPatient.token })}` : ''}
@@ -519,6 +524,7 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded, reason, nextPatie
               </Space>
             )} />
         )}
+        {giving && rx.id && <SellModal prescriptionId={rx.id} onClose={() => setGiving(false)} />}
         {printRx && rx.id && <DocumentModal kind="prescription" id={rx.id} title={`${t('consult.printRx')} - ${patient?.full_name ?? ''}`} language={patient?.preferred_language} onClose={() => setPrintRx(false)} />}
 
         <div className="section-nav">

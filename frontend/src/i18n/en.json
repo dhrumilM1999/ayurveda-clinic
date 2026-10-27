@@ -155,7 +155,23 @@
     "quickActions": "Quick actions",
     "pillAppointments": "appointments",
     "pillWaiting": "waiting",
-    "pillInConsult": "in check-up"
+    "pillInConsult": "in check-up",
+    "quotes": [
+      "Every patient you listen to today leaves a little lighter.",
+      "Small, steady care heals more than big, rare effort.",
+      "Good health is the quiet wealth of every home.",
+      "Your calm voice is already half the medicine.",
+      "Today is a fine day to help someone feel better.",
+      "Balance in food, sleep and mind is the heart of Ayurveda.",
+      "Healing begins the moment someone feels heard.",
+      "Be kind to every patient: you may be the best part of their day.",
+      "Patience and care make the best medicine.",
+      "A healthy day begins with a smile at the door.",
+      "Prevention is the gentlest cure.",
+      "Thank you for caring for your community today."
+    ],
+    "giveMedicines": "Give medicines & bill",
+    "nextQuote": "Another thought"
   },
   "branches": {
     "title": "Branches",

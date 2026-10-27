@@ -116,7 +116,7 @@ export function DispenseTab() {
 type Choice = { give: boolean; batch?: string; quantity: number; loose: boolean; units: number; discount: number };
 type Done = { dispense: string; invoice: string | null; number: string; total_amount: string; invoice_status: string };
 
-function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClose: (done: boolean) => void }) {
+export function SellModal({ prescriptionId, onClose }: { prescriptionId: string; onClose: (done: boolean) => void }) {
   const { t } = useTranslation();
   const { message, modal } = App.useApp();
   const { can, hasFeature } = useAuth();

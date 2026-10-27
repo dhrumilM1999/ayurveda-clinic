@@ -2089,15 +2089,15 @@ body {
 
 .view-switch { margin-bottom: 14px; }
 
-/* Dashboard: light colours - soft hero, white cards, pills, shortcut descriptions */
-.hero { color: var(--clinic-text); background: linear-gradient(120deg, #eef4fd 0%, #f7fafe 60%, #ffffff 100%); border: 1px solid var(--clinic-border); box-shadow: none; padding: 22px 26px; border-radius: 16px; }
-.hero-date { color: var(--clinic-primary); }
-.hero-sub { color: rgba(15, 27, 45, 0.6); }
-.hero-leaf { opacity: 0.1; }
+/* Dashboard: the greeting box is dark (with the clinic logo and a positive thought); the rest is light */
+.hero { padding: 22px 26px; border-radius: 16px; }
 .hero-title { font-size: 26px; }
+.hero-quote { display: block; margin-top: 12px; max-width: 62%; padding: 0; border: 0; background: none; font: inherit; font-style: italic; font-size: 14px; line-height: 1.45; color: rgba(255, 255, 255, 0.82); text-align: left; cursor: pointer; }
+.hero-logo { position: absolute; right: 26px; top: 50%; transform: translateY(-50%); width: 190px; height: 92px; padding: 8px 12px; border-radius: 14px; background: #fff; display: grid; place-items: center; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25); }
+.hero-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
 .hero-pills { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
-.hero-pills span { padding: 5px 12px; border-radius: 999px; background: #fff; border: 1px solid var(--clinic-border); font-size: 13px; color: rgba(15, 27, 45, 0.7); }
-.hero-pills b { color: var(--clinic-primary); font-size: 14px; margin-right: 2px; }
+.hero-pills span { padding: 5px 12px; border-radius: 999px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.18); font-size: 13px; color: rgba(255, 255, 255, 0.85); }
+.hero-pills b { color: #fff; font-size: 14px; margin-right: 2px; }
 .shortcut-desc { font-size: 12px; line-height: 1.3; color: rgba(15, 27, 45, 0.5); }
 .shortcut { padding: 18px 10px 16px; border-radius: 16px; }
 @media (min-width: 992px) { .shortcut-grid { grid-template-columns: repeat(5, 1fr); } }
@@ -2111,3 +2111,4 @@ body {
 .pharm-subtabs button:hover { border-color: var(--clinic-primary); color: var(--clinic-primary); }
 .pharm-subtabs button.active { background: var(--clinic-primary); border-color: var(--clinic-primary); color: #fff; }
 @media (max-width: 576px) { .pharm-groups { width: 100%; } .pharm-groups .ant-segmented-item { flex: 1; } .pharm-groups .ant-segmented-item-label { padding: 4px 6px; } }
+@media (max-width: 700px) { .hero-logo { display: none; } .hero-quote { max-width: 100%; } }

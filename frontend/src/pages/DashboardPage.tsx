@@ -17,6 +17,7 @@ import { api } from '../api/client';
 import type { DashboardToday, OpdCounts } from '../api/types';
 import { useAuth } from '../auth/AuthContext';
 import { LeafArt } from '../components/LeafArt';
+import { useBranding } from '../branding/BrandingContext';
 import { clinicConfig } from '../config/clinic';
 import { alpha } from '../theme';
 import { money } from './medicines/shared';
@@ -78,6 +79,11 @@ export default function DashboardPage() {
   const { t } = useTranslation();
   const { me, branch, can, features, hasFeature } = useAuth();
   const navigate = useNavigate();
+  const { logoUrl } = useBranding();
+  // A positive thought: a new one each day; the button shows the next one
+  const quotes = t('dashboard.quotes', { returnObjects: true }) as unknown as string[];
+  const [quoteNo, setQuoteNo] = useState(0);
+  const quote = Array.isArray(quotes) && quotes.length ? quotes[(dayjs().diff(dayjs().startOf('year'), 'day') + quoteNo) % quotes.length] : '';
   const [data, setData] = useState<DashboardToday | null>(null);
   const showStockAlerts = can('pharmacy.view') && features.pharmacy !== false && hasFeature('pharmacy_stock_alerts');
 
@@ -123,7 +129,12 @@ export default function DashboardPage() {
             <span><b>{(mine ?? clinic)!.with_doctor}</b> {t('dashboard.pillInConsult')}</span>
           </div>
         )}
-        <LeafArt className="hero-leaf" />
+        {quote && (
+          <button type="button" className="hero-quote" title={t('dashboard.nextQuote')} onClick={() => setQuoteNo((n) => n + 1)}>
+            “{quote}”
+          </button>
+        )}
+        {logoUrl ? <div className="hero-logo"><img src={logoUrl} alt={clinicConfig.appName} /></div> : <LeafArt className="hero-leaf" />}
       </div>
 
       <div className="section-title">{t('dashboard.quickActions')}</div>
