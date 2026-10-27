@@ -18,6 +18,7 @@ import type { DashboardToday, OpdCounts } from '../api/types';
 import { useAuth } from '../auth/AuthContext';
 import { LeafArt } from '../components/LeafArt';
 import { clinicConfig } from '../config/clinic';
+import { alpha } from '../theme';
 import { money } from './medicines/shared';
 import { AlertTiles } from './pharmacy/StockTab';
 
@@ -48,9 +49,8 @@ function Tiles({ tiles, xl }: { tiles: Tile[]; xl?: number }) {
     <Row gutter={[12, 12]}>
       {tiles.map((tile) => (
         <Col xs={12} md={xl ? 12 : 8} xl={xl ?? 24 / Math.min(tiles.length, 6)} key={tile.key}>
-          <Card className="stat-card stat-dark" hoverable={!!tile.link}
-            style={{ background: `linear-gradient(135deg, ${tile.color} 0%, #0c1c33 135%)` }}>
-            <div className="stat-icon" style={{ background: 'rgba(255,255,255,0.16)', color: '#fff' }}>{tile.icon}</div>
+          <Card className="stat-card" hoverable={!!tile.link}>
+            <div className="stat-icon" style={{ background: alpha(tile.color, 0.12), color: tile.color }}>{tile.icon}</div>
             <div>
               <div className="stat-label">
                 {tile.link ? <Link to={tile.link} style={{ color: 'inherit' }}>{t(`dashboard.${tile.key}`)}</Link> : t(`dashboard.${tile.key}`)}

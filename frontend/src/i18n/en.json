@@ -1362,7 +1362,13 @@
     "tickSaveAnyway": "The totals differ. Check the lines, or tick 'save anyway'.",
     "totalMatches": "The total matches the supplier invoice.",
     "expiryMissing": "{{name}}: please enter the expiry date printed on the pack.",
-    "invoiceSays": "Invoice says {{amount}}"
+    "invoiceSays": "Invoice says {{amount}}",
+    "groups": {
+      "sell": "Sell",
+      "stock": "Stock",
+      "buy": "Buy",
+      "reports": "Reports"
+    }
   },
   "billing": {
     "status": {

@@ -1362,7 +1362,13 @@
     "tickSaveAnyway": "કુલ અલગ છે. લાઇનો જુઓ, અથવા 'છતાં સેવ કરો' પર ટિક કરો.",
     "totalMatches": "કુલ સપ્લાયર બિલ સાથે મળે છે.",
     "expiryMissing": "{{name}}: પેક પર છપાયેલી એક્સપાયરી તારીખ લખો.",
-    "invoiceSays": "બિલમાં {{amount}}"
+    "invoiceSays": "બિલમાં {{amount}}",
+    "groups": {
+      "sell": "વેચાણ",
+      "stock": "સ્ટોક",
+      "buy": "ખરીદી",
+      "reports": "રિપોર્ટ"
+    }
   },
   "billing": {
     "status": {

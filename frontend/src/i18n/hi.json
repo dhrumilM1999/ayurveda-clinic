@@ -1362,7 +1362,13 @@
     "tickSaveAnyway": "कुल अलग है। लाइनें देखें, या 'फिर भी सेव करें' पर टिक करें।",
     "totalMatches": "कुल सप्लायर बिल से मिलता है।",
     "expiryMissing": "{{name}}: पैक पर छपी एक्सपायरी तारीख लिखें।",
-    "invoiceSays": "बिल में {{amount}}"
+    "invoiceSays": "बिल में {{amount}}",
+    "groups": {
+      "sell": "बिक्री",
+      "stock": "स्टॉक",
+      "buy": "खरीद",
+      "reports": "रिपोर्ट"
+    }
   },
   "billing": {
     "status": {

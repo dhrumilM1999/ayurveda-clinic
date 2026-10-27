@@ -1,7 +1,7 @@
 // Pharmacy: dispense, stock by batch, purchases, suppliers - always.
 // Extra tabs follow the switches in Additional settings: counter sale, sales & returns, bills, stock check,
 // stock ledger, reports, racks.
-import { Tabs, Typography } from 'antd';
+import { Segmented, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
@@ -44,9 +44,20 @@ export default function PharmacyPage() {
       children: <SetupTab />,
     }] : []),
   ];
+  // The tabs are grouped, so the screen shows 4 clear sections and only the few tabs of the chosen section.
+  // SAFE TO EDIT: move a tab key to another group here.
+  const GROUPS: { key: string; tabs: string[] }[] = [
+    { key: 'sell', tabs: ['dispense', 'counter', 'sales', 'bills'] },
+    { key: 'stock', tabs: ['stock', 'medicines', 'check', 'ledger', 'setup'] },
+    { key: 'buy', tabs: ['purchases', 'dues'] },
+    { key: 'reports', tabs: ['reports'] },
+  ];
   // A tab that was switched off (e.g. an old link) falls back to the first tab
   const asked = params.get('tab') ?? 'dispense';
   const tab = tabs.some((x) => x.key === asked) ? asked : 'dispense';
+  const groups = GROUPS.map((g) => ({ ...g, items: tabs.filter((x) => g.tabs.includes(x.key)) })).filter((g) => g.items.length > 0);
+  const group = groups.find((g) => g.tabs.includes(tab)) ?? groups[0]!;
+  const current = tabs.find((x) => x.key === tab)!;
 
   return (
     <>
@@ -56,7 +67,17 @@ export default function PharmacyPage() {
           <div className="cell-sub">{t('pharmacy.subtitle')}</div>
         </div>
       </div>
-      <Tabs className="page-tabs" activeKey={tab} onChange={(key) => setParams({ tab: key })} destroyOnHidden items={tabs} />
+      <Segmented className="pharm-groups" size="large" value={group.key}
+        onChange={(key) => setParams({ tab: groups.find((g) => g.key === key)!.items[0]!.key })}
+        options={groups.map((g) => ({ value: g.key, label: t(`pharmacy.groups.${g.key}`) }))} />
+      {group.items.length > 1 && (
+        <div className="pharm-subtabs">
+          {group.items.map((x) => (
+            <button type="button" key={x.key} className={x.key === tab ? 'active' : ''} onClick={() => setParams({ tab: x.key })}>{x.label}</button>
+          ))}
+        </div>
+      )}
+      <div key={tab}>{current.children}</div>
     </>
   );
 }
