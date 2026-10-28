@@ -2124,3 +2124,15 @@ body {
 .shortcut-icon { box-shadow: none; }
 .shortcut-icon { color: var(--clinic-primary); background: color-mix(in srgb, var(--clinic-primary) 12%, #fff); }
 .shortcut:hover { border-color: var(--clinic-primary); }
+
+/* Follow-up (next visit) date: easy to see. today / soon = strong ember, later = soft, past = grey-red */
+.followup-badge { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 6px; font-size: 13px; font-weight: 500;
+  border: 1px solid var(--clinic-primary); color: var(--clinic-primary); background: color-mix(in srgb, var(--clinic-primary) 10%, #fff); }
+.followup-badge .followup-when { font-weight: 600; }
+.followup-badge.followup-today, .followup-badge.followup-soon { background: var(--clinic-primary); color: #fff; }
+.followup-badge.followup-past { border-color: #c0392b; color: #c0392b; background: #fdf0ee; }
+.followup-badge.big { font-size: 15px; padding: 6px 14px; }
+.shortcut-table { width: 100%; border-collapse: collapse; }
+.shortcut-table td { padding: 5px 4px; border-bottom: 1px solid var(--clinic-border); font-size: 13.5px; }
+.shortcut-table td:first-child { width: 150px; white-space: nowrap; }
+.shortcut-table kbd { background: var(--clinic-background, #f4f4f2); border: 1px solid var(--clinic-border); border-bottom-width: 2px; border-radius: 5px; padding: 1px 7px; font-family: inherit; font-size: 12.5px; }

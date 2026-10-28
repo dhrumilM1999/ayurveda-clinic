@@ -1,8 +1,8 @@
 // Appointments of one day in the current branch: book, walk-in, check in, reschedule, cancel.
-import { CalendarOutlined, LeftOutlined, PlusOutlined, ReloadOutlined, RightOutlined, UnorderedListOutlined, UserAddOutlined } from '@ant-design/icons';
-import { App, Button, DatePicker, Grid, Segmented, Select, Space, Table, Tag, Typography } from 'antd';
+import { CalendarOutlined, LeftOutlined, PlusOutlined, QuestionCircleOutlined, ReloadOutlined, RightOutlined, UnorderedListOutlined, UserAddOutlined } from '@ant-design/icons';
+import { App, Button, DatePicker, Grid, Modal, Segmented, Select, Space, Table, Tag, Tooltip, Typography } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import CalendarPage from './CalendarPage';
@@ -13,6 +13,7 @@ import { useAuth } from '../../auth/AuthContext';
 import { OpdBillButton } from '../billing/OpdBillModal';
 import { AppointmentActions } from './AppointmentActions';
 import { BookAppointmentModal } from './BookAppointmentModal';
+import { LIST_SHORTCUT_HELP, listShortcutFor } from './shortcuts';
 import { PatientCell, StatusTag, fmtTime, isTimePassed } from './shared';
 import { LiveSearch } from '../../components/LiveSearch';
 import { ListEmpty } from '../../components/ListEmpty';
@@ -33,7 +34,7 @@ function AppointmentsList() {
   const { message } = App.useApp();
   const { can, multiDoctor } = useAuth();
   const navigate = useNavigate();
-  // The doctor clicks a patient in this list: the check-up opens and the patient becomes With doctor
+  // The doctor clicks a patient in this list: the check-up opens (the patient's status does not change)
   const startCheckup = async (r: Appointment) => {
     try {
       const { data } = await api.post<{ id: string }>('/visits/', { appointment: r.id });
@@ -50,6 +51,31 @@ function AppointmentsList() {
   const [doctors, setDoctors] = useState<AppointmentDoctor[]>([]);
   const [booking, setBooking] = useState<'booked' | 'walk_in' | null>(null);
   const dayKey = day.format('YYYY-MM-DD');
+  // Keyboard (keys in shortcuts.ts): n = book, w = walk-in, t = today, [ ] = day, / = search, ? = help
+  const [helpOpen, setHelpOpen] = useState(false);
+  const keyActions = useRef<Record<string, () => void>>({});
+  keyActions.current = {
+    book: () => can('appointments.manage') && setBooking('booked'),
+    walkIn: () => can('appointments.manage') && setBooking('walk_in'),
+    today: () => setDay(dayjs()),
+    prevDay: () => setDay((d) => d.subtract(1, 'day')),
+    nextDay: () => setDay((d) => d.add(1, 'day')),
+    search: () => (document.querySelector('.appt-search input') as HTMLInputElement | null)?.focus(),
+    help: () => setHelpOpen((o) => !o),
+  };
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.isComposing) return;
+      const el = document.activeElement as HTMLElement | null;
+      const typing = !!el && (['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName) || el.isContentEditable);
+      const action = listShortcutFor(e, { typing });
+      if (!action || document.querySelector('.ant-modal-wrap:not([style*="display: none"]), .ant-drawer-open')) return;
+      e.preventDefault();
+      keyActions.current[action]?.();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   const { rows, loading, reload, failed } = useList<Appointment>('/appointments/', {
     date: dayKey, doctor, q: query || undefined, ordering: 'time_order',
@@ -110,9 +136,21 @@ function AppointmentsList() {
           style={{ minWidth: 200 }}
           options={doctors.map((d) => ({ value: d.id, label: d.full_name }))}
         />}
-        <LiveSearch placeholder={t('appointments.searchPlaceholder')} onSearch={setQuery} loading={loading} width={240} />
+        <span className="appt-search"><LiveSearch placeholder={t('appointments.searchPlaceholder')} onSearch={setQuery} loading={loading} width={240} /></span>
         <Button icon={<ReloadOutlined />} onClick={reload} aria-label={t('appointments.refresh')} />
+        <Tooltip title={t('shortcuts.hint')}>
+          <Button type="text" icon={<QuestionCircleOutlined />} onClick={() => setHelpOpen(true)} aria-label={t('shortcuts.hint')} />
+        </Tooltip>
       </div>
+
+      <Modal open={helpOpen} onCancel={() => setHelpOpen(false)} footer={null} title={t('shortcuts.title')} width={420}>
+        <table className="shortcut-table"><tbody>
+          {LIST_SHORTCUT_HELP.map((h) => (
+            <tr key={h.keys}><td><kbd>{h.keys}</kbd></td><td>{t(`shortcuts.${h.label}`)}</td></tr>
+          ))}
+        </tbody></table>
+        <div className="cell-sub" style={{ marginTop: 8 }}>{t('shortcuts.note')}</div>
+      </Modal>
 
       {can('emr.edit') && <div className="cell-sub" style={{ margin: '0 0 8px' }}>{t('appointments.clickToStart')}</div>}
       <Segmented

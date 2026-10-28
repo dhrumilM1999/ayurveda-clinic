@@ -2,6 +2,13 @@
 
 What changed in each step, in plain words.
 
+## Check-up opens any time, follow-up date highlighted, keyboard shortcuts (2026-10-28)
+
+- **Opening a check-up no longer changes the appointment:** no automatic "With doctor" and no token for a patient who has not arrived. The doctor can open any check-up any time. The status changes only with the Check in / Start / Done buttons; finishing the check-up of a patient who was never checked in checks them in (token) and marks the visit done. The green "With doctor" tag in the check-up header is removed.
+- **Follow-up date is highlighted:** an orange "Next visit: Wed, 04-11-2026 - in 7 days" badge in the check-up header and on the Follow-up section (stronger when it is within 3 days, red when it is already past).
+- **Keyboard shortcuts.** Check-up: Ctrl+S save, Alt+1..9 / Alt+0 sections, Alt+M find a medicine, Alt+P print, Ctrl+Enter complete, Alt+N next patient, / search the list, ? help. Appointments list: n book, w walk-in, t today, [ ] previous / next day, / search, ? help. A button with a ? icon shows the list. Keys are in `shortcuts.ts` of each screen.
+- **Tests first:** new backend tests for the status rules and the first front-end tests (`npm test`, vitest) for the shortcut keys and the follow-up highlight.
+
 ## Full-day QA with real-life patients: fixes and safety improvements (2026-10-27)
 
 - **Certificates could not be made** (server error). Fixed: the certificate number is now taken inside one transaction. A new test runs it the way the real server does.
