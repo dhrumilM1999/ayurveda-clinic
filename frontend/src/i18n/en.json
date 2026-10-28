@@ -723,7 +723,7 @@
       "cancelled": "Cancelled",
       "no_show": "Did not come"
     },
-    "clickToStart": "Doctor: click a patient to start the check-up. The patient becomes With doctor.",
+    "clickToStart": "Doctor: click a patient to open the check-up (any time). The status changes only with the Check in / Start / Done buttons.",
     "viewList": "List",
     "viewCalendar": "Calendar",
     "timePassed": "Time passed"
@@ -901,7 +901,22 @@
     "doneBar": "Check-up completed. Print the prescription or go on with the next patient.",
     "printRx": "Print prescription",
     "nextPatient": "Next patient: {{name}}",
-    "tokenN": "Token {{n}}"
+    "tokenN": "Token {{n}}",
+    "nextVisitOn": "Next visit: {{date}}",
+    "followUpWhen": {
+      "today": "TODAY",
+      "tomorrow": "tomorrow",
+      "days": "in {{n}} days",
+      "past": "{{n}} days ago"
+    },
+    "medicalHistory": "Medical history",
+    "lastVisit": "Last visit: {{date}}",
+    "historyKind": {
+      "past": "Past illnesses",
+      "family": "Family",
+      "surgical": "Operations",
+      "notes": "Notes"
+    }
   },
   "templatesAdmin": {
     "title": "Check-up templates",
@@ -2554,5 +2569,25 @@
     "makeBill": "Make bill {{amount}}",
     "billMade": "Bill {{number}} made",
     "newSale": "New sale"
+  },
+  "shortcuts": {
+    "title": "Keyboard shortcuts",
+    "hint": "Keyboard shortcuts (?)",
+    "save": "Save",
+    "section": "Go to section 1 to 9",
+    "section10": "Go to section 10",
+    "medicine": "Search a medicine",
+    "print": "Print the prescription",
+    "complete": "Complete the visit",
+    "nextPatient": "Next patient",
+    "focusSearch": "Search the patient list",
+    "help": "This list",
+    "note": "Shortcuts with a plain key (/ and ?) work only when you are not typing in a box.",
+    "book": "Book an appointment",
+    "walkIn": "Walk-in (token)",
+    "today": "Go to today",
+    "prevDay": "Previous day",
+    "nextDay": "Next day",
+    "searchList": "Search the list"
   }
 }

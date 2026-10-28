@@ -47,10 +47,46 @@ def test_open_visit_from_appointment(doctor, branch_a, appointment):
     client = client_for(doctor, branch_a)
     res = start(client, appointment)
     assert res.status_code == 201, res.data
-    appointment.refresh_from_db()
-    assert appointment.status == "in_consultation" and appointment.token_number == 1
     again = start(client, appointment)  # opening again returns the same visit
     assert again.status_code == 200 and again.data["id"] == res.data["id"]
+
+
+@pytest.mark.django_db
+def test_opening_a_checkup_does_not_change_the_appointment(doctor, branch_a, appointment):
+    """The doctor may open any check-up any time (to look, prepare or write) - it must not mark 'With doctor' or
+    give a token to a patient who has not arrived. The status changes only with the Check in / Start / Done buttons."""
+    client = client_for(doctor, branch_a)
+    assert start(client, appointment).status_code == 201
+    appointment.refresh_from_db()
+    assert appointment.status == "booked" and appointment.token_number is None
+
+
+@pytest.mark.django_db
+def test_opening_a_checkup_keeps_a_waiting_patient_waiting(doctor, receptionist, branch_a, appointment):
+    client_for(receptionist, branch_a).post(f"/api/v1/appointments/{appointment.id}/check-in/")
+    assert start(client_for(doctor, branch_a), appointment).status_code == 201
+    appointment.refresh_from_db()
+    assert appointment.status == "checked_in" and appointment.token_number == 1
+
+
+@pytest.mark.django_db
+def test_completing_the_checkup_of_a_patient_who_was_never_checked_in(doctor, branch_a, appointment):
+    """The patient was seen, so finishing the check-up checks them in (token) and marks the appointment done."""
+    client = client_for(doctor, branch_a)
+    visit_id = start(client, appointment).data["id"]
+    assert client.post(f"{URL}{visit_id}/complete/").status_code == 200
+    appointment.refresh_from_db()
+    assert appointment.status == "completed" and appointment.token_number == 1 and appointment.completed_at
+
+
+@pytest.mark.django_db
+def test_checkup_of_a_started_patient_still_shows_with_doctor(doctor, receptionist, branch_a, appointment):
+    r = client_for(receptionist, branch_a)
+    r.post(f"/api/v1/appointments/{appointment.id}/check-in/")
+    r.post(f"/api/v1/appointments/{appointment.id}/start/")
+    assert start(client_for(doctor, branch_a), appointment).status_code == 201
+    appointment.refresh_from_db()
+    assert appointment.status == "in_consultation"
 
 
 @pytest.mark.django_db
@@ -183,13 +219,34 @@ def test_symptom_score_and_progress(doctor, branch_a, appointment, patient):
 
 
 @pytest.mark.django_db
-def test_future_appointment_cannot_open_checkup(org, doctor, branch_a, patient):
+def test_a_later_appointments_checkup_can_be_opened_and_written_but_not_completed(org, doctor, branch_a, patient):
+    """The doctor may prepare any check-up any time. It belongs to the appointment's day and cannot be completed before it."""
     from datetime import timedelta
+
+    day = timezone.localdate() + timedelta(days=2)
+    later = Appointment.objects.create(organization=org, branch=branch_a, patient=patient, doctor=doctor, date=day,
+                                       start_time=time(11, 0))
+    client = client_for(doctor, branch_a)
+    res = start(client, later)
+    assert res.status_code == 201, res.data
+    assert res.data["visit_date"] == str(day)
+    assert client.patch(f"{URL}{res.data['id']}/", {"history_notes": "Prepared in advance"}, format="json").status_code == 200
+    done = client.post(f"{URL}{res.data['id']}/complete/")
+    assert done.status_code == 400 and "day of the appointment" in str(done.data)
+    later.refresh_from_db()
+    assert later.status == "booked"
+
+
+@pytest.mark.django_db
+def test_a_later_checkup_does_not_count_as_the_last_visit(org, doctor, branch_a, patient):
+    from datetime import timedelta
+
+    from apps.emr.services import last_visit_date
 
     later = Appointment.objects.create(organization=org, branch=branch_a, patient=patient, doctor=doctor,
                                        date=timezone.localdate() + timedelta(days=2), start_time=time(11, 0))
-    res = start(client_for(doctor, branch_a), later)
-    assert res.status_code == 400 and "later date" in str(res.data)
+    start(client_for(doctor, branch_a), later)
+    assert last_visit_date(patient, doctor, timezone.localdate() + timedelta(days=1)) is None
 
 
 @pytest.mark.django_db

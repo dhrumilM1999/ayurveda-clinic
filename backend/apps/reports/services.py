@@ -25,8 +25,8 @@ def opd_counts(branch, day, doctor=None) -> dict:
     returning = set(seen_before.filter(patient_id__in=patients).values_list("patient_id", flat=True))
     return {
         "booked": sum(n for s, n in by.items() if s != "cancelled"),
-        "waiting": by.get("checked_in", 0),
-        "with_doctor": by.get("in_consultation", 0),
+        "waiting": by.get("checked_in", 0) + by.get("in_consultation", 0),  # no separate "With doctor" status
+        "with_doctor": 0,
         "seen": by.get("completed", 0),
         "not_arrived": by.get("booked", 0),
         "no_show": by.get("no_show", 0),
@@ -40,9 +40,9 @@ def opd_counts(branch, day, doctor=None) -> dict:
 
 def next_patients(branch, day, doctor, limit=5) -> list[dict]:
     rows = (Appointment.objects.filter(branch=branch, date=day, doctor=doctor, status__in=["checked_in", "in_consultation"])
-            .select_related("patient").order_by("-status", "token_number", "checked_in_at")[:limit])
+            .select_related("patient").order_by("token_number", "checked_in_at")[:limit])
     return [{"appointment": str(a.id), "token_number": a.token_number, "patient": a.patient.full_name,
-             "uhid": a.patient.uhid, "status": a.status, "reason": a.reason} for a in rows]
+             "uhid": a.patient.uhid, "status": "checked_in", "reason": a.reason} for a in rows]
 
 
 def attention(branch, day, now_time, with_bills=False, with_therapy=False) -> dict:

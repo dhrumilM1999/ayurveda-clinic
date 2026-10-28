@@ -251,8 +251,8 @@ class AppointmentViewSet(AuditedModelViewSet):
     @action(detail=False, methods=["get"])
     def queue(self, request):
         """
-        The waiting queue per doctor for one day (default today): who is with the doctor now,
-        who is waiting (in token order), and how many are booked / done.
+        The waiting queue per doctor for one day (default today): who is waiting (in token order),
+        and how many are booked / done. ("now" is always empty: there is no "With doctor" status.)
         """
         day = parse_day(request.query_params.get("date"), timezone.localdate())
         qs = self.get_queryset().filter(date=day).exclude(status="cancelled")
@@ -265,9 +265,8 @@ class AppointmentViewSet(AuditedModelViewSet):
                 "doctor": str(appt.doctor_id), "doctor_name": appt.doctor.full_name,
                 "now": [], "waiting": [], "booked_count": 0, "done_count": 0,
             })
-            if appt.status == "in_consultation":
-                group["now"].append(appt)
-            elif appt.status == "checked_in":
+            # "With doctor" is no longer a status anyone sees: an old record of it just counts as waiting
+            if appt.status in ("checked_in", "in_consultation"):
                 group["waiting"].append(appt)
             elif appt.status == "booked":
                 group["booked_count"] += 1

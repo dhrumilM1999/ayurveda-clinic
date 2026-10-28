@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Complaint, Diagnosis, ExamField, ExamTemplate, RxLine, Visit } from '../../api/types';
+import { FollowUpBadge } from './FollowUpBadge';
 import { ChipPicker, PrakritiBars, scorePrakriti, useLang3, usePrakritiName, useTemplateName } from './shared';
 
 export type VisitDraft = Pick<Visit,
@@ -175,11 +176,7 @@ export function FollowUpSection({ draft, onChange, readOnly, daysBar }: SectionP
           disabledDate={(d) => d.isBefore(dayjs(), 'day')}
           onChange={(d) => onChange({ follow_up_date: d ? d.format('YYYY-MM-DD') : null })} />
       </Space>
-      {draft.follow_up_date && (
-        <div className="cell-sub" style={{ marginTop: 6 }}>
-          {t('consult.followUpOn', { date: dayjs(draft.follow_up_date).format('dddd, DD-MM-YYYY') })}
-        </div>
-      )}
+      {draft.follow_up_date && <div style={{ marginTop: 10 }}><FollowUpBadge date={draft.follow_up_date} big /></div>}
       <SectionTitle>{t('consult.notes')}</SectionTitle>
       <Input value={draft.follow_up_notes} maxLength={300} disabled={readOnly}
         placeholder={t('consult.followUpNotesPlaceholder')} onChange={(e) => onChange({ follow_up_notes: e.target.value })} />

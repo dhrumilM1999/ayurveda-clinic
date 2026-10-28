@@ -51,24 +51,24 @@ export default function QueueDisplayPage() {
             <h2>{group.doctor_name}</h2>
             <div className="tv-now">
               <div className="tv-label">{t('queue.nowCalling')}</div>
-              {group.now.length ? group.now.map((item) => (
-                <div key={item.id} className="tv-now-row">
-                  <span className="tv-token">{item.token_number ?? '—'}</span>
-                  <span className="tv-name">{item.display_name}</span>
+              {group.waiting[0] ? (
+                <div className="tv-now-row">
+                  <span className="tv-token">{group.waiting[0].token_number ?? '—'}</span>
+                  <span className="tv-name">{group.waiting[0].display_name}</span>
                 </div>
-              )) : <div className="tv-token tv-token-empty">—</div>}
+              ) : <div className="tv-token tv-token-empty">—</div>}
             </div>
             <div className="tv-label">{t('queue.next')}</div>
             <ul className="tv-next">
-              {group.waiting.slice(0, NEXT_COUNT).map((item) => (
+              {group.waiting.slice(1, NEXT_COUNT + 1).map((item) => (
                 <li key={item.id}>
                   <span className="tv-next-token">{item.token_number}</span>
                   <span>{item.display_name}</span>
                 </li>
               ))}
-              {group.waiting.length === 0 && <li className="tv-dim">{t('queue.noneWaiting')}</li>}
-              {group.waiting.length > NEXT_COUNT && (
-                <li className="tv-dim">{t('queue.more', { n: group.waiting.length - NEXT_COUNT })}</li>
+              {group.waiting.length <= 1 && <li className="tv-dim">{t('queue.noneWaiting')}</li>}
+              {group.waiting.length > NEXT_COUNT + 1 && (
+                <li className="tv-dim">{t('queue.more', { n: group.waiting.length - NEXT_COUNT - 1 })}</li>
               )}
             </ul>
           </section>

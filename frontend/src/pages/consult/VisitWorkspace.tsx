@@ -5,10 +5,14 @@
 // SAFE TO EDIT: AUTOSAVE_MS, RETRY_MS, UNDO_STEPS below.
 import { MedicineBoxOutlined, PrinterOutlined,
   AlertOutlined, CheckCircleOutlined, CloudSyncOutlined, EditOutlined, FileSearchOutlined, RedoOutlined, SaveOutlined, UndoOutlined,
+  QuestionCircleOutlined,
 } from '@ant-design/icons';
 import { Alert, App, Button, Card, Modal, Skeleton, Space, Tag, Tooltip } from 'antd';
 import dayjs from 'dayjs';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { FollowUpBadge } from './FollowUpBadge';
+import { medicineLine, medicalHistoryLines } from './historySummary';
+import { SHORTCUT_HELP, shortcutFor } from './shortcuts';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { api, errorMessage } from '../../api/client';
@@ -344,11 +348,31 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded, reason, nextPatie
       const key = e.key.toLowerCase();
       if (key === 'z' && !e.shiftKey) { e.preventDefault(); keys.current.undo(); }
       else if (key === 'y' || (key === 'z' && e.shiftKey)) { e.preventDefault(); keys.current.redo(); }
-      else if (key === 's') { e.preventDefault(); save(); }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [readOnly, save]);
+
+  // Keyboard shortcuts (the keys are in shortcuts.ts)
+  const [helpOpen, setHelpOpen] = useState(false);
+  const act = useRef<Record<string, () => void>>({});
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.isComposing) return;
+      const el = document.activeElement as HTMLElement | null;
+      const typing = !!el && (['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName) || el.isContentEditable);
+      const action = shortcutFor(e, { typing });
+      if (!action) return;
+      const modalOpen = !!document.querySelector('.ant-modal-wrap:not([style*="display: none"])');
+      if (modalOpen && action.type !== 'help') return;
+      const handler = act.current[action.type === 'section' ? `section${action.index}` : action.type];
+      if (!handler) return;
+      e.preventDefault();
+      handler();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   const complete = async () => {
     if (!(await save())) return;
@@ -416,6 +440,20 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded, reason, nextPatie
     { key: 'advice', label: t('consult.sections.advice') },
     { key: 'followUp', label: t('consult.sections.followUp') },
   ];
+  const finished = visit.status === 'completed';
+  act.current = {
+    help: () => setHelpOpen((open) => !open),
+    focusSearch: () => (document.querySelector('.consult-list input') as HTMLInputElement | null)?.focus(),
+    nextPatient: () => nextPatient?.open(),
+    print: () => { if (rx.id) setPrintRx(true); },
+    ...(!readOnly ? { save: () => { save(); } } : {}),
+    ...(!readOnly && !finished ? { complete: () => { complete(); } } : {}),
+    ...(canSeeRx && !rxReadOnly ? { medicine: () => {
+      setSection('rx');
+      window.setTimeout(() => (document.querySelector('.rx-search input') as HTMLInputElement | null)?.focus(), 150);
+    } } : {}),
+    ...Object.fromEntries(sections.map((x, i) => [`section${i}`, () => setSection(x.key)])),
+  };
   const openTemplate = section.startsWith('tpl:') ? templates.find((tpl) => `tpl:${tpl.code}` === section) : undefined;
   const p = visit.patient_detail;
   const props = { draft, onChange: changeDraft, readOnly };
@@ -427,6 +465,14 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded, reason, nextPatie
 
   return (
     <div className="workspace" ref={workspaceRef}>
+      <Modal open={helpOpen} onCancel={() => setHelpOpen(false)} footer={null} title={t('shortcuts.title')} width={420}>
+        <table className="shortcut-table"><tbody>
+          {SHORTCUT_HELP.map((h) => (
+            <tr key={h.keys}><td><kbd>{h.keys}</kbd></td><td>{t(`shortcuts.${h.label}`)}</td></tr>
+          ))}
+        </tbody></table>
+        <div className="cell-sub" style={{ marginTop: 8 }}>{t('shortcuts.note')}</div>
+      </Modal>
       {billOpen && <OpdBillModal target={{ visit: visitId }} onClose={() => setBillOpen(false)} />}
       {handwritingOpen && (
         <HandwritingModal open visitId={visitId} patientName={visit.patient_detail.full_name} onClose={() => setHandwritingOpen(false)} />
@@ -441,7 +487,7 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded, reason, nextPatie
                 <span className="cell-sub">{genderAge(t, p.gender, p.age_years)}</span>
                 {visit.token_number && <Tooltip title={t('consult.tokenHelp')}><span className="token-chip">{t('consult.tokenLabel', { n: visit.token_number })}</span></Tooltip>}
                 <Tag color={visit.is_follow_up ? 'cyan' : 'blue'} bordered={false}>{visit.is_follow_up ? t('consult.followUpTag') : t('consult.newTag')}</Tag>
-                {visit.status === 'draft' && visit.appointment_status === 'in_consultation' && <Tag color="green">{t('appointments.status.in_consultation')}</Tag>}
+                <FollowUpBadge date={draft.follow_up_date} />
                 {visit.prakriti?.type && (
                   <Tag color="purple">{t('consult.prakritiTag', { type: prakritiName(visit.prakriti.type) })}</Tag>
                 )}
@@ -452,6 +498,9 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded, reason, nextPatie
               </div>
             </div>
             <Space size={[8, 8]} wrap className="visit-actions">
+              <Tooltip title={t('shortcuts.hint')}>
+                <Button size="small" type="text" icon={<QuestionCircleOutlined />} onClick={() => setHelpOpen(true)} aria-label={t('shortcuts.hint')} />
+              </Tooltip>
               <span className={`save-state save-${saveState}`}>
                 <CloudSyncOutlined /> {t(`consult.save.${saveState}`)}
               </span>
@@ -565,15 +614,16 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded, reason, nextPatie
         </Card>
       </div>
 
-      <PreviousVisits patientId={visit.patient} currentId={visit.id} templates={templates}
+      <PreviousVisits patientId={visit.patient} patient={patient} currentId={visit.id} templates={templates}
         onRepeat={!rxReadOnly ? (lines) => { changeRx({ items: [...rx.items, ...lines] }); setSection('rx'); } : undefined} />
     </div>
   );
 }
 
 /** Right panel: the patient's earlier check-ups (all branches). Click one to read it. */
-function PreviousVisits({ patientId, currentId, templates, onRepeat }: {
+function PreviousVisits({ patientId, patient, currentId, templates, onRepeat }: {
   patientId: string;
+  patient: Patient | null;
   currentId: string;
   templates: ExamTemplate[];
   onRepeat?: (lines: RxLine[]) => void;
@@ -583,6 +633,8 @@ function PreviousVisits({ patientId, currentId, templates, onRepeat }: {
   const [rows, setRows] = useState<VisitListItem[]>([]);
   const [open, setOpen] = useState<Visit | null>(null);
   const [openRx, setOpenRx] = useState<Prescription | null>(null);
+  // The latest earlier check-up is shown open, without a click (what was told, found and given last time)
+  const [last, setLast] = useState<{ visit: Visit; rx: Prescription | null } | null>(null);
 
   const openVisit = async (id: string) => {
     const { data } = await api.get<Visit>(`/visits/${id}/`);
@@ -600,10 +652,55 @@ function PreviousVisits({ patientId, currentId, templates, onRepeat }: {
       .catch(() => setRows([]));
   }, [patientId, currentId]);
 
+  const lastId = rows[0]?.id;
+  useEffect(() => {
+    setLast(null);
+    if (!lastId) return;
+    let live = true;
+    (async () => {
+      try {
+        const { data: v } = await api.get<Visit>(`/visits/${lastId}/`);
+        let rx: Prescription | null = null;
+        if (can('prescriptions.view')) {
+          const { data: page } = await api.get<Page<Prescription>>('/prescriptions/', { params: { visit: lastId } });
+          rx = page.results[0] ?? null;
+        }
+        if (live) setLast({ visit: v, rx });
+      } catch { /* the panel stays closed: the list below still works */ }
+    })();
+    return () => { live = false; };
+  }, [lastId, can]);
+
+  const history = patient ? medicalHistoryLines(patient) : [];
+
   return (
     <aside className="workspace-side">
       <div className="section-title" style={{ marginTop: 0 }}><FileSearchOutlined /> {t('consult.previousVisits')}</div>
+      {history.length > 0 && (
+        <div className="history-box">
+          <div className="history-title">{t('consult.medicalHistory')}</div>
+          {history.map((h) => <div key={h.key}><span className="cell-sub">{t(`consult.historyKind.${h.key}`)}:</span> {h.text}</div>)}
+        </div>
+      )}
       {rows.length === 0 && <div className="cell-sub">{t('consult.firstVisit')}</div>}
+      {last && (
+        <div className="history-box last-visit">
+          <div className="history-title">{t('consult.lastVisit', { date: dayjs(last.visit.visit_date).format('DD-MM-YYYY') })}</div>
+          {last.visit.complaints.length > 0 && <div><span className="cell-sub">{t('consult.sections.complaints')}:</span> {last.visit.complaints.map((c) => c.label).join(', ')}</div>}
+          {last.visit.diagnoses.length > 0 && <div><span className="cell-sub">{t('consult.sections.diagnosis')}:</span> <b>{last.visit.diagnoses.map((d) => d.label).join(', ')}</b></div>}
+          {last.rx && last.rx.items.length > 0 && (
+            <div>
+              <span className="cell-sub">{t('consult.sections.rx')}:</span>
+              <ul className="history-rx">{last.rx.items.map((i) => <li key={i.id}>{medicineLine(i)}</li>)}</ul>
+              {onRepeat && (
+                <Button size="small" onClick={() => onRepeat(last.rx!.items.map(({ id: _id, ...line }) => line))}>{t('rx.repeat', { count: last.rx.items.length })}</Button>
+              )}
+            </div>
+          )}
+          {last.visit.advice.length > 0 && <div><span className="cell-sub">{t('consult.sections.advice')}:</span> {last.visit.advice.join(', ')}</div>}
+          {last.visit.follow_up_date && <div><span className="cell-sub">{t('consult.sections.followUp')}:</span> {dayjs(last.visit.follow_up_date).format('DD-MM-YYYY')}</div>}
+        </div>
+      )}
       {rows.map((v) => (
         <button type="button" className="prev-visit" key={v.id}
           onClick={() => openVisit(v.id)}>

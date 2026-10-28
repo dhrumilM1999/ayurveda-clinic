@@ -1,7 +1,7 @@
 // The buttons on one appointment row: the next step (Check in / Start / Done) and a "more" menu
 // (Reschedule, Cancel, Did not come, WhatsApp). Used on the Appointments screen and the patient file.
 import { MoreOutlined, UndoOutlined } from '@ant-design/icons';
-import { App, Button, DatePicker, Dropdown, Form, Input, Grid, Modal, Space, Tooltip } from 'antd';
+import { Alert, App, Button, DatePicker, Dropdown, Form, Input, Grid, Modal, Space, Tooltip } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -10,6 +10,7 @@ import { api, errorMessage } from '../../api/client';
 import type { Appointment, PatientNotification, Slot } from '../../api/types';
 import { useAuth } from '../../auth/AuthContext';
 import { OpdBillModal } from '../billing/OpdBillModal';
+import { canOpenCheckup, nextStep } from './status';
 import { NotificationResult, SlotPicker, fmtTime, isTimePassed } from './shared';
 
 type Step = 'check-in' | 'start' | 'complete' | 'no-show';
@@ -22,7 +23,8 @@ export function AppointmentActions({ appointment: a, onChanged }: { appointment:
   const [busy, setBusy] = useState(false);
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
-  const [notice, setNotice] = useState<{ title: string; notification?: PatientNotification; thenBill?: boolean } | null>(null);
+  const [notice, setNotice] = useState<{ title: string; notification?: PatientNotification } | null>(null);
+  const [billBanner, setBillBanner] = useState<{ title: string; notification?: PatientNotification } | null>(null);
   const [billOpen, setBillOpen] = useState(false);
   const canBill = can('billing.charge') || can('billing.create');
   const screens = Grid.useBreakpoint();
@@ -39,8 +41,14 @@ export function AppointmentActions({ appointment: a, onChanged }: { appointment:
     try {
       const { data } = await api.post<Appointment>(`/appointments/${a.id}/${step}/`);
       if (step === 'check-in') {
-        // After the token message, the OPD bill opens for the consultation fee (fee at check-in)
-        setNotice({ title: t('appointments.checkedInMsg', { token: data.token_number }), notification: data.notification, thenBill: canBill && hasFeature('opd_billing') && !data.opd_bill });
+        const title = t('appointments.checkedInMsg', { token: data.token_number });
+        if (canBill && hasFeature('opd_billing') && !data.opd_bill) {
+          // Straight to the OPD bill for the consultation fee: the token and the message result sit on top of it
+          setBillBanner({ title, notification: data.notification });
+          setBillOpen(true);
+        } else {
+          setNotice({ title, notification: data.notification });
+        }
       } else {
         message.success(t('common.saved'));
       }
@@ -69,10 +77,7 @@ export function AppointmentActions({ appointment: a, onChanged }: { appointment:
     ? a.status === 'booked' ? t('undo.booking') : t('undo.to', { status: t(`appointments.status.${a.undo_to}`) })
     : '';
 
-  const closeNotice = () => {
-    if (notice?.thenBill) setBillOpen(true);
-    setNotice(null);
-  };
+  const closeNotice = () => setNotice(null);
 
   // Doctors: open the check-up screen for this appointment (marks it "With doctor")
   const openCheckup = async () => {
@@ -96,12 +101,10 @@ export function AppointmentActions({ appointment: a, onChanged }: { appointment:
   };
 
   // The one main button for the next step
-  let main: { step: Step; label: string } | null = null;
-  if (a.status === 'booked' && isToday) main = { step: 'check-in', label: t('appointments.checkIn') };
-  if (a.status === 'checked_in') main = { step: 'start', label: t('appointments.start') };
-  if (a.status === 'in_consultation') main = { step: 'complete', label: t('appointments.complete') };
+  const step = nextStep(a.status, isToday);
+  const main: { step: Step; label: string } | null = step ? { step, label: step === 'check-in' ? t('appointments.checkIn') : t('appointments.complete') } : null;
 
-  const canCheckup = can('emr.edit') && isToday && ['booked', 'checked_in', 'in_consultation', 'completed'].includes(a.status);
+  const canCheckup = can('emr.edit') && canOpenCheckup(a.status);
   if (!can('appointments.manage')) {
     // Doctor without front-desk rights: only the check-up button
     return canCheckup ? <Button size="small" loading={busy} onClick={openCheckup}>{t('consult.openCheckup')}</Button> : null;
@@ -112,7 +115,6 @@ export function AppointmentActions({ appointment: a, onChanged }: { appointment:
     ...(canBill && !['cancelled', 'no_show'].includes(a.status) ? [{ key: 'bill', label: t('opd.titlePlain') }] : []),
     ...(['booked', 'no_show'].includes(a.status) ? [{ key: 'reschedule', label: t('appointments.reschedule') }] : []),
     ...(a.undo_to && a.status === 'booked' ? [{ key: 'undo-booking', label: undoLabel }] : []),
-    ...(a.status === 'checked_in' ? [{ key: 'complete', label: t('appointments.complete') }] : []),
     ...(a.status === 'booked' && !dayjs(a.date).isAfter(dayjs(), 'day') && !(dayjs(a.date).isSame(dayjs(), 'day') && a.start_time && a.start_time.slice(0, 5) > dayjs().format('HH:mm')) ? [{ key: 'no-show', label: t('appointments.markNoShow') }] : []),
     { key: 'whatsapp', label: t('appointments.whatsapp') },
     ...(['booked', 'checked_in', 'no_show'].includes(a.status) ? [{ key: 'cancel', label: t('appointments.cancel'), danger: true }] : []),
@@ -178,10 +180,17 @@ export function AppointmentActions({ appointment: a, onChanged }: { appointment:
         }} />
       )}
       <Modal open={!!notice} title={notice?.title} onCancel={() => closeNotice()} width={520}
-        footer={<Button type="primary" onClick={() => closeNotice()}>{notice?.thenBill ? t('opd.next') : t('common.close')}</Button>}>
+        footer={<Button type="primary" onClick={() => closeNotice()}>{t('common.close')}</Button>}>
         <NotificationResult notification={notice?.notification} />
       </Modal>
-      {billOpen && <OpdBillModal target={{ appointment: a.id }} onClose={(changed) => { setBillOpen(false); if (changed) onChanged(); }} />}
+      {billOpen && (
+        <OpdBillModal target={{ appointment: a.id }}
+          banner={billBanner && (
+            <Alert type="success" showIcon style={{ marginBottom: 12 }} message={billBanner.title}
+              description={<NotificationResult notification={billBanner.notification} />} />
+          )}
+          onClose={(changed) => { setBillOpen(false); setBillBanner(null); if (changed) onChanged(); }} />
+      )}
     </>
   );
 }

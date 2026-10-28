@@ -238,34 +238,34 @@ def latest_prakriti(patient) -> dict | None:
 @transaction.atomic
 def start_visit(*, patient, doctor, branch, user, appointment=None) -> tuple[Visit, bool]:
     """
-    Open the check-up. With an appointment: reuse its visit if it already has one, and move the
-    appointment to "With doctor". Returns (visit, created).
+    Open the check-up. With an appointment: reuse its visit if it already has one. Returns (visit, created).
+    Opening never changes the appointment (no "With doctor", no token): the doctor may open any check-up any time.
+    The status changes only with the Check in / Start / Done buttons, or when the check-up is completed.
     """
     if appointment is not None:
         existing = Visit.objects.filter(appointment=appointment).first()
         if existing:
             return existing, False
-        if appointment.date > timezone.localdate():
-            raise ValidationError({"detail": "This appointment is on a later date. The check-up opens on that day."})
-        if appointment.date == timezone.localdate():
-            if appointment.status == "booked":
-                change_status(appointment, "check_in", user)
-            if appointment.status == "checked_in":
-                change_status(appointment, "start", user)
+    # A check-up of a later appointment can be prepared in advance: it belongs to that appointment's day
     visit = Visit.objects.create(
         organization_id=branch.organization_id, branch=branch, patient=patient, doctor=doctor,
-        appointment=appointment, visit_date=timezone.localdate(), created_by=user, updated_by=user,
+        appointment=appointment, visit_date=appointment.date if appointment else timezone.localdate(),
+        created_by=user, updated_by=user,
     )
     return visit, True
 
 
 @transaction.atomic
 def complete_visit(visit: Visit, user) -> Visit:
+    if visit.visit_date > timezone.localdate():
+        raise ValidationError({"detail": "This check-up can be completed only on the day of the appointment."})
     visit.status = "completed"
     visit.completed_at = timezone.now()
     visit.updated_by = user
     visit.save(update_fields=["status", "completed_at", "updated_by", "updated_at"])
     appointment = visit.appointment
+    if appointment and appointment.status == "booked" and appointment.date == timezone.localdate():
+        change_status(appointment, "check_in", user)  # the patient was seen: check in (token), then mark done
     if appointment and appointment.status in ("checked_in", "in_consultation"):
         change_status(appointment, "complete", user)
     from apps.prescriptions.services import finalize_for_visit  # here, to avoid a circular import

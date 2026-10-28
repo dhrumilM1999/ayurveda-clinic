@@ -1,7 +1,7 @@
 // Popup to book an appointment (pick doctor, date and time) or add a walk-in (gets a token now).
 // After saving it shows the confirmation message and the WhatsApp button.
 import { CheckCircleFilled } from '@ant-design/icons';
-import { App, Button, Col, DatePicker, Form, Input, Modal, Result, Row, Select } from 'antd';
+import { Alert, App, Button, Col, DatePicker, Form, Input, Modal, Result, Row, Select } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -95,6 +95,8 @@ export function BookAppointmentModal({ open, kind, patient, defaultDate, default
       };
       const { data } = await api.post<Appointment>('/appointments/', payload);
       setResult(data);
+      // A walk-in pays now: go straight to the bill, with the token on top of it
+      if (data.kind === 'walk_in' && canBill) setBillOpen(true);
     } catch (err) {
       message.error(errorMessage(err, t('common.saveFailed')));
     } finally {
@@ -121,7 +123,11 @@ export function BookAppointmentModal({ open, kind, patient, defaultDate, default
           subTitle={`${result.patient_detail.full_name} · ${result.doctor_name}`}
         />
         <NotificationResult notification={result.notification} />
-        {billOpen && <OpdBillModal target={{ appointment: result.id }} onClose={() => setBillOpen(false)} />}
+        {billOpen && (
+          <OpdBillModal target={{ appointment: result.id }}
+            banner={<Alert type="success" showIcon style={{ marginBottom: 12 }} message={title} description={<NotificationResult notification={result.notification} />} />}
+            onClose={() => { setBillOpen(false); onClose(true); }} />
+        )}
       </Modal>
     );
   }
