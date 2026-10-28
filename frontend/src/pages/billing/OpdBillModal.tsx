@@ -1,13 +1,14 @@
 // OPD bill popup: consultation fee at check-in, services & charges after the check-up, and taking payment.
-// Everything is checked on screen first, then confirmed; the bill preview opens on the same screen.
+// Everything is checked on screen first (an unusual bill is confirmed; the plain fee is one click); the bill preview opens on the same screen.
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { Alert, App, Button, Input, InputNumber, Modal, Segmented, Select, Space, Spin, Table, Tag, Typography } from 'antd';
 import dayjs from 'dayjs';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from '../../api/client';
 import type { InvoiceLine, InvoiceRecord, OpdSuggestion, PaymentMode, ServiceCharge } from '../../api/types';
 import { useAuth } from '../../auth/AuthContext';
+import { needsConfirm } from './billFlow';
 import { BillPreviewModal } from '../../components/BillPreview';
 import { money } from '../medicines/shared';
 import { InvoiceStatusTag } from '../pharmacy/common';
@@ -21,7 +22,7 @@ const amountOf = (d: Draft) => rupee(d.price * d.quantity * (100 - d.discount) /
 
 export type OpdBillTarget = { appointment?: string; visit?: string; patient?: string; doctor?: string };
 
-export function OpdBillModal({ target, onClose }: { target: OpdBillTarget; onClose: (changed: boolean) => void }) {
+export function OpdBillModal({ target, onClose, banner }: { target: OpdBillTarget; onClose: (changed: boolean) => void; banner?: ReactNode }) {
   const { t } = useTranslation();
   const { message, modal } = App.useApp();
   const { can } = useAuth();
@@ -107,6 +108,11 @@ export function OpdBillModal({ target, onClose }: { target: OpdBillTarget; onClo
       message.warning(t('opd.needDescription'));
       return;
     }
+    // The plain consultation fee collected in full is one click; anything unusual still asks first
+    if (!needsConfirm({ drafts, suggestedFee: info?.consultation ? Number(info.consultation.fee) : null, payment, dueAfter })) {
+      submit();
+      return;
+    }
     const name = info!.patient_detail.full_name;
     const lines = [
       drafts.length ? (bill ? t('opd.confirmAdd', { amount: money(newTotal), number: bill.number }) : t('opd.confirmCreate', { amount: money(newTotal), name })) : '',
@@ -157,6 +163,7 @@ export function OpdBillModal({ target, onClose }: { target: OpdBillTarget; onClo
       ) : null}>
       {!info ? <Spin /> : (
         <>
+          {banner}
           <div className="opd-head">
             <div>
               <b>{info.patient_detail.full_name}</b> <span className="cell-sub mono">{info.patient_detail.uhid}</span>

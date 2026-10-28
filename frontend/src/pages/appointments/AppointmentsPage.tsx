@@ -14,6 +14,7 @@ import { OpdBillButton } from '../billing/OpdBillModal';
 import { AppointmentActions } from './AppointmentActions';
 import { BookAppointmentModal } from './BookAppointmentModal';
 import { LIST_SHORTCUT_HELP, listShortcutFor } from './shortcuts';
+import { canOpenCheckup } from './status';
 import { PatientCell, StatusTag, fmtTime, isTimePassed } from './shared';
 import { LiveSearch } from '../../components/LiveSearch';
 import { ListEmpty } from '../../components/ListEmpty';
@@ -43,7 +44,7 @@ function AppointmentsList() {
       message.error(errorMessage(err, t('common.loadFailed')));
     }
   };
-  const canStart = (r: Appointment) => can('emr.edit') && r.date === dayjs().format('YYYY-MM-DD') && ['booked', 'checked_in', 'in_consultation', 'completed'].includes(r.status);
+  const canStart = (r: Appointment) => can('emr.edit') && canOpenCheckup(r.status);
   const [day, setDay] = useState<Dayjs>(dayjs());
   const [doctor, setDoctor] = useState<string>();
   const [filter, setFilter] = useState<Filter>('all');

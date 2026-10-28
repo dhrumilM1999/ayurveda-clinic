@@ -219,13 +219,34 @@ def test_symptom_score_and_progress(doctor, branch_a, appointment, patient):
 
 
 @pytest.mark.django_db
-def test_future_appointment_cannot_open_checkup(org, doctor, branch_a, patient):
+def test_a_later_appointments_checkup_can_be_opened_and_written_but_not_completed(org, doctor, branch_a, patient):
+    """The doctor may prepare any check-up any time. It belongs to the appointment's day and cannot be completed before it."""
     from datetime import timedelta
+
+    day = timezone.localdate() + timedelta(days=2)
+    later = Appointment.objects.create(organization=org, branch=branch_a, patient=patient, doctor=doctor, date=day,
+                                       start_time=time(11, 0))
+    client = client_for(doctor, branch_a)
+    res = start(client, later)
+    assert res.status_code == 201, res.data
+    assert res.data["visit_date"] == str(day)
+    assert client.patch(f"{URL}{res.data['id']}/", {"history_notes": "Prepared in advance"}, format="json").status_code == 200
+    done = client.post(f"{URL}{res.data['id']}/complete/")
+    assert done.status_code == 400 and "day of the appointment" in str(done.data)
+    later.refresh_from_db()
+    assert later.status == "booked"
+
+
+@pytest.mark.django_db
+def test_a_later_checkup_does_not_count_as_the_last_visit(org, doctor, branch_a, patient):
+    from datetime import timedelta
+
+    from apps.emr.services import last_visit_date
 
     later = Appointment.objects.create(organization=org, branch=branch_a, patient=patient, doctor=doctor,
                                        date=timezone.localdate() + timedelta(days=2), start_time=time(11, 0))
-    res = start(client_for(doctor, branch_a), later)
-    assert res.status_code == 400 and "later date" in str(res.data)
+    start(client_for(doctor, branch_a), later)
+    assert last_visit_date(patient, doctor, timezone.localdate() + timedelta(days=1)) is None
 
 
 @pytest.mark.django_db

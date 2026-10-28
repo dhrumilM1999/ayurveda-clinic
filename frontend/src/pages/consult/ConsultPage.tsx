@@ -1,4 +1,5 @@
 // The doctor's check-up screen: today's patients on the left, the open check-up on the right.
+import { shownStatus } from '../appointments/status';
 import { LeftOutlined, PlusOutlined, ReloadOutlined, RightOutlined, SearchOutlined } from '@ant-design/icons';
 import { App, Button, DatePicker, Empty, Input, Modal, Select, Spin, Tag } from 'antd';
 import dayjs from 'dayjs';
@@ -34,7 +35,7 @@ export default function ConsultPage() {
   const today = dayjs().format('YYYY-MM-DD');
   // The day shown in the list (today by default), a quick filter and a search box
   const [day, setDay] = useState(today);
-  const [filter, setFilter] = useState<'all' | 'checked_in' | 'in_consultation' | 'booked' | 'completed'>('all');
+  const [filter, setFilter] = useState<'all' | 'checked_in' | 'booked' | 'completed'>('all');
   const [search, setSearch] = useState('');
   const moveDay = (delta: number) => setDay(dayjs(day).add(delta, 'day').format('YYYY-MM-DD'));
 
@@ -79,13 +80,13 @@ export default function ConsultPage() {
   };
 
   // Waiting / with doctor first, then booked (not arrived), then done
-  const order = { in_consultation: 0, checked_in: 1, booked: 2, completed: 3 } as Record<string, number>;
-  const sorted = [...rows].sort((a, b) => (order[a.status] ?? 9) - (order[b.status] ?? 9)
+  const order = { checked_in: 0, booked: 1, completed: 2 } as Record<string, number>;
+  const sorted = [...rows].sort((a, b) => (order[shownStatus(a.status)] ?? 9) - (order[shownStatus(b.status)] ?? 9)
     || (a.token_number ?? 999) - (b.token_number ?? 999) || (a.start_time ?? '').localeCompare(b.start_time ?? ''));
 
-  const count = (status: string) => rows.filter((a) => a.status === status).length;
+  const count = (status: string) => rows.filter((a) => shownStatus(a.status) === status).length;
   const needle = search.trim().toLowerCase();
-  const shown = sorted.filter((a) => (filter === 'all' || a.status === filter)
+  const shown = sorted.filter((a) => (filter === 'all' || shownStatus(a.status) === filter)
     && (!needle || `${a.patient_detail.full_name} ${a.patient_detail.uhid} ${a.reason}`.toLowerCase().includes(needle)));
 
   return (
@@ -108,10 +109,10 @@ export default function ConsultPage() {
         <Input size="small" allowClear prefix={<SearchOutlined />} placeholder={t('consult.searchList')} value={search}
           onChange={(e) => setSearch(e.target.value)} />
         <div className="consult-filters">
-          {([['all', rows.length], ['checked_in', count('checked_in')], ['in_consultation', count('in_consultation')],
+          {([['all', rows.length], ['checked_in', count('checked_in')],
             ['booked', count('booked')], ['completed', count('completed')]] as [typeof filter, number][]).map(([value, n]) => (
             <Tag.CheckableTag key={value} checked={filter === value} onChange={() => setFilter(value)}>
-              {t(`consult.filter.${{ all: 'all', checked_in: 'waiting', in_consultation: 'withDoctor', booked: 'booked', completed: 'done' }[value]}`)} {n}
+              {t(`consult.filter.${{ all: 'all', checked_in: 'waiting', booked: 'booked', completed: 'done' }[value]}`)} {n}
             </Tag.CheckableTag>
           ))}
         </div>

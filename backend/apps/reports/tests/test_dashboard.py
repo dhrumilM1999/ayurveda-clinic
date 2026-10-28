@@ -80,3 +80,13 @@ def test_front_desk_sees_what_needs_attention(org, branch_a, doctor, receptionis
 @pytest.mark.django_db
 def test_pharmacist_gets_no_attention_panel(branch_a, pharmacist):
     assert "attention" not in client_for(pharmacist, branch_a).get(URL).data
+
+
+@pytest.mark.django_db
+def test_an_old_with_doctor_record_counts_as_waiting(org, branch_a, doctor):
+    patient = Patient.objects.create(organization=org, uhid="D-9", first_name="Old", last_name="Status", gender="male", mobile="9800000109")
+    Appointment.objects.create(organization=org, branch=branch_a, patient=patient, doctor=doctor, date=TODAY,
+                               start_time=time(9, 0), status="in_consultation", token_number=1)
+    mine = client_for(doctor, branch_a).get(URL).data["my_opd"]
+    assert mine["waiting"] == 1 and mine["with_doctor"] == 0
+    assert client_for(doctor, branch_a).get(URL).data["next_patients"][0]["status"] == "checked_in"

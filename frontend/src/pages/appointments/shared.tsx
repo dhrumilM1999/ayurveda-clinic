@@ -2,6 +2,7 @@
 import { CheckCircleFilled, MessageOutlined, WhatsAppOutlined } from '@ant-design/icons';
 import { Alert, Button, Empty, Select, Space, Spin, Tag, Typography } from 'antd';
 import dayjs from 'dayjs';
+import { shownStatus } from './status';
 import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api/client';
@@ -31,7 +32,8 @@ export function isTimePassed(a: { status: AppointmentStatus; date: string; start
 
 export function StatusTag({ status }: { status: AppointmentStatus }) {
   const { t } = useTranslation();
-  return <Tag color={STATUS_COLORS[status]} style={{ marginInlineEnd: 0 }}>{t(`appointments.status.${status}`)}</Tag>;
+  const shown = shownStatus(status); // no "With doctor": an old record shows as Waiting
+  return <Tag color={STATUS_COLORS[shown]} style={{ marginInlineEnd: 0 }}>{t(`appointments.status.${shown}`)}</Tag>;
 }
 
 export function PatientCell({ patient }: { patient: AppointmentPatient }) {

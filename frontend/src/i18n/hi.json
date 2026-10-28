@@ -908,6 +908,14 @@
       "tomorrow": "कल",
       "days": "{{n}} दिन बाद",
       "past": "{{n}} दिन पहले"
+    },
+    "medicalHistory": "चिकित्सा इतिहास",
+    "lastVisit": "पिछली मुलाक़ात: {{date}}",
+    "historyKind": {
+      "past": "पहले की बीमारी",
+      "family": "परिवार में",
+      "surgical": "ऑपरेशन",
+      "notes": "नोट"
     }
   },
   "templatesAdmin": {

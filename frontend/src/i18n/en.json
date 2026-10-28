@@ -908,6 +908,14 @@
       "tomorrow": "tomorrow",
       "days": "in {{n}} days",
       "past": "{{n}} days ago"
+    },
+    "medicalHistory": "Medical history",
+    "lastVisit": "Last visit: {{date}}",
+    "historyKind": {
+      "past": "Past illnesses",
+      "family": "Family",
+      "surgical": "Operations",
+      "notes": "Notes"
     }
   },
   "templatesAdmin": {

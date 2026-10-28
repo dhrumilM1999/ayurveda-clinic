@@ -908,6 +908,14 @@
       "tomorrow": "આવતીકાલે",
       "days": "{{n}} દિવસ પછી",
       "past": "{{n}} દિવસ પહેલાં"
+    },
+    "medicalHistory": "તબીબી ઇતિહાસ",
+    "lastVisit": "છેલ્લી મુલાકાત: {{date}}",
+    "historyKind": {
+      "past": "પહેલાંની બીમારી",
+      "family": "કુટુંબમાં",
+      "surgical": "ઓપરેશન",
+      "notes": "નોંધ"
     }
   },
   "templatesAdmin": {

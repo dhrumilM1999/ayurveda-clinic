@@ -6,7 +6,7 @@
 import {
   BarChartOutlined, FileTextOutlined, GiftOutlined, HeartOutlined, OrderedListOutlined, ScheduleOutlined,
   CheckCircleOutlined, ClockCircleOutlined, MedicineBoxOutlined, ShopOutlined, TeamOutlined, UserAddOutlined,
-  UserOutlined, WalletOutlined, WarningOutlined,
+  WalletOutlined, WarningOutlined,
 } from '@ant-design/icons';
 import { Button, Card, Col, Empty, Row, Tag } from 'antd';
 import dayjs from 'dayjs';
@@ -66,10 +66,9 @@ function Tiles({ tiles, xl }: { tiles: Tile[]; xl?: number }) {
   );
 }
 
-function opdTiles(t: (k: string, o?: Record<string, unknown>) => string, o: OpdCounts, mine: boolean): Tile[] {
+function opdTiles(t: (k: string, o?: Record<string, unknown>) => string, o: OpdCounts): Tile[] {
   return [
     { key: 'waiting', icon: <ClockCircleOutlined />, color: c.accent, value: o.waiting, note: t('dashboard.waitingNote'), link: '/queue' },
-    { key: mine ? 'withMe' : 'withDoctor', icon: <UserOutlined />, color: c.primary, value: o.with_doctor, note: t('dashboard.withDoctorNote'), link: '/consult' },
     { key: 'seen', icon: <CheckCircleOutlined />, color: c.success, value: o.seen, note: t('dashboard.seenNote') },
     { key: 'booked', icon: <TeamOutlined />, color: '#8a4fa8', value: o.booked, note: t('dashboard.bookedNote', { n: o.not_arrived }), link: '/appointments' },
   ];
@@ -172,7 +171,6 @@ export default function DashboardPage() {
           <div className="hero-pills">
             <span><b>{(mine ?? clinic)!.booked}</b> {t('dashboard.pillAppointments')}</span>
             <span><b>{(mine ?? clinic)!.waiting}</b> {t('dashboard.pillWaiting')}</span>
-            <span><b>{(mine ?? clinic)!.with_doctor}</b> {t('dashboard.pillInConsult')}</span>
           </div>
         )}
         {quote && (
@@ -203,7 +201,7 @@ export default function DashboardPage() {
             {caseLine(mine)}
           </div>
           <Row gutter={[12, 12]}>
-            <Col xs={24} xl={16}><Tiles tiles={opdTiles(t, mine, true)} xl={12} /></Col>
+            <Col xs={24} xl={16}><Tiles tiles={opdTiles(t, mine)} xl={12} /></Col>
             <Col xs={24} xl={8}>
               <Card size="small" title={t('dashboard.nextPatients')} className="dash-next"
                 extra={<Button size="small" type="primary" icon={<MedicineBoxOutlined />} onClick={() => navigate('/consult')}>{t('dashboard.openCheckup')}</Button>}>
@@ -214,9 +212,7 @@ export default function DashboardPage() {
                       <b>{p.patient}</b> <span className="cell-sub mono">{p.uhid}</span>
                       {p.reason && <div className="cell-sub">{p.reason}</div>}
                     </div>
-                    <Tag color={p.status === 'in_consultation' ? 'blue' : 'gold'} className="tag-tight">
-                      {p.status === 'in_consultation' ? t('dashboard.withMeShort') : t('dashboard.waitingShort')}
-                    </Tag>
+                    <Tag color="gold" className="tag-tight">{t('dashboard.waitingShort')}</Tag>
                   </div>
                 )) : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('dashboard.nobodyWaiting')} />}
               </Card>
@@ -231,7 +227,7 @@ export default function DashboardPage() {
             <div className="section-title" style={{ margin: 0 }}>{t('dashboard.clinicOpd')}</div>
             {caseLine(clinic)}
           </div>
-          <Tiles tiles={opdTiles(t, clinic, false)} />
+          <Tiles tiles={opdTiles(t, clinic)} />
         </>
       )}
 

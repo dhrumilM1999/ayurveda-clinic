@@ -11,6 +11,7 @@ import { Alert, App, Button, Card, Modal, Skeleton, Space, Tag, Tooltip } from '
 import dayjs from 'dayjs';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FollowUpBadge } from './FollowUpBadge';
+import { medicineLine, medicalHistoryLines } from './historySummary';
 import { SHORTCUT_HELP, shortcutFor } from './shortcuts';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -613,15 +614,16 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded, reason, nextPatie
         </Card>
       </div>
 
-      <PreviousVisits patientId={visit.patient} currentId={visit.id} templates={templates}
+      <PreviousVisits patientId={visit.patient} patient={patient} currentId={visit.id} templates={templates}
         onRepeat={!rxReadOnly ? (lines) => { changeRx({ items: [...rx.items, ...lines] }); setSection('rx'); } : undefined} />
     </div>
   );
 }
 
 /** Right panel: the patient's earlier check-ups (all branches). Click one to read it. */
-function PreviousVisits({ patientId, currentId, templates, onRepeat }: {
+function PreviousVisits({ patientId, patient, currentId, templates, onRepeat }: {
   patientId: string;
+  patient: Patient | null;
   currentId: string;
   templates: ExamTemplate[];
   onRepeat?: (lines: RxLine[]) => void;
@@ -631,6 +633,8 @@ function PreviousVisits({ patientId, currentId, templates, onRepeat }: {
   const [rows, setRows] = useState<VisitListItem[]>([]);
   const [open, setOpen] = useState<Visit | null>(null);
   const [openRx, setOpenRx] = useState<Prescription | null>(null);
+  // The latest earlier check-up is shown open, without a click (what was told, found and given last time)
+  const [last, setLast] = useState<{ visit: Visit; rx: Prescription | null } | null>(null);
 
   const openVisit = async (id: string) => {
     const { data } = await api.get<Visit>(`/visits/${id}/`);
@@ -648,10 +652,55 @@ function PreviousVisits({ patientId, currentId, templates, onRepeat }: {
       .catch(() => setRows([]));
   }, [patientId, currentId]);
 
+  const lastId = rows[0]?.id;
+  useEffect(() => {
+    setLast(null);
+    if (!lastId) return;
+    let live = true;
+    (async () => {
+      try {
+        const { data: v } = await api.get<Visit>(`/visits/${lastId}/`);
+        let rx: Prescription | null = null;
+        if (can('prescriptions.view')) {
+          const { data: page } = await api.get<Page<Prescription>>('/prescriptions/', { params: { visit: lastId } });
+          rx = page.results[0] ?? null;
+        }
+        if (live) setLast({ visit: v, rx });
+      } catch { /* the panel stays closed: the list below still works */ }
+    })();
+    return () => { live = false; };
+  }, [lastId, can]);
+
+  const history = patient ? medicalHistoryLines(patient) : [];
+
   return (
     <aside className="workspace-side">
       <div className="section-title" style={{ marginTop: 0 }}><FileSearchOutlined /> {t('consult.previousVisits')}</div>
+      {history.length > 0 && (
+        <div className="history-box">
+          <div className="history-title">{t('consult.medicalHistory')}</div>
+          {history.map((h) => <div key={h.key}><span className="cell-sub">{t(`consult.historyKind.${h.key}`)}:</span> {h.text}</div>)}
+        </div>
+      )}
       {rows.length === 0 && <div className="cell-sub">{t('consult.firstVisit')}</div>}
+      {last && (
+        <div className="history-box last-visit">
+          <div className="history-title">{t('consult.lastVisit', { date: dayjs(last.visit.visit_date).format('DD-MM-YYYY') })}</div>
+          {last.visit.complaints.length > 0 && <div><span className="cell-sub">{t('consult.sections.complaints')}:</span> {last.visit.complaints.map((c) => c.label).join(', ')}</div>}
+          {last.visit.diagnoses.length > 0 && <div><span className="cell-sub">{t('consult.sections.diagnosis')}:</span> <b>{last.visit.diagnoses.map((d) => d.label).join(', ')}</b></div>}
+          {last.rx && last.rx.items.length > 0 && (
+            <div>
+              <span className="cell-sub">{t('consult.sections.rx')}:</span>
+              <ul className="history-rx">{last.rx.items.map((i) => <li key={i.id}>{medicineLine(i)}</li>)}</ul>
+              {onRepeat && (
+                <Button size="small" onClick={() => onRepeat(last.rx!.items.map(({ id: _id, ...line }) => line))}>{t('rx.repeat', { count: last.rx.items.length })}</Button>
+              )}
+            </div>
+          )}
+          {last.visit.advice.length > 0 && <div><span className="cell-sub">{t('consult.sections.advice')}:</span> {last.visit.advice.join(', ')}</div>}
+          {last.visit.follow_up_date && <div><span className="cell-sub">{t('consult.sections.followUp')}:</span> {dayjs(last.visit.follow_up_date).format('DD-MM-YYYY')}</div>}
+        </div>
+      )}
       {rows.map((v) => (
         <button type="button" className="prev-visit" key={v.id}
           onClick={() => openVisit(v.id)}>

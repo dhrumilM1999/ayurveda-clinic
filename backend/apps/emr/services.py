@@ -246,17 +246,19 @@ def start_visit(*, patient, doctor, branch, user, appointment=None) -> tuple[Vis
         existing = Visit.objects.filter(appointment=appointment).first()
         if existing:
             return existing, False
-        if appointment.date > timezone.localdate():
-            raise ValidationError({"detail": "This appointment is on a later date. The check-up opens on that day."})
+    # A check-up of a later appointment can be prepared in advance: it belongs to that appointment's day
     visit = Visit.objects.create(
         organization_id=branch.organization_id, branch=branch, patient=patient, doctor=doctor,
-        appointment=appointment, visit_date=timezone.localdate(), created_by=user, updated_by=user,
+        appointment=appointment, visit_date=appointment.date if appointment else timezone.localdate(),
+        created_by=user, updated_by=user,
     )
     return visit, True
 
 
 @transaction.atomic
 def complete_visit(visit: Visit, user) -> Visit:
+    if visit.visit_date > timezone.localdate():
+        raise ValidationError({"detail": "This check-up can be completed only on the day of the appointment."})
     visit.status = "completed"
     visit.completed_at = timezone.now()
     visit.updated_by = user

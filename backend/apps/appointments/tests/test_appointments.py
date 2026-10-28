@@ -236,12 +236,14 @@ def test_queue_groups_by_doctor(org, receptionist, doctor, branch_a, patient):
     other = make_patient(org, mobile="9876500000", first="Sunita", last="Shah")
     second = client.post(URL, {"patient": str(other.id), "doctor": str(doctor.id), "kind": "walk_in"},
                          format="json").data
-    client_for(doctor, branch_a).post(f"{URL}{second['id']}/start/")
+    client_for(doctor, branch_a).post(f"{URL}{second['id']}/start/")  # an old "With doctor" record
     res = client.get(URL + "queue/")
     assert res.status_code == 200
     group = res.data["doctors"][0]
-    assert [w["token_number"] for w in group["waiting"]] == [1]
-    assert group["now"][0]["display_name"] == "Sunita S."
+    # There is no "With doctor" group any more: everyone who has arrived and is not done waits in token order
+    assert group["now"] == []
+    assert [w["token_number"] for w in group["waiting"]] == [1, 2]
+    assert group["waiting"][1]["display_name"] == "Sunita S."
 
 
 # --- Who can do what -----------------------------------------------------------------

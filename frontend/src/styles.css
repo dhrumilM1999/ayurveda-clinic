@@ -2136,3 +2136,8 @@ body {
 .shortcut-table td { padding: 5px 4px; border-bottom: 1px solid var(--clinic-border); font-size: 13.5px; }
 .shortcut-table td:first-child { width: 150px; white-space: nowrap; }
 .shortcut-table kbd { background: var(--clinic-background, #f4f4f2); border: 1px solid var(--clinic-border); border-bottom-width: 2px; border-radius: 5px; padding: 1px 7px; font-family: inherit; font-size: 12.5px; }
+/* Patient history shown straight away on the check-up screen */
+.history-box { border: 1px solid var(--clinic-border); border-radius: 8px; padding: 8px 10px; background: #fff; font-size: 13px; line-height: 1.5; }
+.history-box.last-visit { border-color: var(--clinic-primary); background: color-mix(in srgb, var(--clinic-primary) 5%, #fff); }
+.history-title { font-weight: 600; margin-bottom: 2px; }
+.history-rx { margin: 2px 0 6px; padding-left: 18px; }
