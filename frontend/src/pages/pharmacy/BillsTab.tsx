@@ -1,7 +1,7 @@
 // Pharmacy bills: day closing summary, bill list, bill detail with payments, UPI QR, print and cancel.
 import { LeftOutlined, ReloadOutlined, RightOutlined } from '@ant-design/icons';
 import {
-  App, Button, DatePicker, Descriptions, Drawer, Form, Input, InputNumber, Modal, QRCode, Segmented, Space, Spin, Table,
+  Alert, App, Button, DatePicker, Descriptions, Drawer, Form, Input, InputNumber, Modal, QRCode, Segmented, Space, Spin, Table,
   Tag, Typography,
 } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
@@ -11,6 +11,7 @@ import { api, errorMessage } from '../../api/client';
 import type { CreditNoteRecord, DaySummary, InvoiceRecord, InvoiceStatus, Page, PaymentMode } from '../../api/types';
 import { useAuth } from '../../auth/AuthContext';
 import { money } from '../medicines/shared';
+import { refundShortfall } from '../billing/refundCheck';
 import { InvoiceStatusTag, PrintButton, expiryText, qty } from './common';
 import { LiveSearch, useLatestRequest } from '../../components/LiveSearch';
 
@@ -330,6 +331,8 @@ function CancelModal({ invoice, onClose }: { invoice: InvoiceRecord; onClose: (s
     }
   };
   const paid = Number(invoice.paid_amount) - Number(invoice.refunded_amount);
+  const refundMode = Form.useWatch('refund_mode', form) as 'cash' | 'upi' | 'card' | undefined;
+  const short = refundMode ? refundShortfall(invoice.payments ?? [], invoice.credit_notes ?? [], refundMode, paid) : null;
   return (
     <Modal open keyboard={false} maskClosable={false} width={460} title={t('billing.cancelBill')} onCancel={() => onClose(false)} onOk={save}
       okText={t('billing.cancelBill')} okButtonProps={{ danger: true }} cancelText={t('common.close')} confirmLoading={saving}>
@@ -344,6 +347,10 @@ function CancelModal({ invoice, onClose }: { invoice: InvoiceRecord; onClose: (s
           </Form.Item>
         )}
       </Form>
+      {short && refundMode && (
+        <Alert type="warning" showIcon style={{ marginBottom: 12 }}
+          message={t('billing.refundShort', { mode: t(`billing.modes.${refundMode}`), received: money(short.received), refund: money(short.refund) })} />
+      )}
       <Typography.Text type="secondary">{t('billing.neverDeleted')}</Typography.Text>
     </Modal>
   );

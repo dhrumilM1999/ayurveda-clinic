@@ -1475,6 +1475,7 @@
     "rate": "Rate",
     "receivedBy": "Received by",
     "reference": "Reference (UPI ref / card slip)",
+    "refundShort": "Only {{received}} came in by {{mode}} on this bill, but you are giving back {{refund}} that way. You can still go on (for example the patient paid by UPI and you return cash), but the day closing will show it.",
     "refundBy": "Refund {{amount}} by",
     "refundMode": "Refund by",
     "refunded": "Refunded",
@@ -1513,6 +1514,7 @@
       "labels": "Patient medicine labels",
       "stock_labels": "Pharmacy stock labels",
       "enquiries": "Online enquiry",
+      "reminders": "Reminders",
       "prescription": "Prescription"
     },
     "features": {
@@ -1575,6 +1577,14 @@
       "medicine_extra_details": {
         "label": "Extra product details",
         "help": "Generic name, category, pack type and default selling price on the medicine form."
+      },
+      "therapy_auto_billing": {
+        "label": "Bill each finished therapy session on the OPD bill",
+        "help": "On: when the therapist finishes a session, its price (from Services & charges) is added to that patient's OPD bill of the day, so nothing is forgotten. Off: you add therapy charges to the bill yourself. A therapy with no price linked is never added. Needs OPD bills."
+      },
+      "whatsapp_reminders": {
+        "label": "WhatsApp reminders for appointments and therapy sessions",
+        "help": "On: the WhatsApp button on an appointment due today or tomorrow, and on a therapy session, opens a reminder message for the patient (you press Send in WhatsApp). Only for patients who agreed to messages."
       },
       "combined_opd_bill": {
         "label": "Medicines on the OPD bill (one combined bill)",
@@ -2053,6 +2063,7 @@
     }
   },
   "therapy": {
+    "whatsappReminder": "WhatsApp reminder",
     "title": "Panchakarma and therapy",
     "subtitle": "Therapy plans, the sessions of the day, therapists and rooms",
     "tabs": {

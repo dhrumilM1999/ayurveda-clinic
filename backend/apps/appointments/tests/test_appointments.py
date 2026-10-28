@@ -400,3 +400,44 @@ def test_walk_in_is_listed_by_the_time_it_was_entered(org, receptionist, doctor,
     ids = [r["id"] for r in client.get(URL, {"date": str(today), "ordering": "time_order"}).data["results"]]
     # the walk-in arrived now, before the later booked slot
     assert ids.index(res.data["id"]) < ids.index(str(booked.id))
+
+
+# --- WhatsApp reminders (Additional settings -> "WhatsApp reminders") ---------------------
+def _reminders(org, on=True):
+    from apps.organizations.models import OrganizationFeature
+    OrganizationFeature.objects.update_or_create(organization=org, code="whatsapp_reminders", defaults={"enabled": on})
+
+
+@pytest.mark.django_db
+def test_whatsapp_button_sends_a_reminder_for_tomorrows_booking_when_switched_on(
+        org, receptionist, doctor, branch_a, schedule, patient):
+    client = client_for(receptionist, branch_a)
+    appointment = book(client, patient, doctor, start="11:00").data["id"]
+    # switch off: the same "booked" text as always
+    off = client.post(f"{URL}{appointment}/whatsapp/")
+    assert "Reminder" not in off.data["message"] and "your appointment" in off.data["message"]
+    _reminders(org)
+    on = client.post(f"{URL}{appointment}/whatsapp/")
+    assert on.data["message"].startswith("Reminder") and "11:00 AM" in on.data["message"]
+    assert FakeWhatsAppProvider.outbox[-1]["message"] == on.data["message"]
+
+
+@pytest.mark.django_db
+def test_reminder_text_follows_the_patients_language(org, receptionist, doctor, branch_a, schedule, patient):
+    _reminders(org)
+    patient.preferred_language = "gu"
+    patient.save()
+    client = client_for(receptionist, branch_a)
+    appointment = book(client, patient, doctor, start="11:00").data["id"]
+    assert "યાદ" in client.post(f"{URL}{appointment}/whatsapp/").data["message"]
+
+
+@pytest.mark.django_db
+def test_no_reminder_for_a_booking_far_away_or_without_consent(org, receptionist, doctor, branch_a, schedule, patient):
+    _reminders(org)
+    client = client_for(receptionist, branch_a)
+    far = book(client, patient, doctor, day=timezone.localdate() + timedelta(days=5), start="11:00").data["id"]
+    assert not client.post(f"{URL}{far}/whatsapp/").data["message"].startswith("Reminder")
+    nobody = make_patient(org, mobile="9876500001", first="Mina", consent=False)
+    mine = book(client, nobody, doctor, start="12:00").data["id"]
+    assert client.post(f"{URL}{mine}/whatsapp/").data["consent"] is False

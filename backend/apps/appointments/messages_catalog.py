@@ -35,4 +35,13 @@ MESSAGES = {
         "gu": "નમસ્તે {name}, {clinic} ખાતે {doctor} માટે તમારો ટોકન નંબર {token} છે. કૃપા કરીને તમારા વારાની રાહ જુઓ.",
         "hi": "नमस्ते {name}, {clinic} में {doctor} के लिए आपका टोकन नंबर {token} है। कृपया अपनी बारी की प्रतीक्षा करें।",
     },
+    # Used by the WhatsApp button when "WhatsApp reminders" is switched on and the visit is today or tomorrow
+    "reminder": {
+        "en": "Reminder: Namaste {name}, your appointment with {doctor} at {clinic} is on {date} at {time}. "
+              "Please come 10 minutes early. For changes call {phone}.",
+        "gu": "યાદ અપાવવા: નમસ્તે {name}, {clinic} ખાતે {doctor} સાથે તમારી એપોઇન્ટમેન્ટ {date} ના રોજ {time} વાગ્યે છે. "
+              "કૃપા કરીને 10 મિનિટ વહેલા આવશો. ફેરફાર માટે {phone} પર ફોન કરો.",
+        "hi": "याद दिलाने के लिए: नमस्ते {name}, {clinic} में {doctor} के साथ आपका अपॉइंटमेंट {date} को {time} बजे है। "
+              "कृपया 10 मिनट पहले आएँ। बदलाव के लिए {phone} पर कॉल करें।",
+    },
 }

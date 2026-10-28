@@ -2,6 +2,17 @@
 
 What changed in each step, in plain words.
 
+## Therapy billing and WhatsApp reminders as switches, Sora font, refund warning (2026-10-28)
+
+Both new features are **off by default**. The owner (or the doctor) switches them on in **Settings -> Additional settings**, so each clinic decides.
+
+- **"Bill each finished therapy session on the OPD bill"** (group Billing, needs OPD bills). When the therapist finishes a session, its price (the service linked to the therapy in Services & charges) is added to that patient's OPD bill of the day (the bill is made if there is none). One bill per patient per day; finish -> undo -> finish again never adds the line twice. A therapy with no price linked is never added.
+- **"WhatsApp reminders for appointments and therapy sessions"** (group Reminders). The WhatsApp button on a booked appointment due today or tomorrow now sends a "Reminder: ..." text, and the therapy Sessions list gets a WhatsApp button. Same free click-to-chat as before (staff press Send); only for patients who agreed to messages; English, Gujarati and Hindi. Texts: `backend/apps/appointments/messages_catalog.py` ("reminder") and `backend/apps/therapy/messages_catalog.py`.
+- **Sora font for headings and the clinic name** (free, SIL Open Font Licence; file and licence in `frontend/public/fonts`). Body text stays Satoshi. To go back, change `fonts.heading` in `frontend/src/config/clinic.ts`.
+- **Refund warning on "Cancel bill":** if the refund way (cash/UPI/card) is more than came in by that way (paid by UPI, refund in cash), a yellow note says so. It is a warning only (giving cash back for a UPI payment is normal at a counter), and the day closing shows it.
+- The fixed words of the **bill itself stay English** on purpose (tax paper). Prescription, case sheet, therapy plan, follow-up card, certificates and Prakriti report already print in the patient's language.
+- Tests first: new backend tests for the therapy bill, both reminders; new front-end test for the refund check.
+
 ## Check-up opens any time, follow-up date highlighted, keyboard shortcuts (2026-10-28)
 
 - **Opening a check-up no longer changes the appointment:** no automatic "With doctor" and no token for a patient who has not arrived. The doctor can open any check-up any time. The status changes only with the Check in / Start / Done buttons; finishing the check-up of a patient who was never checked in checks them in (token) and marks the visit done. The green "With doctor" tag in the check-up header is removed.
