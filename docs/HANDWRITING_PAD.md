@@ -32,6 +32,11 @@ screen's bottom-right corner. Without pad mode you would have to aim at the smal
 3. To press a button (Save, Undo...), move the pen onto the button and tap. Taps on buttons never write.
 4. **Leave pad mode** (or Esc) goes back to the normal window. Your writing is kept.
 
+Pad mode opens in **Wide** (pad held sideways). If you hold the pad upright, press **Upright**.
+
+**Writing sticks to an edge, or the ring does not match the pen?** Press **Set pad corners**, touch the pen at the pad's
+TOP-LEFT corner, then at the BOTTOM-RIGHT corner. This is remembered on this computer. **Use whole screen** forgets it.
+
 If the browser refuses full screen, press F11 and try again. Pad mode needs full screen so the pad and the screen line up.
 
 ## What is saved

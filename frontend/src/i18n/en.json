@@ -2411,7 +2411,13 @@
     "padMode": "Pad mode (full screen)",
     "padExit": "Leave pad mode",
     "padNoFullscreen": "The browser did not allow full screen. Press F11 for full screen, then try again.",
-    "padHint": "Pad mode: write on the whole pad. The blue ring shows the pen on the page. To press a button, move the pen onto it and tap."
+    "padHint": "Pad mode: write on the whole pad. The blue ring shows the pen on the page. To press a button, move the pen onto it and tap. If the writing sticks to an edge, press Set pad corners and touch the pad's top-left and bottom-right corners.",
+    "corners": "Set pad corners",
+    "corner1": "Touch the pad's TOP-LEFT corner...",
+    "corner2": "Now touch the BOTTOM-RIGHT corner...",
+    "cornersSaved": "Pad corners saved.",
+    "cornersTooClose": "The two touches were too close. Touch the two opposite corners of the pad.",
+    "cornersReset": "Use whole screen"
   },
   "calendar": {
     "title": "Calendar",

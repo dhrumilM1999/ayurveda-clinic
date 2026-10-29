@@ -4,6 +4,7 @@ What changed in each step, in plain words.
 
 ## Pad mode for the writing pad (2026-10-30)
 - New **Pad mode (full screen)** in the Handwriting window: the whole pad is the writing area (pen at the pad's corner = the page's corner), with a ring showing the pen and buttons that never write. Frontend only, no database change.
+- Pad mode opens in Wide (pad held sideways). Pad position is read from the screen, and **Set pad corners** (touch two corners of the pad) fixes any edge shifting; remembered on the computer.
 - Tested with the iScribe pad: the browser sees it as a mouse (Mouse mode), so pressure is not available.
 
 ## Walk-in after registering, patient can come any time, Dose box switch, stock in tablets (2026-10-29)

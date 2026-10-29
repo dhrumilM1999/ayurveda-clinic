@@ -1,7 +1,7 @@
 // The writing area for the digital pad (iScribe pad in Mouse mode, a tablet pen, a touch screen or a mouse).
 // The pen draws live. Strokes are kept as normalised points, so the picture is identical on any screen size.
 // SAFE TO EDIT: PAD_RATIO (shape of the writing area), SMOOTHING. The words are in src/i18n/*.json under "handwriting".
-import { isToolbarTarget, viewportPoint } from './padMapping';
+import { isToolbarTarget, screenPoint, viewportPoint, type PadBounds } from './padMapping';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 // iScribe A4 pad: 210 x 291.5 mm (portrait); landscape is the other way round
@@ -26,12 +26,13 @@ type Props = {
   width: number; // pen thickness in screen pixels at normal size
   tool: Tool;
   maxHeight: number; // pixels the writing area may use on this screen
+  bounds?: PadBounds; // pad mode: where the pad is on the screen (screen pixels); the whole screen when not set
   padMode?: boolean; // full-screen pad mode: the whole screen is the pad (see padMapping.ts)
   onInkChange?: (hasInk: boolean) => void;
 };
 
 export const HandwritingCanvas = forwardRef<CanvasHandle, Props>(function HandwritingCanvas(
-  { landscape, color, width, tool, maxHeight, padMode = false, onInkChange }, ref,
+  { landscape, color, width, tool, maxHeight, padMode = false, bounds, onInkChange }, ref,
 ) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -137,8 +138,12 @@ export const HandwritingCanvas = forwardRef<CanvasHandle, Props>(function Handwr
   // whole screen, because the pad covers the whole screen (see padMapping.ts).
   type Area = { left: number; top: number; width: number; height: number };
   const screenArea = (): Area => ({ left: 0, top: 0, width: window.innerWidth, height: window.innerHeight });
+  const padBounds = (): PadBounds => bounds ?? { left: 0, top: 0, right: window.screen.width, bottom: window.screen.height };
   const toPoint = (e: PointerEvent, area: Area): Point => {
-    const { x, y } = viewportPoint(e.clientX - area.left, e.clientY - area.top, area.width, area.height);
+    // Pad mode reads the position on the SCREEN, so it also works when the browser is not full screen
+    const { x, y } = padMode
+      ? screenPoint(e.screenX, e.screenY, padBounds())
+      : viewportPoint(e.clientX - area.left, e.clientY - area.top, area.width, area.height);
     return { x, y, p: e.pointerType === 'pen' ? e.pressure : 0.5 };
   };
 
@@ -166,7 +171,7 @@ export const HandwritingCanvas = forwardRef<CanvasHandle, Props>(function Handwr
   const showRing = (e: PointerEvent) => {
     const ring = ringRef.current;
     if (!ring) return;
-    const { x, y } = viewportPoint(e.clientX, e.clientY, window.innerWidth, window.innerHeight);
+    const { x, y } = screenPoint(e.screenX, e.screenY, padBounds());
     ring.style.display = 'block';
     ring.style.transform = `translate(${x * size.w}px, ${y * size.h}px)`;
   };
