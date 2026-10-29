@@ -143,3 +143,21 @@ def test_therapy_reminder_uses_the_gujarati_therapy_name_for_a_gujarati_patient(
     sid = _session(c, patient, abhyanga, therapist)
     message = c.post(f"/api/v1/therapy-sessions/{sid}/whatsapp/").data["message"]
     assert abhyanga.name_gu in message and "યાદ" in message
+
+
+# --- Setting a therapy's price straight from the Therapies screen ---
+@pytest.mark.django_db
+def test_setting_a_price_on_a_therapy_creates_and_links_its_service(org, roles, branch_a, doctor, therapist, abhyanga):
+    _setup(org, branch_a, auto_bill=False)
+    abhyanga.service = None
+    abhyanga.save()
+    c = client_for(doctor, branch_a)
+    res = c.patch(f"/api/v1/therapies/{abhyanga.id}/", {"set_price": "650"}, format="json")
+    assert res.status_code == 200, res.data
+    abhyanga.refresh_from_db()
+    assert abhyanga.service is not None and abhyanga.service.price == Decimal("650")
+    assert abhyanga.service.name == abhyanga.name and res.data["price"] == "650.00"
+    # a second time with a price already linked does not create another service
+    before = ServiceCharge.objects.count()
+    c.patch(f"/api/v1/therapies/{abhyanga.id}/", {"set_price": "700"}, format="json")
+    assert ServiceCharge.objects.count() == before

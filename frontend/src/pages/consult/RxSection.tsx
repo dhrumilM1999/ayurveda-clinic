@@ -142,7 +142,7 @@ export function RxSection({ rx, onChange, warnings, diagnoses, readOnly, daysBar
       label: (
         <div className="rx-option">
           <span><b>{m.name}</b> <span className="cell-sub">{m.dosage_form?.label}</span></span>
-          <span className="rx-option-meta"><StockTag stock={m.stock_available} /> <MedicineFlags medicine={m} /> <span className="cell-sub num">{money(m.branch_price)}</span></span>
+          <span className="rx-option-meta"><StockTag stock={m.stock_available} units={m.stock_units} unit={m.stock_unit} /> <MedicineFlags medicine={m} /> <span className="cell-sub num">{money(m.branch_price)}</span></span>
         </div>
       ),
     })),
@@ -219,7 +219,7 @@ export function RxSection({ rx, onChange, warnings, diagnoses, readOnly, daysBar
                   <b>{l.medicine_name}</b>
                   {l.dosage_form && <span className="cell-sub">{l.dosage_form}</span>}
                   {l.medicine === null && <Tag className="tag-tight">{t('rx.freeText')}</Tag>}
-                  <StockTag stock={l.stock_available} />
+                  <StockTag stock={l.stock_available} units={l.stock_units} unit={l.stock_unit} />
                   <MedicineFlags flags={l.medicine_flags} />
                 </div>
                 {!readOnly && (

@@ -4,6 +4,8 @@ from apps.appointments.serializers import patient_summary
 from apps.common.serializers import MasterField
 from apps.medicines.models import Medicine
 
+from apps.pharmacy.services import units_of
+
 from .models import DURATION_UNITS, Prescription, PrescriptionItem, PrescriptionTemplate
 from .services import warnings_for
 
@@ -18,6 +20,8 @@ class PrescriptionItemSerializer(serializers.ModelSerializer):
     pack_size = serializers.CharField(source="medicine.pack_size", read_only=True, default="")
     units_per_pack = serializers.DecimalField(source="medicine.units_per_pack", max_digits=10, decimal_places=2, read_only=True, default=None)
     pack_label = serializers.SerializerMethodField()
+    stock_units = serializers.SerializerMethodField()
+    stock_unit = serializers.SerializerMethodField()
 
     class Meta:
         model = PrescriptionItem
@@ -25,6 +29,7 @@ class PrescriptionItemSerializer(serializers.ModelSerializer):
             "id", "medicine", "medicine_name", "medicine_kind", "medicine_version", "dosage_form", "dose",
             "dose_unit", "frequency", "timing", "anupana", "duration", "duration_unit", "quantity",
             "instructions", "medicine_flags", "stock_available", "pack_size", "units_per_pack", "pack_label",
+            "stock_units", "stock_unit",
         ]
 
     def get_stock_available(self, obj):
@@ -32,6 +37,16 @@ class PrescriptionItemSerializer(serializers.ModelSerializer):
         if stock is None or obj.medicine_id is None:
             return None
         return str(stock.get(obj.medicine_id, 0))
+
+    def get_stock_units(self, obj):
+        stock = self.context.get("stock")
+        if stock is None or obj.medicine_id is None:
+            return None
+        return units_of(obj.medicine, stock.get(obj.medicine_id, 0))
+
+    def get_stock_unit(self, obj):
+        m = obj.medicine
+        return m.dose_unit.label if m is not None and m.dose_unit_id else "units"
 
     def get_pack_label(self, obj):
         m = obj.medicine

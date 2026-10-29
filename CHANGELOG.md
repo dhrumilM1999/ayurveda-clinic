@@ -2,6 +2,11 @@
 
 What changed in each step, in plain words.
 
+## Stock in tablets on the check-up screen, therapy price from the Therapies screen (2026-10-29)
+- The medicine search and the prescription lines now show loose stock in tablets (for example "975 tablets"), the same as the pharmacy screens.
+- On the Therapies screen, type a price and the therapy is added to Services & charges and linked for you (only when it has no price yet). Needed for "Bill each finished therapy session".
+- Branches `feature/therapy-billing-reminders-sora` and `feature/walkin-after-register-stock-units` were merged into main.
+
 ## Walk-in after registering, patient can come any time, Dose box switch, stock in tablets (2026-10-29)
 
 - **New patient registered -> "Walk-in (Give token)" straight away.** After saving a new patient a small window offers Walk-in, Book appointment or Open patient file. The patient file's Appointments tab also has a **Walk-in** button now.

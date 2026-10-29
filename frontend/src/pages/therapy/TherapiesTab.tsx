@@ -109,6 +109,11 @@ export default function TherapiesTab({ rows, reload }: { rows: TherapyType[]; re
                 options={services.map((s) => ({ value: s.id, label: `${s.name} (₹${s.price})` }))} />
             </Form.Item>
           )}
+          {hasFeature('opd_billing') && !editing?.service && (
+            <Form.Item name="set_price" label={t('therapy.list.setPrice')} extra={t('therapy.list.setPriceHelp')}>
+              <InputNumber min={0} max={1000000} prefix="₹" style={{ width: 160 }} />
+            </Form.Item>
+          )}
           <Form.Item name="instructions" label={t('therapy.list.instructions')}><Input.TextArea rows={3} maxLength={1500} /></Form.Item>
         </Form>
       </Modal>

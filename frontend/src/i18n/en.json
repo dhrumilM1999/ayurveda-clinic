@@ -2173,7 +2173,9 @@
       "active": "In use",
       "loadSample": "Add the starting list",
       "loadedN": "{{n}} therapies added.",
-      "empty": "No therapies yet. Add the starting list (Abhyanga, Shirodhara, Virechana ...) and change it as you like."
+      "empty": "No therapies yet. Add the starting list (Abhyanga, Shirodhara, Virechana ...) and change it as you like.",
+      "setPrice": "Price (₹)",
+      "setPriceHelp": "Type the price and the therapy is added to Services & charges for you. It is then used on OPD bills."
     },
     "off": "Panchakarma and therapy is switched off for this branch. Switch it on in Settings, Modules.",
     "timePassed": "Time passed",
