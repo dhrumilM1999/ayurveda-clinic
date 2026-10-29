@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from '../../api/client';
+import { useAuth } from '../../auth/AuthContext';
 import { useLiveLookup } from '../../components/LiveSearch';
 import { useMasterLabel, useMasters } from '../../api/masters';
 import type { Diagnosis, Medicine, Page, Prescription, PrescriptionTemplate, RxLine, RxWarning } from '../../api/types';
@@ -75,6 +76,7 @@ export function RxSection({ rx, onChange, warnings, diagnoses, readOnly, daysBar
   visitId?: string;
 }) {
   const { t } = useTranslation();
+  const { hasFeature } = useAuth();
   const { message } = App.useApp();
   const [search, setSearch] = useState('');
   const { options, loading: searching, search: lookup, loadNow } = useLiveLookup<Medicine>(
@@ -226,14 +228,17 @@ export function RxSection({ rx, onChange, warnings, diagnoses, readOnly, daysBar
                 )}
               </div>
               <div className="rx-controls">
-                <div className="rx-field">
-                  <span>{t('rx.dose')}</span>
-                  <Space.Compact size="small">
-                    <Input size="small" value={l.dose} maxLength={20} disabled={readOnly} style={{ width: 52 }} placeholder="2"
-                      onChange={(e) => update(i, { dose: e.target.value })} />
-                    <LabelSelect category="dose_unit" value={l.dose_unit} disabled={readOnly} width={96} onChange={(v) => update(i, { dose_unit: v })} />
-                  </Space.Compact>
-                </div>
+                {/* Additional settings -> "Dose box". Off: the medicine's usual dose (Medicines screen) is kept and printed */}
+                {hasFeature('rx_dose_box') && (
+                  <div className="rx-field">
+                    <span>{t('rx.dose')}</span>
+                    <Space.Compact size="small">
+                      <Input size="small" value={l.dose} maxLength={20} disabled={readOnly} style={{ width: 52 }} placeholder="2"
+                        onChange={(e) => update(i, { dose: e.target.value })} />
+                      <LabelSelect category="dose_unit" value={l.dose_unit} disabled={readOnly} width={96} onChange={(v) => update(i, { dose_unit: v })} />
+                    </Space.Compact>
+                  </div>
+                )}
                 <div className="rx-field">
                   <Tooltip title={t('rx.frequencyHelp')}><span>{t('rx.frequency')}</span></Tooltip>
                   <AutoComplete size="small" value={l.frequency} disabled={readOnly} style={{ width: 84 }} placeholder="1-0-1"
@@ -275,7 +280,7 @@ export function RxSection({ rx, onChange, warnings, diagnoses, readOnly, daysBar
               {/* The sum in plain words, so dose, times a day, days and the number of packs are never a mystery */}
               {(() => {
                 const plan = coursePlan(l);
-                if (!plan) return <div className="rx-calc cell-sub">{t('rx.calcMissing')}</div>;
+                if (!plan) return <div className="rx-calc cell-sub">{t(hasFeature('rx_dose_box') ? 'rx.calcMissing' : 'rx.calcMissingNoDose')}</div>;
                 return (
                   <div className="rx-calc">
                     {t('rx.calc', { dose: plan.doses, unit: plan.unit, times: plan.perDay, days: plan.days, total: plan.total })}

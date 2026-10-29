@@ -1,5 +1,8 @@
 /* Satoshi font (free for commercial use, licence in public/fonts). One file holds every weight. */
 @font-face { font-family: 'Satoshi'; src: url('/fonts/Satoshi-Variable.woff2') format('woff2'); font-weight: 300 900; font-style: normal; font-display: swap; }
+/* Sora font for headings and the clinic name (SIL Open Font Licence, free for commercial use, licence in public/fonts).
+   It has Latin letters only: Gujarati and Hindi headings use Hind Vadodara / Hind (see src/config/clinic.ts). */
+@font-face { font-family: 'Sora'; src: url('/fonts/Sora-Variable.woff2') format('woff2'); font-weight: 100 800; font-style: normal; font-display: swap; }
 
 /* SAFE TO EDIT: extra styles. Colours and fonts come from src/config/clinic.ts
    and are used here as var(--clinic-...). */

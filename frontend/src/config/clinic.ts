@@ -61,7 +61,8 @@ export const clinicConfig = {
     // Satoshi (files in public/fonts). Body text. Gujarati uses "Hind Vadodara", Hindi uses "Hind" automatically.
     body: "'Satoshi', 'Plus Jakarta Sans', 'Hind Vadodara', 'Hind', 'Nirmala UI', 'Segoe UI', sans-serif",
     // Clinic name and page titles
-    heading: "'Satoshi', 'Hind Vadodara', 'Hind', 'Segoe UI', sans-serif",
+    // Sora (files in public/fonts). To go back to the body font, write 'Satoshi' here instead of 'Sora'.
+    heading: "'Sora', 'Satoshi', 'Hind Vadodara', 'Hind', 'Segoe UI', sans-serif",
   },
 
   // Corner roundness of buttons and boxes (in pixels)

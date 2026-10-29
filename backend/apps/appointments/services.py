@@ -12,6 +12,7 @@ from rest_framework.exceptions import ValidationError
 from apps.accounts.models import DoctorSchedule
 from apps.notifications.sms import send_sms
 from apps.notifications.whatsapp import prepare_whatsapp
+from apps.organizations.services import is_feature_enabled
 from apps.patients.services import has_consent
 
 from .messages_catalog import MESSAGES
@@ -148,6 +149,8 @@ def event_for(appointment: Appointment) -> str:
         return "cancelled"
     if appointment.token_number and appointment.status in ("checked_in", "in_consultation"):
         return "token"
+    if appointment.status == "booked" and 0 <= (appointment.date - timezone.localdate()).days <= 1             and is_feature_enabled(appointment.branch, "whatsapp_reminders"):
+        return "reminder"  # Additional settings -> "WhatsApp reminders"
     return "rescheduled" if appointment.reschedule_count else "booked"
 
 

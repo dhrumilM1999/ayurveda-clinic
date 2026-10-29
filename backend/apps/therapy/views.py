@@ -11,7 +11,7 @@ from apps.organizations.services import is_feature_enabled
 
 from .models import TherapyPlan, TherapyPlanItem, TherapySession, TherapyType
 from .serializers import ScheduleSerializer, SessionRescheduleSerializer, TherapyPlanSerializer, TherapySessionSerializer, TherapyTypeSerializer
-from .services import check_free, end_for, load_sample_therapies, refresh_plan_status, therapists_in_branch, undo_last_step
+from .services import bill_finished_session, session_reminder, check_free, end_for, load_sample_therapies, refresh_plan_status, therapists_in_branch, undo_last_step
 
 FEATURE = "panchakarma"
 
@@ -137,7 +137,8 @@ class TherapySessionViewSet(ModuleSwitch, AuditedModelViewSet):
     ordering_fields = ["date", "start_time"]
     pagination_class = None
     required_permissions = {"start": "therapy.manage", "complete": "therapy.manage", "missed": "therapy.manage",
-                            "cancel": "therapy.manage", "reschedule": "therapy.manage", "undo": "therapy.manage", "options": "therapy.view"}
+                            "cancel": "therapy.manage", "reschedule": "therapy.manage", "undo": "therapy.manage", "options": "therapy.view",
+                            "whatsapp": "therapy.manage"}
 
     def create(self, request, *args, **kwargs):
         raise ValidationError({"detail": "Book sessions from the plan (POST /therapy-plans/<id>/schedule/)."})
@@ -162,6 +163,8 @@ class TherapySessionViewSet(ModuleSwitch, AuditedModelViewSet):
         session.updated_by = request.user
         session.save()
         refresh_plan_status(session.plan)
+        if status == "done":
+            bill_finished_session(session, request.user)
         log_action(request, "update", session, changes={"status": {"from": before, "to": status}})
         return Response(self.get_serializer(session).data)
 
@@ -180,6 +183,20 @@ class TherapySessionViewSet(ModuleSwitch, AuditedModelViewSet):
         if not session.started_at:
             fields["started_at"] = timezone.now()
         return self._set(request, "done", completed_at=timezone.now(), **fields)
+
+    @action(detail=True, methods=["post"])
+    def whatsapp(self, request, pk=None):
+        """A click-to-chat WhatsApp reminder for this session (Additional settings -> WhatsApp reminders)."""
+        if not is_feature_enabled(request.branch, "whatsapp_reminders"):
+            raise PermissionDenied("WhatsApp reminders are switched off. Switch them on in Additional settings.")
+        session = self.get_object()
+        therapy = session.therapy
+        language = session.patient.preferred_language
+        name = (getattr(therapy, f"name_{language}", "") if language in ("gu", "hi") else "") or therapy.name
+        notification = session_reminder(session, name)
+        if notification["consent"]:
+            log_action(request, "share", session, changes={"channel": "whatsapp"})
+        return Response(notification)
 
     @action(detail=True, methods=["post"])
     def missed(self, request, pk=None):

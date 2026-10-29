@@ -771,6 +771,9 @@ export interface StockBatch {
   barcode: string;
   supplier_name: string;
   quantity: string;
+  /** tablets left, for a medicine sold loose (null otherwise) */
+  units_left?: string | null;
+  unit?: string;
 }
 
 export interface StockRow {
@@ -784,6 +787,12 @@ export interface StockRow {
   barcode: string;
   available: string;
   usable: string;
+  /** a medicine sold loose is also counted in tablets (usable_units); null for the others */
+  usable_units?: string | null;
+  available_units?: string | null;
+  units_per_pack?: string | null;
+  allow_loose?: boolean;
+  unit?: string;
   near_expiry_quantity: string;
   nearest_expiry: string | null;
   reorder_level: string | null;

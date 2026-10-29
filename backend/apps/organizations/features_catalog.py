@@ -79,11 +79,22 @@ ADDITIONAL_FEATURES = {
     "label_clinic": {"group": "labels", "label": "Label: clinic / pharmacy name", "default": True,
                      "requires": "medicine_labels"},
     # Prescription
+    # The Dose box (amount + unit) on each medicine line of the check-up. Off: the line shows only times a day (1-0-1),
+    # when, anupana, days and quantity; the medicine's usual dose (set on the Medicines screen) is still printed.
+    "rx_dose_box": {"group": "prescription", "label": "Dose box on each medicine in the check-up", "default": False},
     "digital_pad": {"group": "prescription", "label": "Digital pad: handwritten prescription", "default": False},
     # Pharmacy and products
     "clinic_products": {"group": "pharmacy", "label": "Clinic products (sell oils, supplements and other things that are not medicines)", "default": True},
     "separate_medicine_menu": {"group": "pharmacy", "label": "Show the Medicines list as its own menu (otherwise it is a tab inside Pharmacy)", "default": False},
     # Billing
+    # Therapy: when a therapist finishes a session, the price (from "Services & charges") is added to the patient's
+    # OPD bill of that day. Off by default: each clinic decides how it charges for Panchakarma courses.
+    "therapy_auto_billing": {"group": "billing", "label": "Bill each finished therapy session on the OPD bill",
+                             "default": False, "requires": "opd_billing"},
+    # Reminders: the WhatsApp button on an appointment due today/tomorrow, and on a therapy session, sends a
+    # reminder text (click-to-chat; staff press Send). Only for patients who agreed to messages.
+    "whatsapp_reminders": {"group": "reminders", "label": "WhatsApp reminders for appointments and therapy sessions",
+                           "default": False},
     "combined_opd_bill": {"group": "billing", "label": "Medicines on the OPD bill (one combined bill)",
                           "default": True, "requires": "pharmacy_billing"},
 }

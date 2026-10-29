@@ -7,6 +7,7 @@ Therapy rules in one place (views call these; other modules should too):
 """
 from datetime import datetime, timedelta
 
+from django.db.models import Q
 from django.utils import timezone
 
 from rest_framework.exceptions import ValidationError
@@ -154,3 +155,59 @@ def undo_last_step(session, user) -> dict:
     session.save(update_fields=fields)
     refresh_plan_status(session.plan)
     return {"from": old, "to": target, "undo": True}
+
+
+def bill_finished_session(session, user):
+    """
+    Additional setting "Bill each finished therapy session": put the therapy's price on the patient's OPD bill
+    of the session day (one bill per patient per day; made if there is none yet). Does nothing when the switch is
+    off, the therapy has no price, or this session is already on the bill (finish -> undo -> finish again).
+    """
+    from apps.billing.models import Invoice
+    from apps.billing.opd import branch_services, charge_opd
+    from apps.organizations.services import is_feature_enabled
+
+    if not is_feature_enabled(session.branch, "therapy_auto_billing") or not is_feature_enabled(session.branch, "opd_billing"):
+        return None
+    service_id = session.therapy.service_id
+    if not service_id:
+        return None
+    row = next((r for r in branch_services(session.branch) if r["service"].id == service_id), None)
+    if row is None:  # the service is switched off in this branch
+        return None
+    earlier = Q(date__lt=session.date) | Q(date=session.date, start_time__lt=session.start_time)
+    number = session.item.sessions.exclude(status="cancelled").filter(earlier).count() + 1
+    description = f"{session.therapy.name} - session {number} of {session.item.sessions_planned} ({session.date:%d-%m-%Y})"
+    bills = Invoice.objects.filter(branch=session.branch, series="OP", patient=session.patient, invoice_date=session.date)         .exclude(status="cancelled")
+    if bills.filter(lines__description=description).exists():
+        return None
+    service = row["service"]
+    line = {"kind": "service", "service": service, "description": description, "quantity": 1, "unit_price": row["price"],
+            "discount_percent": 0, "gst_rate": service.gst_rate, "hsn_code": service.sac_code, "unit_label": ""}
+    existing = bills.order_by("created_at").first()
+    if existing is not None:
+        from apps.billing.services import add_lines
+        return add_lines(existing, user, [line])
+    return charge_opd(session.branch, user, patient=session.patient, doctor=session.plan.doctor, lines=[line],
+                      visit=session.plan.visit)
+
+
+def session_reminder(session, name: str) -> dict:
+    """
+    A WhatsApp reminder for a therapy session (click-to-chat link; staff press Send), ONLY if the patient agreed to
+    messages. `name` is the therapy name in the patient's language.
+    """
+    from apps.notifications.whatsapp import prepare_whatsapp
+    from apps.patients.services import has_consent
+
+    from .messages_catalog import REMINDER
+
+    patient = session.patient
+    if not has_consent(patient, "communication"):
+        return {"consent": False, "sms_sent": False, "whatsapp_link": "", "message": ""}
+    branch = session.branch
+    text = (REMINDER.get(patient.preferred_language) or REMINDER["en"]).format(
+        name=patient.first_name, therapy=name, clinic=branch.name, date=session.date.strftime("%d-%m-%Y"),
+        time=session.start_time.strftime("%I:%M %p").lstrip("0"), phone=branch.phone or session.organization.phone or "")
+    link = prepare_whatsapp(patient.mobile, text, organization=session.organization, purpose="therapy_reminder")
+    return {"consent": True, "sms_sent": False, "whatsapp_link": link, "message": text}

@@ -56,11 +56,22 @@ class BatchSerializer(serializers.ModelSerializer):
     medicine_name = serializers.CharField(source="medicine.name", read_only=True)
     supplier_name = serializers.CharField(source="supplier.name", read_only=True, default="")
     sale_price = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
+    units_left = serializers.SerializerMethodField()  # tablets left, for a medicine sold loose (else null)
+    unit = serializers.SerializerMethodField()  # "tablets": the word that goes with units_left
 
     class Meta:
         model = StockBatch
         fields = ["id", "medicine", "medicine_name", "batch_no", "mfg_date", "expiry_date", "mrp", "selling_price",
-                  "sale_price", "purchase_rate", "gst_rate", "barcode", "supplier_name", "quantity"]
+                  "sale_price", "purchase_rate", "gst_rate", "barcode", "supplier_name", "quantity", "units_left", "unit"]
+
+    def get_units_left(self, batch):
+        from .services import units_of
+
+        return units_of(batch.medicine, batch.quantity)
+
+    def get_unit(self, batch):
+        medicine = batch.medicine
+        return medicine.dose_unit.label if medicine.dose_unit_id else ""
 
 
 class MovementSerializer(serializers.ModelSerializer):

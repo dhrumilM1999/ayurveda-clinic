@@ -1,6 +1,6 @@
 // A patient's appointments in the current branch, with "Book appointment".
-import { PlusOutlined } from '@ant-design/icons';
-import { Button, Table, Typography } from 'antd';
+import { PlusOutlined, UserAddOutlined } from '@ant-design/icons';
+import { Button, Space, Table, Typography } from 'antd';
 import dayjs from 'dayjs';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +16,7 @@ export function AppointmentsTab({ patient }: { patient: Patient }) {
   const { t } = useTranslation();
   const { can } = useAuth();
   const [booking, setBooking] = useState(false);
+  const [walkingIn, setWalkingIn] = useState(false);
   const { rows, loading, reload, pagination, failed } = useList<Appointment>('/appointments/', {
     patient: patient.id, ordering: '-date',
   }, 10);
@@ -25,7 +26,10 @@ export function AppointmentsTab({ patient }: { patient: Patient }) {
       <div className="section-toolbar">
         <Typography.Text type="secondary">{t('appointments.patientTabHelp')}</Typography.Text>
         {can('appointments.manage') && (
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setBooking(true)}>{t('appointments.book')}</Button>
+          <Space>
+            <Button icon={<UserAddOutlined />} onClick={() => setWalkingIn(true)}>{t('appointments.walkIn')}</Button>
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => setBooking(true)}>{t('appointments.book')}</Button>
+          </Space>
         )}
       </div>
       <Table<Appointment>
@@ -55,6 +59,12 @@ export function AppointmentsTab({ patient }: { patient: Patient }) {
             render: (_: unknown, r: Appointment) => <AppointmentActions appointment={r} onChanged={reload} />,
           },
         ]}
+      />
+      <BookAppointmentModal
+        open={walkingIn}
+        kind="walk_in"
+        patient={{ id: patient.id, label: `${patient.full_name} · ${patient.uhid}` }}
+        onClose={(changed) => { setWalkingIn(false); if (changed) reload(); }}
       />
       <BookAppointmentModal
         open={booking}

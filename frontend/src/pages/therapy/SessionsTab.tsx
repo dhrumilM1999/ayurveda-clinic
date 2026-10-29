@@ -1,20 +1,20 @@
 // The day's therapy sessions: who comes when, with which therapist and room. The therapist starts a session and records
 // the oil used and how the patient felt. SAFE TO EDIT: the words are in src/i18n/*.json under "therapy".
-import { CheckOutlined, CloseOutlined, LeftOutlined, PlayCircleOutlined, ReloadOutlined, RightOutlined, UndoOutlined, UserDeleteOutlined } from '@ant-design/icons';
+import { CheckOutlined, CloseOutlined, LeftOutlined, PlayCircleOutlined, ReloadOutlined, RightOutlined, UndoOutlined, UserDeleteOutlined, WhatsAppOutlined } from '@ant-design/icons';
 import { App, Button, DatePicker, Form, Input, InputNumber, Modal, Popconfirm, Select, Space, Table, Tag, TimePicker, Tooltip, Typography } from 'antd';
 import dayjs from 'dayjs';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from '../../api/client';
-import type { TherapyOptions, TherapySession } from '../../api/types';
+import type { PatientNotification, TherapyOptions, TherapySession } from '../../api/types';
 import { useAuth } from '../../auth/AuthContext';
-import { PatientCell } from '../appointments/shared';
+import { NotificationResult, PatientCell } from '../appointments/shared';
 import { SessionStatusTag, StageTag, hhmm, useTherapyName } from './common';
 
 export default function SessionsTab() {
   const { t } = useTranslation();
   const { message } = App.useApp();
-  const { can } = useAuth();
+  const { can, hasFeature } = useAuth();
   const canManage = can('therapy.manage');
   const name = useTherapyName();
   const [day, setDay] = useState(dayjs());
@@ -26,6 +26,7 @@ export default function SessionsTab() {
   const [recording, setRecording] = useState<TherapySession | null>(null);
   const [moving, setMoving] = useState<TherapySession | null>(null);
   const [saving, setSaving] = useState(false);
+  const [reminder, setReminder] = useState<PatientNotification | null>(null);
   const [form] = Form.useForm();
 
   const load = useCallback(async () => {
@@ -46,6 +47,16 @@ export default function SessionsTab() {
   useEffect(() => {
     api.get<TherapyOptions>('/therapy-sessions/options/').then(({ data }) => setOptions(data)).catch(() => undefined);
   }, []);
+
+  // Additional settings -> WhatsApp reminders: a click-to-chat message for the patient (staff press Send)
+  const remind = async (row: TherapySession) => {
+    try {
+      const { data } = await api.post<PatientNotification>(`/therapy-sessions/${row.id}/whatsapp/`);
+      setReminder(data);
+    } catch (err) {
+      message.error(errorMessage(err, t('common.loadFailed')));
+    }
+  };
 
   const act = async (row: TherapySession, what: 'start' | 'missed' | 'cancel' | 'undo') => {
     try {
@@ -144,6 +155,9 @@ export default function SessionsTab() {
                     <Button size="small" icon={<CloseOutlined />} title={t('therapy.cancel')} />
                   </Popconfirm>
                 )}
+                {r.status === 'scheduled' && hasFeature('whatsapp_reminders') && (
+                  <Button size="small" icon={<WhatsAppOutlined />} title={t('therapy.whatsappReminder')} onClick={() => remind(r)} />
+                )}
                 {r.status === 'scheduled' && (
                   <Button size="small" icon={<UserDeleteOutlined />} title={t('therapy.missed')} onClick={() => act(r, 'missed')} />
                 )}
@@ -152,6 +166,11 @@ export default function SessionsTab() {
           },
         ]}
       />
+
+      <Modal open={!!reminder} title={t('therapy.whatsappReminder')} onCancel={() => setReminder(null)} width={520}
+        footer={<Button type="primary" onClick={() => setReminder(null)}>{t('common.close')}</Button>}>
+        <NotificationResult notification={reminder ?? undefined} />
+      </Modal>
 
       <MoveModal session={moving} options={options} onClose={() => setMoving(null)} onMoved={() => { setMoving(null); load(); }} />
 

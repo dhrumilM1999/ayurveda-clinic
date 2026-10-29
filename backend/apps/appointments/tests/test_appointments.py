@@ -400,3 +400,74 @@ def test_walk_in_is_listed_by_the_time_it_was_entered(org, receptionist, doctor,
     ids = [r["id"] for r in client.get(URL, {"date": str(today), "ordering": "time_order"}).data["results"]]
     # the walk-in arrived now, before the later booked slot
     assert ids.index(res.data["id"]) < ids.index(str(booked.id))
+
+
+# --- WhatsApp reminders (Additional settings -> "WhatsApp reminders") ---------------------
+def _reminders(org, on=True):
+    from apps.organizations.models import OrganizationFeature
+    OrganizationFeature.objects.update_or_create(organization=org, code="whatsapp_reminders", defaults={"enabled": on})
+
+
+@pytest.mark.django_db
+def test_whatsapp_button_sends_a_reminder_for_tomorrows_booking_when_switched_on(
+        org, receptionist, doctor, branch_a, schedule, patient):
+    client = client_for(receptionist, branch_a)
+    appointment = book(client, patient, doctor, start="11:00").data["id"]
+    # switch off: the same "booked" text as always
+    off = client.post(f"{URL}{appointment}/whatsapp/")
+    assert "Reminder" not in off.data["message"] and "your appointment" in off.data["message"]
+    _reminders(org)
+    on = client.post(f"{URL}{appointment}/whatsapp/")
+    assert on.data["message"].startswith("Reminder") and "11:00 AM" in on.data["message"]
+    assert FakeWhatsAppProvider.outbox[-1]["message"] == on.data["message"]
+
+
+@pytest.mark.django_db
+def test_reminder_text_follows_the_patients_language(org, receptionist, doctor, branch_a, schedule, patient):
+    _reminders(org)
+    patient.preferred_language = "gu"
+    patient.save()
+    client = client_for(receptionist, branch_a)
+    appointment = book(client, patient, doctor, start="11:00").data["id"]
+    assert "યાદ" in client.post(f"{URL}{appointment}/whatsapp/").data["message"]
+
+
+@pytest.mark.django_db
+def test_no_reminder_for_a_booking_far_away_or_without_consent(org, receptionist, doctor, branch_a, schedule, patient):
+    _reminders(org)
+    client = client_for(receptionist, branch_a)
+    far = book(client, patient, doctor, day=timezone.localdate() + timedelta(days=5), start="11:00").data["id"]
+    assert not client.post(f"{URL}{far}/whatsapp/").data["message"].startswith("Reminder")
+    nobody = make_patient(org, mobile="9876500001", first="Mina", consent=False)
+    mine = book(client, nobody, doctor, start="12:00").data["id"]
+    assert client.post(f"{URL}{mine}/whatsapp/").data["consent"] is False
+
+
+# --- A patient can come at any time ------------------------------------------------------
+@pytest.mark.django_db
+def test_walk_in_of_a_patient_booked_for_later_today_checks_in_that_booking(org, receptionist, doctor, branch_a, patient):
+    """Booked for 4 pm but arrives at 11 am: the walk-in uses the booking (one visit, one token), no error."""
+    booked = today_appointment(org, branch_a, patient, doctor, start=time(16, 0))
+    res = client_for(receptionist, branch_a).post(URL, {"patient": str(patient.id), "doctor": str(doctor.id), "kind": "walk_in"},
+                                                  format="json")
+    assert res.status_code == 200, res.data
+    assert res.data["id"] == str(booked.id) and res.data["status"] == "checked_in" and res.data["token_number"] == 1
+    assert Appointment.objects.filter(patient=patient).count() == 1
+    assert "token number" in res.data["notification"]["message"]
+
+
+@pytest.mark.django_db
+def test_walk_in_of_a_patient_already_waiting_is_still_refused(org, receptionist, doctor, branch_a, patient):
+    client = client_for(receptionist, branch_a)
+    body = {"patient": str(patient.id), "doctor": str(doctor.id), "kind": "walk_in"}
+    assert client.post(URL, body, format="json").status_code == 201
+    again = client.post(URL, body, format="json")
+    assert again.status_code == 400 and "already" in str(again.data)
+
+
+@pytest.mark.django_db
+def test_walk_in_for_a_patient_booked_on_another_day_is_a_new_visit(org, receptionist, doctor, branch_a, schedule, patient):
+    client = client_for(receptionist, branch_a)
+    book(client, patient, doctor, start="11:00")  # booked for tomorrow
+    res = client.post(URL, {"patient": str(patient.id), "doctor": str(doctor.id), "kind": "walk_in"}, format="json")
+    assert res.status_code == 201 and res.data["status"] == "checked_in"

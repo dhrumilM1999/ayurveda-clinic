@@ -38,7 +38,7 @@ from .serializers import (
 from .services import (
     WALK_IN, alert_counts, stock_alert_message, complete_verification, correct_stock, counter_sell, dispense_status, dispensed_quantities,
     ledger, locations_for, receive_stock, return_to_supplier, scan, sell, set_location, set_reorder_level,
-    needed_medicines, start_verification, stock_by_medicine, stock_summary, suggested_batches, take_back,
+    needed_medicines, units_of, start_verification, stock_by_medicine, stock_summary, suggested_batches, take_back,
 )
 
 
@@ -271,6 +271,11 @@ class StockViewSet(PharmacyMixin, viewsets.ViewSet):
             "reorder_level": money(r["reorder_level"]), "location": r["location"],
             "rack": str(r["rack_id"]) if r["rack_id"] else None, "shelf": r["shelf"], "bin": r["bin"],
             "low": r["low"], "out": r["out"], "expiring": r["expiring"], "expired": r["expired"],
+            # A medicine sold loose (a jar of 1000 tablets) is also shown in tablets: 975 after giving 25
+            "allow_loose": bool(r["medicine"].allow_loose and r["medicine"].units_per_pack),
+            "units_per_pack": units_of(r["medicine"], 1), "usable_units": units_of(r["medicine"], r["usable"]),
+            "available_units": units_of(r["medicine"], r["available"]),
+            "unit": r["medicine"].dose_unit.label if r["medicine"].dose_unit_id else "",
         } for r in rows])
 
     @action(detail=False, methods=["get"])

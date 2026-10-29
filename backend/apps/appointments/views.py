@@ -4,7 +4,7 @@ from datetime import timedelta
 from django.db import IntegrityError, transaction
 from django.db.models import Count, Q
 from django.utils import timezone
-from rest_framework import status as http
+from rest_framework import serializers, status as http
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
@@ -86,8 +86,28 @@ class AppointmentViewSet(AuditedModelViewSet):
             data["notification"] = notification
         return Response(data, status=status)
 
+    def _booking_of_walk_in(self, request):
+        """The patient's still-booked appointment of today with this doctor, when a walk-in is being made for them."""
+        if request.data.get("kind") != "walk_in":
+            return None
+        try:
+            patient = serializers.UUIDField().run_validation(request.data.get("patient"))
+            doctor = serializers.UUIDField().run_validation(request.data.get("doctor"))
+        except serializers.ValidationError:
+            return None  # the normal checks below report what is wrong
+        return Appointment.objects.filter(
+            branch=request.branch, organization_id=request.user.organization_id, patient_id=patient, doctor_id=doctor,
+            date=timezone.localdate(), status="booked").first()
+
     # --- Book / walk-in -----------------------------------------------------------
     def create(self, request, *args, **kwargs):
+        # A patient can come at any time: someone booked for later today who walks in now is simply checked in
+        # (one visit, one token) instead of being told "already has an appointment".
+        booked = self._booking_of_walk_in(request)
+        if booked is not None:
+            change = change_status(booked, "check_in", request.user)
+            log_action(request, "update", booked, changes={"status": change})
+            return self._response(booked, notify_patient(booked, "token"))
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         try:

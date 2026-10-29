@@ -14,6 +14,7 @@ import { money } from '../medicines/shared';
 import { LedgerDrawer } from './LedgerTab';
 import { PurchaseModal } from './PurchaseModal';
 import { ScanInput, expiryText, qty } from './common';
+import { stockLabel } from './stockUnits';
 import { StockLabelsButton } from './StockLabels';
 import { LiveSearch, useLatestRequest } from '../../components/LiveSearch';
 
@@ -200,7 +201,7 @@ export function StockTab() {
               <Space size={6}>
                 {r.out && <Tag color="red" className="tag-tight">{t('pharmacy.out')}</Tag>}
                 {r.low && <Tag color="orange" className="tag-tight">{t('pharmacy.low')}</Tag>}
-                <b className="num">{qty(r.usable)}</b>
+                <Tooltip title={r.usable_units ? `${qty(r.usable)} ${t('pharmacy.packsShort')}` : undefined}><b className="num">{stockLabel(r.usable, r.usable_units, r.unit)}</b></Tooltip>
               </Space>
             ),
           },
@@ -288,7 +289,7 @@ function BatchList({ row, canStock, onChanged }: { row: StockRow; canStock: bool
           ...(rateOn ? [{ title: t('pharmacy.purchaseRate'), dataIndex: 'purchase_rate', align: 'right' as const, render: (v: string | null) => <span className="num">{money(v)}</span> }] : []),
           ...(details ? [{ title: 'GST', dataIndex: 'gst_rate', align: 'right' as const, render: (v: string) => `${qty(v)}%` }] : []),
           ...(suppliersOn ? [{ title: t('pharmacy.supplier'), dataIndex: 'supplier_name', render: (v: string) => v || '—' }] : []),
-          { title: t('pharmacy.available'), dataIndex: 'quantity', align: 'right' as const, render: (v: string) => <b className="num">{qty(v)}</b> },
+          { title: t('pharmacy.available'), dataIndex: 'quantity', align: 'right' as const, render: (v: string, b: StockBatch) => <b className="num">{stockLabel(v, b.units_left, b.unit)}</b> },
           {
             title: '', key: 'actions', width: stockLabels ? 280 : 190, align: 'right' as const,
             render: (_: unknown, b: StockBatch) => canStock ? (
