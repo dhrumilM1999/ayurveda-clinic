@@ -1967,6 +1967,14 @@ body {
 .hw-wrap { background: #fff; box-shadow: 0 1px 6px rgba(0, 0, 0, 0.18); border-radius: 4px; touch-action: none; }
 .hw-canvas { display: block; touch-action: none; user-select: none; border-radius: 4px;
   background-image: repeating-linear-gradient(transparent 0, transparent 38px, #e7edf3 39px); }
+/* Pad mode: full screen; the pad moves the cursor over the whole screen, so the real cursor is hidden and a ring on the page shows the pen */
+.hw-pad-wrap, .hw-pad-wrap * { cursor: none !important; }
+.hw-pad-wrap [data-hw-ui] button, .hw-pad-wrap [data-hw-ui] .ant-segmented-item, .hw-pad-wrap [data-hw-ui] .ant-slider { cursor: pointer !important; }
+.hw-pad-wrap .ant-modal { max-width: 100vw; }
+.hw-pad-wrap .ant-modal-content { min-height: 100vh; border-radius: 0; }
+.hw-wrap { position: relative; }
+.hw-ring { display: none; position: absolute; left: -11px; top: -11px; width: 22px; height: 22px; border: 2px solid #1677ff;
+  border-radius: 50%; pointer-events: none; }
 .hw-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
 .hw-color { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px #bbb; cursor: pointer; padding: 0; }
 .hw-color.on { box-shadow: 0 0 0 2px var(--clinic-primary); }

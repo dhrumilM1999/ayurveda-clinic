@@ -2,6 +2,10 @@
 
 What changed in each step, in plain words.
 
+## Pad mode for the writing pad (2026-10-30)
+- New **Pad mode (full screen)** in the Handwriting window: the whole pad is the writing area (pen at the pad's corner = the page's corner), with a ring showing the pen and buttons that never write. Frontend only, no database change.
+- Tested with the iScribe pad: the browser sees it as a mouse (Mouse mode), so pressure is not available.
+
 ## Walk-in after registering, patient can come any time, Dose box switch, stock in tablets (2026-10-29)
 
 - **New patient registered -> "Walk-in (Give token)" straight away.** After saving a new patient a small window offers Walk-in, Book appointment or Open patient file. The patient file's Appointments tab also has a **Walk-in** button now.

@@ -21,6 +21,19 @@ name, ID and date, your handwriting, the QR code and your signature line. It is 
 5. The pharmacist sees the pages in the medicine-giving window (above the medicine list). Pages saved for the check-up are
    also listed under the Handwriting button.
 
+## Pad mode (full screen): write on the whole pad
+
+The iScribe pad (Mouse mode) moves the cursor over the WHOLE screen: pen at the pad's bottom-right corner = cursor at the
+screen's bottom-right corner. Without pad mode you would have to aim at the small writing box.
+
+1. In the Handwriting window press **Pad mode (full screen)**. The screen goes full screen.
+2. Write anywhere on the pad. What you write on the pad appears in the same place on the page. A blue ring shows where
+   the pen is on the page (the normal cursor is hidden).
+3. To press a button (Save, Undo...), move the pen onto the button and tap. Taps on buttons never write.
+4. **Leave pad mode** (or Esc) goes back to the normal window. Your writing is kept.
+
+If the browser refuses full screen, press F11 and try again. Pad mode needs full screen so the pad and the screen line up.
+
 ## What is saved
 
 - Your handwriting alone (transparent picture) and the combined picture, both private (only logged-in staff who may see
