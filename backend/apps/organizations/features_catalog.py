@@ -79,6 +79,9 @@ ADDITIONAL_FEATURES = {
     "label_clinic": {"group": "labels", "label": "Label: clinic / pharmacy name", "default": True,
                      "requires": "medicine_labels"},
     # Prescription
+    # The Dose box (amount + unit) on each medicine line of the check-up. Off: the line shows only times a day (1-0-1),
+    # when, anupana, days and quantity; the medicine's usual dose (set on the Medicines screen) is still printed.
+    "rx_dose_box": {"group": "prescription", "label": "Dose box on each medicine in the check-up", "default": False},
     "digital_pad": {"group": "prescription", "label": "Digital pad: handwritten prescription", "default": False},
     # Pharmacy and products
     "clinic_products": {"group": "pharmacy", "label": "Clinic products (sell oils, supplements and other things that are not medicines)", "default": True},

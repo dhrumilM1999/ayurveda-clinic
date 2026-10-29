@@ -17,6 +17,7 @@ import { money } from '../medicines/shared';
 import { UpiPayment } from './BillsTab';
 import { HandwrittenPages } from '../consult/handwriting/HandwrittenPages';
 import { DispenseStatusTag, PrintButton, ScanInput, expiryText, lineFromScan, qty } from './common';
+import { stockLabel } from './stockUnits';
 
 const REFRESH_SECONDS = 30;
 
@@ -377,7 +378,7 @@ export function SellModal({ prescriptionId, onClose }: { prescriptionId: string;
                         label: [
                           hasFeature('pharmacy_batch_tracking') ? b.batch_no : '',
                           hasFeature('pharmacy_expiry_tracking') ? `${t('pharmacy.exp')} ${expiryText(b.expiry_date)}` : '',
-                          `${qty(b.quantity)} ${t('pharmacy.left')}`,
+                          `${stockLabel(b.quantity, b.units_left, b.unit)} ${t('pharmacy.left')}`,
                           hasFeature('pharmacy_selling_price') ? money(b.sale_price) : '',
                         ].filter(Boolean).join(' · '),
                       }))} />

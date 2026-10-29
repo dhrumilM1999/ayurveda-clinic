@@ -445,6 +445,8 @@
     "registerTitle": "New patient registration",
     "registerHelp": "Fields marked with a star are needed. Everything else can be added later.",
     "registerButton": "Register patient",
+    "registeredTitle": "Patient registered",
+    "openFile": "Open patient file",
     "registeredMsg": "Patient registered. Patient ID: {{uhid}}",
     "editTitle": "Edit patient",
     "searchPlaceholder": "Search by name, mobile number or patient ID",
@@ -1144,6 +1146,7 @@
     "calc": "{{dose}} {{unit}} each time × {{times}} time(s) a day × {{days}} days = {{total}} {{unit}} in all",
     "calcPacks": "{{packs}} pack(s), each pack {{size}}",
     "calcNoPack": "pack size of this medicine is not set, type the quantity yourself",
+    "calcMissingNoDose": "Fill M-N-N and days: the total and the number of packs are worked out here, using the medicine's usual dose.",
     "calcMissing": "Fill dose (with its unit), M-N-N and days: the total and the number of packs are worked out here."
   },
   "pharmacy": {
@@ -1180,6 +1183,7 @@
     "alreadyGiven": "{{n}} already given",
     "batch": "Batch",
     "exp": "exp",
+    "packsShort": "packs",
     "left": "left",
     "qty": "Qty",
     "amount": "Amount",
@@ -1585,6 +1589,10 @@
       "whatsapp_reminders": {
         "label": "WhatsApp reminders for appointments and therapy sessions",
         "help": "On: the WhatsApp button on an appointment due today or tomorrow, and on a therapy session, opens a reminder message for the patient (you press Send in WhatsApp). Only for patients who agreed to messages."
+      },
+      "rx_dose_box": {
+        "label": "Dose box on each medicine in the check-up",
+        "help": "On: every medicine line in the check-up has a Dose box (amount and unit). Off: only times a day (1-0-1), when, anupana, days and quantity are shown; the medicine's usual dose set on the Medicines screen is still kept and printed."
       },
       "combined_opd_bill": {
         "label": "Medicines on the OPD bill (one combined bill)",

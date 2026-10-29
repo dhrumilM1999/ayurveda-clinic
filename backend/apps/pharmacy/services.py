@@ -260,6 +260,22 @@ def dispense_status(prescription) -> str:
     return "pending" if count == 0 else ("done" if count == len(stock_items) else "partly")
 
 
+def plain_number(value) -> str:
+    """Decimal('975.000') -> '975', Decimal('0.5') -> '0.5' (no trailing zeros)."""
+    text = format(Decimal(value).normalize(), "f")
+    return text
+
+
+def units_of(medicine, packs):
+    """
+    A medicine that can be sold loose (e.g. a jar of 1000 tablets) is counted in packs inside, but people want to see
+    tablets: 0.975 pack = '975'. None for a medicine that is not sold loose.
+    """
+    if not (medicine.allow_loose and medicine.units_per_pack):
+        return None
+    return plain_number((Decimal(packs) * medicine.units_per_pack).quantize(Decimal("0.01")))
+
+
 def _unit_label(medicine, loose_units=None):
     if loose_units:
         unit = medicine.dose_unit.label if medicine.dose_unit_id else "units"

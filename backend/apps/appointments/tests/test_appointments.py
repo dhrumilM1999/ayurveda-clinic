@@ -441,3 +441,33 @@ def test_no_reminder_for_a_booking_far_away_or_without_consent(org, receptionist
     nobody = make_patient(org, mobile="9876500001", first="Mina", consent=False)
     mine = book(client, nobody, doctor, start="12:00").data["id"]
     assert client.post(f"{URL}{mine}/whatsapp/").data["consent"] is False
+
+
+# --- A patient can come at any time ------------------------------------------------------
+@pytest.mark.django_db
+def test_walk_in_of_a_patient_booked_for_later_today_checks_in_that_booking(org, receptionist, doctor, branch_a, patient):
+    """Booked for 4 pm but arrives at 11 am: the walk-in uses the booking (one visit, one token), no error."""
+    booked = today_appointment(org, branch_a, patient, doctor, start=time(16, 0))
+    res = client_for(receptionist, branch_a).post(URL, {"patient": str(patient.id), "doctor": str(doctor.id), "kind": "walk_in"},
+                                                  format="json")
+    assert res.status_code == 200, res.data
+    assert res.data["id"] == str(booked.id) and res.data["status"] == "checked_in" and res.data["token_number"] == 1
+    assert Appointment.objects.filter(patient=patient).count() == 1
+    assert "token number" in res.data["notification"]["message"]
+
+
+@pytest.mark.django_db
+def test_walk_in_of_a_patient_already_waiting_is_still_refused(org, receptionist, doctor, branch_a, patient):
+    client = client_for(receptionist, branch_a)
+    body = {"patient": str(patient.id), "doctor": str(doctor.id), "kind": "walk_in"}
+    assert client.post(URL, body, format="json").status_code == 201
+    again = client.post(URL, body, format="json")
+    assert again.status_code == 400 and "already" in str(again.data)
+
+
+@pytest.mark.django_db
+def test_walk_in_for_a_patient_booked_on_another_day_is_a_new_visit(org, receptionist, doctor, branch_a, schedule, patient):
+    client = client_for(receptionist, branch_a)
+    book(client, patient, doctor, start="11:00")  # booked for tomorrow
+    res = client.post(URL, {"patient": str(patient.id), "doctor": str(doctor.id), "kind": "walk_in"}, format="json")
+    assert res.status_code == 201 and res.data["status"] == "checked_in"

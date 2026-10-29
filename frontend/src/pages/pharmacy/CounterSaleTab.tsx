@@ -16,6 +16,7 @@ import { useAuth } from '../../auth/AuthContext';
 import { money } from '../medicines/shared';
 import { UpiPayment } from './BillsTab';
 import { MedicinePicker, PrintButton, ScanInput, expiryText, lineFromScan, qty } from './common';
+import { stockLabel } from './stockUnits';
 
 type Choice = { batch: string; quantity: number; loose: boolean; units: number; discount: number };
 type Held = { id: string; at: string; customer: string; phone: string; lines: DispenseLine[]; choices: Record<string, Choice> };
@@ -235,7 +236,7 @@ export function CounterSaleTab() {
                   label: [
                     hasFeature('pharmacy_batch_tracking') ? b.batch_no : '',
                     hasFeature('pharmacy_expiry_tracking') ? `${t('pharmacy.exp')} ${expiryText(b.expiry_date)}` : '',
-                    `${qty(b.quantity)} ${t('pharmacy.left')}`,
+                    `${stockLabel(b.quantity, b.units_left, b.unit)} ${t('pharmacy.left')}`,
                   ].filter(Boolean).join(' · '),
                 }))} />
             ),

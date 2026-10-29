@@ -2,7 +2,7 @@
 import { ArrowLeftOutlined, MinusCircleOutlined, PlusOutlined, UserSwitchOutlined } from '@ant-design/icons';
 import {
   Alert, App, Button, Card, Checkbox, Col, DatePicker, Empty, Form, Input, InputNumber, Radio, Row, Select,
-  Segmented, Skeleton, Space, Switch, Typography,
+  Modal, Segmented, Skeleton, Space, Switch, Typography,
 } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -16,6 +16,7 @@ import { useAuth } from '../../auth/AuthContext';
 import { MasterSelect } from '../../components/MasterSelect';
 import { PhotoPicker } from '../../components/PhotoPicker';
 import { LANGUAGES } from '../../i18n';
+import { BookAppointmentModal } from '../appointments/BookAppointmentModal';
 import { genderAge } from './PatientsPage';
 
 const MASTER_FIELDS = ['title', 'blood_group', 'marital_status', 'referral_source', 'emergency_relation'] as const;
@@ -40,6 +41,9 @@ export default function PatientFormPage() {
   const [patient, setPatient] = useState<Patient | null>(null);
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
+  // After a NEW patient is registered: give a token now (walk-in), book a time, or just open the file
+  const [registered, setRegistered] = useState<{ id: string; label: string } | null>(null);
+  const [arrival, setArrival] = useState<'walk_in' | 'booked' | null>(null);
   const [photo, setPhoto] = useState<Blob | null>(null);
   const [existingPhotoUrl, setExistingPhotoUrl] = useState<string | null>(null);
   const [ageMode, setAgeMode] = useState<'dob' | 'age'>('age');
@@ -238,7 +242,11 @@ export default function PatientFormPage() {
       const fromEnquiry = new URLSearchParams(window.location.search).get('enquiry');
       if (!isEdit && fromEnquiry) await api.patch(`/enquiries/${fromEnquiry}/`, { patient: data.id }).catch(() => undefined);
       clearDraft(draftKey);
-      navigate(`/patients/${data.id}`);
+      if (!isEdit && can('appointments.manage')) {
+        setRegistered({ id: data.id, label: `${data.full_name} · ${data.uhid}` });
+      } else {
+        navigate(`/patients/${data.id}`);
+      }
     } catch (err) {
       message.error(errorMessage(err, t('common.saveFailed')));
     } finally {
@@ -250,8 +258,21 @@ export default function PatientFormPage() {
 
   const sectionTitle = (text: string) => <span style={{ fontWeight: 600 }}>{text}</span>;
 
+  const openFile = () => { if (registered) navigate(`/patients/${registered.id}`); };
   return (
     <>
+      <Modal open={!!registered && !arrival} title={t('patients.registeredTitle')} onCancel={openFile} width={440}
+        footer={<Button onClick={openFile}>{t('patients.openFile')}</Button>}>
+        <p style={{ marginTop: 0 }}>{registered?.label}</p>
+        <Space direction="vertical" style={{ width: '100%' }}>
+          <Button type="primary" block size="large" onClick={() => setArrival('walk_in')}>{t('appointments.walkIn')} ({t('appointments.giveToken')})</Button>
+          <Button block onClick={() => setArrival('booked')}>{t('appointments.book')}</Button>
+        </Space>
+      </Modal>
+      {registered && (
+        <BookAppointmentModal open={!!arrival} kind={arrival ?? 'walk_in'} patient={registered}
+          onClose={(changed) => { setArrival(null); if (changed) openFile(); }} />
+      )}
       <div className="page-toolbar">
         <Space align="center">
           <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => navigate(isEdit ? `/patients/${id}` : '/patients')} aria-label={t('login.back')} />

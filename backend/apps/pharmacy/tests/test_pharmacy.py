@@ -266,3 +266,40 @@ def test_pharmacist_sees_the_doctors_safety_warnings_when_dispensing(org, roles,
     data = client_for(pharmacist, branch_a).get(f"/api/v1/dispensing/{final_rx.id}/").data
     assert [w["rule"] for w in data["warnings"]] == ["metals"]
     assert data["warnings"][0]["medicine"] == "Triphala Churna"
+
+
+@pytest.mark.django_db
+def test_stock_list_counts_a_loose_medicine_in_tablets(pharmacist, branch_a, meds, final_rx):
+    """One jar of 1000 tablets: after giving 25 the stock reads 975 tablets, not 0.975 of a pack."""
+    med = meds["Triphala Churna"]
+    med.allow_loose, med.units_per_pack = True, Decimal("1000")
+    med.save()
+    client = client_for(pharmacist, branch_a)
+    receive(client, meds, [("Triphala Churna", "B1", LATER, "1", 0, "50", "100")])
+    row = next(r for r in client.get("/api/v1/stock/").data if r["name"] == "Triphala Churna")
+    assert row["usable_units"] == "1000" and row["allow_loose"] is True
+    item = final_rx.items.get(medicine__isnull=False)
+    batch = StockBatch.objects.get(batch_no="B1")
+    assert sell(client, final_rx, [{"prescription_item": str(item.id), "batch": str(batch.id), "loose_units": "25"}]).status_code == 201
+    row = next(r for r in client.get("/api/v1/stock/").data if r["name"] == "Triphala Churna")
+    assert row["usable_units"] == "975" and row["units_per_pack"] == "1000"
+    # a medicine that is not sold loose has no unit count
+    med.allow_loose = False
+    med.save()
+    row = next(r for r in client.get("/api/v1/stock/").data if r["name"] == "Triphala Churna")
+    assert row["usable_units"] is None and row["allow_loose"] is False
+
+
+@pytest.mark.django_db
+def test_dispensing_batches_show_tablets_left(pharmacist, branch_a, meds, final_rx):
+    med = meds["Triphala Churna"]
+    med.allow_loose, med.units_per_pack = True, Decimal("1000")
+    med.save()
+    client = client_for(pharmacist, branch_a)
+    receive(client, meds, [("Triphala Churna", "B1", LATER, "1", 0, "50", "100")])
+    batch = StockBatch.objects.get(batch_no="B1")
+    item = final_rx.items.get(medicine__isnull=False)
+    sell(client, final_rx, [{"prescription_item": str(item.id), "batch": str(batch.id), "loose_units": "25"}])
+    rx2 = client.get("/api/v1/stock/batches/", {"medicine": str(med.id)})
+    assert rx2.status_code == 200
+    assert rx2.data[0]["units_left"] == "975"
