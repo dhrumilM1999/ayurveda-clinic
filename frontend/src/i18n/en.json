@@ -918,7 +918,9 @@
       "family": "Family",
       "surgical": "Operations",
       "notes": "Notes"
-    }
+    },
+    "todaysAppointments": "Today's appointments",
+    "appointmentsOf": "Appointments of {{date}}"
   },
   "templatesAdmin": {
     "title": "Check-up templates",
@@ -1697,6 +1699,10 @@
       "separate_medicine_menu": {
         "label": "Medicines as their own menu",
         "help": "Off (usual): the medicine list is a tab inside Pharmacy, so there is one place for medicines and stock. On: Medicines is a separate menu, for a clinic where a different person manages the medicine list."
+      },
+      "lab_orders": {
+        "label": "Lab test order slip (Send Order button in the check-up)",
+        "help": "Shows a Send Order button in the check-up header that prints a lab test order slip for the tests advised. Keep it off if you have no lab connected."
       }
     },
     "choices": {

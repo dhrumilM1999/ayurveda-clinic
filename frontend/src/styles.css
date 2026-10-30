@@ -948,9 +948,24 @@ body {
   background: var(--clinic-primary-soft);
   box-shadow: inset 3px 0 0 var(--clinic-primary);
 }
-.consult-item.status-completed {
-  opacity: 0.6;
-}
+/* Each patient in the list is coloured by where they are: waiting (amber), booked and not arrived yet (blue), done (green) */
+.consult-item { border-left: 4px solid var(--clinic-border); }
+.consult-item.status-checked_in { border-left-color: #d48a0c; background: #fff8e8; }
+.consult-item.status-booked { border-left-color: #3b78d8; }
+.consult-item.status-completed { border-left-color: #2f8a57; background: #eef7f1; }
+.consult-item.status-completed .consult-item-name { color: #2f6b49; }
+.consult-item.active { background: var(--clinic-primary-soft); }
+.consult-counts-title { font-size: 11px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; color: #667085; margin-top: 2px; }
+.consult-counts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.consult-count { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 4px 0; border: 1px solid transparent;
+  border-radius: 8px; background: transparent; cursor: pointer; font: inherit; }
+.consult-count:hover { background: #f4f6f8; }
+.consult-count.on { border-color: var(--clinic-border); background: #f4f6f8; }
+.consult-count-n { min-width: 26px; height: 26px; line-height: 26px; border-radius: 13px; text-align: center; font-weight: 700; font-size: 13px; color: #fff; background: #667085; }
+.consult-count.count-checked_in .consult-count-n { background: #d48a0c; }
+.consult-count.count-booked .consult-count-n { background: #3b78d8; }
+.consult-count.count-completed .consult-count-n { background: #2f8a57; }
+.consult-count-l { font-size: 10.5px; color: #667085; text-transform: uppercase; letter-spacing: 0.2px; }
 .consult-item-top,
 .consult-item-sub {
   display: flex;

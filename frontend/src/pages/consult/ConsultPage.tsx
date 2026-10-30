@@ -108,12 +108,15 @@ export default function ConsultPage() {
         )}
         <Input size="small" allowClear prefix={<SearchOutlined />} placeholder={t('consult.searchList')} value={search}
           onChange={(e) => setSearch(e.target.value)} />
-        <div className="consult-filters">
+        <div className="consult-counts-title">{day === today ? t('consult.todaysAppointments') : t('consult.appointmentsOf', { date: dayjs(day).format('DD-MM-YYYY') })}</div>
+        <div className="consult-counts">
           {([['all', rows.length], ['checked_in', count('checked_in')],
             ['booked', count('booked')], ['completed', count('completed')]] as [typeof filter, number][]).map(([value, n]) => (
-            <Tag.CheckableTag key={value} checked={filter === value} onChange={() => setFilter(value)}>
-              {t(`consult.filter.${{ all: 'all', checked_in: 'waiting', booked: 'booked', completed: 'done' }[value]}`)} {n}
-            </Tag.CheckableTag>
+            <button type="button" key={value} className={`consult-count count-${value}${filter === value ? ' on' : ''}`} onClick={() => setFilter(value)}
+              aria-pressed={filter === value}>
+              <span className="consult-count-n">{n}</span>
+              <span className="consult-count-l">{t(`consult.filter.${{ all: 'all', checked_in: 'waiting', booked: 'booked', completed: 'done' }[value]}`)}</span>
+            </button>
           ))}
         </div>
         {me?.user.is_doctor && can('emr.edit') && (

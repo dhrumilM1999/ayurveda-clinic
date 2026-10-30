@@ -1,4 +1,5 @@
 // The quick-tool buttons in the check-up header: + Appt, + Patient, Send Order, Patient Report, Graph (as in Healthray).
+// Send Order (a lab order slip) is shown only when Additional settings -> "Lab test order slip" is on: most clinics have no lab connected.
 // Each opens its own window; nothing here changes the check-up itself.
 // SAFE TO EDIT: the words are in src/i18n/*.json under "consultTools".
 import { BarChartOutlined, CalendarOutlined, ExperimentOutlined, FileTextOutlined, UserAddOutlined } from '@ant-design/icons';
@@ -15,7 +16,7 @@ type Tool = 'appt' | 'order' | 'report' | 'graph' | null;
 
 export function ConsultTools({ patientId, patientName, uhid, visitId }: { patientId: string; patientName: string; uhid: string; visitId: string }) {
   const { t } = useTranslation();
-  const { can } = useAuth();
+  const { can, hasFeature } = useAuth();
   const [tool, setTool] = useState<Tool>(null);
 
   return (
@@ -31,7 +32,9 @@ export function ConsultTools({ patientId, patientName, uhid, visitId }: { patien
       )}
       {can('emr.view') && (
         <>
-          <Button size="small" icon={<ExperimentOutlined />} onClick={() => setTool('order')}>{t('consultTools.sendOrder')}</Button>
+          {hasFeature('lab_orders') && (
+            <Button size="small" icon={<ExperimentOutlined />} onClick={() => setTool('order')}>{t('consultTools.sendOrder')}</Button>
+          )}
           <Button size="small" icon={<FileTextOutlined />} onClick={() => setTool('report')}>{t('consultTools.patientReport')}</Button>
           <Button size="small" icon={<BarChartOutlined />} onClick={() => setTool('graph')}>{t('consultTools.graph')}</Button>
         </>

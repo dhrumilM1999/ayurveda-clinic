@@ -27,7 +27,7 @@ def ensure_exam_templates(organization) -> int:
         template = ExamTemplate.objects.create(
             organization=organization, code=tpl["code"], version=tpl["version"], kind=tpl["kind"],
             name=tpl["name"]["en"], name_gu=tpl["name"]["gu"], name_hi=tpl["name"]["hi"],
-            description=tpl.get("description", {}), fields=tpl["fields"], sort_order=order,
+            description=tpl.get("description", {}), fields=tpl["fields"], sort_order=order, is_active=tpl.get("active", True),
         )
         ExamTemplateVersion.objects.create(template=template, version=template.version, fields=template.fields)
         added += 1

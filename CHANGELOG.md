@@ -2,6 +2,13 @@
 
 What changed in each step, in plain words.
 
+## Check-up list colours and counts, Send Order as a switch, Menstrual history template (2026-10-31)
+- **Today's appointments** (top of the Check-up list): four round counts, All / Waiting / Booked / Done. Tap one to filter.
+- Each patient in the list is **coloured**: waiting = amber, booked but not arrived = blue, done = green (no longer faded). Waiting patients come first, then booked, then done.
+- **Send Order** (lab order slip) is now an Additional setting, **off by default**, because no lab is connected. Switch it on in Additional settings -> Prescription.
+- New check-up template **Menstrual history (Artava)** with cycle, flow, pain, clots and discharge, in English, Gujarati and Hindi. It is added **switched off**; switch it on in Check-up templates when needed. Other Healthray templates (Homeopathy, Ophthal, Antenatal, Admit/IPD) were left out on purpose.
+- Frontend plus one template; no database change.
+
 ## Check-up header tools: + Appt, + Patient, Send Order, Patient Report, Graph (2026-10-30)
 Looked at Healthray first (layout only), then built five buttons in the check-up header:
 - **+ Appt**: book an appointment for this patient without leaving the check-up.

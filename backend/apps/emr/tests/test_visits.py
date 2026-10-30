@@ -38,8 +38,18 @@ def start(client, appointment):
 
 @pytest.mark.django_db
 def test_starting_templates_exist(templates):
-    assert set(templates) == {"ashtavidha", "dashavidha", "agni_habits", "prakriti"}
+    assert set(templates) == {"ashtavidha", "dashavidha", "agni_habits", "prakriti", "artava"}
     assert templates["prakriti"].kind == "questionnaire"
+
+
+@pytest.mark.django_db
+def test_menstrual_history_template_is_added_but_switched_off(doctor, branch_a, templates):
+    """Women's health template: ready to use, but not shown in every check-up until the clinic switches it on."""
+    assert templates["artava"].is_active is False
+    client = client_for(doctor, branch_a)
+    codes = lambda res: {t["code"] for t in (res.data["results"] if isinstance(res.data, dict) else res.data)}  # noqa: E731
+    assert "artava" not in codes(client.get("/api/v1/exam-templates/"))
+    assert "artava" in codes(client.get("/api/v1/exam-templates/", {"all": "1"}))
 
 
 @pytest.mark.django_db
