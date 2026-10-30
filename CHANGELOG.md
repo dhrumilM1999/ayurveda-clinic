@@ -2,6 +2,10 @@
 
 What changed in each step, in plain words.
 
+## Handwriting is now a tab in the check-up (2026-10-30)
+- No more pop-up window. The **Handwriting** tab (after Follow-up) shows one A4 page, fully on the screen, next to the appointments. Only the part of the pad over the page writes. Saving still makes the one picture with the letterhead.
+- What you wrote stays when you visit another tab and come back. Frontend only, no database change.
+
 ## Walk-in after registering, patient can come any time, Dose box switch, stock in tablets (2026-10-29)
 
 - **New patient registered -> "Walk-in (Give token)" straight away.** After saving a new patient a small window offers Walk-in, Book appointment or Open patient file. The patient file's Appointments tab also has a **Walk-in** button now.

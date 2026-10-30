@@ -12,14 +12,16 @@ name, ID and date, your handwriting, the QR code and your signature line. It is 
 
 ## Every day
 
-1. Doctor: open the patient's check-up (Check-up screen).
-2. Press **Handwriting** (top of the check-up).
-3. Write on the pad with the pen. The writing appears live on the screen. Tools: Pen, Eraser, 3 colours, thickness,
-   Undo, Clear all, Upright/Wide, paper A5 (half A4) or A4.
-4. Press **Save prescription**. The software makes the combined picture and shows it. Then **Print** or **Write another
-   page**.
-5. The pharmacist sees the pages in the medicine-giving window (above the medicine list). Pages saved for the check-up are
-   also listed under the Handwriting button.
+1. Doctor: open the patient's check-up (Check-up screen). The appointments stay on the left.
+2. Press the **Handwriting** tab (after Follow-up). One A4 page appears, fully on the screen.
+3. Write on the pad with the pen. The writing appears live. Tools: Pen, Eraser, 3 colours, thickness, Undo, Clear all.
+4. Press **Save prescription**. The software makes the combined picture (letterhead + patient line + your handwriting + QR +
+   signature) and shows it. Then **Print** or **Write another page**.
+5. The pharmacist sees the pages in the medicine-giving window (above the medicine list). Earlier pages of the check-up are
+   listed at the bottom of the Handwriting tab.
+
+The pad moves the cursor over the whole screen, so only the part of the pad that lies over the A4 page writes. Outside the
+page the pad does nothing. If you go to another tab and come back, what you wrote is still there.
 
 ## What is saved
 
@@ -41,7 +43,7 @@ name, ID and date, your handwriting, the QR code and your signature line. It is 
   metals) do not run on it. Keep the typed medicine list too (Rx tab), or ask the pharmacist to read the picture.
 - Gujarati, Hindi and English all work, because it is just a picture of what you write.
 - If the pen draws in the wrong place, check that iScribe4U is in Mouse mode and the pad is not in Portrait/Landscape mismatch
-  (use the Upright/Wide switch in the writing window to match the pad).
+  (the page is always A4 upright).
 - No pad? A tablet with a pen, a touch screen or a mouse works the same way.
 
 ## For the person who edits files

@@ -4,7 +4,7 @@
 // - Undo / Redo: buttons at the top, or Ctrl+Z / Ctrl+Y (Ctrl+Shift+Z) while the check-up is open.
 // SAFE TO EDIT: AUTOSAVE_MS, RETRY_MS, UNDO_STEPS below.
 import { MedicineBoxOutlined, PrinterOutlined,
-  AlertOutlined, CheckCircleOutlined, CloudSyncOutlined, EditOutlined, FileSearchOutlined, RedoOutlined, SaveOutlined, UndoOutlined,
+  AlertOutlined, CheckCircleOutlined, CloudSyncOutlined, FileSearchOutlined, RedoOutlined, SaveOutlined, UndoOutlined,
   QuestionCircleOutlined,
 } from '@ant-design/icons';
 import { Alert, App, Button, Card, Modal, Skeleton, Space, Tag, Tooltip } from 'antd';
@@ -23,7 +23,7 @@ import type {
 import { useAuth } from '../../auth/AuthContext';
 import { OpdBillModal } from '../billing/OpdBillModal';
 import { PlanTherapyButton } from '../therapy/PlanTherapyButton';
-import { HandwritingModal } from './handwriting/HandwritingModal';
+import { HandwritingSection } from './handwriting/HandwritingSection';
 import { DocumentModal } from '../../components/BillPreview';
 import { PrintMenu } from './PrintMenu';
 import { SellModal } from '../pharmacy/DispenseTab';
@@ -109,7 +109,17 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded, reason, nextPatie
   const [saveState, setSaveState] = useState<'saved' | 'dirty' | 'saving' | 'error'>('saved');
   const [error, setError] = useState<string | null>(null);
   const readOnly = !can('emr.edit');
-  const [handwritingOpen, setHandwritingOpen] = useState(false);
+  // Handwriting tab: opened once, then kept (hidden) so nothing written is lost when the doctor goes to another tab
+  const [hwOpened, setHwOpened] = useState(false);
+  const [hwInk, setHwInk] = useState(false);
+  const canWriteByHand = can('prescriptions.create') && hasFeature('digital_pad');
+  const hwRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (section !== 'handwriting') return;
+    setHwOpened(true);
+    // bring the whole A4 page into view, so the doctor writes without scrolling
+    window.setTimeout(() => hwRef.current?.scrollIntoView({ block: 'start' }), 50);
+  }, [section]);
   const [printRx, setPrintRx] = useState(false);
   const [giving, setGiving] = useState(false); // the doctor gives the medicines and makes the bill from this screen
   const canSeeRx = can('prescriptions.view');
@@ -424,6 +434,7 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded, reason, nextPatie
     progress: draft.complaints.some((c) => c.score !== null && c.score !== undefined),
     photos: visit.photos.length > 0,
     rx: rx.items.length > 0,
+    handwriting: hwInk,
     ...Object.fromEntries(templates.map((tpl) => [`tpl:${tpl.code}`, Object.keys(exams[tpl.code] ?? {}).length > 0])),
   };
   const sections = [
@@ -439,6 +450,7 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded, reason, nextPatie
     ...(canSeeRx ? [{ key: 'rx', label: t('consult.sections.rx') }] : []),
     { key: 'advice', label: t('consult.sections.advice') },
     { key: 'followUp', label: t('consult.sections.followUp') },
+    ...(canWriteByHand ? [{ key: 'handwriting', label: t('consult.sections.handwriting') }] : []),
   ];
   const finished = visit.status === 'completed';
   act.current = {
@@ -474,9 +486,6 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded, reason, nextPatie
         <div className="cell-sub" style={{ marginTop: 8 }}>{t('shortcuts.note')}</div>
       </Modal>
       {billOpen && <OpdBillModal target={{ visit: visitId }} onClose={() => setBillOpen(false)} />}
-      {handwritingOpen && (
-        <HandwritingModal open visitId={visitId} patientName={visit.patient_detail.full_name} onClose={() => setHandwritingOpen(false)} />
-      )}
       <div className="workspace-main">
         <Card className="visit-head" size="small">
           <div className="visit-head-row">
@@ -518,9 +527,6 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded, reason, nextPatie
               <PrintMenu visitId={visit.id} rxId={rx.id} hasFollowUp={!!draft.follow_up_date} patientName={p.full_name}
                 language={patient?.preferred_language} doctorId={visit.doctor} diagnoses={draft.diagnoses.map((d) => d.label)}
                 beforePrint={() => save()} />
-              {can('prescriptions.create') && hasFeature('digital_pad') && (
-                <Button size="small" icon={<EditOutlined />} onClick={() => setHandwritingOpen(true)}>{t('handwriting.open')}</Button>
-              )}
               <PlanTherapyButton patientId={p.id} patientName={p.full_name} visitId={visit.id} />
               {(can('billing.charge') || can('billing.create')) && (
                 <Tooltip title={t('consult.billHelp')}>
@@ -611,6 +617,11 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded, reason, nextPatie
           )}
           {section === 'advice' && <AdviceSection {...props} />}
           {section === 'followUp' && <FollowUpSection {...props} daysBar={daysBar} />}
+          {canWriteByHand && (hwOpened || section === 'handwriting') && (
+            <div hidden={section !== 'handwriting'} ref={hwRef}>
+              <HandwritingSection visitId={visit.id} onInkChange={setHwInk} />
+            </div>
+          )}
         </Card>
       </div>
 
