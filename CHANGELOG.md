@@ -2,6 +2,9 @@
 
 What changed in each step, in plain words.
 
+## Earlier check-ups below the check-up, full width (2026-10-30)
+- On the Check-up screen the patient's earlier check-ups (last visit, history, older visits) moved from the right side to **below the check-up**, and the check-up itself now uses the **full width**. Older check-ups are tiles; click one to read it. Frontend only.
+
 ## Walk-in after registering, patient can come any time, Dose box switch, stock in tablets (2026-10-29)
 
 - **New patient registered -> "Walk-in (Give token)" straight away.** After saving a new patient a small window offers Walk-in, Book appointment or Open patient file. The patient file's Appointments tab also has a **Walk-in** button now.

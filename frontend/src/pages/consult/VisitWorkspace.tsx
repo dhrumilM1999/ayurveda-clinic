@@ -612,15 +612,16 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded, reason, nextPatie
           {section === 'advice' && <AdviceSection {...props} />}
           {section === 'followUp' && <FollowUpSection {...props} daysBar={daysBar} />}
         </Card>
-      </div>
 
-      <PreviousVisits patientId={visit.patient} patient={patient} currentId={visit.id} templates={templates}
-        onRepeat={!rxReadOnly ? (lines) => { changeRx({ items: [...rx.items, ...lines] }); setSection('rx'); } : undefined} />
+        {/* The patient's earlier check-ups: below the check-up, full width */}
+        <PreviousVisits patientId={visit.patient} patient={patient} currentId={visit.id} templates={templates}
+          onRepeat={!rxReadOnly ? (lines) => { changeRx({ items: [...rx.items, ...lines] }); setSection('rx'); } : undefined} />
+      </div>
     </div>
   );
 }
 
-/** Right panel: the patient's earlier check-ups (all branches). Click one to read it. */
+/** Below the check-up: the patient's earlier check-ups (all branches). Click one to read it. */
 function PreviousVisits({ patientId, patient, currentId, templates, onRepeat }: {
   patientId: string;
   patient: Patient | null;

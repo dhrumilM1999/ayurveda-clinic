@@ -979,7 +979,7 @@ body {
 
 .workspace {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 230px;
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   align-items: start;
 }
@@ -1246,19 +1246,21 @@ body {
 .pre-line {
   white-space: pre-line;
 }
+/* Earlier check-ups: below the check-up, full width. The title and the two summary boxes use the whole row, each older
+   check-up is a tile (as many tiles per row as fit). */
 .workspace-side {
-  position: sticky;
-  top: 72px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  max-height: calc(100vh - 92px);
-  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  align-items: start;
+  gap: 8px;
   padding: 10px;
   border-radius: 10px;
   background: #fff;
   border: 1px solid var(--clinic-border);
 }
+.workspace-side > .section-title,
+.workspace-side > .history-box,
+.workspace-side > .cell-sub { grid-column: 1 / -1; }
 .prev-visit {
   text-align: left;
   padding: 7px 9px;
@@ -1281,15 +1283,6 @@ body {
   font-weight: 600;
 }
 
-@media (max-width: 1200px) {
-  .workspace {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .workspace-side {
-    position: static;
-    max-height: none;
-  }
-}
 @media (max-width: 900px) {
   .consult,
   .questionnaire {
