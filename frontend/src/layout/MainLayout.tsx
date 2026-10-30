@@ -1,7 +1,7 @@
 // The frame around every screen: left menu, top bar with branch and language switchers.
 import { DownOutlined, EnvironmentOutlined, LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import { Alert, Avatar, Badge, Button, Dropdown, Grid, Layout, Menu, Segmented, Select } from 'antd';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
@@ -16,6 +16,16 @@ import { LANGUAGES, setLanguage } from '../i18n';
 
 const { Header, Sider, Content } = Layout;
 const { useBreakpoint } = Grid;
+
+// Left menu: a thin strip of icons; it opens to full width while the mouse is over it, and stays open (pushing the page)
+// after the toggle button is pressed. SAFE TO EDIT: the two widths (pixels) and the pinned choice key.
+const MENU_WIDE = 224;
+const MENU_THIN = 72;
+const PINNED_KEY = 'menu-pinned';
+
+function loadPinned(): boolean {
+  try { return localStorage.getItem(PINNED_KEY) === '1'; } catch { return false; }
+}
 
 const SHORT_LANGUAGE: Record<string, string> = { en: 'EN', gu: 'ગુ', hi: 'हि' };
 
@@ -32,12 +42,19 @@ function initials(name: string) {
 export default function MainLayout() {
   const { t, i18n } = useTranslation();
   const { me, branch, features, hasFeature, can, switchBranch, logout } = useAuth();
-  const [collapsed, setCollapsed] = useState(false);
+  const [pinned, setPinned] = useState(loadPinned); // opened with the toggle button
+  const [hover, setHover] = useState(false); // the mouse is over the thin strip
+  const leaveTimer = useRef<number>();
   const navigate = useNavigate();
   const location = useLocation();
   const screens = useBreakpoint();
   // On a phone the menu is hidden until the menu button is pressed (it floats over the page, and closes after a choice)
   const isPhone = screens.sm === false;
+  // On a phone only the toggle button opens the menu. On a computer the mouse also opens it while it is over the strip.
+  const collapsed = isPhone ? !pinned : !(pinned || hover);
+  useEffect(() => { try { localStorage.setItem(PINNED_KEY, pinned ? '1' : '0'); } catch { /* not remembered */ } }, [pinned]);
+  const hoverIn = () => { window.clearTimeout(leaveTimer.current); if (!isPhone) setHover(true); };
+  const hoverOut = () => { window.clearTimeout(leaveTimer.current); leaveTimer.current = window.setTimeout(() => setHover(false), 150); };
   useEffect(() => { addStep('page', location.pathname); }, [location.pathname]);
 
   const onIdle = useCallback(() => logout('idle'), [logout]);
@@ -74,16 +91,17 @@ export default function MainLayout() {
   const roleLabel = me?.user.is_org_admin ? t('layout.orgAdmin') : branch?.role?.name ?? '';
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout hasSider style={{ minHeight: '100vh' }}>
+      {/* The slot keeps the page from moving: the menu opens OVER the page while hovered */}
+      <div className="app-sider-slot" style={{ width: isPhone ? 0 : pinned ? MENU_WIDE : MENU_THIN }}
+        onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
       <Sider
-        className="app-sider"
+        className={`app-sider${hover && !pinned && !isPhone ? ' app-sider-hover' : ''}`}
         collapsible
         collapsed={collapsed}
         trigger={null}
-        breakpoint="lg"
-        onBreakpoint={(broken) => setCollapsed(broken)}
-        width={224}
-        collapsedWidth={isPhone ? 0 : 76}
+        width={MENU_WIDE}
+        collapsedWidth={isPhone ? 0 : MENU_THIN}
       >
         <SoftwareBrand variant={collapsed ? 'mark' : 'sider'} />
         <div className="app-sider-divider" />
@@ -96,19 +114,20 @@ export default function MainLayout() {
           onClick={({ key }) => {
             const item = menuItems.find((m) => m.key === key);
             if (item) navigate(item.path);
-            if (isPhone) setCollapsed(true);
+            if (isPhone) setPinned(false);
           }}
         />
         {!collapsed && me?.organization && <div className="app-sider-footer">{me.organization.name}</div>}
       </Sider>
+      </div>
 
       <Layout>
         <Header className="app-header">
           <div className="app-header-left">
             <Button
               type="text"
-              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-              onClick={() => setCollapsed(!collapsed)}
+              icon={pinned ? <MenuFoldOutlined /> : <MenuUnfoldOutlined />}
+              onClick={() => { setPinned(!pinned); setHover(false); }}
               aria-label={t('layout.toggleMenu')}
             />
             {multiBranch ? <Select

@@ -2,6 +2,11 @@
 
 What changed in each step, in plain words.
 
+## Left menu: thin strip, opens on hover (2026-10-30)
+- The left menu is now a **thin strip of icons**. When the mouse is over it, it opens to full width and floats over the page (the page does not move). When the mouse leaves, it closes.
+- The toggle button at the top still opens it fully and keeps it open (the page moves aside, as before). Press again to go back to the thin strip. The choice is remembered on this computer.
+- The widths are at the top of `frontend/src/layout/MainLayout.tsx` (MENU_WIDE, MENU_THIN). Frontend only.
+
 ## Handwriting page on the side of the check-up (2026-10-30)
 - No more pop-up window and no tab. The A4 handwriting page is a **panel on the right side** of the check-up screen. Drag its left edge to make it wider or narrower: the page keeps its A4 shape and the size (and open/closed) is remembered, also after a reload.
 - The patient's earlier check-ups moved **below the check-up form** (when handwriting is on).
