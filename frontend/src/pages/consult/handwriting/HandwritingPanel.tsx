@@ -32,9 +32,9 @@ export function HandwritingPanel({ open, width, workspaceRef, visitId, onWidth, 
 
   return (
     <aside className="hw-panel" hidden={!open}>
-      <div className="hw-resize" role="separator" aria-orientation="vertical" aria-label={t('handwriting.resize')} title={t('handwriting.resize')}
+      <div className="hw-resize" data-hw-ui role="separator" aria-orientation="vertical" aria-label={t('handwriting.resize')} title={t('handwriting.resize')}
         onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp} />
-      <div className="hw-panel-head">
+      <div className="hw-panel-head" data-hw-ui>
         <b><EditOutlined /> {t('handwriting.title')}</b>
         <Button size="small" type="text" icon={<CloseOutlined />} onClick={onClose} aria-label={t('handwriting.hidePanel')} title={t('handwriting.hidePanel')} />
       </div>

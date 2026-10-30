@@ -1,6 +1,7 @@
 // The writing area for the digital pad (iScribe pad in Mouse mode, a tablet pen, a touch screen or a mouse).
 // The pen draws live. Strokes are kept as normalised points, so the picture is identical on any screen size.
 // SAFE TO EDIT: PAD_RATIO (shape of the writing area), SMOOTHING. The words are in src/i18n/*.json under "handwriting".
+import { isToolbarTarget, screenPoint, viewportPoint, type PadBounds } from './padMapping';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 // iScribe A4 pad: 210 x 291.5 mm (portrait); landscape is the other way round
@@ -25,17 +26,25 @@ type Props = {
   width: number; // pen thickness in screen pixels at normal size
   tool: Tool;
   maxHeight: number; // pixels the writing area may use on this screen
+  bounds?: PadBounds; // pad mode: where the pad is on the screen (screen pixels); the whole screen when not set
+  calibrating?: boolean; // the doctor is touching the pad corners: this touch is not writing
+  padMode?: boolean; // full-screen pad mode: the whole screen is the pad (see padMapping.ts)
   onInkChange?: (hasInk: boolean) => void;
 };
 
 export const HandwritingCanvas = forwardRef<CanvasHandle, Props>(function HandwritingCanvas(
-  { landscape, color, width, tool, maxHeight, onInkChange }, ref,
+  { landscape, color, width, tool, maxHeight, padMode = false, calibrating = false, bounds, onInkChange }, ref,
 ) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const strokes = useRef<Stroke[]>([]);
   const current = useRef<Stroke | null>(null);
   const penSeen = useRef(false);
+  const calibratingRef = useRef(false);
+  calibratingRef.current = calibrating;
+  const erasing = useRef(false);
+  const writing = useRef(false); // pad mode: a stroke is being written
+  const ringRef = useRef<HTMLDivElement>(null); // pad mode: where the pen is on the page
   const [size, setSize] = useState({ w: 600, h: 800 });
   const ratio = landscape ? 1 / PAD_RATIO : PAD_RATIO; // width / height
 
@@ -130,13 +139,17 @@ export const HandwritingCanvas = forwardRef<CanvasHandle, Props>(function Handwr
     },
   }));
 
-  const toPoint = (e: React.PointerEvent): Point => {
-    const rect = (e.currentTarget as HTMLCanvasElement).getBoundingClientRect();
-    return {
-      x: Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1),
-      y: Math.min(Math.max((e.clientY - rect.top) / rect.height, 0), 1),
-      p: e.pointerType === 'pen' ? e.pressure : 0.5,
-    };
+  // One pen/mouse movement -> a point on the page. Normal mode: position inside the writing box. Pad mode: position on the
+  // whole screen, because the pad covers the whole screen (see padMapping.ts).
+  type Area = { left: number; top: number; width: number; height: number };
+  const screenArea = (): Area => ({ left: 0, top: 0, width: window.innerWidth, height: window.innerHeight });
+  const padBounds = (): PadBounds => bounds ?? { left: 0, top: 0, right: window.screen.width, bottom: window.screen.height };
+  const toPoint = (e: PointerEvent, area: Area): Point => {
+    // Pad mode reads the position on the SCREEN, so it also works when the browser is not full screen
+    const { x, y } = padMode
+      ? screenPoint(e.screenX, e.screenY, padBounds())
+      : viewportPoint(e.clientX - area.left, e.clientY - area.top, area.width, area.height);
+    return { x, y, p: e.pointerType === 'pen' ? e.pressure : 0.5 };
   };
 
   const eraseAt = (pt: Point) => {
@@ -147,40 +160,41 @@ export const HandwritingCanvas = forwardRef<CanvasHandle, Props>(function Handwr
     if (strokes.current.length !== before) { redraw(); changed(); }
   };
 
-  const down = (e: React.PointerEvent<HTMLCanvasElement>) => {
+  // Returns false when the movement must not start writing (palm on the screen, right mouse button)
+  const begin = (e: PointerEvent, area: Area): boolean => {
     if (e.pointerType === 'pen') penSeen.current = true;
-    if (e.pointerType === 'touch' && penSeen.current) return; // palm resting on the screen while a pen is used
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
-    e.currentTarget.setPointerCapture(e.pointerId);
-    const pt = toPoint(e);
-    if (tool === 'eraser') { current.current = null; eraseAt(pt); (e.currentTarget as HTMLCanvasElement).dataset.erasing = '1'; return; }
+    if (e.pointerType === 'touch' && penSeen.current) return false; // palm resting on the screen while a pen is used
+    if (e.pointerType === 'mouse' && e.button !== 0) return false;
+    const pt = toPoint(e, area);
+    if (tool === 'eraser') { current.current = null; erasing.current = true; eraseAt(pt); return true; }
     current.current = { color, width, pen: e.pointerType === 'pen', points: [pt] };
     redraw();
+    return true;
   };
 
-  const move = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    const canvas = e.currentTarget;
+  // Pad mode: a small ring on the page shows where the pen is (the real cursor is hidden)
+  const showRing = (e: PointerEvent) => {
+    const ring = ringRef.current;
+    if (!ring) return;
+    const { x, y } = screenPoint(e.screenX, e.screenY, padBounds());
+    ring.style.display = 'block';
+    ring.style.transform = `translate(${x * size.w}px, ${y * size.h}px)`;
+  };
+
+  const move = (e: PointerEvent, area: Area) => {
     if (tool === 'eraser') {
-      if (canvas.dataset.erasing === '1') eraseAt(toPoint(e));
+      if (erasing.current) eraseAt(toPoint(e, area));
       return;
     }
     const stroke = current.current;
     if (!stroke) return;
-    const events = typeof e.nativeEvent.getCoalescedEvents === 'function' ? e.nativeEvent.getCoalescedEvents() : [];
-    const list = events.length ? events : [e.nativeEvent];
-    const rect = canvas.getBoundingClientRect();
-    for (const ev of list) {
-      stroke.points.push({
-        x: Math.min(Math.max((ev.clientX - rect.left) / rect.width, 0), 1),
-        y: Math.min(Math.max((ev.clientY - rect.top) / rect.height, 0), 1),
-        p: ev.pointerType === 'pen' ? ev.pressure : 0.5,
-      });
-    }
+    const events = typeof e.getCoalescedEvents === 'function' ? e.getCoalescedEvents() : [];
+    for (const ev of events.length ? events : [e]) stroke.points.push(toPoint(ev, area));
     redraw();
   };
 
-  const up = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    e.currentTarget.dataset.erasing = '0';
+  const end = () => {
+    erasing.current = false;
     if (current.current) {
       strokes.current.push(current.current);
       current.current = null;
@@ -189,18 +203,72 @@ export const HandwritingCanvas = forwardRef<CanvasHandle, Props>(function Handwr
     }
   };
 
+  // Pad mode: the pad moves the cursor over the WHOLE screen, so the whole screen is the pad. We listen on the whole window
+  // and, so that writing near a button never presses it, every mouse click outside the handwriting panel is blocked.
+  const latest = useRef({ begin, move, end, showRing });
+  latest.current = { begin, move, end, showRing };
+  useEffect(() => {
+    if (!padMode) return undefined;
+    const outside = (target: EventTarget | null) => !(target instanceof Element && target.closest('.hw-panel'));
+    const onDown = (e: PointerEvent) => {
+      if (calibratingRef.current) return;
+      if (!isToolbarTarget(e.target)) writing.current = latest.current.begin(e, screenArea());
+      if (outside(e.target)) { e.preventDefault(); e.stopPropagation(); }
+    };
+    const onMove = (e: PointerEvent) => {
+      latest.current.showRing(e);
+      if (writing.current) latest.current.move(e, screenArea());
+      if (outside(e.target)) e.stopPropagation();
+    };
+    const onUp = (e: PointerEvent) => {
+      writing.current = false;
+      latest.current.end();
+      if (outside(e.target)) e.stopPropagation();
+    };
+    const block = (e: Event) => {
+      const hover = e.type === 'mouseover' || e.type === 'mouseout'; // the pen passing over the menu must not open it
+      const to = hover ? (e as MouseEvent).relatedTarget : null;
+      if (outside(e.target) || (hover && outside(to))) { e.stopPropagation(); if (!hover) e.preventDefault(); }
+    };
+    const blocked = ['mousedown', 'mouseup', 'click', 'dblclick', 'auxclick', 'contextmenu', 'mouseover', 'mouseout'];
+    window.addEventListener('pointerdown', onDown, true);
+    window.addEventListener('pointermove', onMove, true);
+    window.addEventListener('pointerup', onUp, true);
+    window.addEventListener('pointercancel', onUp, true);
+    blocked.forEach((type) => window.addEventListener(type, block, true));
+    const ring = ringRef.current;
+    return () => {
+      window.removeEventListener('pointerdown', onDown, true);
+      window.removeEventListener('pointermove', onMove, true);
+      window.removeEventListener('pointerup', onUp, true);
+      window.removeEventListener('pointercancel', onUp, true);
+      blocked.forEach((type) => window.removeEventListener(type, block, true));
+      if (ring) ring.style.display = 'none';
+    };
+  }, [padMode]);
+
+  // Normal mode: the writing box itself
+  const boxArea = (el: HTMLElement): Area => el.getBoundingClientRect();
+  const onDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (padMode) return;
+    if (begin(e.nativeEvent, boxArea(e.currentTarget))) e.currentTarget.setPointerCapture(e.pointerId);
+  };
+  const onMove = (e: React.PointerEvent<HTMLCanvasElement>) => { if (!padMode) move(e.nativeEvent, boxArea(e.currentTarget)); };
+  const onUp = () => { if (!padMode) end(); };
+
   return (
     <div ref={wrapRef} className="hw-wrap" style={{ width: size.w, height: size.h }}>
       <canvas
         ref={canvasRef}
         className="hw-canvas"
         style={{ width: size.w, height: size.h, cursor: tool === 'eraser' ? 'cell' : 'crosshair' }}
-        onPointerDown={down}
-        onPointerMove={move}
-        onPointerUp={up}
-        onPointerCancel={up}
+        onPointerDown={onDown}
+        onPointerMove={onMove}
+        onPointerUp={onUp}
+        onPointerCancel={onUp}
         onContextMenu={(e) => e.preventDefault()}
       />
+      {padMode && <div ref={ringRef} className="hw-ring" aria-hidden="true" />}
     </div>
   );
 });

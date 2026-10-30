@@ -1,16 +1,19 @@
 // "Handwriting" tab of the doctor's check-up screen: one A4 page on the screen, written with the digital pad (or a tablet
 // pen / touch screen / mouse). Press Save: the handwriting is kept as a picture, and ONE combined picture with the clinic
 // letterhead is made for this patient's prescription. Earlier pages of this check-up are shown below.
-// The pad moves the cursor over the whole screen, so only the part of the pad that lies over the page writes; outside the
-// page the pad does nothing.
+// The pad moves the cursor over the WHOLE screen. "Use the whole pad" (the default for pad users) therefore reads the pen from
+// the whole screen, so the whole pad is this page; while it is on, mouse clicks outside this panel are blocked on purpose
+// (writing near a button must never press it). Switch it off to use the mouse on the rest of the screen.
 // SAFE TO EDIT: pen colours (COLORS) and the starting thickness. The words are in src/i18n/*.json under "handwriting".
 import { ClearOutlined, EditOutlined, PrinterOutlined, RedoOutlined, SaveOutlined, UndoOutlined } from '@ant-design/icons';
-import { Alert, App, Button, Segmented, Slider, Space, Typography } from 'antd';
+import { Alert, App, Button, Segmented, Slider, Space, Switch, Typography } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from '../../../api/client';
 import type { HandwrittenPage } from '../../../api/types';
 import { DocumentModal } from '../../../components/BillPreview';
+import { isToolbarTarget } from './padMapping';
+import { boundsFromCorners, loadBounds, saveBounds, type PadBounds, type UnitPoint } from './padMapping';
 import { HandwritingCanvas, type CanvasHandle, type Tool } from './HandwritingCanvas';
 import { HandwrittenPages, PrivateImage } from './HandwrittenPages';
 
@@ -41,6 +44,38 @@ export function HandwritingSection({ visitId, onInkChange, onSaved }: {
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
+
+  // Use the whole pad (remembered on this computer)
+  const [whole, setWhole] = useState(() => { try { return localStorage.getItem('hw-whole-pad') === '1'; } catch { return false; } });
+  useEffect(() => { try { localStorage.setItem('hw-whole-pad', whole ? '1' : '0'); } catch { /* not remembered */ } }, [whole]);
+  useEffect(() => {
+    if (!whole) return undefined;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setWhole(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [whole]);
+
+  // "Set pad corners": touch the pen at two opposite corners of the pad so the pad's place on the screen is known exactly
+  const [bounds, setBounds] = useState<PadBounds | null>(() => loadBounds());
+  const [corner, setCorner] = useState<0 | 1 | 2>(0); // 0 = not setting, 1 = waiting for the first corner, 2 = for the second
+  const firstCorner = useRef<UnitPoint | null>(null);
+  useEffect(() => {
+    if (corner === 0) return undefined;
+    const onDown = (e: PointerEvent) => {
+      if (isToolbarTarget(e.target)) return;
+      e.stopPropagation(); // this touch is a corner, not writing
+      const here = { x: e.screenX, y: e.screenY };
+      if (corner === 1) { firstCorner.current = here; setCorner(2); return; }
+      const found = firstCorner.current ? boundsFromCorners(firstCorner.current, here) : null;
+      if (!found) { message.warning(t('handwriting.cornersTooClose')); setCorner(1); return; }
+      setBounds(found);
+      saveBounds(found);
+      setCorner(0);
+      message.success(t('handwriting.cornersSaved'));
+    };
+    window.addEventListener('pointerdown', onDown, true);
+    return () => window.removeEventListener('pointerdown', onDown, true);
+  }, [corner, message, t]);
 
   const inkChanged = (value: boolean) => { setHasInk(value); onInkChange?.(value); };
 
@@ -80,9 +115,24 @@ export function HandwritingSection({ visitId, onInkChange, onSaved }: {
           {printing && <DocumentModal kind="handwritten-rx" id={saved.id} title={t('handwriting.title')} onClose={() => setPrinting(false)} />}
         </div>
       )}
+      <div data-hw-ui style={{ marginBottom: 8 }}>
+        <Space wrap size={[8, 6]}>
+          <Switch checked={whole} onChange={setWhole} />
+          <b>{t('handwriting.wholePad')}</b>
+          {whole && (
+            <>
+              <Button size="small" type={corner ? 'primary' : 'default'} onClick={() => { firstCorner.current = null; setCorner(corner ? 0 : 1); }}>
+                {corner === 1 ? t('handwriting.corner1') : corner === 2 ? t('handwriting.corner2') : t('handwriting.corners')}
+              </Button>
+              {bounds && !corner && <Button size="small" onClick={() => { setBounds(null); saveBounds(null); }}>{t('handwriting.cornersReset')}</Button>}
+            </>
+          )}
+        </Space>
+        {whole && <Alert type="info" showIcon style={{ marginTop: 6 }} message={t('handwriting.wholePadOn')} />}
+      </div>
       {/* The writing page stays mounted (only hidden after saving) so nothing written is ever lost */}
       <div hidden={!!saved}>
-        <Space wrap size={[12, 8]} style={{ marginBottom: 8 }}>
+        <Space wrap size={[12, 8]} style={{ marginBottom: 8 }} data-hw-ui>
           <Segmented value={tool} onChange={(v) => setTool(v as Tool)}
             options={[{ value: 'pen', label: t('handwriting.pen') }, { value: 'eraser', label: t('handwriting.eraser') }]} />
           <Space size={4}>
@@ -101,9 +151,10 @@ export function HandwritingSection({ visitId, onInkChange, onSaved }: {
         </Space>
         <div className="hw-stage">
           <HandwritingCanvas ref={canvas} landscape={false} color={color} width={width} tool={tool}
-            maxHeight={Math.max(viewHeight - 270, 320)} onInkChange={inkChanged} />
+            maxHeight={Math.max(viewHeight - (whole ? 380 : 270), 300)} padMode={whole} calibrating={corner > 0}
+            bounds={bounds ?? undefined} onInkChange={inkChanged} />
         </div>
-        <Typography.Text type="secondary" className="cell-sub" style={{ display: 'block', marginTop: 6 }}>{t('handwriting.sectionHint')}</Typography.Text>
+        <Typography.Text type="secondary" className="cell-sub" style={{ display: 'block', marginTop: 6 }}>{whole ? t('handwriting.sectionHintWhole') : t('handwriting.sectionHint')}</Typography.Text>
       </div>
       <div style={{ marginTop: 16 }}>
         <Typography.Text strong><RedoOutlined /> {t('handwriting.earlier')}</Typography.Text>

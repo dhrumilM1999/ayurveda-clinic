@@ -24,8 +24,16 @@ name, ID and date, your handwriting, the QR code and your signature line. It is 
 **Bigger or smaller page:** drag the left edge of the panel. The page always keeps its A4 shape (it is never stretched) and
 the size is remembered on this computer, also after you reload the page.
 
-The pad moves the cursor over the whole screen, so only the part of the pad that lies over the A4 page writes. Outside the
-page the pad does nothing. If you hide the panel and show it again, what you wrote is still there.
+**Use the whole pad:** the pad moves the cursor over the WHOLE screen, so by default only the part of the pad that lies over the
+A4 page writes. Switch on **Use the whole pad** (top of the panel) and the whole pad becomes the A4 page: write anywhere on the
+pad. A blue ring on the page shows where the pen is. While it is on, mouse clicks outside the panel are switched off on purpose
+(writing near a button must never press it); the buttons inside the panel work. Press **Esc** or switch it off to use the mouse
+again. The choice is remembered on this computer.
+
+If the writing sticks to an edge or does not match the pen, press **Set pad corners**, touch the pen at the pad's TOP-LEFT corner,
+then the BOTTOM-RIGHT corner. This is remembered. **Use whole screen** forgets it.
+
+If you hide the panel and show it again, what you wrote is still there.
 
 ## What is saved
 

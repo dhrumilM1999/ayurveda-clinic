@@ -2,6 +2,11 @@
 
 What changed in each step, in plain words.
 
+## Use the whole pad in the handwriting panel (2026-10-30)
+- New switch **Use the whole pad** at the top of the handwriting panel: the whole pad becomes the A4 page (the pad moves the cursor over the whole screen, so the pen is read from the screen). A ring shows the pen; the left menu does not open while you write.
+- While it is on, mouse clicks outside the panel are switched off on purpose, so writing near a button never presses it. Esc or the switch turns it off. The choice is remembered.
+- **Set pad corners** (touch two corners of the pad) fixes any shifting. Frontend only, no database change.
+
 ## Left menu: thin strip, opens on hover (2026-10-30)
 - The left menu is now a **thin strip of icons**. When the mouse is over it, it opens to full width and floats over the page (the page does not move). When the mouse leaves, it closes.
 - The toggle button at the top still opens it fully and keeps it open (the page moves aside, as before). Press again to go back to the thin strip. The choice is remembered on this computer.
