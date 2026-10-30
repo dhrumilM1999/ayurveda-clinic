@@ -3,7 +3,7 @@
 What changed in each step, in plain words.
 
 ## Earlier check-ups below the check-up, full width (2026-10-30)
-- On the Check-up screen the patient's earlier check-ups (last visit, history, older visits) moved from the right side to **below the check-up**, and the check-up itself now uses the **full width**. Older check-ups are tiles; click one to read it. Frontend only.
+- On the Check-up screen the patient's earlier check-ups (last visit, history, older visits) moved from the right side to **below the check-up**, and the check-up itself now uses the **full width**. Older check-ups are rows; click one and it **opens right below the row** (no pop-up window), click again to close (as in the Healthray reference). Frontend only.
 
 ## Walk-in after registering, patient can come any time, Dose box switch, stock in tablets (2026-10-29)
 

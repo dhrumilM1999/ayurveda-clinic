@@ -1246,21 +1246,16 @@ body {
 .pre-line {
   white-space: pre-line;
 }
-/* Earlier check-ups: below the check-up, full width. The title and the two summary boxes use the whole row, each older
-   check-up is a tile (as many tiles per row as fit). */
+/* Earlier check-ups: below the check-up, full width. Each older check-up is a row; click it to read it right below (no pop-up). */
 .workspace-side {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  align-items: start;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
   padding: 10px;
   border-radius: 10px;
   background: #fff;
   border: 1px solid var(--clinic-border);
 }
-.workspace-side > .section-title,
-.workspace-side > .history-box,
-.workspace-side > .cell-sub { grid-column: 1 / -1; }
 .prev-visit {
   text-align: left;
   padding: 7px 9px;
@@ -1270,6 +1265,9 @@ body {
   font: inherit;
   cursor: pointer;
 }
+.prev-visit { width: 100%; }
+.prev-visit.open { border-color: var(--clinic-primary); background: #e3ecfa; }
+.prev-visit-open { margin: 6px 0 4px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--clinic-border); background: #fff; }
 .prev-visit:hover {
   border-color: var(--clinic-primary);
 }
