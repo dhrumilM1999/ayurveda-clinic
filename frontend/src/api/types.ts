@@ -1379,3 +1379,21 @@ export interface ProductRow {
   gst_rate: string; price: string | null; stock: string;
   batches: { id: string; batch_no: string; expiry_date: string | null; quantity: string; price: string | null }[];
 }
+
+// "Patient Report" window of the check-up screen: what was written at the patient's visits between two dates
+export interface PatientReportVisit {
+  id: string;
+  visit_date: string;
+  doctor_name: string;
+  branch_name: string;
+  status: 'draft' | 'completed';
+  complaints: string[];
+  diagnoses: string[];
+  advice: string[];
+  history_notes: string;
+  examination_notes: string;
+  advice_notes: string;
+  follow_up_date: string | null;
+  rx: { medicine: string; dose: string; frequency: string; timing: string; duration: string }[];
+  investigations: { test: string; status: string }[];
+}

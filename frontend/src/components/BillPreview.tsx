@@ -199,28 +199,30 @@ export function LabelsButton({ dispense, prescription, size = 'small' }: {
   );
 }
 
-type DocKind = 'prescription' | 'follow-up-card' | 'prakriti' | 'certificate' | 'therapy-plan' | 'handwritten-rx';
+type DocKind = 'prescription' | 'follow-up-card' | 'prakriti' | 'certificate' | 'therapy-plan' | 'handwritten-rx' | 'lab-order';
 // the name of each document in Settings -> PDF settings
 const DOC_TYPE: Record<DocKind, string> = {
-  prescription: 'prescription', 'follow-up-card': 'follow_up_card', prakriti: 'prakriti_report', certificate: 'certificate', 'therapy-plan': 'therapy_plan', 'handwritten-rx': 'prescription',
+  prescription: 'prescription', 'follow-up-card': 'follow_up_card', prakriti: 'prakriti_report', certificate: 'certificate', 'therapy-plan': 'therapy_plan', 'handwritten-rx': 'prescription', 'lab-order': 'lab_order',
 };
 
 /** A medical document (prescription, follow-up card, Prakriti report, certificate) on screen, in the patient's
  *  language (can be changed), with paper size, Download and Print. Reprints say DUPLICATE COPY. */
-export function DocumentModal({ kind, id, title, language, detail, onClose }: {
+export function DocumentModal({ kind, id, title, language, detail, extra, onClose }: {
   kind: DocKind;
   id: string;
   title: string;
   language?: string;
   /** Prescription only: the detailed prescription (full check-up summary), A4 first */
   detail?: boolean;
+  /** More options for the document, such as the tests of a lab order */
+  extra?: Record<string, string | number>;
   onClose: () => void;
 }) {
   const { t } = useTranslation();
   const defaults = usePaperDefaults();
   if (!defaults) return null;
   const sizes: Record<DocKind, string[]> = {
-    prescription: detail ? ['a4', 'a5'] : ['a5', 'a4'], 'follow-up-card': ['a6', 'a5'], prakriti: ['a4', 'a5'], certificate: ['a4', 'a5'], 'therapy-plan': ['a4', 'a5'], 'handwritten-rx': ['a5', 'a4'],
+    prescription: detail ? ['a4', 'a5'] : ['a5', 'a4'], 'follow-up-card': ['a6', 'a5'], prakriti: ['a4', 'a5'], certificate: ['a4', 'a5'], 'therapy-plan': ['a4', 'a5'], 'handwritten-rx': ['a5', 'a4'], 'lab-order': ['a5', 'a4'],
   };
   return (
     <PdfModal title={title} fileName={detail ? 'prescription-detailed' : `${kind}`} onClose={onClose}
@@ -229,7 +231,7 @@ export function DocumentModal({ kind, id, title, language, detail, onClose }: {
       choices2={(['en', 'gu', 'hi'] as const).map((v) => ({ value: v, label: t(`print.lang.${v}`) }))}
       initial2={language && ['en', 'gu', 'hi'].includes(language) ? language : 'en'}
       fetchPdf={(size, forPrint, lang) => blobOf(`/documents/${kind}/${id}/`, {
-        size, lang, ...(detail ? { detail: 1 } : {}), ...(forPrint ? {} : { preview: 1 }),
+        size, lang, ...(detail ? { detail: 1 } : {}), ...(extra ?? {}), ...(forPrint ? {} : { preview: 1 }),
       })} />
   );
 }

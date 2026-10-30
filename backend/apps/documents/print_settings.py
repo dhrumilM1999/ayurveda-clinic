@@ -56,6 +56,7 @@ DOC_TYPES = {
     "prakriti_report": {"label": "Prakriti report", "paper": "a4", "papers": PAPERS_DOCS, "keys": _PRINT},
     "certificate": {"label": "Certificate", "paper": "a4", "papers": PAPERS_DOCS, "keys": _PRINT},
     "therapy_plan": {"label": "Therapy plan", "paper": "a4", "papers": PAPERS_DOCS, "keys": _PRINT},
+    "lab_order": {"label": "Lab test order", "paper": "a5", "papers": PAPERS_DOCS, "keys": _PRINT},
     "opd_bill": {"label": "OPD bill / receipt", "paper": "a4", "papers": PAPERS_BILLS, "keys": _BILL},
     "pharmacy_bill": {"label": "Pharmacy bill / counter sale", "paper": "a4", "papers": PAPERS_BILLS, "keys": _BILL},
     "credit_note": {"label": "Credit note", "paper": "a4", "papers": PAPERS_BILLS, "keys": _BILL},

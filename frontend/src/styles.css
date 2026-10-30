@@ -2144,3 +2144,27 @@ body {
 .history-box.last-visit { border-color: var(--clinic-primary); background: color-mix(in srgb, var(--clinic-primary) 5%, #fff); }
 .history-title { font-weight: 600; margin-bottom: 2px; }
 .history-rx { margin: 2px 0 6px; padding-left: 18px; }
+
+/* ---------- Check-up header tools: Graph, Patient Report, Send Order ---------- */
+.vg-layout { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 14px; }
+.vg-checks { display: flex; flex-direction: column; gap: 6px; }
+.vg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 10px; }
+.vg-card { border: 1px solid var(--clinic-border); border-radius: 8px; padding: 8px 10px; background: #fff; }
+.vg-card-head { display: flex; align-items: baseline; gap: 6px; }
+.vg-last { margin-left: auto; font-weight: 700; color: var(--clinic-primary); }
+.vg-svg { width: 100%; height: auto; display: block; margin-top: 4px; }
+.vg-axis { stroke: #d9d9d9; stroke-width: 1; }
+.vg-line { fill: none; stroke: var(--clinic-primary); stroke-width: 2; stroke-linejoin: round; }
+.vg-dot { fill: #fff; stroke: var(--clinic-primary); stroke-width: 2; }
+.vg-dates { display: flex; justify-content: space-between; }
+.vg-empty { padding: 28px 0; text-align: center; }
+.pr-list { display: flex; flex-direction: column; gap: 10px; max-height: 60vh; overflow-y: auto; }
+.pr-visit { border: 1px solid var(--clinic-border); border-radius: 8px; padding: 8px 12px; background: #fff; }
+.pr-head { display: flex; gap: 10px; align-items: baseline; margin-bottom: 4px; }
+.pr-part { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 8px; padding: 3px 0; }
+.pr-label { font-size: 12px; font-weight: 700; color: var(--clinic-primary); text-transform: uppercase; }
+.pr-rx { margin: 0; padding-left: 18px; }
+.so-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 18px; }
+.so-label { font-weight: 700; margin-bottom: 6px; }
+.so-tests { display: flex; flex-direction: column; gap: 6px; }
+@media (max-width: 900px) { .vg-layout, .so-grid { grid-template-columns: minmax(0, 1fr); } .pr-part { grid-template-columns: minmax(0, 1fr); } }

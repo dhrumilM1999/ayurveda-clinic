@@ -342,6 +342,13 @@ def follow_up_context(visit, lang: str) -> dict:
             **letterhead(visit.branch, visit.doctor)}
 
 
+def lab_order_context(visit, lang: str, tests, lab: str, urgent: bool) -> dict:
+    """A lab test order slip: patient line, the chosen tests (with the doctor's note for each), lab name, URGENT mark."""
+    w = words_for(lang)
+    return {"w": w, "lang": lang, "patient": _patient(visit.patient, w), "date": visit.visit_date, "lab": lab, "urgent": urgent,
+            "tests": [{"name": t.test_name, "note": t.note} for t in tests], **letterhead(visit.branch, visit.doctor)}
+
+
 def handwritten_rx_context(handwriting, lang: str) -> dict:
     """A handwritten prescription page: patient line, letterhead and the handwriting picture itself."""
     visit = handwriting.visit

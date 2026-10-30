@@ -2,6 +2,15 @@
 
 What changed in each step, in plain words.
 
+## Check-up header tools: + Appt, + Patient, Send Order, Patient Report, Graph (2026-10-30)
+Looked at Healthray first (layout only), then built five buttons in the check-up header:
+- **+ Appt**: book an appointment for this patient without leaving the check-up.
+- **+ Patient**: opens the new patient form in a new browser tab (the check-up stays open and keeps saving).
+- **Graph**: the patient's vital signs (weight, pulse, temperature, BP, SpO2, breathing, BMI) as small line charts; tick what to show, pick 1 month to all. Drawn by our own code, no new package.
+- **Patient Report**: pick two dates and the parts (complaints, history, examination, diagnosis, medicines, tests, advice, next visit): all check-ups in those dates, newest first, all branches. Opening it is written to the audit log (without the medical text). Medicines only for people who may see prescriptions.
+- **Send Order**: tick the tests advised at this check-up (or search and add one), write the lab name, mark Urgent, **Print order**: a lab test order slip (A5/A4, in the patient's language, numbered `.../LO/...`, with the QR check). The patient's earlier tests and their report status are listed beside it. New document type `lab_order` (Settings, PDF settings has it too), template `backend/templates/documents/lab_order.html`.
+- Backend: `GET /visits/report/`, `GET /documents/lab-order/<visit>/?tests=&lab=&urgent=`. One new migration (documents 0005, only the list of document kinds).
+
 ## Walk-in after registering, patient can come any time, Dose box switch, stock in tablets (2026-10-29)
 
 - **New patient registered -> "Walk-in (Give token)" straight away.** After saving a new patient a small window offers Walk-in, Book appointment or Open patient file. The patient file's Appointments tab also has a **Walk-in** button now.

@@ -24,6 +24,7 @@ import { useAuth } from '../../auth/AuthContext';
 import { OpdBillModal } from '../billing/OpdBillModal';
 import { PlanTherapyButton } from '../therapy/PlanTherapyButton';
 import { HandwritingModal } from './handwriting/HandwritingModal';
+import { ConsultTools } from './tools/ConsultTools';
 import { DocumentModal } from '../../components/BillPreview';
 import { PrintMenu } from './PrintMenu';
 import { SellModal } from '../pharmacy/DispenseTab';
@@ -521,6 +522,7 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded, reason, nextPatie
               {can('prescriptions.create') && hasFeature('digital_pad') && (
                 <Button size="small" icon={<EditOutlined />} onClick={() => setHandwritingOpen(true)}>{t('handwriting.open')}</Button>
               )}
+              <ConsultTools patientId={p.id} patientName={p.full_name} uhid={p.uhid} visitId={visit.id} />
               <PlanTherapyButton patientId={p.id} patientName={p.full_name} visitId={visit.id} />
               {(can('billing.charge') || can('billing.create')) && (
                 <Tooltip title={t('consult.billHelp')}>

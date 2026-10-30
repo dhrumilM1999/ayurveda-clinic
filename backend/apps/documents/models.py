@@ -22,6 +22,7 @@ DOCUMENT_KINDS = [
     ("prakriti_report", "Prakriti report"),
     ("therapy_plan", "Therapy plan"),
     ("handwritten_rx", "Handwritten prescription"),
+    ("lab_order", "Lab test order"),
 ]
 CERTIFICATE_KINDS = [
     ("medical", "Medical certificate (rest advised)"),

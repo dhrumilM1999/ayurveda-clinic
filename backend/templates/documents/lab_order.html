@@ -1,0 +1,17 @@
+{% extends "documents/_doc_base.html" %}
+{% comment %}SAFE TO EDIT: the lab test order slip (the tests the doctor ticked in "Send Order").{% endcomment %}
+{% block style %}
+  .urgent { display: inline-block; border: 2px solid #b3261e; color: #b3261e; font-weight: 700; padding: 0.2mm 3mm; margin-left: 3mm; }
+  ol.tests { margin: 3mm 0 0 5mm; padding: 0; }
+  ol.tests li { margin: 1.5mm 0; }
+{% endblock %}
+{% block content %}
+<div class="title">{{ w.lab_order }}{% if urgent %}<span class="urgent">{{ w.urgent }}</span>{% endif %}</div>
+<div><b>{{ patient.name }}</b> <span class="small muted">{{ w.patient_id }} {{ patient.uhid }}</span></div>
+{% if lab %}<div class="small">{{ w.lab }}: <b>{{ lab }}</b></div>{% endif %}
+<div style="margin-top: 3mm"><b>{{ w.ordered_tests }}</b></div>
+<ol class="tests">
+  {% for t in tests %}<li>{{ t.name }}{% if t.note %} <span class="small muted">— {{ t.note }}</span>{% endif %}</li>{% endfor %}
+</ol>
+<div class="small muted" style="margin-top: 4mm">{{ w.lab_note }}</div>
+{% endblock %}
