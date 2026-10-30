@@ -2,6 +2,10 @@
 
 What changed in each step, in plain words.
 
+## Pad turned by a quarter fixed (2026-10-30)
+- Checked with the real iScribe pad: held upright (clip at the top) it reports its position turned by a quarter, so words written at the pad's top appeared on the page's left. The whole-pad mode now turns it back, so top is top, left is left.
+- New button **Turn pad 90°** (for other pads) and **Set pad corners** now also finds the turn from the two touches. The real cursor is hidden while the whole pad is used (the blue ring shows the pen). Frontend only.
+
 ## Use the whole pad in the handwriting panel (2026-10-30)
 - New switch **Use the whole pad** at the top of the handwriting panel: the whole pad becomes the A4 page (the pad moves the cursor over the whole screen, so the pen is read from the screen). A ring shows the pen; the left menu does not open while you write.
 - While it is on, mouse clicks outside the panel are switched off on purpose, so writing near a button never presses it. Esc or the switch turns it off. The choice is remembered.

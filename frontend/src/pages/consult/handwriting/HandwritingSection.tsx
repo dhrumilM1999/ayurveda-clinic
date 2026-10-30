@@ -13,7 +13,7 @@ import { api, errorMessage } from '../../../api/client';
 import type { HandwrittenPage } from '../../../api/types';
 import { DocumentModal } from '../../../components/BillPreview';
 import { isToolbarTarget } from './padMapping';
-import { boundsFromCorners, loadBounds, saveBounds, type PadBounds, type UnitPoint } from './padMapping';
+import { boundsFromCorners, loadBounds, loadRotation, rotationFromCorners, saveBounds, saveRotation, type PadBounds, type Rotation, type UnitPoint } from './padMapping';
 import { HandwritingCanvas, type CanvasHandle, type Tool } from './HandwritingCanvas';
 import { HandwrittenPages, PrivateImage } from './HandwrittenPages';
 
@@ -57,6 +57,8 @@ export function HandwritingSection({ visitId, onInkChange, onSaved }: {
 
   // "Set pad corners": touch the pen at two opposite corners of the pad so the pad's place on the screen is known exactly
   const [bounds, setBounds] = useState<PadBounds | null>(() => loadBounds());
+  const [rotation, setRotation] = useState<Rotation>(loadRotation); // how the pad is turned: the iScribe pad needs a quarter turn
+  const turnPad = (value: Rotation) => { setRotation(value); saveRotation(value); };
   const [corner, setCorner] = useState<0 | 1 | 2>(0); // 0 = not setting, 1 = waiting for the first corner, 2 = for the second
   const firstCorner = useRef<UnitPoint | null>(null);
   useEffect(() => {
@@ -70,6 +72,7 @@ export function HandwritingSection({ visitId, onInkChange, onSaved }: {
       if (!found) { message.warning(t('handwriting.cornersTooClose')); setCorner(1); return; }
       setBounds(found);
       saveBounds(found);
+      if (firstCorner.current) turnPad(rotationFromCorners(firstCorner.current, here)); // the two touches also tell how the pad is turned
       setCorner(0);
       message.success(t('handwriting.cornersSaved'));
     };
@@ -124,6 +127,7 @@ export function HandwritingSection({ visitId, onInkChange, onSaved }: {
               <Button size="small" type={corner ? 'primary' : 'default'} onClick={() => { firstCorner.current = null; setCorner(corner ? 0 : 1); }}>
                 {corner === 1 ? t('handwriting.corner1') : corner === 2 ? t('handwriting.corner2') : t('handwriting.corners')}
               </Button>
+              <Button size="small" onClick={() => turnPad(((rotation + 1) % 4) as Rotation)}>{t('handwriting.turnPad')}</Button>
               {bounds && !corner && <Button size="small" onClick={() => { setBounds(null); saveBounds(null); }}>{t('handwriting.cornersReset')}</Button>}
             </>
           )}
@@ -151,7 +155,7 @@ export function HandwritingSection({ visitId, onInkChange, onSaved }: {
         </Space>
         <div className="hw-stage">
           <HandwritingCanvas ref={canvas} landscape={false} color={color} width={width} tool={tool}
-            maxHeight={Math.max(viewHeight - (whole ? 380 : 270), 300)} padMode={whole} calibrating={corner > 0}
+            maxHeight={Math.max(viewHeight - (whole ? 380 : 270), 300)} padMode={whole} calibrating={corner > 0} rotation={rotation}
             bounds={bounds ?? undefined} onInkChange={inkChanged} />
         </div>
         <Typography.Text type="secondary" className="cell-sub" style={{ display: 'block', marginTop: 6 }}>{whole ? t('handwriting.sectionHintWhole') : t('handwriting.sectionHint')}</Typography.Text>

@@ -30,8 +30,12 @@ pad. A blue ring on the page shows where the pen is. While it is on, mouse click
 (writing near a button must never press it); the buttons inside the panel work. Press **Esc** or switch it off to use the mouse
 again. The choice is remembered on this computer.
 
-If the writing sticks to an edge or does not match the pen, press **Set pad corners**, touch the pen at the pad's TOP-LEFT corner,
-then the BOTTOM-RIGHT corner. This is remembered. **Use whole screen** forgets it.
+**The iScribe pad reports itself turned by a quarter** (held upright with the clip at the top, its top edge arrives on the
+screen's left edge). The software turns it back by default. If your pad writes on the wrong side, press **Turn pad 90°** until the
+words land where you write (remembered).
+
+If the writing sticks to an edge or does not match the pen, press **Set pad corners**, touch the pen at the pad's TOP-LEFT corner (clip side),
+then the BOTTOM-RIGHT corner. This is remembered, and it also finds out how the pad is turned. **Use whole screen** forgets it.
 
 If you hide the panel and show it again, what you wrote is still there.
 

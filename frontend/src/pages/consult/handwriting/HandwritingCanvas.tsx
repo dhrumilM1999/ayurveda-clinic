@@ -1,7 +1,7 @@
 // The writing area for the digital pad (iScribe pad in Mouse mode, a tablet pen, a touch screen or a mouse).
 // The pen draws live. Strokes are kept as normalised points, so the picture is identical on any screen size.
 // SAFE TO EDIT: PAD_RATIO (shape of the writing area), SMOOTHING. The words are in src/i18n/*.json under "handwriting".
-import { isToolbarTarget, screenPoint, viewportPoint, type PadBounds } from './padMapping';
+import { isToolbarTarget, screenPoint, viewportPoint, type PadBounds, type Rotation } from './padMapping';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 // iScribe A4 pad: 210 x 291.5 mm (portrait); landscape is the other way round
@@ -27,13 +27,14 @@ type Props = {
   tool: Tool;
   maxHeight: number; // pixels the writing area may use on this screen
   bounds?: PadBounds; // pad mode: where the pad is on the screen (screen pixels); the whole screen when not set
+  rotation?: Rotation; // how the pad is turned (see padMapping.ts)
   calibrating?: boolean; // the doctor is touching the pad corners: this touch is not writing
   padMode?: boolean; // full-screen pad mode: the whole screen is the pad (see padMapping.ts)
   onInkChange?: (hasInk: boolean) => void;
 };
 
 export const HandwritingCanvas = forwardRef<CanvasHandle, Props>(function HandwritingCanvas(
-  { landscape, color, width, tool, maxHeight, padMode = false, calibrating = false, bounds, onInkChange }, ref,
+  { landscape, color, width, tool, maxHeight, padMode = false, calibrating = false, rotation = 0, bounds, onInkChange }, ref,
 ) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -147,7 +148,7 @@ export const HandwritingCanvas = forwardRef<CanvasHandle, Props>(function Handwr
   const toPoint = (e: PointerEvent, area: Area): Point => {
     // Pad mode reads the position on the SCREEN, so it also works when the browser is not full screen
     const { x, y } = padMode
-      ? screenPoint(e.screenX, e.screenY, padBounds())
+      ? screenPoint(e.screenX, e.screenY, padBounds(), rotation)
       : viewportPoint(e.clientX - area.left, e.clientY - area.top, area.width, area.height);
     return { x, y, p: e.pointerType === 'pen' ? e.pressure : 0.5 };
   };
@@ -176,7 +177,7 @@ export const HandwritingCanvas = forwardRef<CanvasHandle, Props>(function Handwr
   const showRing = (e: PointerEvent) => {
     const ring = ringRef.current;
     if (!ring) return;
-    const { x, y } = screenPoint(e.screenX, e.screenY, padBounds());
+    const { x, y } = screenPoint(e.screenX, e.screenY, padBounds(), rotation);
     ring.style.display = 'block';
     ring.style.transform = `translate(${x * size.w}px, ${y * size.h}px)`;
   };
@@ -231,6 +232,7 @@ export const HandwritingCanvas = forwardRef<CanvasHandle, Props>(function Handwr
       if (outside(e.target) || (hover && outside(to))) { e.stopPropagation(); if (!hover) e.preventDefault(); }
     };
     const blocked = ['mousedown', 'mouseup', 'click', 'dblclick', 'auxclick', 'contextmenu', 'mouseover', 'mouseout'];
+    document.documentElement.classList.add('hw-whole-pad'); // hides the real cursor: the ring on the page shows the pen
     window.addEventListener('pointerdown', onDown, true);
     window.addEventListener('pointermove', onMove, true);
     window.addEventListener('pointerup', onUp, true);
@@ -243,6 +245,7 @@ export const HandwritingCanvas = forwardRef<CanvasHandle, Props>(function Handwr
       window.removeEventListener('pointerup', onUp, true);
       window.removeEventListener('pointercancel', onUp, true);
       blocked.forEach((type) => window.removeEventListener(type, block, true));
+      document.documentElement.classList.remove('hw-whole-pad');
       if (ring) ring.style.display = 'none';
     };
   }, [padMode]);

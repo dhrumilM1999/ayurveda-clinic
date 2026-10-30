@@ -23,9 +23,35 @@ export function wholeScreen(screenWidth: number, screenHeight: number): PadBound
   return { left: 0, top: 0, right: screenWidth, bottom: screenHeight };
 }
 
+// Some pads report their position turned by a quarter: the iScribe pad held upright (clip at the top) moves the cursor as if it
+// were lying sideways. Rotation 0 = as is, 1 = turned a quarter (the iScribe pad), 2 = upside down, 3 = the other quarter.
+export type Rotation = 0 | 1 | 2 | 3;
+
+/** A position on the screen area (0 to 1 each way) -> the position on the page, after turning the pad back upright. */
+export function rotateUnit(point: UnitPoint, rotation: Rotation): UnitPoint {
+  const { x, y } = point;
+  if (rotation === 1) return { x: 1 - y, y: x };
+  if (rotation === 2) return { x: 1 - x, y: 1 - y };
+  if (rotation === 3) return { x: y, y: 1 - x };
+  return { x, y };
+}
+
 /** Cursor position on the SCREEN (event.screenX / screenY) -> position on the page, 0 to 1. */
-export function screenPoint(screenX: number, screenY: number, bounds: PadBounds): UnitPoint {
-  return viewportPoint(screenX - bounds.left, screenY - bounds.top, bounds.right - bounds.left, bounds.bottom - bounds.top);
+export function screenPoint(screenX: number, screenY: number, bounds: PadBounds, rotation: Rotation = 0): UnitPoint {
+  return rotateUnit(viewportPoint(screenX - bounds.left, screenY - bounds.top, bounds.right - bounds.left, bounds.bottom - bounds.top), rotation);
+}
+
+/**
+ * The doctor touched the pad's TOP-LEFT corner (as the pad is held) and then its BOTTOM-RIGHT corner. Where those two touches
+ * land on the screen tells how the pad is turned.
+ */
+export function rotationFromCorners(topLeft: UnitPoint, bottomRight: UnitPoint): Rotation {
+  const right = bottomRight.x >= topLeft.x;
+  const down = bottomRight.y >= topLeft.y;
+  if (right && down) return 0;
+  if (right && !down) return 1;
+  if (!right && !down) return 2;
+  return 3;
 }
 
 /** The two corners the doctor touched (any order) -> the pad area. Null when the two touches are too close. */
@@ -35,6 +61,26 @@ export function boundsFromCorners(a: UnitPoint, b: UnitPoint, minSize = 200): Pa
 }
 
 const KEY = 'hw-pad-bounds';
+const ROTATION_KEY = 'hw-pad-rotation';
+/** The iScribe pad needs a quarter turn (checked with the real pad), so this is where a new computer starts. */
+export const DEFAULT_ROTATION: Rotation = 1;
+
+export function loadRotation(): Rotation {
+  try {
+    const value = Number(localStorage.getItem(ROTATION_KEY));
+    return localStorage.getItem(ROTATION_KEY) !== null && [0, 1, 2, 3].includes(value) ? (value as Rotation) : DEFAULT_ROTATION;
+  } catch {
+    return DEFAULT_ROTATION;
+  }
+}
+
+export function saveRotation(rotation: Rotation): void {
+  try {
+    localStorage.setItem(ROTATION_KEY, String(rotation));
+  } catch {
+    // private window: the choice is simply not remembered
+  }
+}
 
 export function loadBounds(): PadBounds | null {
   try {

@@ -2415,11 +2415,12 @@
     "wholePadOn": "The whole pad is this page. Mouse clicks outside this panel are switched off while this is on. Press Esc or switch it off to use the mouse again.",
     "sectionHintWhole": "Write anywhere on the pad: the whole pad is this A4 page and the blue ring shows the pen. If the writing sticks to an edge, press Set pad corners and touch the pad's top-left and bottom-right corners.",
     "corners": "Set pad corners",
-    "corner1": "Touch the pad's TOP-LEFT corner...",
+    "corner1": "Touch the pad's TOP-LEFT corner (clip side)...",
     "corner2": "Now touch the BOTTOM-RIGHT corner...",
     "cornersSaved": "Pad corners saved.",
     "cornersTooClose": "The two touches were too close. Touch the two opposite corners of the pad.",
-    "cornersReset": "Use whole screen"
+    "cornersReset": "Use whole screen",
+    "turnPad": "Turn pad 90°"
   },
   "calendar": {
     "title": "Calendar",
