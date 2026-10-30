@@ -6,7 +6,7 @@
 // SAFE TO EDIT: pen colours (COLORS) and the starting thickness. The words are in src/i18n/*.json under "handwriting".
 import { ClearOutlined, EditOutlined, PrinterOutlined, RedoOutlined, SaveOutlined, UndoOutlined } from '@ant-design/icons';
 import { Alert, App, Button, Segmented, Slider, Space, Typography } from 'antd';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from '../../../api/client';
 import type { HandwrittenPage } from '../../../api/types';
@@ -34,6 +34,13 @@ export function HandwritingSection({ visitId, onInkChange, onSaved }: {
   const [saved, setSaved] = useState<HandwrittenPage | null>(null);
   const [printing, setPrinting] = useState(false);
   const [refresh, setRefresh] = useState(0);
+
+  const [viewHeight, setViewHeight] = useState(window.innerHeight);
+  useEffect(() => {
+    const onResize = () => setViewHeight(window.innerHeight);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   const inkChanged = (value: boolean) => { setHasInk(value); onInkChange?.(value); };
 
@@ -94,7 +101,7 @@ export function HandwritingSection({ visitId, onInkChange, onSaved }: {
         </Space>
         <div className="hw-stage">
           <HandwritingCanvas ref={canvas} landscape={false} color={color} width={width} tool={tool}
-            maxHeight={Math.max(window.innerHeight - 190, 360)} onInkChange={inkChanged} />
+            maxHeight={Math.max(viewHeight - 270, 320)} onInkChange={inkChanged} />
         </div>
         <Typography.Text type="secondary" className="cell-sub" style={{ display: 'block', marginTop: 6 }}>{t('handwriting.sectionHint')}</Typography.Text>
       </div>

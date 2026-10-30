@@ -12,16 +12,20 @@ name, ID and date, your handwriting, the QR code and your signature line. It is 
 
 ## Every day
 
-1. Doctor: open the patient's check-up (Check-up screen). The appointments stay on the left.
-2. Press the **Handwriting** tab (after Follow-up). One A4 page appears, fully on the screen.
+1. Doctor: open the patient's check-up (Check-up screen). Today's appointments stay on the left.
+2. The **A4 page is on the right side** (the **Handwriting** button at the top shows or hides it). The patient's earlier
+   check-ups are below the check-up form in the middle.
 3. Write on the pad with the pen. The writing appears live. Tools: Pen, Eraser, 3 colours, thickness, Undo, Clear all.
 4. Press **Save prescription**. The software makes the combined picture (letterhead + patient line + your handwriting + QR +
    signature) and shows it. Then **Print** or **Write another page**.
 5. The pharmacist sees the pages in the medicine-giving window (above the medicine list). Earlier pages of the check-up are
-   listed at the bottom of the Handwriting tab.
+   listed at the bottom of the panel.
+
+**Bigger or smaller page:** drag the left edge of the panel. The page always keeps its A4 shape (it is never stretched) and
+the size is remembered on this computer, also after you reload the page.
 
 The pad moves the cursor over the whole screen, so only the part of the pad that lies over the A4 page writes. Outside the
-page the pad does nothing. If you go to another tab and come back, what you wrote is still there.
+page the pad does nothing. If you hide the panel and show it again, what you wrote is still there.
 
 ## What is saved
 

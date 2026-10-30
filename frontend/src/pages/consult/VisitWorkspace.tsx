@@ -4,7 +4,7 @@
 // - Undo / Redo: buttons at the top, or Ctrl+Z / Ctrl+Y (Ctrl+Shift+Z) while the check-up is open.
 // SAFE TO EDIT: AUTOSAVE_MS, RETRY_MS, UNDO_STEPS below.
 import { MedicineBoxOutlined, PrinterOutlined,
-  AlertOutlined, CheckCircleOutlined, CloudSyncOutlined, FileSearchOutlined, RedoOutlined, SaveOutlined, UndoOutlined,
+  AlertOutlined, CheckCircleOutlined, CloudSyncOutlined, EditOutlined, FileSearchOutlined, RedoOutlined, SaveOutlined, UndoOutlined,
   QuestionCircleOutlined,
 } from '@ant-design/icons';
 import { Alert, App, Button, Card, Modal, Skeleton, Space, Tag, Tooltip } from 'antd';
@@ -23,7 +23,8 @@ import type {
 import { useAuth } from '../../auth/AuthContext';
 import { OpdBillModal } from '../billing/OpdBillModal';
 import { PlanTherapyButton } from '../therapy/PlanTherapyButton';
-import { HandwritingSection } from './handwriting/HandwritingSection';
+import { HandwritingPanel } from './handwriting/HandwritingPanel';
+import { clampPanelWidth, loadPanel, savePanel } from './handwriting/panelSize';
 import { DocumentModal } from '../../components/BillPreview';
 import { PrintMenu } from './PrintMenu';
 import { SellModal } from '../pharmacy/DispenseTab';
@@ -109,17 +110,10 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded, reason, nextPatie
   const [saveState, setSaveState] = useState<'saved' | 'dirty' | 'saving' | 'error'>('saved');
   const [error, setError] = useState<string | null>(null);
   const readOnly = !can('emr.edit');
-  // Handwriting tab: opened once, then kept (hidden) so nothing written is lost when the doctor goes to another tab
-  const [hwOpened, setHwOpened] = useState(false);
-  const [hwInk, setHwInk] = useState(false);
+  // Handwriting panel on the right side: open/closed and its width are remembered on this computer
   const canWriteByHand = can('prescriptions.create') && hasFeature('digital_pad');
-  const hwRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (section !== 'handwriting') return;
-    setHwOpened(true);
-    // bring the whole A4 page into view, so the doctor writes without scrolling
-    window.setTimeout(() => hwRef.current?.scrollIntoView({ block: 'start' }), 50);
-  }, [section]);
+  const [hwPanel, setHwPanel] = useState(loadPanel);
+  useEffect(() => { savePanel(hwPanel); }, [hwPanel]);
   const [printRx, setPrintRx] = useState(false);
   const [giving, setGiving] = useState(false); // the doctor gives the medicines and makes the bill from this screen
   const canSeeRx = can('prescriptions.view');
@@ -434,7 +428,6 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded, reason, nextPatie
     progress: draft.complaints.some((c) => c.score !== null && c.score !== undefined),
     photos: visit.photos.length > 0,
     rx: rx.items.length > 0,
-    handwriting: hwInk,
     ...Object.fromEntries(templates.map((tpl) => [`tpl:${tpl.code}`, Object.keys(exams[tpl.code] ?? {}).length > 0])),
   };
   const sections = [
@@ -450,7 +443,6 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded, reason, nextPatie
     ...(canSeeRx ? [{ key: 'rx', label: t('consult.sections.rx') }] : []),
     { key: 'advice', label: t('consult.sections.advice') },
     { key: 'followUp', label: t('consult.sections.followUp') },
-    ...(canWriteByHand ? [{ key: 'handwriting', label: t('consult.sections.handwriting') }] : []),
   ];
   const finished = visit.status === 'completed';
   act.current = {
@@ -475,8 +467,14 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded, reason, nextPatie
       onFollowUpDays={changeFollowUpDays} readOnly={rxReadOnly} followUpReadOnly={readOnly} />
   );
 
+  const previousVisits = (
+    <PreviousVisits patientId={visit.patient} patient={patient} currentId={visit.id} templates={templates} inline={canWriteByHand}
+      onRepeat={!rxReadOnly ? (lines) => { changeRx({ items: [...rx.items, ...lines] }); setSection('rx'); } : undefined} />
+  );
+
   return (
-    <div className="workspace" ref={workspaceRef}>
+    <div className={`workspace${canWriteByHand ? ' workspace--hw' : ''}${canWriteByHand && hwPanel.open ? ' workspace--hw-open' : ''}`} ref={workspaceRef}
+      style={canWriteByHand ? ({ '--hw-w': `${hwPanel.width}px` } as React.CSSProperties) : undefined}>
       <Modal open={helpOpen} onCancel={() => setHelpOpen(false)} footer={null} title={t('shortcuts.title')} width={420}>
         <table className="shortcut-table"><tbody>
           {SHORTCUT_HELP.map((h) => (
@@ -527,6 +525,10 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded, reason, nextPatie
               <PrintMenu visitId={visit.id} rxId={rx.id} hasFollowUp={!!draft.follow_up_date} patientName={p.full_name}
                 language={patient?.preferred_language} doctorId={visit.doctor} diagnoses={draft.diagnoses.map((d) => d.label)}
                 beforePrint={() => save()} />
+              {canWriteByHand && (
+                <Button size="small" icon={<EditOutlined />} type={hwPanel.open ? 'primary' : 'default'} ghost={hwPanel.open}
+                  onClick={() => setHwPanel((x) => ({ ...x, open: !x.open }))}>{t('handwriting.open')}</Button>
+              )}
               <PlanTherapyButton patientId={p.id} patientName={p.full_name} visitId={visit.id} />
               {(can('billing.charge') || can('billing.create')) && (
                 <Tooltip title={t('consult.billHelp')}>
@@ -617,22 +619,25 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded, reason, nextPatie
           )}
           {section === 'advice' && <AdviceSection {...props} />}
           {section === 'followUp' && <FollowUpSection {...props} daysBar={daysBar} />}
-          {canWriteByHand && (hwOpened || section === 'handwriting') && (
-            <div hidden={section !== 'handwriting'} ref={hwRef}>
-              <HandwritingSection visitId={visit.id} onInkChange={setHwInk} />
-            </div>
-          )}
         </Card>
+
+        {/* The patient's earlier check-ups: below the check-up form (on the right side when there is no handwriting panel) */}
+        {canWriteByHand && previousVisits}
       </div>
 
-      <PreviousVisits patientId={visit.patient} patient={patient} currentId={visit.id} templates={templates}
-        onRepeat={!rxReadOnly ? (lines) => { changeRx({ items: [...rx.items, ...lines] }); setSection('rx'); } : undefined} />
+      {!canWriteByHand && previousVisits}
+      {canWriteByHand && (
+        <HandwritingPanel open={hwPanel.open} width={hwPanel.width} workspaceRef={workspaceRef} visitId={visit.id}
+          onWidth={(width) => setHwPanel((p) => ({ ...p, width: clampPanelWidth(width, workspaceRef.current?.clientWidth ?? window.innerWidth) }))}
+          onClose={() => setHwPanel((p) => ({ ...p, open: false }))} />
+      )}
     </div>
   );
 }
 
 /** Right panel: the patient's earlier check-ups (all branches). Click one to read it. */
-function PreviousVisits({ patientId, patient, currentId, templates, onRepeat }: {
+function PreviousVisits({ patientId, patient, currentId, templates, onRepeat, inline }: {
+  inline?: boolean; // shown below the check-up form instead of on the right side
   patientId: string;
   patient: Patient | null;
   currentId: string;
@@ -685,7 +690,7 @@ function PreviousVisits({ patientId, patient, currentId, templates, onRepeat }: 
   const history = patient ? medicalHistoryLines(patient) : [];
 
   return (
-    <aside className="workspace-side">
+    <aside className={`workspace-side${inline ? ' workspace-side--inline' : ''}`}>
       <div className="section-title" style={{ marginTop: 0 }}><FileSearchOutlined /> {t('consult.previousVisits')}</div>
       {history.length > 0 && (
         <div className="history-box">

@@ -2,9 +2,10 @@
 
 What changed in each step, in plain words.
 
-## Handwriting is now a tab in the check-up (2026-10-30)
-- No more pop-up window. The **Handwriting** tab (after Follow-up) shows one A4 page, fully on the screen, next to the appointments. Only the part of the pad over the page writes. Saving still makes the one picture with the letterhead.
-- What you wrote stays when you visit another tab and come back. Frontend only, no database change.
+## Handwriting page on the side of the check-up (2026-10-30)
+- No more pop-up window and no tab. The A4 handwriting page is a **panel on the right side** of the check-up screen. Drag its left edge to make it wider or narrower: the page keeps its A4 shape and the size (and open/closed) is remembered, also after a reload.
+- The patient's earlier check-ups moved **below the check-up form** (when handwriting is on).
+- Only the part of the pad over the page writes. Saving still makes the one picture with the letterhead. What you wrote stays when you hide and show the panel. Frontend only, no database change.
 
 ## Walk-in after registering, patient can come any time, Dose box switch, stock in tablets (2026-10-29)
 

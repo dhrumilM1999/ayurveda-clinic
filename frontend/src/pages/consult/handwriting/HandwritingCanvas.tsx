@@ -42,7 +42,9 @@ export const HandwritingCanvas = forwardRef<CanvasHandle, Props>(function Handwr
   // Fit the writing area into the space we have
   useEffect(() => {
     const fit = () => {
-      const availW = wrapRef.current?.parentElement?.clientWidth ?? 600;
+      const parent = wrapRef.current?.parentElement;
+      const pad = parent ? parseFloat(getComputedStyle(parent).paddingLeft) + parseFloat(getComputedStyle(parent).paddingRight) : 0;
+      const availW = parent ? Math.max(parent.clientWidth - pad, 0) : 600;
       let w = availW;
       let h = w / ratio;
       if (h > maxHeight) { h = maxHeight; w = h * ratio; }

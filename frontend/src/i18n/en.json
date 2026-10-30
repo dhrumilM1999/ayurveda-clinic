@@ -809,8 +809,7 @@
       "progress": "Progress",
       "photos": "Photos",
       "rx": "Rx (medicines)",
-      "investigations": "Lab tests",
-      "handwriting": "Handwriting"
+      "investigations": "Lab tests"
     },
     "units": {
       "days": "days",
@@ -2409,7 +2408,9 @@
     "hint": "Write with the pad pen (set the pad to Mouse mode in iScribe4U), a tablet pen, your finger or a mouse.",
     "historyHelp": "Every handwritten prescription page of this patient, latest first. Click a picture to enlarge, or open the check-up.",
     "openCheckup": "Open check-up",
-    "sectionHint": "Write on the A4 page above with the pad. The pad writes only where the page is on the screen; outside the page it does nothing. Press Save to make the prescription picture with the letterhead."
+    "sectionHint": "Write on the A4 page with the pad. The pad writes only where the page is on the screen; outside the page it does nothing. Drag the left edge of this panel to make it bigger or smaller; the page keeps its shape and the size is remembered.",
+    "resize": "Drag to make the page wider or narrower",
+    "hidePanel": "Hide the handwriting page"
   },
   "calendar": {
     "title": "Calendar",
