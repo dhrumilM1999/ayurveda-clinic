@@ -144,13 +144,18 @@ body {
 }
 
 /* ---------- Left menu ---------- */
+.app-sider-slot { flex: 0 0 auto; position: relative; transition: width 0.2s; }
 .app-sider {
-  position: sticky !important;
+  position: fixed !important;
+  left: 0;
   top: 0;
+  z-index: 150;
   height: 100vh;
   overflow: auto;
   background: var(--clinic-sidebar) !important;
 }
+/* opened only by the mouse: it floats over the page */
+.app-sider-hover { box-shadow: 6px 0 22px rgba(0, 0, 0, 0.28); }
 .app-sider .ant-layout-sider-children {
   display: flex;
   flex-direction: column;
@@ -2053,7 +2058,7 @@ body {
   .app-content { min-width: 0; }
 }
 @media (max-width: 575px) {
-  .app-sider { position: fixed !important; top: 0; left: 0; height: 100vh; z-index: 200; }
+  .app-sider { z-index: 200; }
 }
 
 /* Reason for the visit (from the booking) and the bar after a check-up is completed */

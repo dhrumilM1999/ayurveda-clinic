@@ -2,6 +2,11 @@
 
 What changed in each step, in plain words.
 
+## Left menu: thin strip, opens on hover (2026-10-30)
+- The left menu is now a **thin strip of icons**. When the mouse is over it, it opens to full width and floats over the page (the page does not move). When the mouse leaves, it closes.
+- The toggle button at the top still opens it fully and keeps it open (the page moves aside, as before). Press again to go back to the thin strip. The choice is remembered on this computer.
+- The widths are at the top of `frontend/src/layout/MainLayout.tsx` (MENU_WIDE, MENU_THIN). Frontend only.
+
 ## Walk-in after registering, patient can come any time, Dose box switch, stock in tablets (2026-10-29)
 
 - **New patient registered -> "Walk-in (Give token)" straight away.** After saving a new patient a small window offers Walk-in, Book appointment or Open patient file. The patient file's Appointments tab also has a **Walk-in** button now.
