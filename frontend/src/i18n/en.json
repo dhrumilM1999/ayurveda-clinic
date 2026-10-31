@@ -918,7 +918,9 @@
       "family": "Family",
       "surgical": "Operations",
       "notes": "Notes"
-    }
+    },
+    "todaysAppointments": "Today's appointments",
+    "appointmentsOf": "Appointments of {{date}}"
   },
   "templatesAdmin": {
     "title": "Check-up templates",
@@ -1697,6 +1699,10 @@
       "separate_medicine_menu": {
         "label": "Medicines as their own menu",
         "help": "Off (usual): the medicine list is a tab inside Pharmacy, so there is one place for medicines and stock. On: Medicines is a separate menu, for a clinic where a different person manages the medicine list."
+      },
+      "lab_orders": {
+        "label": "Lab test order slip (Send Order button in the check-up)",
+        "help": "Shows a Send Order button in the check-up header that prints a lab test order slip for the tests advised. Keep it off if you have no lab connected."
       }
     },
     "choices": {
@@ -2610,5 +2616,55 @@
     "prevDay": "Previous day",
     "nextDay": "Next day",
     "searchList": "Search the list"
+  },
+  "consultTools": {
+    "addAppt": "+ Appt",
+    "addPatient": "+ Patient",
+    "sendOrder": "Send Order",
+    "patientReport": "Patient Report",
+    "graph": "Graph",
+    "graphTitle": "Vital signs · {{name}}",
+    "graphShow": "Show",
+    "graphNone": "No readings in this time",
+    "range": {
+      "1m": "1 month",
+      "3m": "3 months",
+      "6m": "6 months",
+      "1y": "1 year",
+      "3y": "3 years",
+      "all": "All"
+    },
+    "vital": {
+      "weight_kg": "Weight",
+      "pulse": "Pulse",
+      "temperature_f": "Temperature",
+      "bp_systolic": "BP upper (systolic)",
+      "bp_diastolic": "BP lower (diastolic)",
+      "spo2": "SpO₂",
+      "respiratory_rate": "Breathing rate",
+      "bmi": "BMI"
+    },
+    "reportTitle": "Patient report · {{name}}",
+    "reportNone": "No check-ups in these dates.",
+    "notCompleted": "(not completed)",
+    "part": {
+      "complaints": "Complaints",
+      "history": "History",
+      "examination": "Examination",
+      "diagnosis": "Diagnosis",
+      "rx": "Medicines",
+      "investigations": "Tests",
+      "advice": "Advice",
+      "followUp": "Next visit"
+    },
+    "orderTitle": "Send order · {{name}}",
+    "orderTests": "Tests to order (advised at this check-up)",
+    "orderNone": "No test advised yet. Search a test above to add it.",
+    "orderLab": "Lab",
+    "orderLabHelp": "Lab name (optional)",
+    "orderUrgent": "Urgent",
+    "orderPrint": "Print order",
+    "orderHistory": "All tests of this patient",
+    "orderTest": "Test"
   }
 }

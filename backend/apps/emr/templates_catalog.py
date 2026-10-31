@@ -1,5 +1,5 @@
 """
-SAFE TO EDIT: the starting Ayurveda check-up templates (Ashtavidha, Dashavidha, Prakriti, Agni & habits).
+SAFE TO EDIT: the starting Ayurveda check-up templates (Ashtavidha, Dashavidha, Prakriti, Agni & habits, Menstrual history).
 
 How it works
 - Each template is copied into the database for each clinic (only if it is missing).
@@ -11,6 +11,7 @@ How it works
 - "questionnaire" templates (Prakriti) give each answer to a dosha (vata / pitta / kapha)
   and the software counts the score.
 - Every label has English (en), Gujarati (gu) and Hindi (hi).
+- "active": False = the template is added but switched off; switch it on in Check-up templates when the clinic needs it.
 - Never change a field "key" or an option "value" after the template is in use (old visits use them).
   To change the meaning, raise "version".
 
@@ -271,6 +272,50 @@ TEMPLATES = [
                 ("pitta", "Irritable, angry", "ચીડિયા, ગુસ્સાવાળા", "चिड़चिड़े, गुस्सैल"),
                 ("kapha", "Withdrawn, calm", "શાંત, અળગા", "शांत, अलग-थलग"),
             )},
+        ],
+    },
+    # ---------------------------------------------------------------------------------
+    {
+        "code": "artava",
+        "version": 1,
+        "kind": "form",
+        "active": False,  # women's health: switched on from Check-up templates (it would only clutter a male patient's check-up)
+        "name": L("Menstrual history (Artava)", "માસિક ઇતિહાસ (આર્તવ)", "मासिक इतिहास (आर्तव)"),
+        "description": L("Cycle, flow, pain and discharge", "ચક્ર, સ્રાવ, દુખાવો અને સફેદ પાણી", "चक्र, स्राव, दर्द और सफेद पानी"),
+        "fields": [
+            {"key": "lmp", "type": "text", "label": L("Last period began (date)", "છેલ્લા માસિકની તારીખ", "आखिरी माहवारी की तारीख")},
+            {"key": "cycle", "type": "choice", "label": L("Cycle", "માસિક ચક્ર", "माहवारी चक्र"), "options": opts(
+                ("regular", "Regular", "નિયમિત", "नियमित"),
+                ("irregular", "Irregular", "અનિયમિત", "अनियमित"),
+                ("absent", "Absent (Anartava)", "બંધ (અનાર્તવ)", "बंद (अनार्तव)"),
+                ("menopause", "Menopause", "રજોનિવૃત્તિ", "रजोनिवृत्ति"),
+            )},
+            {"key": "cycle_days", "type": "number", "unit": "days", "min": 15, "max": 90, "label": L("Cycle length", "ચક્રના દિવસ", "चक्र के दिन")},
+            {"key": "bleeding_days", "type": "number", "unit": "days", "min": 0, "max": 15, "label": L("Days of bleeding", "રક્તસ્રાવના દિવસ", "रक्तस्राव के दिन")},
+            {"key": "flow", "type": "choice", "label": L("Flow", "સ્રાવ", "स्राव"), "options": opts(
+                ("scanty", "Scanty", "ઓછો", "कम"),
+                ("normal", "Normal", "સામાન્ય", "सामान्य"),
+                ("heavy", "Heavy", "વધુ", "अधिक"),
+            )},
+            {"key": "pain", "type": "choice", "label": L("Pain with periods", "માસિકમાં દુખાવો", "माहवारी में दर्द"), "options": opts(
+                ("none", "None", "નથી", "नहीं"),
+                ("mild", "Mild", "હળવો", "हल्का"),
+                ("moderate", "Moderate", "મધ્યમ", "मध्यम"),
+                ("severe", "Severe", "તીવ્ર", "तीव्र"),
+            )},
+            {"key": "clots", "type": "choice", "label": L("Clots", "ગઠ્ઠા", "थक्के"), "options": opts(
+                ("no", "No", "ના", "नहीं"),
+                ("yes", "Yes", "હા", "हाँ"),
+            )},
+            {"key": "leucorrhoea", "type": "choice", "label": L("White discharge (Shweta pradara)", "સફેદ પાણી (શ્વેત પ્રદર)", "सफेद पानी (श्वेत प्रदर)"), "options": opts(
+                ("none", "None", "નથી", "नहीं"),
+                ("mild", "Mild", "થોડું", "थोड़ा"),
+                ("moderate", "Moderate", "મધ્યમ", "मध्यम"),
+                ("severe", "Severe", "વધુ", "अधिक"),
+            )},
+            {"key": "menarche_age", "type": "number", "unit": "years", "min": 8, "max": 20, "label": L("Age at first period", "પહેલા માસિકની ઉંમર", "पहली माहवारी की उम्र")},
+            {"key": "obstetric", "type": "text", "label": L("Pregnancies / children / abortions", "ગર્ભાવસ્થા / બાળકો / ગર્ભપાત", "गर्भावस्था / बच्चे / गर्भपात")},
+            NOTES,
         ],
     },
 ]

@@ -2,6 +2,28 @@
 
 What changed in each step, in plain words.
 
+## Lists update by themselves (2026-10-31)
+- The **Check-up list** (waiting / booked / done counts and patients), the **Appointments** list, the **Queue**, **Give medicines** and the **Dashboard** now ask the server again every few seconds (check-up list 5 s, queue 6 s, appointments 8 s, give medicines 8 s, dashboard 20 s). A new appointment or a completed check-up appears **without pressing refresh**.
+- It waits while the browser tab is hidden, refreshes at once when you come back, never sends a new request while the last is still running, and if the server does not answer the list on the screen simply stays as it was (no flicker, no error pop-ups).
+- No new package and no Redis needed. Instant push (the same second) would need Redis and a live connection; every few seconds is enough for a clinic.
+- Code: `frontend/src/api/liveRefresh.ts` and `useLiveRefresh.ts` (with tests). Frontend only.
+
+## Check-up list colours and counts, Send Order as a switch, Menstrual history template (2026-10-31)
+- **Today's appointments** (top of the Check-up list): four round counts, All / Waiting / Booked / Done. Tap one to filter.
+- Each patient in the list is **coloured**: waiting = amber, booked but not arrived = blue, done = green (no longer faded). Waiting patients come first, then booked, then done.
+- **Send Order** (lab order slip) is now an Additional setting, **off by default**, because no lab is connected. Switch it on in Additional settings -> Prescription.
+- New check-up template **Menstrual history (Artava)** with cycle, flow, pain, clots and discharge, in English, Gujarati and Hindi. It is added **switched off**; switch it on in Check-up templates when needed. Other Healthray templates (Homeopathy, Ophthal, Antenatal, Admit/IPD) were left out on purpose.
+- Frontend plus one template; no database change.
+
+## Check-up header tools: + Appt, + Patient, Send Order, Patient Report, Graph (2026-10-30)
+Looked at Healthray first (layout only), then built five buttons in the check-up header:
+- **+ Appt**: book an appointment for this patient without leaving the check-up.
+- **+ Patient**: opens the new patient form in a new browser tab (the check-up stays open and keeps saving).
+- **Graph**: the patient's vital signs (weight, pulse, temperature, BP, SpO2, breathing, BMI) as small line charts; tick what to show, pick 1 month to all. Drawn by our own code, no new package.
+- **Patient Report**: pick two dates and the parts (complaints, history, examination, diagnosis, medicines, tests, advice, next visit): all check-ups in those dates, newest first, all branches. Opening it is written to the audit log (without the medical text). Medicines only for people who may see prescriptions.
+- **Send Order**: tick the tests advised at this check-up (or search and add one), write the lab name, mark Urgent, **Print order**: a lab test order slip (A5/A4, in the patient's language, numbered `.../LO/...`, with the QR check). The patient's earlier tests and their report status are listed beside it. New document type `lab_order` (Settings, PDF settings has it too), template `backend/templates/documents/lab_order.html`.
+- Backend: `GET /visits/report/`, `GET /documents/lab-order/<visit>/?tests=&lab=&urgent=`. One new migration (documents 0005, only the list of document kinds).
+
 ## Stock in tablets on the check-up screen, therapy price from the Therapies screen (2026-10-29)
 - The medicine search and the prescription lines now show loose stock in tablets (for example "975 tablets"), the same as the pharmacy screens.
 - On the Therapies screen, type a price and the therapy is added to Services & charges and linked for you (only when it has no price yet). Needed for "Bill each finished therapy session".

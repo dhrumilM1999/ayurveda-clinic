@@ -7,13 +7,14 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api, errorMessage } from '../../api/client';
+import { useLiveRefresh } from '../../api/useLiveRefresh';
 import type { Appointment, AppointmentDoctor, Page, Visit } from '../../api/types';
 import { useAuth } from '../../auth/AuthContext';
 import { money } from '../medicines/shared';
 import { PatientPicker, StatusTag, fmtTime } from '../appointments/shared';
 import { VisitWorkspace } from './VisitWorkspace';
 
-const REFRESH_SECONDS = 30;
+const REFRESH_SECONDS = 5; // the waiting list updates by itself (new patient arrives, a check-up is completed)
 
 export default function ConsultPage() {
   const { visitId } = useParams();
@@ -39,26 +40,25 @@ export default function ConsultPage() {
   const [search, setSearch] = useState('');
   const moveDay = (delta: number) => setDay(dayjs(day).add(delta, 'day').format('YYYY-MM-DD'));
 
-  const loadList = useCallback(async () => {
+  // quiet = the automatic refresh: no spinner, and if the server does not answer the list on the screen stays as it was
+  const fetchList = useCallback(async (quiet: boolean) => {
     if (!withAppointments) return;
-    setLoading(true);
+    if (!quiet) setLoading(true);
     try {
       const { data } = await api.get<Page<Appointment>>('/appointments/', {
         params: { date: day, doctor, page_size: 200, ordering: 'start_time' },
       });
       setRows(data.results.filter((a) => !['cancelled', 'no_show'].includes(a.status)));
     } catch {
-      setRows([]);
+      if (!quiet) setRows([]);
     } finally {
-      setLoading(false);
+      if (!quiet) setLoading(false);
     }
   }, [withAppointments, day, doctor]);
+  const loadList = useCallback(() => fetchList(false), [fetchList]);
 
-  useEffect(() => {
-    loadList();
-    const timer = window.setInterval(loadList, REFRESH_SECONDS * 1000);
-    return () => window.clearInterval(timer);
-  }, [loadList]);
+  useEffect(() => { loadList(); }, [loadList]);
+  useLiveRefresh(() => fetchList(true), REFRESH_SECONDS);
 
   useEffect(() => {
     if (!withAppointments) return;
@@ -108,12 +108,15 @@ export default function ConsultPage() {
         )}
         <Input size="small" allowClear prefix={<SearchOutlined />} placeholder={t('consult.searchList')} value={search}
           onChange={(e) => setSearch(e.target.value)} />
-        <div className="consult-filters">
+        <div className="consult-counts-title">{day === today ? t('consult.todaysAppointments') : t('consult.appointmentsOf', { date: dayjs(day).format('DD-MM-YYYY') })}</div>
+        <div className="consult-counts">
           {([['all', rows.length], ['checked_in', count('checked_in')],
             ['booked', count('booked')], ['completed', count('completed')]] as [typeof filter, number][]).map(([value, n]) => (
-            <Tag.CheckableTag key={value} checked={filter === value} onChange={() => setFilter(value)}>
-              {t(`consult.filter.${{ all: 'all', checked_in: 'waiting', booked: 'booked', completed: 'done' }[value]}`)} {n}
-            </Tag.CheckableTag>
+            <button type="button" key={value} className={`consult-count count-${value}${filter === value ? ' on' : ''}`} onClick={() => setFilter(value)}
+              aria-pressed={filter === value}>
+              <span className="consult-count-n">{n}</span>
+              <span className="consult-count-l">{t(`consult.filter.${{ all: 'all', checked_in: 'waiting', booked: 'booked', completed: 'done' }[value]}`)}</span>
+            </button>
           ))}
         </div>
         {me?.user.is_doctor && can('emr.edit') && (

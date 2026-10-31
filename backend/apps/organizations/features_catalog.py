@@ -83,6 +83,8 @@ ADDITIONAL_FEATURES = {
     # when, anupana, days and quantity; the medicine's usual dose (set on the Medicines screen) is still printed.
     "rx_dose_box": {"group": "prescription", "label": "Dose box on each medicine in the check-up", "default": False},
     "digital_pad": {"group": "prescription", "label": "Digital pad: handwritten prescription", "default": False},
+    # "Send Order" button in the check-up header: a lab test order slip. Off by default: the clinic has no lab connected.
+    "lab_orders": {"group": "prescription", "label": "Lab test order slip (Send Order button in the check-up)", "default": False},
     # Pharmacy and products
     "clinic_products": {"group": "pharmacy", "label": "Clinic products (sell oils, supplements and other things that are not medicines)", "default": True},
     "separate_medicine_menu": {"group": "pharmacy", "label": "Show the Medicines list as its own menu (otherwise it is a tab inside Pharmacy)", "default": False},

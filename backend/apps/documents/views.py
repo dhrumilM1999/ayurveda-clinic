@@ -7,6 +7,8 @@ GET /documents/<kind>/<id>/   kind: prescription (id = prescription), follow-up-
                               ?detail=1 (prescription only: the detailed prescription with the full check-up)
 Every view / print / share is written to the audit log.
 """
+import uuid
+
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
@@ -29,7 +31,7 @@ from .print_settings import page_settings
 from .serializers import CertificateSerializer
 from .services import (
     SIZES, case_sheet_context, certificate_context, detailed_context, follow_up_context, issue, language_of, mark_printed, pad_for,
-    handwritten_rx_context, prakriti_context, prescription_context, therapy_plan_context, render, verify_url, _qr,
+    handwritten_rx_context, lab_order_context, prakriti_context, prescription_context, therapy_plan_context, render, verify_url, _qr,
 )
 from .words import words_for
 
@@ -40,12 +42,29 @@ PERMISSIONS = {  # any one of these codes
     "certificate": ("emr.view",),
     "therapy-plan": ("therapy.view",),
     "handwritten-rx": ("prescriptions.view",),
+    "lab-order": ("emr.view",),
 }
 
 
 def _any_perm(request, codes):
     if not any(user_has_perm(request.user, code, request.branch) for code in codes):
         raise PermissionDenied()
+
+
+def _tests_of(visit, raw: str):
+    """The advised tests of THIS check-up that the doctor ticked (?tests=id,id). At least one is needed."""
+    from apps.emr.models import VisitInvestigation
+
+    ids = []
+    for part in [p.strip() for p in raw.split(",") if p.strip()]:
+        try:
+            ids.append(str(uuid.UUID(part)))
+        except ValueError:
+            raise ValidationError({"tests": "Choose the tests to order."})
+    tests = list(VisitInvestigation.objects.filter(visit=visit, id__in=ids).order_by("created_at")) if ids else []
+    if not tests or len(tests) != len(set(ids)):
+        raise ValidationError({"tests": "Choose the tests to order."})
+    return tests
 
 
 def _load(kind, request, pk):
@@ -59,6 +78,16 @@ def _load(kind, request, pk):
         doc = issue("prescription", rx.id, branch=branch, patient=rx.patient, doctor=rx.doctor,
                     issued_on=rx.visit.visit_date, series="RX")
         return rx, doc, "prescription.html", lambda lang: prescription_context(rx, lang), rx.patient
+    if kind == "lab-order":
+        visit = Visit.objects.filter(branch=branch, pk=pk).select_related("patient", "doctor", "branch__organization").first()
+        if visit is None:
+            raise NotFound("Check-up not found.")
+        tests = _tests_of(visit, request.query_params.get("tests", ""))
+        doc = issue("lab_order", visit.id, branch=branch, patient=visit.patient, doctor=visit.doctor,
+                    issued_on=visit.visit_date, series="LO")
+        lab = (request.query_params.get("lab") or "").strip()[:100]
+        urgent = request.query_params.get("urgent") == "1"
+        return visit, doc, "lab_order.html", lambda lang: lab_order_context(visit, lang, tests, lab, urgent), visit.patient
     if kind in ("follow-up-card", "prakriti"):
         visit = Visit.objects.filter(branch=branch, pk=pk).select_related("patient", "doctor", "branch__organization").first()
         if visit is None:
@@ -104,7 +133,7 @@ def _load(kind, request, pk):
 
 
 DOC_TYPE = {"prescription": "prescription", "follow-up-card": "follow_up_card", "prakriti": "prakriti_report",
-            "certificate": "certificate", "therapy-plan": "therapy_plan", "handwritten-rx": "prescription"}
+            "certificate": "certificate", "therapy-plan": "therapy_plan", "handwritten-rx": "prescription", "lab-order": "lab_order"}
 
 
 def compose(branch, kind, record, template, make, *, lang, size, detailed, number, duplicate, qr, cancelled, ps):

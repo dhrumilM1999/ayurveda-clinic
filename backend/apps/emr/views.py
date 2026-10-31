@@ -1,4 +1,4 @@
-from datetime import date as date_cls
+from datetime import date as date_cls, timedelta
 
 from django.http import FileResponse
 from django.utils import timezone
@@ -11,13 +11,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from apps.accounts.permissions import BranchPermission
+from apps.accounts.services import user_has_perm
 from apps.appointments.models import Appointment
 from apps.audit.services import log_action
 from apps.common.viewsets import AuditedModelViewSet
 from apps.patients.models import Patient
 from apps.patients.services import IMAGE_TYPES, check_upload
 
-from .models import PHOTO_KINDS, ExamTemplate, Visit, VisitPhoto
+from .models import PHOTO_KINDS, ExamTemplate, Visit, VisitInvestigation, VisitPhoto
 from .serializers import (
     ExamTemplateSerializer, StartVisitSerializer, VisitExamSerializer, VisitListSerializer, VisitPhotoSerializer,
     VisitSerializer,
@@ -95,6 +96,7 @@ class VisitViewSet(AuditedModelViewSet):
         "photo_file": "emr.view",
         "delete_photo": "emr.edit",
         "patient_photos": "emr.view",
+        "report": "emr.view",
     }
 
     def destroy(self, request, *args, **kwargs):
@@ -228,3 +230,48 @@ class VisitViewSet(AuditedModelViewSet):
             organization_id=request.user.organization_id, visit__patient_id=patient_id,
         ).select_related("visit").order_by("visit__visit_date", "created_at")
         return Response(VisitPhotoSerializer(photos, many=True).data)
+
+    @action(detail=False, methods=["get"], url_path="report")
+    def report(self, request):
+        """
+        "Patient Report": what was written at one patient's check-ups between two dates (?from=&to=, default the last
+        6 months), newest first, all branches. Medicines are included only for people who may see prescriptions.
+        Opening the report is written to the audit log (without the medical text).
+        """
+        patient = Patient.objects.filter(organization_id=request.user.organization_id,
+                                         id=request.query_params.get("patient") or None).first()
+        if patient is None:
+            raise ValidationError({"patient": "Choose a patient."})
+        today = timezone.localdate()
+        try:
+            start = date_cls.fromisoformat(request.query_params["from"]) if request.query_params.get("from") else today - timedelta(days=183)
+            end = date_cls.fromisoformat(request.query_params["to"]) if request.query_params.get("to") else today
+        except ValueError:
+            raise ValidationError({"detail": "Dates must look like 2026-10-05."})
+        if start > end:
+            raise ValidationError({"detail": "The start date is after the end date."})
+        visits = list(Visit.objects.filter(organization_id=request.user.organization_id, patient=patient,
+                                           visit_date__range=(start, end))
+                      .select_related("doctor", "branch").order_by("-visit_date", "-created_at")[:100])
+        rx_by_visit = {}
+        if user_has_perm(request.user, "prescriptions.view", request.branch):
+            from apps.prescriptions.models import PrescriptionItem
+
+            items = PrescriptionItem.objects.filter(prescription__visit__in=visits).select_related("prescription")
+            for item in items.order_by("prescription__visit_id", "sort_order"):
+                rx_by_visit.setdefault(item.prescription.visit_id, []).append({
+                    "medicine": item.medicine_name, "dose": f"{item.dose} {item.dose_unit}".strip(), "frequency": item.frequency,
+                    "timing": item.timing, "duration": f"{item.duration} {item.duration_unit}" if item.duration else "",
+                })
+        tests_by_visit = {}
+        for test in VisitInvestigation.objects.filter(visit__in=visits).order_by("created_at"):
+            tests_by_visit.setdefault(test.visit_id, []).append({"test": test.test_name, "status": test.status})
+        log_action(request, "view", patient, changes={"patient_report": f"{start} to {end}", "visits": len(visits)})
+        return Response([{
+            "id": str(v.id), "visit_date": str(v.visit_date), "doctor_name": v.doctor.full_name, "branch_name": v.branch.name,
+            "status": v.status,
+            "complaints": [c.get("label") for c in v.complaints], "diagnoses": [d.get("label") for d in v.diagnoses],
+            "advice": list(v.advice), "history_notes": v.history_notes, "examination_notes": v.examination_notes,
+            "advice_notes": v.advice_notes, "follow_up_date": str(v.follow_up_date) if v.follow_up_date else None,
+            "rx": rx_by_visit.get(v.id, []), "investigations": tests_by_visit.get(v.id, []),
+        } for v in visits])

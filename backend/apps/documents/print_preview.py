@@ -69,6 +69,12 @@ def sample_follow_up(branch, lang):
             "follow_up_notes": "Sample note", **letterhead(branch, _doctor())}
 
 
+def sample_lab_order(branch, lang):
+    w = words_for(lang)
+    return {"w": w, "lang": lang, "patient": _patient_dict(w), "date": TODAY(), "lab": "Sample Lab", "urgent": False,
+            "tests": [{"name": "CBC", "note": "fasting"}, {"name": "LFT", "note": ""}], **letterhead(branch, _doctor())}
+
+
 def sample_prakriti(branch, lang):
     w = words_for(lang)
     return {
@@ -247,7 +253,7 @@ def preview_pdf(*, branch, doc_type: str, paper: str | None, lang: str | None, d
 
     # Medical documents
     kind = {"prescription": "prescription", "follow_up_card": "follow_up_card", "prakriti_report": "prakriti_report",
-            "certificate": "certificate", "therapy_plan": "therapy_plan"}[doc_type]
+            "certificate": "certificate", "therapy_plan": "therapy_plan", "lab_order": "lab-order"}[doc_type]
     record, make, template, number = None, None, None, "SAMPLE"
     if doc_type == "prescription":
         record = _latest(Prescription.objects.filter(branch=branch).select_related("visit__appointment", "patient", "doctor", "branch__organization"))
@@ -267,6 +273,9 @@ def preview_pdf(*, branch, doc_type: str, paper: str | None, lang: str | None, d
         record = _latest(Certificate.objects.filter(branch=branch).select_related("patient", "doctor", "branch__organization"))
         template = "certificate.html"
         make = (lambda lng: certificate_context(record, lng)) if record else (lambda lng: sample_certificate(branch, lng))
+    elif doc_type == "lab_order":  # an order slip is always shown with the sample tests
+        template = "lab_order.html"
+        make = lambda lng: sample_lab_order(branch, lng)  # noqa: E731
     else:
         record = _latest(TherapyPlan.objects.filter(branch=branch).select_related("patient", "doctor", "branch__organization"))
         template = "therapy_plan.html"

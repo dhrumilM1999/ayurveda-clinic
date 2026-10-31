@@ -14,6 +14,7 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
+import { useLiveRefresh } from '../api/useLiveRefresh';
 import type { DashboardToday, OpdCounts } from '../api/types';
 import { useAuth } from '../auth/AuthContext';
 import { LeafArt } from '../components/LeafArt';
@@ -24,7 +25,7 @@ import { money } from './medicines/shared';
 import { AlertTiles } from './pharmacy/StockTab';
 
 const c = clinicConfig.colors;
-const REFRESH_SECONDS = 60;
+const REFRESH_SECONDS = 20;
 
 // Big shortcut buttons at the top. SAFE TO EDIT: add, remove or re-order a line (permission = who sees it,
 // feature = the extra that must be on). Texts are in the i18n files under dashboard.shortcuts.
@@ -135,11 +136,8 @@ export default function DashboardPage() {
   const load = useCallback(() => {
     api.get<DashboardToday>('/dashboard/today/').then(({ data: d }) => setData(d)).catch(() => setData(null));
   }, []);
-  useEffect(() => {
-    load();
-    const timer = window.setInterval(load, REFRESH_SECONDS * 1000);
-    return () => window.clearInterval(timer);
-  }, [load, branch?.id]);
+  useEffect(() => { load(); }, [load, branch?.id]);
+  useLiveRefresh(load, REFRESH_SECONDS);
 
   const hour = new Date().getHours();
   const greetingKey = hour < 12 ? 'dashboard.goodMorning' : hour < 17 ? 'dashboard.goodAfternoon' : 'dashboard.goodEvening';
