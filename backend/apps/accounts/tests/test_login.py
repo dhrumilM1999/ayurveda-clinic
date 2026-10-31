@@ -15,7 +15,7 @@ ME = "/api/v1/auth/me/"
 @pytest.fixture(autouse=True)
 def otp_switched_on(settings):
     """The OTP rules below are tested with the OTP switch on; the default (off) is tested at the end of this file."""
-    settings.LOGIN_OTP_ENABLED = True
+    settings.REQUIRE_2FA = True
 
 
 def login(api, username, password=PASSWORD):
@@ -118,7 +118,7 @@ def test_api_needs_login(api):
 
 @pytest.mark.django_db
 def test_otp_is_off_by_default_so_doctor_and_owner_log_in_with_the_password_only(api, doctor, org_admin, settings):
-    settings.LOGIN_OTP_ENABLED = False
+    settings.REQUIRE_2FA = False
     for name in ("owner", "doc"):
         res = login(api, name)
         assert res.status_code == 200 and res.data["otp_required"] is False and res.data["access"]

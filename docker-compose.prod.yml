@@ -1,0 +1,132 @@
+# THE LIVE SERVER. Used only on the Ubuntu server (see docs/GO_LIVE.md). ASK FIRST before editing.
+# Your PC keeps using docker-compose.yml (start.bat). This file is separate.
+#
+# Start:   docker compose -f docker-compose.prod.yml up -d --build      (deploy/update.sh does this for you)
+#   caddy   - front door: HTTPS certificate, React screens, passes /api to the backend  (ports 80 + 443 only)
+#   backend - Django API run by gunicorn (not published to the internet)
+#   db      - PostgreSQL (not published to the internet; data in the "pgdata" volume)
+# There is NO Redis/Celery/Mailpit here: the app does not use them today.
+
+name: ayurveda-prod
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"   # log files are cut at 10 MB and only 3 are kept, so the disk never fills up
+    max-file: "3"
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ayurveda}
+      POSTGRES_USER: ${POSTGRES_USER:-ayurveda}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (deploy/make-env.sh does it)}
+    # Small settings for a 2-4 GB server
+    command: >
+      postgres -c shared_buffers=256MB -c effective_cache_size=768MB -c work_mem=8MB
+      -c max_connections=40 -c log_min_duration_statement=2000
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # No "ports:" on purpose: the database cannot be reached from outside, only by the backend.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+    logging: *logging
+
+  backend:
+    build:
+      context: ./backend
+      target: production
+    image: ayurveda-backend:${IMAGE_TAG:-current}
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      POSTGRES_HOST: db
+      MEDIA_ROOT: /app/media
+      PRIVATE_MEDIA_ROOT: /app/private_media
+      # The backend checks that a recent backup exists (python manage.py check_production_ready)
+      BACKUP_DIR: /backups
+      # Access log without the "?search=..." part of the address (patient names)
+      GUNICORN_CMD_ARGS: --access-logformat '%(h)s "%(m)s %(U)s" %(s)s %(b)s'
+    # On every start: update database tables (safe to repeat), add missing starting values,
+    # collect the admin page's style files, then run gunicorn.
+    # ONE worker with several threads on purpose: login rate-limits are counted in memory and must be shared.
+    # (every line below is indented the same on purpose: extra indentation would break the line joining)
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+      python manage.py ensure_defaults &&
+      SKIP_STARTUP_CHECKS=1 python manage.py collectstatic --noinput &&
+      exec gunicorn config.wsgi:application --bind 0.0.0.0:8000
+      --worker-class gthread --workers $${GUNICORN_WORKERS:-1} --threads $${GUNICORN_THREADS:-8}
+      --timeout 120 --graceful-timeout 30 --max-requests 2000 --max-requests-jitter 200
+      --access-logfile - --error-logfile -"
+    volumes:
+      - staticfiles:/app/staticfiles
+      # Private patient documents, photos, signatures. Only the backend can read them.
+      - private_media:/app/private_media
+      - media:/app/media
+      - ./backups:/backups:ro
+    healthcheck:
+      # Asks the backend "are you ok?" the way Caddy would (https host name, forwarded-proto header)
+      test: ["CMD", "python", "-c", "import os,urllib.request as u; r=u.Request('http://127.0.0.1:8000/api/v1/health/',headers={'Host':os.environ.get('APP_DOMAIN','localhost'),'X-Forwarded-Proto':'https'}); u.urlopen(r,timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    depends_on:
+      db:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    logging: *logging
+
+  caddy:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    image: ayurveda-web:${IMAGE_TAG:-current}
+    restart: unless-stopped
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:?Set APP_DOMAIN in .env, e.g. app.vednathayurved.com}
+      ADMIN_URL: ${ADMIN_URL:-admin}
+      ACME_EMAIL: ${ACME_EMAIL:-}
+      ENQUIRY_FRAME_ORIGINS: ${ENQUIRY_FRAME_ORIGINS:-}
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - staticfiles:/srv/django:ro
+      - caddy_data:/data      # keeps the HTTPS certificate between restarts (important: Let's Encrypt limits)
+      - caddy_config:/config
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:2019/config/"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    logging: *logging
+
+volumes:
+  pgdata:
+  private_media:
+  media:
+  staticfiles:
+  caddy_data:
+  caddy_config:

@@ -112,7 +112,7 @@ def test_pictures_are_private_and_every_view_is_logged(doctor, branch_a, branch_
     c = client_for(doctor, branch_a)
     page = c.post(URL, {"visit": str(visit.id), "ink": ink_png()}, format="multipart").data["id"]
     first = c.get(f"{URL}{page}/image/")
-    assert first.status_code == 200 and first["Content-Type"] == "image/png" and first["Cache-Control"] == "no-store"
+    assert first.status_code == 200 and first["Content-Type"] == "image/png" and first["Cache-Control"] == "no-store, private"
     assert c.get(f"{URL}{page}/image/?kind=ink").status_code == 200
     assert c.get(f"{URL}{page}/image/?kind=other").status_code == 400
     assert AuditLog.objects.filter(object_id=page, action="view").count() >= 2

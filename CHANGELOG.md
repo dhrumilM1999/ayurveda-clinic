@@ -2,6 +2,11 @@
 
 What changed in each step, in plain words.
 
+## main and production joined (2026-10-31)
+- The **main** and **production** branches now hold the same code: all clinic work from main, and all live-server work from production (server setup, backups, security, the real clinic profile).
+- Login code (OTP) now has **one switch**, `REQUIRE_2FA` (the old name `LOGIN_OTP_ENABLED` is gone). It stays **off on your PC** and is **on by default on a live server**; `.env.production.example` sets it to 0 until e-mail or SMS works.
+- Two packages come along from production: **Django REST Framework 3.17.2** (fixes two published security problems) and **gunicorn** (the web server used on the live server only).
+
 ## Lists update by themselves (2026-10-31)
 - The **Check-up list** (waiting / booked / done counts and patients), the **Appointments** list, the **Queue**, **Give medicines** and the **Dashboard** now ask the server again every few seconds (check-up list 5 s, queue 6 s, appointments 8 s, give medicines 8 s, dashboard 20 s). A new appointment or a completed check-up appears **without pressing refresh**.
 - It waits while the browser tab is hidden, refreshes at once when you come back, never sends a new request while the last is still running, and if the server does not answer the list on the screen simply stays as it was (no flicker, no error pop-ups).
@@ -123,6 +128,27 @@ Both new features are **off by default**. The owner (or the doctor) switches the
   on that patient's check-up. Print it like any prescription; the pharmacist sees the pages while giving medicines.
   See `docs/HANDWRITING_PAD.md`. New table `HandwrittenPrescription`, new library `pypdfium2` (turns the PDF page into a picture).
 - The letterhead on A5 prints no longer lets a long address run under the doctor's name.
+## Going live on a server (2026-10-17)
+
+Everything needed to put the software on one Ubuntu server with free HTTPS (guide: `docs/GO_LIVE.md`, tick list: `docs/GO_LIVE_CHECKLIST.md`):
+- `docker-compose.prod.yml` + `deploy/Caddyfile`: Caddy (automatic HTTPS, the screens as ready-made files, security headers), the backend run by gunicorn as a normal user, and the database that is **not reachable from the internet**. Only ports 80 and 443 are open. No Redis/Celery/Mailpit (the app does not use them yet).
+- `.env.production.example` and `deploy/make-env.sh` (makes the secrets for you, never prints them).
+- `create_clinic` command: creates the first clinic, branch and owner login with **no demo data**.
+- Backups: `deploy/backup.sh` (14 daily + 8 weekly, checked, with a log, optional copy off the server with rclone/scp), `deploy/restore.sh` (with a safe `--test` practice mode), nightly systemd timer.
+- `deploy/server-setup.sh` (firewall, fail2ban, automatic security updates, Docker, swap), `deploy/update.sh` (backup first, `--rollback`), `deploy/status.sh`.
+- `create_clinic --profile clinic_profiles/vednath.json` creates the real clinic (Vednath Ayurved, Adajan) with Dr. Grishm Shingala as owner and doctor, and her timings. Git branch `production` is for the server; demo data is saved outside the project for local testing.
+- The backend image has a new "production" version (the PC keeps using the old one). `gunicorn` was added to `requirements.txt` (the web server for the live site).
+
+## Safe for the live server (2026-10-17)
+
+See `docs/SECURITY_LIVE.md`. In short:
+- Debug is **off unless `DJANGO_DEBUG=1`**. In live mode the software refuses to start with the sample secret key, no encryption key, a `*` host, or login codes that cannot be delivered.
+- HTTPS settings (`DJANGO_HTTPS=1`), safe browser headers, no caching of patient data, admin address moved (`ADMIN_URL`) with a login limit, no browsable API.
+- Doctors/admins' login code can go by **e-mail** (`TWO_FACTOR_METHOD=email`) or be switched off temporarily (`REQUIRE_2FA=0`); the code is never on screen or in the log in live mode.
+- Logs hide tokens, passwords, OTPs and database values; PDFs only use embedded pictures.
+- Resetting a staff password logs that person out everywhere.
+- Demo commands refuse to run on the live server. New command `check_production_ready` (PASS / WARN / FAIL list).
+- Security fix in a library: Django REST framework 3.17.2. New tests walk every API address.
 
 ## Testing "by mistake" cases (2026-10-15)
 

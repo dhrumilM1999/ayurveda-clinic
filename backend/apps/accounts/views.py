@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib.auth import authenticate
 from django.db.models import Count, Q
 from django.utils import timezone
@@ -24,8 +26,13 @@ from .serializers import (
     ChangePasswordSerializer, DoctorScheduleSerializer, LoginSerializer, LogoutSerializer,
     MeUpdateSerializer, RoleSerializer, SetPasswordSerializer, StaffSerializer, VerifyOtpSerializer,
 )
-from .services import accessible_branches, branch_permissions, doctors_in_branch, user_requires_2fa
+from .services import (
+    accessible_branches, branch_permissions, doctors_in_branch, revoke_all_tokens, user_requires_2fa,
+)
 from .throttles import LoginIPThrottle, LoginUserThrottle, OtpThrottle
+
+
+logger = logging.getLogger(__name__)
 
 
 # --- Login / logout -----------------------------------------------------------
@@ -56,12 +63,22 @@ class LoginView(APIView):
             return Response({"detail": "This account is not linked to a clinic."}, status=status.HTTP_403_FORBIDDEN)
 
         if user_requires_2fa(user):
-            challenge, code = otp.start_challenge(user)
+            try:
+                challenge, code = otp.start_challenge(user)
+            except otp.OtpNotDeliverable:
+                return Response(
+                    {"detail": "Your login code cannot be sent because no e-mail address is saved on your account. "
+                               "Ask the clinic owner to add it."}, status=status.HTTP_400_BAD_REQUEST)
+            except Exception:  # e-mail/SMS server down: say so plainly (the real error is in the server log)
+                logger.exception("Could not send the login OTP")
+                return Response({"detail": "The login code could not be sent. Please try again in a minute."},
+                                status=status.HTTP_503_SERVICE_UNAVAILABLE)
             log_action(request, "otp_sent", user, user=user)
             data = {
                 "otp_required": True,
                 "challenge_id": str(challenge.id),
                 "phone_hint": otp.phone_hint(user),
+                "channel": settings.TWO_FACTOR_METHOD,
             }
             if settings.SHOW_DEV_OTP_ON_SCREEN:
                 data["dev_otp"] = code
@@ -240,6 +257,7 @@ class StaffViewSet(AuditedModelViewSet):
         serializer.is_valid(raise_exception=True)
         user.set_password(serializer.validated_data["password"])
         user.save(update_fields=["password"])
+        revoke_all_tokens(user)  # a reset password means the old sessions must end
         log_action(request, "password_change", user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 

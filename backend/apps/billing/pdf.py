@@ -6,6 +6,8 @@ from decimal import Decimal
 
 from django.template.loader import render_to_string
 
+from apps.common.pdf_safety import embedded_only_fetcher
+
 from .payments import upi_link_for
 
 SIZES = {"a4": ("210mm", "297mm", "12mm"), "a5": ("148mm", "210mm", "8mm"), "80mm": ("80mm", None, "3mm"),
@@ -106,4 +108,4 @@ def render_pdf(*, invoice, size="a4", duplicate=False, credit_note=None, ps=None
         "upi_qr": _qr_data_uri(upi) if upi else "", "duplicate": duplicate,
         "ps": ps, "size": size, "narrow": size in ("80mm", "58mm"), "page_width": width, "page_height": height, "page_margin": margin,
     })
-    return HTML(string=html).write_pdf()
+    return HTML(string=html, url_fetcher=embedded_only_fetcher).write_pdf()

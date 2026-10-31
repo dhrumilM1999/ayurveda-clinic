@@ -5,3 +5,5 @@ media
 staticfiles
 .pytest_cache
 .venv
+private_media
+.env

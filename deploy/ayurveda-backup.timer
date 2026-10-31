@@ -1,0 +1,13 @@
+# Runs the backup every night at 02:30 server time (India time after server-setup.sh).
+# SAFE TO EDIT: the time on the OnCalendar line.
+[Unit]
+Description=Ayurveda clinic nightly backup timer
+
+[Timer]
+OnCalendar=*-*-* 02:30:00
+# If the server was off at 02:30, run it as soon as it is back
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target

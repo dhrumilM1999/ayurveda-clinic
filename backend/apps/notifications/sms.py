@@ -15,6 +15,7 @@ import urllib.request
 from django.conf import settings
 
 from apps.common.adapters import load_provider
+from apps.common.utils import mask_phone
 
 from .models import OutboundMessage
 
@@ -36,6 +37,11 @@ class ConsoleSmsProvider(BaseSmsProvider):
     name = "console"
 
     def send(self, to, message):
+        if settings.IS_PRODUCTION:
+            # Real server: logs are kept, so never write the phone number or the text (it may hold an OTP).
+            logger.warning("SMS not sent (SMS_PROVIDER=console): to %s, %d characters, text hidden.",
+                           mask_phone(to), len(message))
+            return "logged"
         logger.warning("\n==== SMS (console, not really sent) ====\nTo: %s\n%s\n========================================", to, message)
         return "logged"
 

@@ -52,8 +52,8 @@ def user_has_perm(user, code: str, branch=None) -> bool:
 
 
 def user_requires_2fa(user) -> bool:
-    """Doctors and admins must enter an OTP at login, but only when LOGIN_OTP_ENABLED is on (it is off for now)."""
-    if not settings.LOGIN_OTP_ENABLED:
+    """Doctors and admins must enter an OTP at login, but only when REQUIRE_2FA is on (off on the PC, on for a live server)."""
+    if not settings.REQUIRE_2FA:
         return False
     if user.is_org_admin:
         return True
@@ -92,3 +92,14 @@ def doctors_in_branch(branch):
         .filter(Q(is_org_admin=True) | Q(branch_roles__branch=branch, branch_roles__is_deleted=False))
         .distinct()
     )
+
+
+def revoke_all_tokens(user) -> int:
+    """Log the user out everywhere: every refresh token they hold stops working (their screens end within minutes)."""
+    from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
+
+    count = 0
+    for token in OutstandingToken.objects.filter(user=user):
+        _, created = BlacklistedToken.objects.get_or_create(token=token)
+        count += int(created)
+    return count

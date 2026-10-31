@@ -36,5 +36,9 @@ demo-video/*.mp4
 frontend/src/**/*.js
 *.tsbuildinfo
 backend/audit_archive/
-.env.local-db
-.env.supabase-db
+
+# Live server helper files
+.deploy-previous-commit
+.env.*
+!.env.example
+!.env.production.example

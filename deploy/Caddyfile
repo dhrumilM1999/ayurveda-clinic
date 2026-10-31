@@ -1,0 +1,89 @@
+# The front door of the live server. ASK FIRST before editing.
+# Caddy gets the free HTTPS certificate (Let's Encrypt) by itself, redirects http -> https,
+# shows the React screens, and passes /api and the admin page to the Django backend.
+# Values come from .env:  APP_DOMAIN (e.g. app.vednathayurved.com),  ADMIN_URL (secret admin path).
+
+{
+	# Optional: your email for Let's Encrypt expiry warnings
+	email {$ACME_EMAIL:}
+}
+
+{$APP_DOMAIN:localhost} {
+	encode zstd gzip
+
+	# --- Security headers on every answer ---
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "same-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+
+	# --- The online enquiry page may be shown inside your main website (iframe) ---
+	# ENQUIRY_FRAME_ORIGINS (in .env, space separated, e.g. "https://vednathayurved.com https://www.vednathayurved.com")
+	@enquiry path /enquiry /enquiry/*
+	header @enquiry {
+		-X-Frame-Options
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'self' {$ENQUIRY_FRAME_ORIGINS:}"
+	}
+
+	# --- Patient files are NEVER served from disk by Caddy (they only go through the API) ---
+	@blocked path /media/* /private_media/* /private-not-served/*
+	handle @blocked {
+		respond 404
+	}
+
+	# --- Backend: API, secret admin page, static files of the admin page ---
+	@backend path /api/* /{$ADMIN_URL:admin}/*
+	handle @backend {
+		request_body {
+			max_size 15MB
+		}
+		reverse_proxy backend:8000 {
+			# Always overwrite: the backend must see the real visitor address, never one the visitor made up
+			header_up X-Forwarded-For {remote_host}
+			# Gunicorn is slow-ish on big PDFs: allow time
+			transport http {
+				response_header_timeout 120s
+			}
+		}
+	}
+
+	# Styles/scripts of the admin page (collected by the backend at start-up)
+	handle /static/* {
+		uri strip_prefix /static
+		root * /srv/django
+		file_server
+		header Cache-Control "public, max-age=86400"
+	}
+
+	# --- React screens ---
+	handle {
+		root * /srv
+		# Files with a hash in the name never change: cache for a year
+		@hashed path /assets/*
+		header @hashed Cache-Control "public, max-age=31536000, immutable"
+		# index.html must always be fetched fresh, so updates show up at once
+		@spa not path /assets/* /logo.svg /favicon.ico
+		header @spa Cache-Control "no-cache"
+		# Screens may only run scripts from this site itself
+		@notenquiry not path /enquiry /enquiry/*
+		header @notenquiry Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'"
+		try_files {path} /index.html
+		file_server
+	}
+
+	log {
+		output stdout
+		# Search words (patient names) travel in the address after "?": never write them to the log
+		format filter {
+			wrap console
+			fields {
+				request>uri regexp \?.* ""
+				request>headers delete
+			}
+		}
+	}
+}
