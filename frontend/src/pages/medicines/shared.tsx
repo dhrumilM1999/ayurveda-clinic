@@ -42,10 +42,16 @@ export function MedicineFlags({ medicine, flags }: { medicine?: Medicine; flags?
 }
 
 /** How many packs the pharmacy has: red when none, orange when almost finished. Nothing when the clinic has no pharmacy. */
-export function StockTag({ stock }: { stock?: string | null }) {
+export function StockTag({ stock, units, unit }: { stock?: string | null; units?: string | null; unit?: string | null }) {
   const { t } = useTranslation();
   if (stock === undefined || stock === null) return null;
   const n = Number(stock);
+  // A medicine sold loose (jar of 1000 tablets) shows tablets left, e.g. "975 tablets"
+  if (units !== undefined && units !== null && units !== '') {
+    const label = `${Number(units)} ${unit || 'units'}`;
+    if (n <= 0) return <Tag color="red" className="tag-tight">{t('rx.stock.none')}</Tag>;
+    return <Tag color={Number(units) <= 10 ? 'orange' : 'green'} className="tag-tight">{label}</Tag>;
+  }
   if (n <= 0) return <Tag color="red" className="tag-tight">{t('rx.stock.none')}</Tag>;
   if (n <= 2) return <Tag color="orange" className="tag-tight">{t('rx.stock.few', { n })}</Tag>;
   return <Tag color="green" className="tag-tight">{t('rx.stock.ok', { n })}</Tag>;

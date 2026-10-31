@@ -2,6 +2,11 @@
 
 What changed in each step, in plain words.
 
+## Stock in tablets on the check-up screen, therapy price from the Therapies screen (2026-10-29)
+- The medicine search and the prescription lines now show loose stock in tablets (for example "975 tablets"), the same as the pharmacy screens.
+- On the Therapies screen, type a price and the therapy is added to Services & charges and linked for you (only when it has no price yet). Needed for "Bill each finished therapy session".
+- Branches `feature/therapy-billing-reminders-sora` and `feature/walkin-after-register-stock-units` were merged into main.
+
 ## Left menu: thin strip, opens on hover (2026-10-30)
 - The left menu is now a **thin strip of icons**. When the mouse is over it, it opens to full width and floats over the page (the page does not move). When the mouse leaves, it closes.
 - The toggle button at the top still opens it fully and keeps it open (the page moves aside, as before). Press again to go back to the thin strip. The choice is remembered on this computer.

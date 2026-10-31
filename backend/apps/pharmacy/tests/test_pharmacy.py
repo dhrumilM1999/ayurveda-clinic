@@ -303,3 +303,24 @@ def test_dispensing_batches_show_tablets_left(pharmacist, branch_a, meds, final_
     rx2 = client.get("/api/v1/stock/batches/", {"medicine": str(med.id)})
     assert rx2.status_code == 200
     assert rx2.data[0]["units_left"] == "975"
+
+
+@pytest.mark.django_db
+def test_medicine_search_shows_loose_stock_in_tablets(pharmacist, branch_a, meds, final_rx):
+    """The medicine search on the check-up screen shows 975 tablets too, not 0.975 pack."""
+    med = meds["Triphala Churna"]
+    med.allow_loose, med.units_per_pack = True, Decimal("1000")
+    med.save()
+    client = client_for(pharmacist, branch_a)
+    receive(client, meds, [("Triphala Churna", "B1", LATER, "1", 0, "50", "100")])
+    item = final_rx.items.get(medicine__isnull=False)
+    batch = StockBatch.objects.get(batch_no="B1")
+    sell(client, final_rx, [{"prescription_item": str(item.id), "batch": str(batch.id), "loose_units": "25"}])
+    res = client.get("/api/v1/medicines/", {"search": "Triphala"})
+    data = res.data["results"] if isinstance(res.data, dict) else res.data
+    row = next(r for r in data if r["name"] == "Triphala Churna")
+    assert row["stock_units"] == "975" and row["stock_unit"]
+    med.allow_loose = False
+    med.save()
+    row = next(r for r in client.get("/api/v1/medicines/", {"search": "Triphala"}).data["results"] if r["name"] == "Triphala Churna")
+    assert row["stock_units"] is None

@@ -651,6 +651,8 @@ export interface Medicine {
   notes: string;
   /** Packs this branch can give today (null when the clinic has no pharmacy module) */
   stock_available?: string | null;
+  stock_units?: string | null;
+  stock_unit?: string | null;
 }
 
 export interface MedicineVersion {
@@ -688,6 +690,8 @@ export interface RxLine {
   medicine_flags?: MedicineFlag[];
   /** Packs the pharmacy can give today (null / missing = not tracked) */
   stock_available?: string | null;
+  stock_units?: string | null;
+  stock_unit?: string | null;
   /** What one pack of this medicine holds (from the medicine list): used to work out how many packs to give */
   pack_size?: string;
   units_per_pack?: string | null;

@@ -2,6 +2,8 @@ from rest_framework import serializers
 
 from apps.common.serializers import MasterField
 
+from apps.pharmacy.services import units_of
+
 from .models import BranchMedicine, Medicine, MedicineVersion
 
 
@@ -18,6 +20,9 @@ class MedicineSerializer(serializers.ModelSerializer):
     branch_active = serializers.SerializerMethodField()
     # Packs this branch can give today (empty when the clinic does not run the pharmacy module)
     stock_available = serializers.SerializerMethodField()
+    # The same stock in tablets (or other units) for a medicine sold loose; None otherwise
+    stock_units = serializers.SerializerMethodField()
+    stock_unit = serializers.SerializerMethodField()
 
     class Meta:
         model = Medicine
@@ -27,7 +32,7 @@ class MedicineSerializer(serializers.ModelSerializer):
             "strength", "sku", "notes", "manufacturer", "classical_equivalent", "classical_equivalent_name", "ayush_licence_no", "hsn_code",
             "gst_rate", "mrp", "pack_size", "default_dose", "dose_unit", "default_frequency", "default_timing",
             "default_anupana", "schedule_e1", "contains_metals", "pregnancy_caution", "child_caution", "sugar_caution",
-            "safety_notes", "is_sample", "is_active", "version", "branch_price", "branch_active", "stock_available", "updated_at",
+            "safety_notes", "is_sample", "is_active", "version", "branch_price", "branch_active", "stock_available", "stock_units", "stock_unit", "updated_at",
         ]
         read_only_fields = ["id", "is_sample", "version", "updated_at"]
 
@@ -36,6 +41,13 @@ class MedicineSerializer(serializers.ModelSerializer):
         if stock is None:
             return None
         return str(stock.get(obj.id, 0))
+
+    def get_stock_units(self, obj):
+        stock = self.context.get("stock")
+        return None if stock is None else units_of(obj, stock.get(obj.id, 0))
+
+    def get_stock_unit(self, obj):
+        return obj.dose_unit.label if obj.dose_unit_id else "units"
 
     def _branch_row(self, obj) -> BranchMedicine | None:
         rows = self.context.get("branch_rows")

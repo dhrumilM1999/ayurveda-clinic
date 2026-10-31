@@ -12,10 +12,31 @@ class TherapyTypeSerializer(serializers.ModelSerializer):
     service_name = serializers.CharField(source="service.name", read_only=True, default=None)
     price = serializers.DecimalField(source="service.price", max_digits=12, decimal_places=2, read_only=True, default=None)
 
+    # Type a price here and the therapy gets its own line in "Services & charges" (only when it has none yet)
+    set_price = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=0, write_only=True, required=False)
+
     class Meta:
         model = TherapyType
         fields = ["id", "name", "name_gu", "name_hi", "stage", "duration_minutes", "default_material", "instructions",
-                  "service", "service_name", "price", "is_active", "sort_order", "is_sample"]
+                  "service", "service_name", "price", "set_price", "is_active", "sort_order", "is_sample"]
+
+    def _with_price(self, validated, instance=None):
+        price = validated.pop("set_price", None)
+        if price is None or validated.get("service") or (instance is not None and instance.service_id):
+            return
+        from apps.billing.models import ServiceCharge
+
+        user = self.context["request"].user
+        data = {**{k: validated.get(k, getattr(instance, k, "")) for k in ("name", "name_gu", "name_hi")}}
+        validated["service"] = ServiceCharge.objects.create(organization_id=user.organization_id, price=price, created_by=user, **data)
+
+    def create(self, validated):
+        self._with_price(validated)
+        return super().create(validated)
+
+    def update(self, instance, validated):
+        self._with_price(validated, instance)
+        return super().update(instance, validated)
 
     def validate_service(self, service):
         org_id = self.context["request"].user.organization_id
