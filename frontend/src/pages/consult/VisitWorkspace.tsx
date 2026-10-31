@@ -612,15 +612,16 @@ export function VisitWorkspace({ visitId, onChanged, onLoaded, reason, nextPatie
           {section === 'advice' && <AdviceSection {...props} />}
           {section === 'followUp' && <FollowUpSection {...props} daysBar={daysBar} />}
         </Card>
-      </div>
 
-      <PreviousVisits patientId={visit.patient} patient={patient} currentId={visit.id} templates={templates}
-        onRepeat={!rxReadOnly ? (lines) => { changeRx({ items: [...rx.items, ...lines] }); setSection('rx'); } : undefined} />
+        {/* The patient's earlier check-ups: below the check-up, full width */}
+        <PreviousVisits patientId={visit.patient} patient={patient} currentId={visit.id} templates={templates}
+          onRepeat={!rxReadOnly ? (lines) => { changeRx({ items: [...rx.items, ...lines] }); setSection('rx'); } : undefined} />
+      </div>
     </div>
   );
 }
 
-/** Right panel: the patient's earlier check-ups (all branches). Click one to read it. */
+/** Below the check-up: the patient's earlier check-ups (all branches). Click one to read it. */
 function PreviousVisits({ patientId, patient, currentId, templates, onRepeat }: {
   patientId: string;
   patient: Patient | null;
@@ -636,7 +637,9 @@ function PreviousVisits({ patientId, patient, currentId, templates, onRepeat }: 
   // The latest earlier check-up is shown open, without a click (what was told, found and given last time)
   const [last, setLast] = useState<{ visit: Visit; rx: Prescription | null } | null>(null);
 
+  // Click an earlier check-up to read it right below its row; click again to close it (no pop-up window)
   const openVisit = async (id: string) => {
+    if (open?.id === id) { setOpen(null); return; }
     const { data } = await api.get<Visit>(`/visits/${id}/`);
     setOpen(data);
     setOpenRx(null);
@@ -702,34 +705,28 @@ function PreviousVisits({ patientId, patient, currentId, templates, onRepeat }: 
         </div>
       )}
       {rows.map((v) => (
-        <button type="button" className="prev-visit" key={v.id}
-          onClick={() => openVisit(v.id)}>
-          <div className="prev-visit-date">{dayjs(v.visit_date).format('DD-MM-YYYY')}</div>
-          <div className="cell-sub">{[multiDoctor ? v.doctor_name : '', multiBranch ? v.branch_name : ''].filter(Boolean).join(' · ')}</div>
-          {v.diagnoses.length > 0 && <div className="prev-visit-dx">{v.diagnoses.join(', ')}</div>}
-          {v.complaints.length > 0 && <div className="cell-sub">{v.complaints.join(', ')}</div>}
-        </button>
+        <div key={v.id} className="prev-visit-wrap">
+          <button type="button" className={`prev-visit${open?.id === v.id ? ' open' : ''}`} onClick={() => openVisit(v.id)}>
+            <div className="prev-visit-date">{dayjs(v.visit_date).format('DD-MM-YYYY')}</div>
+            <div className="cell-sub">{[multiDoctor ? v.doctor_name : '', multiBranch ? v.branch_name : ''].filter(Boolean).join(' · ')}</div>
+            {v.diagnoses.length > 0 && <div className="prev-visit-dx">{v.diagnoses.join(', ')}</div>}
+            {v.complaints.length > 0 && <div className="cell-sub">{v.complaints.join(', ')}</div>}
+          </button>
+          {open?.id === v.id && (
+            <div className="prev-visit-open">
+              <div className="cell-sub" style={{ marginBottom: 8 }}>{[multiDoctor ? open.doctor_name : '', multiBranch ? open.branch_name : ''].filter(Boolean).join(' · ')}</div>
+              <SummarySection draft={toDraft(open)} templates={templates} exams={toExams(open.exams)}
+                examFields={toExamFields(open.exams, templates)} rxItems={openRx?.items} rxNotes={openRx?.notes} />
+              <Space style={{ marginTop: 10 }}>
+                {onRepeat && openRx && openRx.items.length > 0 && (
+                  <Button size="small" onClick={() => onRepeat(openRx.items.map(({ id: _id, ...line }) => line))}>{t('rx.repeat', { count: openRx.items.length })}</Button>
+                )}
+                <Button size="small" onClick={() => setOpen(null)}>{t('common.close')}</Button>
+              </Space>
+            </div>
+          )}
+        </div>
       ))}
-      <Modal open={!!open} width={760} title={open ? t('consult.visitOf', { date: dayjs(open.visit_date).format('DD-MM-YYYY') }) : ''}
-        onCancel={() => setOpen(null)} footer={(
-          <Space>
-            {onRepeat && openRx && openRx.items.length > 0 && (
-              <Button onClick={() => {
-                onRepeat(openRx.items.map(({ id: _id, ...line }) => line));
-                setOpen(null);
-              }}>{t('rx.repeat', { count: openRx.items.length })}</Button>
-            )}
-            <Button type="primary" onClick={() => setOpen(null)}>{t('common.close')}</Button>
-          </Space>
-        )}>
-        {open && (
-          <>
-            <div className="cell-sub" style={{ marginBottom: 8 }}>{[multiDoctor ? open.doctor_name : '', multiBranch ? open.branch_name : ''].filter(Boolean).join(' · ')}</div>
-            <SummarySection draft={toDraft(open)} templates={templates} exams={toExams(open.exams)}
-              examFields={toExamFields(open.exams, templates)} rxItems={openRx?.items} rxNotes={openRx?.notes} />
-          </>
-        )}
-      </Modal>
     </aside>
   );
 }

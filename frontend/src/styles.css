@@ -979,7 +979,7 @@ body {
 
 .workspace {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 230px;
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   align-items: start;
 }
@@ -1246,14 +1246,11 @@ body {
 .pre-line {
   white-space: pre-line;
 }
+/* Earlier check-ups: below the check-up, full width. Each older check-up is a row; click it to read it right below (no pop-up). */
 .workspace-side {
-  position: sticky;
-  top: 72px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  max-height: calc(100vh - 92px);
-  overflow-y: auto;
+  gap: 8px;
   padding: 10px;
   border-radius: 10px;
   background: #fff;
@@ -1268,6 +1265,9 @@ body {
   font: inherit;
   cursor: pointer;
 }
+.prev-visit { width: 100%; }
+.prev-visit.open { border-color: var(--clinic-primary); background: #e3ecfa; }
+.prev-visit-open { margin: 6px 0 4px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--clinic-border); background: #fff; }
 .prev-visit:hover {
   border-color: var(--clinic-primary);
 }
@@ -1281,15 +1281,6 @@ body {
   font-weight: 600;
 }
 
-@media (max-width: 1200px) {
-  .workspace {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .workspace-side {
-    position: static;
-    max-height: none;
-  }
-}
 @media (max-width: 900px) {
   .consult,
   .questionnaire {
