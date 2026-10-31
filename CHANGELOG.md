@@ -2,6 +2,11 @@
 
 What changed in each step, in plain words.
 
+## Left menu: thin strip, opens on hover (2026-10-30)
+- The left menu is now a **thin strip of icons**. When the mouse is over it, it opens to full width and floats over the page (the page does not move). When the mouse leaves, it closes.
+- The toggle button at the top still opens it fully and keeps it open (the page moves aside, as before). Press again to go back to the thin strip. The choice is remembered on this computer.
+- The widths are at the top of `frontend/src/layout/MainLayout.tsx` (MENU_WIDE, MENU_THIN). Frontend only.
+
 ## Earlier check-ups below the check-up, full width (2026-10-30)
 - On the Check-up screen the patient's earlier check-ups (last visit, history, older visits) moved from the right side to **below the check-up**, and the check-up itself now uses the **full width**. Older check-ups are rows; click one and it **opens right below the row** (no pop-up window), click again to close (as in the Healthray reference). Frontend only.
 
