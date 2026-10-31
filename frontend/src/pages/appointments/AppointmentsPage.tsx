@@ -80,7 +80,7 @@ function AppointmentsList() {
 
   const { rows, loading, reload, failed } = useList<Appointment>('/appointments/', {
     date: dayKey, doctor, q: query || undefined, ordering: 'time_order',
-  }, 200); // one day fits on one page
+  }, 200, 8); // one day fits on one page; the list updates by itself every 8 seconds
 
   useEffect(() => {
     api.get<AppointmentDoctor[]>('/appointments/doctors/', { params: { date: dayKey } })

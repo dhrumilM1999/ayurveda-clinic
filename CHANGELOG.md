@@ -2,6 +2,12 @@
 
 What changed in each step, in plain words.
 
+## Lists update by themselves (2026-10-31)
+- The **Check-up list** (waiting / booked / done counts and patients), the **Appointments** list, the **Queue**, **Give medicines** and the **Dashboard** now ask the server again every few seconds (check-up list 5 s, queue 6 s, appointments 8 s, give medicines 8 s, dashboard 20 s). A new appointment or a completed check-up appears **without pressing refresh**.
+- It waits while the browser tab is hidden, refreshes at once when you come back, never sends a new request while the last is still running, and if the server does not answer the list on the screen simply stays as it was (no flicker, no error pop-ups).
+- No new package and no Redis needed. Instant push (the same second) would need Redis and a live connection; every few seconds is enough for a clinic.
+- Code: `frontend/src/api/liveRefresh.ts` and `useLiveRefresh.ts` (with tests). Frontend only.
+
 ## Check-up list colours and counts, Send Order as a switch, Menstrual history template (2026-10-31)
 - **Today's appointments** (top of the Check-up list): four round counts, All / Waiting / Booked / Done. Tap one to filter.
 - Each patient in the list is **coloured**: waiting = amber, booked but not arrived = blue, done = green (no longer faded). Waiting patients come first, then booked, then done.

@@ -1,4 +1,4 @@
-// Today's waiting queue, one card per doctor. Refreshes by itself every 15 seconds.
+// Today's waiting queue, one card per doctor. Refreshes by itself every few seconds.
 // "Call next" finishes the current patient and calls the next token.
 import { DesktopOutlined, ReloadOutlined, UserAddOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Empty, Row, Space, Tag, Typography } from 'antd';
@@ -9,10 +9,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../../api/client';
 import type { QueueData, QueueItem } from '../../api/types';
 import { useAuth } from '../../auth/AuthContext';
+import { useLiveRefresh } from '../../api/useLiveRefresh';
 import { BookAppointmentModal } from './BookAppointmentModal';
 import { OpdBillButton } from '../billing/OpdBillModal';
 
-const REFRESH_SECONDS = 15;
+const REFRESH_SECONDS = 6;
 
 /** Loads the queue now and then every few seconds. */
 export function useQueue(refreshSeconds: number) {
@@ -25,11 +26,8 @@ export function useQueue(refreshSeconds: number) {
       .catch(setError);
   }, []);
 
-  useEffect(() => {
-    load();
-    const timer = window.setInterval(load, refreshSeconds * 1000);
-    return () => window.clearInterval(timer);
-  }, [load, refreshSeconds]);
+  useEffect(() => { load(); }, [load]);
+  useLiveRefresh(load, refreshSeconds);
 
   return { data, error, reload: load };
 }

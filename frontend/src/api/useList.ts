@@ -4,9 +4,11 @@ import { isCancel } from 'axios';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from './client';
+import { useLiveRefresh } from './useLiveRefresh';
 import type { Page } from './types';
 
-export function useList<T>(url: string, params: Record<string, unknown> = {}, initialPageSize = 25) {
+/** liveSeconds: also ask the server again every few seconds (quietly) so the table updates by itself. */
+export function useList<T>(url: string, params: Record<string, unknown> = {}, initialPageSize = 25, liveSeconds = 0) {
   const { message } = App.useApp();
   const { t } = useTranslation();
   const [rows, setRows] = useState<T[]>([]);
@@ -21,11 +23,11 @@ export function useList<T>(url: string, params: Record<string, unknown> = {}, in
   // Only the newest request may update the table (older, slower answers are cancelled and ignored)
   const abort = useRef<AbortController>();
 
-  const reload = useCallback(async () => {
+  const load = useCallback(async (quiet: boolean) => {
     abort.current?.abort();
     const controller = new AbortController();
     abort.current = controller;
-    setLoading(true);
+    if (!quiet) setLoading(true);
     try {
       const { data } = await api.get<Page<T> | T[]>(url, {
         params: { ...JSON.parse(paramsKey), page, page_size: pageSize },
@@ -42,12 +44,16 @@ export function useList<T>(url: string, params: Record<string, unknown> = {}, in
       }
     } catch (err) {
       if (controller.signal.aborted || isCancel(err)) return;
+      if (quiet) return; // a failed quiet refresh leaves the table as it was
       setFailed(true);
       message.error(errorMessage(err, t('common.loadFailed')));
     } finally {
       if (abort.current === controller) setLoading(false);
     }
   }, [url, paramsKey, page, pageSize, message, t]);
+
+  const reload = useCallback(() => load(false), [load]); // (a button passes its click event, so reload takes no argument)
+  useLiveRefresh(() => load(true), liveSeconds || 1, liveSeconds > 0);
 
   useEffect(() => {
     reload();

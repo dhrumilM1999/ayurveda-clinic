@@ -9,6 +9,7 @@ import dayjs, { type Dayjs } from 'dayjs';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from '../../api/client';
+import { useLiveRefresh } from '../../api/useLiveRefresh';
 import type { DispenseDetail, DispenseLine, DispenseQueueRow, DispenseStatus, PaymentMode, ScanResult } from '../../api/types';
 import { useAuth } from '../../auth/AuthContext';
 import { LabelsButton } from '../../components/BillPreview';
@@ -19,7 +20,7 @@ import { HandwrittenPages } from '../consult/handwriting/HandwrittenPages';
 import { DispenseStatusTag, PrintButton, ScanInput, expiryText, lineFromScan, qty } from './common';
 import { stockLabel } from './stockUnits';
 
-const REFRESH_SECONDS = 30;
+const REFRESH_SECONDS = 8;
 
 export function DispenseTab() {
   const { t } = useTranslation();
@@ -40,11 +41,8 @@ export function DispenseTab() {
     }
   }, [day]);
 
-  useEffect(() => {
-    load();
-    const timer = window.setInterval(load, REFRESH_SECONDS * 1000);
-    return () => window.clearInterval(timer);
-  }, [load]);
+  useEffect(() => { load(); }, [load]);
+  useLiveRefresh(load, REFRESH_SECONDS);
 
   const counts = useMemo(() => ({
     all: rows.length,
