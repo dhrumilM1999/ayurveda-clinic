@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { boundsFromCorners, rotateUnit, rotationFromCorners, screenPoint, viewportPoint, wholeScreen } from './padMapping';
+import { afterEach, describe, expect, it } from 'vitest';
+import { boundsFromCorners, isToolbarTarget, rotateUnit, rotationFromCorners, screenPoint, TOOLBAR_SELECTOR, viewportPoint, wholeScreen } from './padMapping';
 
 describe('viewportPoint', () => {
   it('maps the pad corners to the page corners', () => {
@@ -55,5 +55,28 @@ describe('a pad that reports a quarter turn', () => {
     expect(rotationFromCorners({ x: 100, y: 700 }, { x: 900, y: 100 })).toBe(1); // top-left touched at the screen's bottom-left
     expect(rotationFromCorners({ x: 900, y: 700 }, { x: 100, y: 100 })).toBe(2);
     expect(rotationFromCorners({ x: 900, y: 100 }, { x: 100, y: 700 })).toBe(3);
+  });
+});
+
+describe('isToolbarTarget', () => {
+  // The test runs without a browser, so a tiny stand-in for an element: it answers closest() for the selectors it matches
+  class FakeElement {
+    constructor(private matches: string[]) {}
+    closest(selector: string) {
+      return selector.split(',').map((part) => part.trim()).some((part) => this.matches.includes(part)) ? this : null;
+    }
+  }
+  const globals = globalThis as unknown as { Element?: unknown };
+  const before = globals.Element;
+  globals.Element = FakeElement;
+  afterEach(() => { globals.Element = before; });
+
+  it('lets the pen press the toolbar, the close button and the "unsaved writing?" question, but not the page', () => {
+    expect(isToolbarTarget(new FakeElement(['[data-hw-ui]']) as unknown as EventTarget)).toBe(true);
+    expect(isToolbarTarget(new FakeElement(['.ant-modal-close']) as unknown as EventTarget)).toBe(true);
+    expect(isToolbarTarget(new FakeElement(['.ant-modal-confirm']) as unknown as EventTarget)).toBe(true);
+    expect(isToolbarTarget(new FakeElement(['.hw-canvas']) as unknown as EventTarget)).toBe(false);
+    expect(isToolbarTarget(null)).toBe(false);
+    expect(TOOLBAR_SELECTOR).toContain('.ant-modal-confirm');
   });
 });

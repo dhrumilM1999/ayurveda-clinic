@@ -156,7 +156,7 @@ export function HandwritingSection({ visitId, onInkChange, onSaved, heightOffset
         </Space>
         <div className="hw-stage">
           <HandwritingCanvas ref={canvas} landscape={false} color={color} width={width} tool={tool}
-            maxHeight={Math.max(viewHeight - (whole ? 380 : 270) - heightOffset, 300)} padMode={whole} calibrating={corner > 0} rotation={rotation}
+            maxHeight={Math.max(viewHeight - (whole ? 380 : 270) - heightOffset, 300)} padMode={whole && !saved} calibrating={corner > 0} rotation={rotation}
             bounds={bounds ?? undefined} onInkChange={inkChanged} />
         </div>
         <Typography.Text type="secondary" className="cell-sub" style={{ display: 'block', marginTop: 6 }}>{whole ? t('handwriting.sectionHintWhole') : t('handwriting.sectionHint')}</Typography.Text>

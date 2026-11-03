@@ -1,7 +1,7 @@
 // The writing area for the digital pad (iScribe pad in Mouse mode, a tablet pen, a touch screen or a mouse).
 // The pen draws live. Strokes are kept as normalised points, so the picture is identical on any screen size.
 // SAFE TO EDIT: PAD_RATIO (shape of the writing area), SMOOTHING. The words are in src/i18n/*.json under "handwriting".
-import { isToolbarTarget, screenPoint, viewportPoint, type PadBounds, type Rotation } from './padMapping';
+import { isToolbarTarget, screenPoint, TOOLBAR_SELECTOR, viewportPoint, type PadBounds, type Rotation } from './padMapping';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 // iScribe A4 pad: 210 x 291.5 mm (portrait); landscape is the other way round
@@ -210,7 +210,7 @@ export const HandwritingCanvas = forwardRef<CanvasHandle, Props>(function Handwr
   latest.current = { begin, move, end, showRing };
   useEffect(() => {
     if (!padMode) return undefined;
-    const outside = (target: EventTarget | null) => !(target instanceof Element && target.closest('.hw-section, .ant-modal-close'));
+    const outside = (target: EventTarget | null) => !(target instanceof Element && target.closest(`.hw-section, ${TOOLBAR_SELECTOR}`));
     const onDown = (e: PointerEvent) => {
       if (calibratingRef.current) return;
       if (!isToolbarTarget(e.target)) writing.current = latest.current.begin(e, screenArea());

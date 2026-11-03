@@ -10,9 +10,12 @@ export function viewportPoint(clientX: number, clientY: number, viewWidth: numbe
   return { x: unit(clientX, viewWidth), y: unit(clientY, viewHeight) };
 }
 
+/** Things the pen may press (and that never write): the toolbar, the window's close button, and the "unsaved writing?" question. */
+export const TOOLBAR_SELECTOR = '[data-hw-ui], .ant-modal-close, .ant-modal-confirm';
+
 /** True when the pen went down on a button or toolbar, so it must press the button and not start a stroke. */
 export function isToolbarTarget(target: EventTarget | null): boolean {
-  return target instanceof Element && target.closest('[data-hw-ui], .ant-modal-close') !== null;
+  return target instanceof Element && target.closest(TOOLBAR_SELECTOR) !== null;
 }
 
 // --- Where the pad is on the screen (absolute screen position, so full screen is not needed) ---

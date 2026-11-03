@@ -2,6 +2,11 @@
 
 What changed in each step, in plain words.
 
+## Handwriting window: two whole-pad bugs fixed (2026-11-03)
+- With **Use the whole pad** on, the question "unsaved writing?" (when closing the window) could not be answered with the mouse, because its buttons were blocked as "outside the window". They work now.
+- After **Save** in whole-pad mode, the saved screen (Print, Write another page) no longer keeps the cursor hidden or the pad listening, so a tap on Print can no longer leave hidden writing behind.
+- Tested with a simulated pen in the browser: close question, save, print window, write another page, close.
+
 ## Handwriting: both pad branches joined, popup kept (2026-11-03)
 - The two parked handwriting branches are now in **main**. The result is the **popup** you asked for (press **Handwriting**, a window opens with one A4 page), with the best of both branches inside it:
   - **Use the whole pad**: the whole pad is the page, a ring shows the pen, the real cursor is hidden, mouse clicks outside the window are blocked while writing. No full screen needed.
