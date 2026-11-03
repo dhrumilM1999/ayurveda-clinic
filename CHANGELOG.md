@@ -2,6 +2,13 @@
 
 What changed in each step, in plain words.
 
+## Handwriting: both pad branches joined, popup kept (2026-11-03)
+- The two parked handwriting branches are now in **main**. The result is the **popup** you asked for (press **Handwriting**, a window opens with one A4 page), with the best of both branches inside it:
+  - **Use the whole pad**: the whole pad is the page, a ring shows the pen, the real cursor is hidden, mouse clicks outside the window are blocked while writing. No full screen needed.
+  - **Turn pad 90°** (the iScribe pad reports itself turned by a quarter, this is the default) and **Set pad corners**, both remembered.
+- Left out on purpose: the **side panel** and its drag-to-resize, and the browser **full screen** "Pad mode". Earlier check-ups stay **below** the check-up as before.
+- This was tested with the software only (tests, build, browser with a simulated pen). The real iScribe pad still has to be tried once by the doctor.
+
 ## main and production joined (2026-10-31)
 - The **main** and **production** branches now hold the same code: all clinic work from main, and all live-server work from production (server setup, backups, security, the real clinic profile).
 - Login code (OTP) now has **one switch**, `REQUIRE_2FA` (the old name `LOGIN_OTP_ENABLED` is gone). It stays **off on your PC** and is **on by default on a live server**; `.env.production.example` sets it to 0 until e-mail or SMS works.
@@ -33,6 +40,14 @@ Looked at Healthray first (layout only), then built five buttons in the check-up
 - The medicine search and the prescription lines now show loose stock in tablets (for example "975 tablets"), the same as the pharmacy screens.
 - On the Therapies screen, type a price and the therapy is added to Services & charges and linked for you (only when it has no price yet). Needed for "Bill each finished therapy session".
 - Branches `feature/therapy-billing-reminders-sora` and `feature/walkin-after-register-stock-units` were merged into main.
+## Pad turned by a quarter fixed (2026-10-30)
+- Checked with the real iScribe pad: held upright (clip at the top) it reports its position turned by a quarter, so words written at the pad's top appeared on the page's left. The whole-pad mode now turns it back, so top is top, left is left.
+- New button **Turn pad 90°** (for other pads) and **Set pad corners** now also finds the turn from the two touches. The real cursor is hidden while the whole pad is used (the blue ring shows the pen). Frontend only.
+
+## Use the whole pad in the handwriting panel (2026-10-30)
+- New switch **Use the whole pad** at the top of the handwriting panel: the whole pad becomes the A4 page (the pad moves the cursor over the whole screen, so the pen is read from the screen). A ring shows the pen; the left menu does not open while you write.
+- While it is on, mouse clicks outside the panel are switched off on purpose, so writing near a button never presses it. Esc or the switch turns it off. The choice is remembered.
+- **Set pad corners** (touch two corners of the pad) fixes any shifting. Frontend only, no database change.
 
 ## Left menu: thin strip, opens on hover (2026-10-30)
 - The left menu is now a **thin strip of icons**. When the mouse is over it, it opens to full width and floats over the page (the page does not move). When the mouse leaves, it closes.
@@ -45,6 +60,10 @@ Looked at Healthray first (layout only), then built five buttons in the check-up
 - New **Pad mode (full screen)** in the Handwriting window: the whole pad is the writing area (pen at the pad's corner = the page's corner), with a ring showing the pen and buttons that never write. Frontend only, no database change.
 - Pad mode opens in Wide (pad held sideways). Pad position is read from the screen, and **Set pad corners** (touch two corners of the pad) fixes any edge shifting; remembered on the computer.
 - Tested with the iScribe pad: the browser sees it as a mouse (Mouse mode), so pressure is not available.
+## Handwriting page on the side of the check-up (2026-10-30)
+- No more pop-up window and no tab. The A4 handwriting page is a **panel on the right side** of the check-up screen. Drag its left edge to make it wider or narrower: the page keeps its A4 shape and the size (and open/closed) is remembered, also after a reload.
+- The patient's earlier check-ups moved **below the check-up form** (when handwriting is on).
+- Only the part of the pad over the page writes. Saving still makes the one picture with the letterhead. What you wrote stays when you hide and show the panel. Frontend only, no database change.
 
 ## Walk-in after registering, patient can come any time, Dose box switch, stock in tablets (2026-10-29)
 

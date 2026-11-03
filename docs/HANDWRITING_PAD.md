@@ -12,32 +12,34 @@ name, ID and date, your handwriting, the QR code and your signature line. It is 
 
 ## Every day
 
-1. Doctor: open the patient's check-up (Check-up screen).
-2. Press **Handwriting** (top of the check-up).
-3. Write on the pad with the pen. The writing appears live on the screen. Tools: Pen, Eraser, 3 colours, thickness,
-   Undo, Clear all, Upright/Wide, paper A5 (half A4) or A4.
-4. Press **Save prescription**. The software makes the combined picture and shows it. Then **Print** or **Write another
-   page**.
-5. The pharmacist sees the pages in the medicine-giving window (above the medicine list). Pages saved for the check-up are
-   also listed under the Handwriting button.
+1. Doctor: open the patient's check-up (Check-up screen). Today's appointments stay on the left.
+2. Press the **Handwriting** button at the top of the check-up. A window opens with one **A4 page**. The patient's earlier
+   check-ups stay below the check-up form (not in this window).
+3. Write on the pad with the pen. The writing appears live. Tools: Pen, Eraser, 3 colours, thickness, Undo, Clear all.
+4. Press **Save prescription**. The software makes the combined picture (letterhead + patient line + your handwriting + QR +
+   signature) and shows it. Then **Print** or **Write another page**.
+5. The pharmacist sees the pages in the medicine-giving window (above the medicine list). Earlier pages of the check-up are
+   listed at the bottom of the handwriting window.
 
-## Pad mode (full screen): write on the whole pad
+Closing the window with writing that is not saved asks first, so nothing is lost by mistake. **Esc** does not close the window.
+
+## Use the whole pad
 
 The iScribe pad (Mouse mode) moves the cursor over the WHOLE screen: pen at the pad's bottom-right corner = cursor at the
-screen's bottom-right corner. Without pad mode you would have to aim at the small writing box.
+screen's bottom-right corner. By default only the part of the pad that lies over the A4 page writes.
 
-1. In the Handwriting window press **Pad mode (full screen)**. The screen goes full screen.
-2. Write anywhere on the pad. What you write on the pad appears in the same place on the page. A blue ring shows where
-   the pen is on the page (the normal cursor is hidden).
-3. To press a button (Save, Undo...), move the pen onto the button and tap. Taps on buttons never write.
-4. **Leave pad mode** (or Esc) goes back to the normal window. Your writing is kept.
+Switch on **Use the whole pad** (top of the window) and the whole pad becomes the A4 page: write anywhere on the pad. A blue
+ring on the page shows where the pen is (the normal cursor is hidden). While it is on, mouse clicks outside the handwriting
+window are switched off on purpose (writing near a button must never press it). The buttons inside the window work: move the
+pen onto a button and tap; taps on buttons never write. Press **Esc** or switch it off to use the mouse again. The choice is
+remembered on this computer. No full screen is needed.
 
-Pad mode opens in **Wide** (pad held sideways). If you hold the pad upright, press **Upright**.
+**The iScribe pad reports itself turned by a quarter** (held upright with the clip at the top, its top edge arrives on the
+screen's left edge). The software turns it back by default. If your pad writes on the wrong side, press **Turn pad 90°** until the
+words land where you write (remembered).
 
-**Writing sticks to an edge, or the ring does not match the pen?** Press **Set pad corners**, touch the pen at the pad's
-TOP-LEFT corner, then at the BOTTOM-RIGHT corner. This is remembered on this computer. **Use whole screen** forgets it.
-
-If the browser refuses full screen, press F11 and try again. Pad mode needs full screen so the pad and the screen line up.
+If the writing sticks to an edge or does not match the pen, press **Set pad corners**, touch the pen at the pad's TOP-LEFT corner (clip side),
+then the BOTTOM-RIGHT corner. This is remembered, and it also finds out how the pad is turned. **Use whole screen** forgets it.
 
 ## What is saved
 
@@ -59,7 +61,7 @@ If the browser refuses full screen, press F11 and try again. Pad mode needs full
   metals) do not run on it. Keep the typed medicine list too (Rx tab), or ask the pharmacist to read the picture.
 - Gujarati, Hindi and English all work, because it is just a picture of what you write.
 - If the pen draws in the wrong place, check that iScribe4U is in Mouse mode and the pad is not in Portrait/Landscape mismatch
-  (use the Upright/Wide switch in the writing window to match the pad).
+  (the page is always A4 upright).
 - No pad? A tablet with a pen, a touch screen or a mouse works the same way.
 
 ## For the person who edits files

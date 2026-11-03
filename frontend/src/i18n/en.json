@@ -2417,16 +2417,17 @@
     "hint": "Write with the pad pen (set the pad to Mouse mode in iScribe4U), a tablet pen, your finger or a mouse.",
     "historyHelp": "Every handwritten prescription page of this patient, latest first. Click a picture to enlarge, or open the check-up.",
     "openCheckup": "Open check-up",
-    "padMode": "Pad mode (full screen)",
-    "padExit": "Leave pad mode",
-    "padNoFullscreen": "The browser did not allow full screen. Press F11 for full screen, then try again.",
-    "padHint": "Pad mode: write on the whole pad. The blue ring shows the pen on the page. To press a button, move the pen onto it and tap. If the writing sticks to an edge, press Set pad corners and touch the pad's top-left and bottom-right corners.",
+    "sectionHint": "Write on the A4 page with the pad. The pad writes only where the page is on the screen; outside the page it does nothing.",
+    "wholePad": "Use the whole pad",
+    "wholePadOn": "The whole pad is this page. Mouse clicks outside this window are switched off while this is on. Press Esc or switch it off to use the mouse again.",
+    "sectionHintWhole": "Write anywhere on the pad: the whole pad is this A4 page and the blue ring shows the pen. If the writing sticks to an edge, press Set pad corners and touch the pad's top-left and bottom-right corners.",
     "corners": "Set pad corners",
-    "corner1": "Touch the pad's TOP-LEFT corner...",
+    "corner1": "Touch the pad's TOP-LEFT corner (clip side)...",
     "corner2": "Now touch the BOTTOM-RIGHT corner...",
     "cornersSaved": "Pad corners saved.",
     "cornersTooClose": "The two touches were too close. Touch the two opposite corners of the pad.",
-    "cornersReset": "Use whole screen"
+    "cornersReset": "Use whole screen",
+    "turnPad": "Turn pad 90°"
   },
   "calendar": {
     "title": "Calendar",
