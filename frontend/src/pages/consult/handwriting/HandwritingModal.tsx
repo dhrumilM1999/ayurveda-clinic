@@ -2,13 +2,15 @@
 // press Save: the handwriting is kept as a picture, and ONE combined picture with the clinic letterhead is made for
 // this patient's prescription. Earlier pages of this check-up are shown below.
 // SAFE TO EDIT: pen colours (COLORS) and the starting thickness. The words are in src/i18n/*.json under "handwriting".
-import { ClearOutlined, EditOutlined, PrinterOutlined, RedoOutlined, SaveOutlined, UndoOutlined } from '@ant-design/icons';
+import { ClearOutlined, EditOutlined, FullscreenExitOutlined, FullscreenOutlined, PrinterOutlined, RedoOutlined, SaveOutlined, UndoOutlined } from '@ant-design/icons';
 import { Alert, App, Button, Modal, Segmented, Slider, Space, Typography } from 'antd';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, errorMessage } from '../../../api/client';
 import type { HandwrittenPage } from '../../../api/types';
 import { DocumentModal } from '../../../components/BillPreview';
+import { isToolbarTarget } from './padMapping';
+import { boundsFromCorners, loadBounds, saveBounds, type PadBounds, type UnitPoint } from './padMapping';
 import { HandwritingCanvas, type CanvasHandle, type Tool } from './HandwritingCanvas';
 import { HandwrittenPages, PrivateImage } from './HandwrittenPages';
 
@@ -34,8 +36,51 @@ export function HandwritingModal({ open, visitId, patientName, onClose, onSaved 
   const [saved, setSaved] = useState<HandwrittenPage | null>(null);
   const [printing, setPrinting] = useState(false);
   const [refresh, setRefresh] = useState(0);
+  // Pad mode: full screen, the whole screen is the pad (pen at the pad's corner = the page's corner)
+  const [padMode, setPadMode] = useState(false);
+  // "Set pad corners": the doctor touches the pen at two opposite corners of the pad so the screen position of the pad is known
+  const [bounds, setBounds] = useState<PadBounds | null>(() => loadBounds());
+  const [corner, setCorner] = useState<0 | 1 | 2>(0); // 0 = not setting, 1 = waiting for the first corner, 2 = waiting for the second
+  const firstCorner = useRef<UnitPoint | null>(null);
+
+  useEffect(() => {
+    if (corner === 0) return undefined;
+    const onDown = (e: PointerEvent) => {
+      if (isToolbarTarget(e.target)) return;
+      e.stopPropagation(); // this touch is a corner, not writing
+      const here = { x: e.screenX, y: e.screenY };
+      if (corner === 1) { firstCorner.current = here; setCorner(2); return; }
+      const found = firstCorner.current ? boundsFromCorners(firstCorner.current, here) : null;
+      if (!found) { message.warning(t('handwriting.cornersTooClose')); setCorner(1); return; }
+      setBounds(found);
+      saveBounds(found);
+      setCorner(0);
+      message.success(t('handwriting.cornersSaved'));
+    };
+    window.addEventListener('pointerdown', onDown, true);
+    return () => window.removeEventListener('pointerdown', onDown, true);
+  }, [corner, message, t]);
+
+  const resetCorners = () => { setBounds(null); saveBounds(null); setCorner(0); };
+
+  useEffect(() => {
+    const onChange = () => { if (!document.fullscreenElement) setPadMode(false); };
+    document.addEventListener('fullscreenchange', onChange);
+    return () => document.removeEventListener('fullscreenchange', onChange);
+  }, []);
+
+  const leavePad = () => {
+    setPadMode(false);
+    if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined);
+  };
+  const enterPad = () => {
+    setPadMode(true);
+    setLandscape(true); // the pad is usually held sideways (Wide); press Upright if you hold it upright
+    void document.documentElement.requestFullscreen().catch(() => message.warning(t('handwriting.padNoFullscreen')));
+  };
 
   const close = () => {
+    leavePad();
     if (hasInk && !saved) {
       modal.confirm({ title: t('handwriting.unsavedAsk'), okText: t('handwriting.discard'), cancelText: t('common.cancel'), okButtonProps: { danger: true },
         onOk: () => { setHasInk(false); onClose(); } });
@@ -69,7 +114,8 @@ export function HandwritingModal({ open, visitId, patientName, onClose, onSaved 
   const another = () => { setSaved(null); canvas.current?.clear(); };
 
   return (
-    <Modal open={open} onCancel={close} footer={null} width={1040} centered destroyOnHidden maskClosable={false}
+    <Modal open={open} onCancel={close} footer={null} width={padMode ? '100vw' : 1040} centered={!padMode} destroyOnHidden maskClosable={false}
+      closable={!padMode} wrapClassName={padMode ? 'hw-pad-wrap' : undefined} style={padMode ? { top: 0, margin: 0, maxWidth: '100vw', paddingBottom: 0 } : undefined}
       title={<span><EditOutlined /> {t('handwriting.title')} · {patientName}</span>}>
       {saved ? (
         <div className="hw-saved">
@@ -84,7 +130,7 @@ export function HandwritingModal({ open, visitId, patientName, onClose, onSaved 
         </div>
       ) : (
         <>
-          <Space wrap size={[12, 8]} style={{ marginBottom: 8 }}>
+          <Space wrap size={[12, 8]} style={{ marginBottom: 8 }} data-hw-ui>
             <Segmented value={tool} onChange={(v) => setTool(v as Tool)}
               options={[{ value: 'pen', label: t('handwriting.pen') }, { value: 'eraser', label: t('handwriting.eraser') }]} />
             <Space size={4}>
@@ -105,21 +151,32 @@ export function HandwritingModal({ open, visitId, patientName, onClose, onSaved 
               <span className="cell-sub">{t('handwriting.paper')}</span>
               <Segmented value={paper} onChange={(v) => setPaper(v as 'a5' | 'a4')} options={[{ value: 'a5', label: 'A5' }, { value: 'a4', label: 'A4' }]} />
             </Space>
+            {padMode ? (
+              <Space size={6}>
+                <Button icon={<FullscreenExitOutlined />} onClick={leavePad}>{t('handwriting.padExit')}</Button>
+                <Button type={corner ? 'primary' : 'default'} onClick={() => { firstCorner.current = null; setCorner(corner ? 0 : 1); }}>
+                  {corner === 1 ? t('handwriting.corner1') : corner === 2 ? t('handwriting.corner2') : t('handwriting.corners')}
+                </Button>
+                {bounds && !corner && <Button onClick={resetCorners}>{t('handwriting.cornersReset')}</Button>}
+              </Space>
+            ) : (
+              <Button icon={<FullscreenOutlined />} onClick={enterPad}>{t('handwriting.padMode')}</Button>
+            )}
           </Space>
           <div className="hw-stage">
             <HandwritingCanvas ref={canvas} landscape={landscape} color={color} width={width} tool={tool}
-              maxHeight={Math.max(window.innerHeight - 330, 320)} onInkChange={setHasInk} />
+              maxHeight={padMode ? Math.max(window.innerHeight - 190, 320) : Math.max(window.innerHeight - 330, 320)} padMode={padMode} bounds={bounds ?? undefined} onInkChange={setHasInk} />
           </div>
-          <div className="hw-actions">
-            <Typography.Text type="secondary" className="cell-sub">{t('handwriting.hint')}</Typography.Text>
+          <div className="hw-actions" data-hw-ui>
+            <Typography.Text type="secondary" className="cell-sub">{padMode ? t('handwriting.padHint') : t('handwriting.hint')}</Typography.Text>
             <Button type="primary" size="large" icon={<SaveOutlined />} loading={saving} disabled={!hasInk} onClick={save}>
               {t('handwriting.save')}
             </Button>
           </div>
-          <div style={{ marginTop: 16 }}>
+          {!padMode && <div style={{ marginTop: 16 }}>
             <Typography.Text strong><RedoOutlined /> {t('handwriting.earlier')}</Typography.Text>
             <div style={{ marginTop: 8 }}><HandwrittenPages visitId={visitId} refreshKey={refresh} /></div>
-          </div>
+          </div>}
         </>
       )}
     </Modal>

@@ -41,6 +41,10 @@ Looked at Healthray first (layout only), then built five buttons in the check-up
 
 ## Earlier check-ups below the check-up, full width (2026-10-30)
 - On the Check-up screen the patient's earlier check-ups (last visit, history, older visits) moved from the right side to **below the check-up**, and the check-up itself now uses the **full width**. Older check-ups are rows; click one and it **opens right below the row** (no pop-up window), click again to close (as in the Healthray reference). Frontend only.
+## Pad mode for the writing pad (2026-10-30)
+- New **Pad mode (full screen)** in the Handwriting window: the whole pad is the writing area (pen at the pad's corner = the page's corner), with a ring showing the pen and buttons that never write. Frontend only, no database change.
+- Pad mode opens in Wide (pad held sideways). Pad position is read from the screen, and **Set pad corners** (touch two corners of the pad) fixes any edge shifting; remembered on the computer.
+- Tested with the iScribe pad: the browser sees it as a mouse (Mouse mode), so pressure is not available.
 
 ## Walk-in after registering, patient can come any time, Dose box switch, stock in tablets (2026-10-29)
 
